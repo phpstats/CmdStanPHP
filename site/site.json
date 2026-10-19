@@ -10,7 +10,7 @@
     ],
     "install": [
         "composer config repositories.cmdstanphp vcs https://github.com/phpstats/CmdStanPHP",
-        "composer require cmdstan/php:dev-main"
+        "composer require phpstats/cmdstanphp:dev-main"
     ],
     "requires": [
         "PHP 8.2 or newer, with the JSON extension and proc_open enabled",

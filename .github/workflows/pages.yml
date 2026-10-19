@@ -16,53 +16,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: docs
-      - name: Build documentation at a project-site path
-        working-directory: docs
-        env:
-          JEKYLL_ENV: production
-          SITE_BASE_PATH: /${{ github.event.repository.name }}
-        run: bundle exec jekyll build --baseurl "$SITE_BASE_PATH" --destination ../.context/site
+      - name: Check that every page is rendered
+        run: |
+          missing=0
+          for source in docs/*.qmd; do
+            page="${source%.qmd}.html"
+            if [ ! -f "$page" ]; then
+              echo "::error file=$source::$page is missing. Run 'quarto render docs', then 'rsync -a --exclude .DS_Store docs/_site/ docs/' to publish the render beside the sources. The render step removes the published copies, so the rsync is not optional."
+              missing=1
+            fi
+          done
+          exit "$missing"
       - name: Check documentation links
-        env:
-          SITE_BASE_PATH: /${{ github.event.repository.name }}
-        run: python3 scripts/check-docs.py .context/site --baseurl "$SITE_BASE_PATH"
-  build:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: docs
-      - name: Configure Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        if: github.event_name != 'pull_request'
-      - name: Build documentation
-        working-directory: docs
-        env:
-          JEKYLL_ENV: production
-          SITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-        run: bundle exec jekyll build --baseurl "$SITE_BASE_PATH" --destination ../.context/site
-      - name: Check documentation links
-        env:
-          SITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-        run: python3 scripts/check-docs.py .context/site --baseurl "$SITE_BASE_PATH"
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
-        with:
-          path: .context/site
+        run: python3 scripts/check-docs.py docs
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -71,6 +40,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
       - name: Deploy documentation
         id: deployment
         uses: actions/deploy-pages@v4

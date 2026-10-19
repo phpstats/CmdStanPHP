@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify local links in a Jekyll build, including a project-site base path."""
+"""Verify local links in a rendered documentation directory, including a project-site base path."""
 import argparse
 from html.parser import HTMLParser
 from pathlib import Path

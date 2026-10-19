@@ -41,7 +41,7 @@ quarto render docs
 rsync -a --exclude '.DS_Store' docs/_site/ docs/
 ```
 
-Quarto writes the rendered site to the untracked `docs/_site`, and the second command publishes it beside the sources. Commit the regenerated `.html` files along with `search.json`, `sitemap.xml`, `robots.txt`, and `site_libs/` whenever a source page changes. To preview while editing, run `quarto preview docs`.
+Quarto writes the rendered site to the untracked `docs/_site`, and the second command publishes it beside the sources. Both commands are needed. The render step deletes the published pages and `site_libs/` from `docs/`, so running it without the `rsync` leaves the rendered site staged only under `docs/_site`. Commit the regenerated `.html` files along with `search.json`, `sitemap.xml`, `robots.txt`, and `site_libs/` whenever a source page changes. To preview while editing, run `quarto preview docs`.
 
 Links between pages are written as relative `.qmd` targets, which Quarto renders as relative `.html` links. The site therefore works at a domain root, at a repository subpath, and when phpstats.org imports the rendered pages.
 

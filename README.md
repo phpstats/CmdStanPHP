@@ -2,7 +2,7 @@
 
 A PHP 8.2+ interface to [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), with the model and fit API patterned after [CmdStanR](https://mc-stan.org/cmdstanr/). Runs real Stan programs through CmdStan; no R installation or PHP framework is needed.
 
-Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `expose_functions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `phit` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](docs/compatibility.md) for exact differences and unimplemented features.
+Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `expose_functions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `phit` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](https://phpstats.github.io/CmdStanPHP/compatibility.html) for exact differences and unimplemented features.
 
 ```sh
 composer install
@@ -38,7 +38,7 @@ $draws = $fit->draws_columns('beta');   // ['beta[1]' => [...], '.chain' => [...
 $table = $fit->draws_table('beta');     // Phibble\DataFrame; needs phpstats/phibble
 ```
 
-The [API reference](docs/api.md#data-frames-and-the-phpstats-family) documents the conventions. None of these packages is a Composer dependency.
+The [API reference](https://phpstats.github.io/CmdStanPHP/api.html#data-frames-and-the-phpstats-family) documents the conventions. None of these packages is a Composer dependency.
 
 ### Part of the phpstats family
 
@@ -46,7 +46,7 @@ CmdStanPHP belongs to a family of PHP statistics packages: [phit](https://github
 
 ## Documentation and tests
 
-Documentation lives in [docs/](docs/index.md), including installation, inference, API reference, compatibility, and testing. GitHub Actions builds and deploys it to GitHub Pages; select **Settings → Pages → Source → GitHub Actions** after the repository is published. No site has been published from this workspace.
+Documentation lives in [docs/](docs/) and is published at <https://phpstats.github.io/CmdStanPHP/>, including installation, inference, API reference, compatibility, and testing. GitHub Actions builds and deploys it to GitHub Pages; select **Settings → Pages → Source → GitHub Actions** after the repository is published. No site has been published from this workspace.
 
 ```sh
 composer test                 # unit suite, no CmdStan needed
@@ -55,6 +55,6 @@ composer test:compatibility   # direct R/PHP comparisons; needs R packages
 composer lint
 ```
 
-The integration suite exercises all eight CmdStan methods, posterior accuracy, reproducibility, parallel chains, generated quantities, FFI model methods and functions, and errors. CI runs PHP 8.2–8.4 and CmdStan 2.37/2.40 on Linux. See [testing](docs/testing.md) for coverage boundaries.
+The integration suite exercises all eight CmdStan methods, posterior accuracy, reproducibility, parallel chains, generated quantities, FFI model methods and functions, and errors. CI runs PHP 8.2–8.4 and CmdStan 2.37/2.40 on Linux. See [testing](https://phpstats.github.io/CmdStanPHP/testing.html) for coverage boundaries.
 
 MIT licensed. The example models in `resources/examples/` come from CmdStanR under its BSD 3-Clause license (see the `NOTICE` there). CmdStan and CmdStanR are separate Stan projects; this package is an independent implementation, not an official Stan interface.
