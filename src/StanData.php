@@ -4,12 +4,12 @@ namespace CmdStan;
 /**
  * Stan data built from data frames and named columns.
  *
- * A table is any object with toModelData() or toColumns(), such as a phibble Phibble\Frame; phibble is not a dependency.
+ * A table is any object with toModelData() or toColumns(), such as a phibble Phibble\DataFrame; phibble is not a dependency.
  * Conversion rules (fromTable(), and every model method's data argument):
  * - int and float columns become Stan arrays unchanged; booleans become 0/1; list cells (arrays) stay nested arrays.
  * - Factor columns become 1-based integer indices, in level order, and add J_<name> (the number of levels). Levels come
  *   from a toModelData() factor descriptor ['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool], whose
- *   codes are 0-based as phibble's Frame::toModelData() returns them (phibble 93858fa and later) (a 'base' => 1 entry marks 1-based codes), or
+ *   codes are 0-based as phibble's DataFrame::toModelData() returns them (phibble 93858fa and later) (a 'base' => 1 entry marks 1-based codes), or
  *   from the table's levels(name) when toColumns() is used and types() reports a factor. String columns are
  *   treated as factors with sorted unique levels (strcmp order, as phibble's and R's factor() defaults). The labels
  *   are kept in $levels; they are not written to the Stan JSON, which holds numbers only.
@@ -26,7 +26,7 @@ final class StanData
      * @param array<string, mixed> $data Stan data, ready for write_stan_json()
      * @param array<string, list<string>> $levels Labels of each factor or group, by data variable; index i is level i + 1
      * @param list<string> $columns Names of the columns of X, when the data has a design matrix
-     * @param array $meta Extra bookkeeping, such as the source rows kept by stats_model_matrix()
+     * @param array $meta Extra bookkeeping, such as the source rows kept by Phit\model_matrix()
      */
     public function __construct(public readonly array $data, public readonly array $levels = [], public readonly array $columns = [], public readonly array $meta = []) {}
     public function toArray(): array { return $this->data; }
@@ -90,30 +90,30 @@ final class StanData
         return self::assemble($n, $rows, $intercept ? ['(Intercept)', ...$names] : $names, array_map(fn($value, $row) => self::cell($value, $y, $row, true), $yValues['values'], array_keys($yValues['values'])), $groupData);
     }
     /**
-     * Regression data from an R-style formula, e.g. 'y ~ x1 + f + (1 + x1 | g)', using stats_model_matrix() from the
-     * php_stats extension. The result has N, K, X, and y as fromColumns() names them, plus, for each grouping factor g
+     * Regression data from an R-style formula, e.g. 'y ~ x1 + f + (1 + x1 | g)', using Phit\model_matrix() from the
+     * phit extension. The result has N, K, X, and y as fromColumns() names them, plus, for each grouping factor g
      * of the random-effect terms, g_id and J_g (and J for a single grouping factor), and Z_g and Q_g when the terms
      * on g have columns other than the intercept. See fromModelMatrix() for the mapping. $missing is passed to
-     * stats_model_matrix(): 'drop' removes incomplete rows with one E_WARNING, and 'raise' rejects them.
+     * Phit\model_matrix(): 'drop' removes incomplete rows with one E_WARNING, and 'raise' rejects them.
      * $drop_intercept removes the '(Intercept)' column of X for programs with a separate intercept parameter.
      *
      * @param array<string, mixed>|object $data columns, factor descriptors, or a table (toModelData(), or toColumns()
-     *     with types() and levels() for factors). Factors reach stats_model_matrix() as 0-based descriptors, so their
+     *     with types() and levels() for factors). Factors reach Phit\model_matrix() as 0-based descriptors, so their
      *     level order sets the reference level, a factor response's coding, and the order of group indices. Missing
      *     values are left for $missing to handle.
      */
     public static function fromFormula(string $formula, array|object $data, bool $drop_intercept = false, string $missing = 'drop'): self
     {
-        if (!function_exists('stats_model_matrix')) { throw new \RuntimeException('StanData::fromFormula() needs stats_model_matrix() from the php_stats extension (https://github.com/erikwestlund/php-stats), which is not loaded or predates the function. Use StanData::fromColumns() without it.'); }
+        if (!function_exists('Phit\model_matrix')) { throw new \RuntimeException('StanData::fromFormula() needs Phit\model_matrix() from the phit extension (https://github.com/phpstats/phit), which is not loaded or predates the function. Use StanData::fromColumns() without it.'); }
         $levels = []; $columns = [];
         foreach (self::modelColumns($data) as $name => $column) {
             if (is_array($column) && isset($column['levels'], $column['codes'])) { $levels[$name] = $column['levels']; }
             $columns[$name] = $column;
         }
-        return self::fromModelMatrix(\stats_model_matrix($formula, $columns, $missing), $drop_intercept, $levels);
+        return self::fromModelMatrix(\Phit\model_matrix($formula, $columns, $missing), $drop_intercept, $levels);
     }
     /**
-     * Maps a stats_model_matrix() result to Stan data. This is the only code that depends on the result's shape.
+     * Maps a Phit\model_matrix() result to Stan data. This is the only code that depends on the result's shape.
      *
      * - x and columns become X and K; N is the number of retained rows.
      * - A numeric response becomes y, as integers when every value is integral (so it suits int and real data). A
@@ -135,7 +135,7 @@ final class StanData
      */
     public static function fromModelMatrix(array $mm, bool $drop_intercept = false, array $group_levels = []): self
     {
-        foreach (['x', 'columns'] as $key) { if (!array_key_exists($key, $mm)) { throw new \UnexpectedValueException("stats_model_matrix() result lacks '".$key."'."); } }
+        foreach (['x', 'columns'] as $key) { if (!array_key_exists($key, $mm)) { throw new \UnexpectedValueException("Phit\model_matrix() result lacks '".$key."'."); } }
         $columns = array_values(array_map('strval', $mm['columns'])); $rows = array_map(fn($row) => array_map('floatval', array_values($row)), array_values($mm['x']));
         $drop = $drop_intercept ? array_search('(Intercept)', $columns, true) : false;
         if ($drop !== false) { unset($columns[$drop]); $columns = array_values($columns); $rows = array_map(function ($row) use ($drop) { unset($row[$drop]); return array_values($row); }, $rows); }
@@ -143,7 +143,7 @@ final class StanData
         $y = $mm['y'] ?? null;
         if ($y !== null) {
             $y = array_values($y);
-            if (count($y) !== $n) { throw new \UnexpectedValueException('stats_model_matrix() returned a response of the wrong length.'); }
+            if (count($y) !== $n) { throw new \UnexpectedValueException('Phit\model_matrix() returned a response of the wrong length.'); }
             if (isset($mm['response_levels'])) {
                 $labels = array_values(array_map('strval', $mm['response_levels'])); $binary = count($labels) <= 2;
                 $data['y'] = array_map(fn($code) => (int)$code + ($binary ? 0 : 1), $y); $levels['y'] = $labels;
@@ -198,7 +198,7 @@ final class StanData
         return new self($data, $levels, $columns);
     }
     /**
-     * Columns for stats_model_matrix(): factors (descriptors, or toColumns() factors with levels()) become exact
+     * Columns for Phit\model_matrix(): factors (descriptors, or toColumns() factors with levels()) become exact
      * 0-based descriptors with nulls kept, and other columns pass through unchanged.
      *
      * @return array<string, mixed>

@@ -2,15 +2,15 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * Posterior-draw kernels from the php_stats extension, used by Loo::moment_match(). They are detected by function name
+ * Posterior-draw kernels from the phit extension, used by Loo::moment_match(). They are detected by function name
  * because the extension's version metadata does not identify releases that include them. Draws are [draw][parameter]
  * lists in one fixed parameter order; results keep draw and parameter order. A failing kernel throws \Exception with
- * php_stats' code: 1001 invalid input, 1002 incompatible dimensions, 1003 nonfinite input or arithmetic, 1004 singular
+ * phit's code: 1001 invalid input, 1002 incompatible dimensions, 1003 nonfinite input or arithmetic, 1004 singular
  * affine matrix, 1005 covariance not numerically positive definite. Nothing is regularized.
  */
 final class DrawKernels
 {
-    public const FUNCTIONS = ['stats_draw_moments', 'stats_draw_covariance_map', 'stats_draw_affine'];
+    public const FUNCTIONS = ['Phit\draws_moments', 'Phit\draws_covariance_map', 'Phit\draws_affine'];
     public const INVALID = 1001;
     public const NONFINITE = 1003;
     public const SINGULAR_AFFINE = 1004;
@@ -21,14 +21,14 @@ final class DrawKernels
     public static function require(): void
     {
         $missing = self::missing();
-        if ($missing !== []) { throw new \RuntimeException('Moment matching needs the php_stats extension with '.implode(', ', $missing).'; load a php_stats build that includes the posterior-draw kernels.'); }
+        if ($missing !== []) { throw new \RuntimeException('Moment matching needs the phit extension with '.implode(', ', $missing).'; load a phit build that includes the posterior-draw kernels.'); }
     }
     /** Mean and covariance; 'unbiased' treats weights as reliability weights and divides by 1 - sum(w^2). @return array{mean: list<float>, covariance: list<list<float>>} */
-    public static function moments(array $draws, ?array $weights = null, string $normalization = 'population'): array { self::require(); return \stats_draw_moments($draws, $weights, $normalization); }
+    public static function moments(array $draws, ?array $weights = null, string $normalization = 'population'): array { self::require(); return \Phit\draws_moments($draws, $weights, $normalization); }
     /** A = L_t L_s^-1, so A * source * A^T = target. @return array{matrix: list<list<float>>, log_abs_det: float} */
-    public static function covarianceMap(array $source, array $target): array { self::require(); return \stats_draw_covariance_map($source, $target); }
+    public static function covarianceMap(array $source, array $target): array { self::require(); return \Phit\draws_covariance_map($source, $target); }
     /** y = A x + b for every draw. @return array{draws: list<list<float>>, log_abs_det: float} */
-    public static function affine(array $draws, array $matrix, array $shift): array { self::require(); return \stats_draw_affine($draws, $matrix, $shift); }
+    public static function affine(array $draws, array $matrix, array $shift): array { self::require(); return \Phit\draws_affine($draws, $matrix, $shift); }
     /** y = A (x - from) + to: the affine map sending the point `from` to `to`, with shift to - A * from. */
     public static function affineAbout(array $draws, array $matrix, array $from, array $to): array { return self::affine($draws, $matrix, array_map(fn($t, $m) => $t - $m, $to, self::apply($matrix, $from))); }
     /** Whether a kernel exception reports a numerical failure (nonfinite arithmetic or singularity) rather than invalid input. */

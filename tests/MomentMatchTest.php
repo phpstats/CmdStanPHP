@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan\Tests;
 use CmdStan\{DrawKernels, Loo, MomentMatch, Psis, Special};
-/** Moment matching through the php_stats posterior-draw kernels on analytic regression posteriors (no CmdStan needed). */
+/** Moment matching through the phit posterior-draw kernels on analytic regression posteriors (no CmdStan needed). */
 final class MomentMatchTest extends TestCase
 {
     private const SHIFT_ONLY = MomentMatchFixture::SHIFT_ONLY;
@@ -11,7 +11,7 @@ final class MomentMatchTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if (!DrawKernels::available()) { self::markTestSkipped('The php_stats posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
+        if (!DrawKernels::available()) { self::markTestSkipped('The phit posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
     }
     private static function fixture(array $design): array { return MomentMatchFixture::regression(...$design); }
     private static function match(array $f, mixed ...$options): array
@@ -27,12 +27,12 @@ final class MomentMatchTest extends TestCase
     private static function code(callable $call): int
     {
         try { $call(); } catch (\Exception $e) { return $e->getCode(); }
-        self::fail('Expected a php_stats exception.');
+        self::fail('Expected a phit exception.');
     }
     public function testKernelDetectionIsByFunction(): void
     {
         self::assertTrue(DrawKernels::available()); self::assertSame([], DrawKernels::missing());
-        self::assertSame(['stats_draw_not_a_kernel'], DrawKernels::missing(['stats_draw_moments', 'stats_draw_not_a_kernel']));
+        self::assertSame(['Phit\draws_not_a_kernel'], DrawKernels::missing(['Phit\draws_moments', 'Phit\draws_not_a_kernel']));
     }
     public function testWeightedAndUnweightedMomentsFollowLoo(): void
     {

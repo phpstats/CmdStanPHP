@@ -120,7 +120,7 @@ final class CmdStanModel
     }
     /**
      * Use named arguments (sample(chains: 4)) or a single options array. Every method's data may be an array, a JSON
-     * file, a StanData, or a table such as a phibble Frame (any object with toModelData() or toColumns(); see StanData).
+     * file, a StanData, or a table such as a phibble DataFrame (any object with toModelData() or toColumns(); see StanData).
      */
     public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::deprecated(self::options($options), ['cores', 'num_cores', 'num_chains', 'num_warmup', 'num_samples', 'max_depth', 'stepsize', 'save_extra_diagnostics', 'validate_csv'])); }
     public function sample_mpi(string $mpi_cmd = 'mpiexec', array $mpi_args = [], mixed ...$options): CmdStanMCMC

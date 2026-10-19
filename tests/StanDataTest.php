@@ -6,7 +6,7 @@ use PHPUnit\Framework\Attributes\{DataProvider, RunInSeparateProcess};
 use function CmdStan\{write_stan_file, write_stan_json};
 final class StanDataTest extends TestCase
 {
-    /** A table shaped like a phibble Frame: toColumns() gives factor labels, types() and levels() describe factors. */
+    /** A table shaped like a phibble DataFrame: toColumns() gives factor labels, types() and levels() describe factors. */
     private static function frame(array $columns, array $types = [], array $levels = []): object
     {
         return new class($columns, $types, $levels) {
@@ -160,29 +160,29 @@ final class StanDataTest extends TestCase
     }
     public function testFromFormulaRequiresStatsModelMatrix(): void
     {
-        if (function_exists('stats_model_matrix')) { self::markTestSkipped('stats_model_matrix() is available.'); }
-        $this->expectException(\RuntimeException::class); $this->expectExceptionMessage('stats_model_matrix()');
+        if (function_exists('Phit\model_matrix')) { self::markTestSkipped('Phit\model_matrix() is available.'); }
+        $this->expectException(\RuntimeException::class); $this->expectExceptionMessage('Phit\model_matrix()');
         StanData::fromFormula('y ~ x + (1 | g)', ['y' => [1.0], 'x' => [2.0], 'g' => ['a']]);
     }
     #[RunInSeparateProcess]
     public function testFromFormulaPassesTablesToStatsModelMatrix(): void
     {
-        if (function_exists('stats_model_matrix')) { self::markTestSkipped('The real stats_model_matrix() is loaded.'); }
-        eval('function stats_model_matrix(string $formula, mixed $data, string $missing = "drop"): array { $GLOBALS["stats_model_matrix_call"] = [$formula, $data, $missing]; $labels = isset($data["g"]["codes"]) ? array_map(fn($c) => $c === null ? null : $data["g"]["levels"][$c], $data["g"]["codes"]) : $data["g"]; return ["y" => $data["y"], "x" => array_map(fn($x) => [1.0, $x], $data["x"]), "columns" => ["(Intercept)", "x"], "intercept" => true, "random" => [["label" => "1 | g", "group" => "g", "columns" => ["(Intercept)"], "correlated" => true, "z" => [[1.0], [1.0]], "groups" => $labels]], "retained_rows" => [0, 1], "dropped_rows" => []]; }');
+        if (function_exists('Phit\model_matrix')) { self::markTestSkipped('The real Phit\model_matrix() is loaded.'); }
+        eval('namespace Phit; function model_matrix(string $formula, mixed $data, string $missing = "drop"): array { $GLOBALS["model_matrix_call"] = [$formula, $data, $missing]; $labels = isset($data["g"]["codes"]) ? array_map(fn($c) => $c === null ? null : $data["g"]["levels"][$c], $data["g"]["codes"]) : $data["g"]; return ["y" => $data["y"], "x" => array_map(fn($x) => [1.0, $x], $data["x"]), "columns" => ["(Intercept)", "x"], "intercept" => true, "random" => [["label" => "1 | g", "group" => "g", "columns" => ["(Intercept)"], "correlated" => true, "z" => [[1.0], [1.0]], "groups" => $labels]], "retained_rows" => [0, 1], "dropped_rows" => []]; }');
         $data = StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['b', 'a']]), drop_intercept: true, missing: 'raise');
-        self::assertSame(['y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]], 'raise'], $GLOBALS['stats_model_matrix_call'], 'factor columns are passed as descriptors that keep the level order');
+        self::assertSame(['y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]], 'raise'], $GLOBALS['model_matrix_call'], 'factor columns are passed as descriptors that keep the level order');
         self::assertSame(['N' => 2, 'K' => 1, 'X' => [[3.0], [4.0]], 'y' => [1.0, 2.5], 'g_id' => [1, 2], 'J_g' => 2, 'J' => 2], $data->data, 'the table\'s factor levels set the group order');
         $model = ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]];
         $data = StanData::fromFormula('y ~ x + (1 | g)', self::modelData($model));
-        self::assertSame($model, $GLOBALS['stats_model_matrix_call'][1], 'toModelData() is passed unchanged');
+        self::assertSame($model, $GLOBALS['model_matrix_call'][1], 'toModelData() is passed unchanged');
         self::assertSame([1, 2], $data->data['g_id'], 'descriptor levels set the group order'); self::assertSame(['b', 'a'], $data->levels['g_id']);
         try { StanData::fromFormula('y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [1, null], 'base' => 1]]); } catch (\UnexpectedValueException) {} // the fake keeps the missing row; only the call matters
-        self::assertSame(['levels' => ['b', 'a'], 'codes' => [0, null], 'ordered' => false], $GLOBALS['stats_model_matrix_call'][1]['g'], "1-based codes become 0-based, and missing codes are left for stats_model_matrix()");
+        self::assertSame(['levels' => ['b', 'a'], 'codes' => [0, null], 'ordered' => false], $GLOBALS['model_matrix_call'][1]['g'], "1-based codes become 0-based, and missing codes are left for Phit\model_matrix()");
         try { StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', null], 'notes' => [null, 'x']], ['g' => 'factor'], ['g' => ['b', 'a']])); } catch (\UnexpectedValueException) {} // the fake keeps the missing row; only the call matters
-        self::assertSame([0, null], $GLOBALS['stats_model_matrix_call'][1]['g']['codes'], 'missing labels in toColumns() factors do not throw');
-        self::assertSame([null, 'x'], $GLOBALS['stats_model_matrix_call'][1]['notes']);
+        self::assertSame([0, null], $GLOBALS['model_matrix_call'][1]['g']['codes'], 'missing labels in toColumns() factors do not throw');
+        self::assertSame([null, 'x'], $GLOBALS['model_matrix_call'][1]['notes']);
     }
-    private static function requireModelMatrix(): void { if (!function_exists('stats_model_matrix')) { self::markTestSkipped('Needs stats_model_matrix() from the php_stats extension.'); } }
+    private static function requireModelMatrix(): void { if (!function_exists('Phit\model_matrix')) { self::markTestSkipped('Needs Phit\model_matrix() from the phit extension.'); } }
     private const SCHOOLS = ['y' => [1.0, 2.5, 3.0, null, 5.0, 4.0], 'x' => [0.5, 1.5, 2.5, 3.0, 1.0, 2.0], 'g' => ['b', 'a', 'b', 'c', 'a', 'c'], 'f' => ['lo', 'hi', 'lo', 'hi', 'mid', 'lo'], 'r' => ['no', 'yes', 'no', 'yes', 'yes', 'no']];
     public function testRealModelMatrixRandomIntercept(): void
     {
@@ -201,7 +201,7 @@ final class StanDataTest extends TestCase
         self::requireModelMatrix();
         $warnings = []; set_error_handler(function (int $no, string $message) use (&$warnings) { $warnings[] = $message; return true; }, E_WARNING);
         try { $data = StanData::fromFormula('y ~ x + f + (1 + x | g)', self::SCHOOLS, drop_intercept: true); } finally { restore_error_handler(); }
-        self::assertCount(1, $warnings, 'stats_model_matrix() warns once about dropped rows');
+        self::assertCount(1, $warnings, 'Phit\model_matrix() warns once about dropped rows');
         self::assertSame(5, $data->data['N']); self::assertSame(['x', 'flo', 'fmid'], $data->columns); self::assertSame(3, $data->data['K']);
         self::assertSame([[0.5, 1.0, 0.0], [1.5, 0.0, 0.0], [2.5, 1.0, 0.0], [1.0, 0.0, 1.0], [2.0, 1.0, 0.0]], $data->data['X']);
         self::assertSame([2, 1, 2, 1, 3], $data->data['g_id']); self::assertSame(['a', 'b', 'c'], $data->levels['g_id']);

@@ -30,7 +30,7 @@ This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does
 | Draw selection/formats, including `draws_rvars` | `draws()` | Unit tests; posterior comparison |
 | Summaries, custom summary measures, diagnostics | `summary()`, `diagnostic_summary()` | Unit and real posterior tests; posterior comparison |
 | PSIS-LOO and WAIC | `CmdStanMCMC::loo()`, `waic()` | Unit tests; loo package comparison |
-| Moment matching in `loo()` | `loo(moment_match: true)` through model methods and the `php_stats` draw kernels | Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison |
+| Moment matching in `loo()` | `loo(moment_match: true)` through model methods and the `phit` draw kernels | Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison |
 | Logs, timing, metrics, configuration JSON, output persistence | Fit methods | Unit and integration tests |
 | Global options | `options()`, `cmdstan_option()` | Unit tests |
 | bayesplot trace, histogram, density, interval, rank, scatter, and autocorrelation plots; loo's Pareto k plot | `mcmc_trace()` and related functions, rendered as ASCII text, Vega-Lite specs, HTML, or SVG/PNG through vl-convert | Unit tests of layout and specs; vl-convert renders in CI; plotted values compared with R and bayesplot |

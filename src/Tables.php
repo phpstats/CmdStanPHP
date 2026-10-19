@@ -3,11 +3,11 @@ declare(strict_types=1);
 namespace CmdStan;
 /**
  * Column-oriented results for data frame libraries. Columns are name => list of values, the shape accepted by
- * phibble's Phibble\Frame::fromColumns(). phibble is optional: frame() uses it only when it is installed.
+ * phibble's Phibble\DataFrame::fromColumns(). phibble is optional: dataFrame() uses it only when it is installed.
  */
 final class Tables
 {
-    public const FRAME_CLASS = 'Phibble\\Frame';
+    public const DATAFRAME_CLASS = 'Phibble\\DataFrame';
     /**
      * Rows of associative arrays to columns. Columns appear in first-seen order; a row without a column holds null there.
      *
@@ -22,11 +22,11 @@ final class Tables
         foreach ($rows as $row) { foreach ($columns as $name => $_) { $columns[$name][] = $row[$name] ?? null; } }
         return $columns;
     }
-    /** A Phibble\Frame from columns; throws with installation advice when phibble is not installed. */
-    public static function frame(array $columns, string $method = 'to_frame()'): object
+    /** A Phibble\DataFrame from columns; throws with installation advice when phibble is not installed. */
+    public static function dataFrame(array $columns, string $method = 'draws_table()'): object
     {
-        if (!class_exists(self::FRAME_CLASS)) { throw new \RuntimeException($method.' needs the phibble data frame package (composer require erikwestlund/phibble; it requires PHP 8.5). Without it, use the column arrays directly.'); }
-        $class = self::FRAME_CLASS;
+        if (!class_exists(self::DATAFRAME_CLASS)) { throw new \RuntimeException($method.' needs the phibble data frame package (composer require phpstats/phibble; it requires PHP 8.5). Without it, use the column arrays directly.'); }
+        $class = self::DATAFRAME_CLASS;
         return $class::fromColumns($columns);
     }
 }

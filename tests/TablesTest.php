@@ -31,18 +31,18 @@ final class TablesTest extends TestCase
     }
     public function testFramesNeedPhibble(): void
     {
-        if (class_exists(Tables::FRAME_CLASS)) { self::markTestSkipped('phibble is installed.'); }
+        if (class_exists(Tables::DATAFRAME_CLASS)) { self::markTestSkipped('phibble is installed.'); }
         $fit = CmdStanFit::fromCsv([$this->csv()]);
-        try { $fit->to_frame(); self::fail('to_frame() should throw without phibble.'); } catch (\RuntimeException $e) { self::assertStringContainsString('composer require erikwestlund/phibble', $e->getMessage()); }
-        $this->expectExceptionMessage('summary_frame() needs'); $fit->summary_frame();
+        try { $fit->draws_table(); self::fail('draws_table() should throw without phibble.'); } catch (\RuntimeException $e) { self::assertStringContainsString('composer require phpstats/phibble', $e->getMessage()); }
+        $this->expectExceptionMessage('summary_table() needs'); $fit->summary_table();
     }
     #[RunInSeparateProcess]
     public function testFramesUsePhibbleWhenInstalled(): void
     {
-        if (!class_exists(Tables::FRAME_CLASS)) { require __DIR__.'/fixtures/PhibbleFrameStub.php'; }
+        if (!class_exists(Tables::DATAFRAME_CLASS)) { require __DIR__.'/fixtures/PhibbleDataFrameStub.php'; }
         $fit = CmdStanFit::fromCsv([$this->csv()]);
-        $frame = $fit->to_frame('theta');
-        self::assertInstanceOf(Tables::FRAME_CLASS, $frame); self::assertSame($fit->draws_columns('theta'), $frame->toColumns());
-        self::assertSame($fit->summary_columns('theta', measures: ['mean']), $fit->summary_frame('theta', measures: ['mean'])->toColumns());
+        $frame = $fit->draws_table('theta');
+        self::assertInstanceOf(Tables::DATAFRAME_CLASS, $frame); self::assertSame($fit->draws_columns('theta'), $frame->toColumns());
+        self::assertSame($fit->summary_columns('theta', measures: ['mean']), $fit->summary_table('theta', measures: ['mean'])->toColumns());
     }
 }

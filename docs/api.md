@@ -91,7 +91,7 @@ Thread options are aliases, with precedence `threads_per_chain`, `threads`, then
 - `save_output_files()`, `save_latent_dynamics_files()`, `save_profile_files()`, `save_data_file()`, `save_config_files()`, `save_metric_files()`: each takes `dir: '.', basename: null, timestamp: true, random: true` and names files `basename-YYYYmmddHHMM-id-xxxxxx.ext` as CmdStanR does. Files created by the run are moved; imported and user-supplied files are copied. Existing destinations are never overwritten.
 - `save_object(file)`: serialize parsed fit data (and native MCMC summary statistics) to a PHP object file.
 - `print(variables: null, max_rows: null)`: emit summary JSON to stdout, limited to `cmdstanr_max_rows` (default 10) variables.
-- `draws_columns()`, `summary_columns()`, `to_frame()`, `summary_frame()`: column-oriented draws and summaries for data frames; see [data frames](#data-frames-and-the-phpstats-family).
+- `draws_columns()`, `summary_columns()`, `draws_table()`, `summary_table()`: column-oriented draws and summaries for data frames; see [data frames](#data-frames-and-the-phpstats-family).
 
 ### Model methods
 
@@ -110,21 +110,21 @@ These methods need PHP FFI. The first call compiles a shared library for the fit
 
 ### Method-specific fit methods
 
-`CmdStanMCMC` adds `loo(variables: 'log_lik', r_eff: true, moment_match: false, max_iters: 30, k_threshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`; LOO also returns `diagnostics` with Pareto k values. `moment_match: true` needs model methods and the `php_stats` posterior-draw kernels, and adds a `moment_match` key; see the inference guide.
+`CmdStanMCMC` adds `loo(variables: 'log_lik', r_eff: true, moment_match: false, max_iters: 30, k_threshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`; LOO also returns `diagnostics` with Pareto k values. `moment_match: true` needs model methods and the `phit` posterior-draw kernels, and adds a `moment_match` key; see the inference guide.
 
 `CmdStanMLE` adds `mle()`/`optimized_params()` (final optimizer row) and `lp()`; its `summary()` returns `variable`/`estimate` rows, matching CmdStanR's optimization summary. `CmdStanVB` adds `variational_mean()` and `lp_approx()`. Pathfinder and Laplace also expose `lp_approx()`; Laplace exposes `mode()`, and generated quantities fits expose `fitted_params_files()`. `CmdStanPathfinder` adds `single_path_files()`, `single_path_json_files()`, `single_path_fits()`, and `single_path_diagnostics()` for runs with `save_single_paths: true`. `CmdStanDiagnose` adds `gradients()` (gradient-check console output).
 
 ### Statistics helpers
 
-`CmdStan\Figure` renders computed figures with `ascii()`, `vegaLite()`, `json()`, `html()`, `svg()`, and `png()`; casting a figure to a string gives its ASCII form. `CmdStan\Plot` computes the figures, plus `bandwidth()`, `density()`, `autocorrelation()`, and `ranks()` for the values they draw. `CmdStan\Psis` (`pareto_smooth()`, `pareto_khat()`, `psis()`, `gpdfit()`), `CmdStan\Loo` (`loo()`, `waic()`, `relative_eff()`), `CmdStan\MomentMatch` (`loo()` on unconstrained draws with log-density and log-likelihood callbacks, `fromFit()`), `CmdStan\DrawKernels` (detection of and wrappers for the `php_stats` draw kernels), `CmdStan\Summary` (`summarise()` and each posterior measure), `CmdStan\Rvars`, and `CmdStan\Inits` (`fromFit()`, `fromDraws()`, `nest()`, `validate()`) operate on plain draws arrays. Their docblocks describe the input and output shapes.
+`CmdStan\Figure` renders computed figures with `ascii()`, `vegaLite()`, `json()`, `html()`, `svg()`, and `png()`; casting a figure to a string gives its ASCII form. `CmdStan\Plot` computes the figures, plus `bandwidth()`, `density()`, `autocorrelation()`, and `ranks()` for the values they draw. `CmdStan\Psis` (`pareto_smooth()`, `pareto_khat()`, `psis()`, `gpdfit()`), `CmdStan\Loo` (`loo()`, `waic()`, `relative_eff()`), `CmdStan\MomentMatch` (`loo()` on unconstrained draws with log-density and log-likelihood callbacks, `fromFit()`), `CmdStan\DrawKernels` (detection of and wrappers for the `phit` draw kernels), `CmdStan\Summary` (`summarise()` and each posterior measure), `CmdStan\Rvars`, and `CmdStan\Inits` (`fromFit()`, `fromDraws()`, `nest()`, `validate()`) operate on plain draws arrays. Their docblocks describe the input and output shapes.
 
 ## Data frames and the phpstats family
 
-CmdStanPHP works with the [phpstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `php_stats` extension is detected by function name.
+CmdStanPHP works with the [phpstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `phit` extension is detected by function name.
 
 ### Data in
 
-Every `data` argument (`sample()`, `sample_mpi()`, `optimize()`, `variational()`, `pathfinder()`, `laplace()`, `generate_quantities()`, `diagnose()`, and `log_prob()`) and `write_stan_json()` accept a plain array, a JSON file, a `CmdStan\StanData`, or a table. A table is any object with `toModelData()` or `toColumns()`, such as a [phibble](https://github.com/erikwestlund/phibble) `Phibble\Frame`. `toModelData()` is used when both exist. `StanData::fromTable($table, add_n: true)` performs the same conversion and keeps the factor labels.
+Every `data` argument (`sample()`, `sample_mpi()`, `optimize()`, `variational()`, `pathfinder()`, `laplace()`, `generate_quantities()`, `diagnose()`, and `log_prob()`) and `write_stan_json()` accept a plain array, a JSON file, a `CmdStan\StanData`, or a table. A table is any object with `toModelData()` or `toColumns()`, such as a [phibble](https://github.com/phpstats/phibble) `Phibble\DataFrame`. `toModelData()` is used when both exist. `StanData::fromTable($table, add_n: true)` performs the same conversion and keeps the factor labels.
 
 | Column | Stan data |
 | --- | --- |
@@ -135,7 +135,7 @@ Every `data` argument (`sample()`, `sample_mpi()`, `optimize()`, `variational()`
 | string | A factor with sorted unique levels (`strcmp` order, as phibble's and R's `factor()` defaults) |
 | null, dates, other objects | Rejected with the column name and row, because Stan data has no missing values |
 
-Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `Frame::toModelData()` returns them since phibble [93858fa](https://github.com/erikwestlund/phibble/commit/93858fa); add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
+Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them since phibble [93858fa](https://github.com/phpstats/phibble/commit/93858fa); add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
 
 Fit methods use CmdStanR-style snake_case names. `StanData` and `Tables` constructors use camelCase `from...()` names, like the package's other static helpers such as `CmdStanFit::fromCsv()` and `Inits::fromFit()`. `StanData` is a value object with readonly `data`, `levels`, `columns` (the names of the columns of `X`), and `meta`. `toArray()` returns `data`, and `with(['prior_scale' => 2.5])` adds or replaces variables.
 
@@ -171,7 +171,7 @@ data {
 }
 ```
 
-`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, drop_intercept: false, missing: 'drop')` builds regression data from an R-style formula through `stats_model_matrix()` in the [`php_stats`](https://github.com/erikwestlund/php-stats) extension (php-stats `741d38f` and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `drop_intercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `stats_model_matrix()` result and is the only code that depends on its shape.
+`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, drop_intercept: false, missing: 'drop')` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit `741d38f` and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `drop_intercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `Phit\model_matrix()` result and is the only code that depends on its shape.
 
 | Formula part | Stan data |
 | --- | --- |
@@ -183,7 +183,7 @@ data {
 | `(... \| g)` | `<g>_id` (1-based) and `J_<g>` per grouping factor, and `J` when there is one grouping factor |
 | Random slopes, such as `(1 + x \| g)` | `Z_<g>` (N rows of the group's columns, including the intercept column) and `Q_<g>`, the number of columns; omitted when every term on the group is intercept-only |
 
-Group names that are not Stan identifiers have other characters replaced by `_`, so the nested group `g2:g1` gives `g2_g1_id`. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as `stats_model_matrix()` sorts levels). Terms on the same group are concatenated into one `Z_<g>`, intercept-only terms included, so `(1 | g) + (0 + x | g)` gives the same `Z_g` as `(1 + x | g)`. Two groups whose names map to the same `<g>`, such as `a.b` and `a_b`, are rejected. Factors reach `stats_model_matrix()` as descriptors in the data's level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. `missing: 'drop'` removes rows with missing values in any variable the formula uses, with one `E_WARNING` from `stats_model_matrix()`, and `missing: 'raise'` rejects them. The remaining result keys, including `retained_rows`, `dropped_rows`, `n_input`, `n_dropped`, `terms`, and `assign`, are kept in `meta`, and `meta['random'][<g>]` lists each group's columns and terms.
+Group names that are not Stan identifiers have other characters replaced by `_`, so the nested group `g2:g1` gives `g2_g1_id`. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as `Phit\model_matrix()` sorts levels). Terms on the same group are concatenated into one `Z_<g>`, intercept-only terms included, so `(1 | g) + (0 + x | g)` gives the same `Z_g` as `(1 + x | g)`. Two groups whose names map to the same `<g>`, such as `a.b` and `a_b`, are rejected. Factors reach `Phit\model_matrix()` as descriptors in the data's level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. `missing: 'drop'` removes rows with missing values in any variable the formula uses, with one `E_WARNING` from `Phit\model_matrix()`, and `missing: 'raise'` rejects them. The remaining result keys, including `retained_rows`, `dropped_rows`, `n_input`, `n_dropped`, `terms`, and `assign`, are kept in `meta`, and `meta['random'][<g>]` lists each group's columns and terms.
 
 ```stan
 data {
@@ -202,7 +202,7 @@ data {
 
 - `draws_columns(variables: null, inc_warmup: false)` returns draws as columns, like posterior's `as_draws_df()`: one list per variable element (such as `beta[2]`), then one-based `.chain`, `.iteration`, and `.draw` columns.
 - `summary_columns(variables: null, probs: [0.05, 0.95], measures: [])` returns `summary()` as columns: `variable` and one column per measure.
-- `to_frame()` and `summary_frame()` take the same arguments and return a `Phibble\Frame` built with `Frame::fromColumns()`. They need `erikwestlund/phibble`, which requires PHP 8.5, and throw a `RuntimeException` explaining this when it is not installed.
+- `draws_table()` and `summary_table()` take the same arguments and return a `Phibble\DataFrame` built with `DataFrame::fromColumns()`. They need `phpstats/phibble`, which requires PHP 8.5, and throw a `RuntimeException` explaining this when it is not installed.
 - `CmdStan\Tables::fromRows($rows)` converts any list of associative rows, such as `loo()['pointwise']`, to columns.
 
 The column arrays need no other package and suit any data frame library that accepts name-to-values columns.
@@ -211,10 +211,10 @@ The column arrays need no other package and suit any data frame library that acc
 
 CmdStanPHP is part of the phpstats family of PHP statistics packages:
 
-- [php-stats](https://github.com/erikwestlund/php-stats): the `php_stats` native extension (`stats_*` functions), which provides the moment-matching draw kernels and, when available, `stats_model_matrix()`.
-- [phibble](https://github.com/erikwestlund/phibble): data frames (`Phibble\Frame`).
-- [phplyr](https://github.com/erikwestlund/phplyr): dplyr-style verbs for phibble tables.
-- [phiz](https://github.com/erikwestlund/phiz): a Vega-Lite grammar of graphics.
+- [phit](https://github.com/phpstats/phit): the `phit` native extension (`Phit\` functions), which provides the moment-matching draw kernels and, when available, `Phit\model_matrix()`.
+- [phibble](https://github.com/phpstats/phibble): data frames (`Phibble\DataFrame`).
+- [phplyr](https://github.com/phpstats/phplyr): dplyr-style verbs for phibble tables.
+- [phiz](https://github.com/phpstats/phiz): a Vega-Lite grammar of graphics.
 
 The family packages target PHP 8.5. CmdStanPHP keeps PHP 8.2 support and requires none of them.
 
