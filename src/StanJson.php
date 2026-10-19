@@ -3,8 +3,11 @@ declare(strict_types=1);
 namespace CmdStan;
 final class StanJson
 {
-    public static function write(array $data, string $file): string
+    /** $data is an array of Stan variables, a StanData, or a table (an object with toModelData() or toColumns()). */
+    public static function write(array|object $data, string $file): string
     {
+        $data = StanData::normalize($data);
+        if (!is_array($data)) { throw new \InvalidArgumentException('Expected Stan data as an array, StanData, or a table with toColumns().'); }
         foreach ($data as $name => $value) {
             if (!is_string($name) || !preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $name)) { throw new \InvalidArgumentException('Stan data must have valid variable names.'); }
             self::shape($value);

@@ -176,6 +176,28 @@ class CmdStanFit
         for ($i = 0; $i < ($sizes[0] ?? 0); ++$i) { $out[] = array_column($chains, $i); }
         return $out;
     }
+    /**
+     * Draws as columns, like posterior::as_draws_df(): one column per variable element (e.g. 'beta[2]'), then one-based
+     * '.chain', '.iteration' and '.draw' columns. The result is ready for Phibble\Frame::fromColumns().
+     *
+     * @return array<string, list<float|int>>
+     */
+    public function draws_columns(array|string|null $variables = null, bool $inc_warmup = false): array
+    {
+        $chains = $this->draws($variables, 'draws_list', $inc_warmup); $columns = array_fill_keys(array_keys($chains[0] ?? []), []); $meta = ['.chain' => [], '.iteration' => [], '.draw' => []]; $draw = 0;
+        foreach ($chains as $c => $chain) {
+            foreach ($columns as $name => $_) { array_push($columns[$name], ...$chain[$name]); }
+            $n = count(reset($chain) ?: []);
+            for ($i = 0; $i < $n; ++$i) { $meta['.chain'][] = $c + 1; $meta['.iteration'][] = $i + 1; $meta['.draw'][] = ++$draw; }
+        }
+        return $columns + $meta;
+    }
+    /** draws_columns() as a Phibble\Frame. Needs erikwestlund/phibble, which is optional; throws when it is not installed. */
+    public function to_frame(array|string|null $variables = null, bool $inc_warmup = false): object { return Tables::frame($this->draws_columns($variables, $inc_warmup), 'to_frame()'); }
+    /** summary() turned into columns: 'variable' and one column per measure, one value per variable. */
+    public function summary_columns(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): array { return Tables::fromRows($this->summary($variables, $probs, $measures)); }
+    /** summary_columns() as a Phibble\Frame. Needs erikwestlund/phibble; throws when it is not installed. */
+    public function summary_frame(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): object { return Tables::frame($this->summary_columns($variables, $probs, $measures), 'summary_frame()'); }
     public static function quantile(array $values, float $p): float
     {
         if ($values === []) { return NAN; }

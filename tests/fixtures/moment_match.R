@@ -80,5 +80,5 @@ for (name in names(input)) {
 environment(exact_split) <- asNamespace("loo")
 assignInNamespace("loo_moment_match_split", exact_split, ns = "loo")
 for (name in names(input)) out[[name]]$exact_split <- moment_match(model(input[[name]]), TRUE)
-out$versions <- list(loo = as.character(packageVersion("loo")))
+out$versions <- list(loo = as.character(packageVersion("loo")), loo_sha = packageDescription("loo")$RemoteSha)
 jsonlite::write_json(out, args[[2]], digits = NA, auto_unbox = TRUE)

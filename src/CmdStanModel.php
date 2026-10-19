@@ -118,7 +118,10 @@ final class CmdStanModel
         if (!copy($this->hpp_file(), $target)) { throw new \RuntimeException('Cannot copy header.'); }
         return $target;
     }
-    /** Use named arguments (sample(chains: 4)) or a single options array. */
+    /**
+     * Use named arguments (sample(chains: 4)) or a single options array. Every method's data may be an array, a JSON
+     * file, a StanData, or a table such as a phibble Frame (any object with toModelData() or toColumns(); see StanData).
+     */
     public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::deprecated(self::options($options), ['cores', 'num_cores', 'num_chains', 'num_warmup', 'num_samples', 'max_depth', 'stepsize', 'save_extra_diagnostics', 'validate_csv'])); }
     public function sample_mpi(string $mpi_cmd = 'mpiexec', array $mpi_args = [], mixed ...$options): CmdStanMCMC
     {
@@ -142,7 +145,7 @@ final class CmdStanModel
     {
         CmdStan::requireVersion('2.32.0'); $o = self::deprecated(self::options($options), ['jacobian_adjustment']); Options::validate('laplace', $o);
         if (!isset($o['mode'])) {
-            $opt = $o['opt_args'] ?? [];
+            $o['data'] = StanData::normalize($o['data'] ?? null); $opt = $o['opt_args'] ?? [];
             $opt['data'] = $o['data'] ?? null; $opt['jacobian'] = $o['jacobian'] ?? true;
             foreach (['seed', 'init', 'show_messages', 'show_exceptions', 'sig_figs', 'timeout'] as $name) { if (isset($o[$name])) { $opt[$name] = $o[$name]; } }
             $o['mode'] = $this->optimize($opt);
@@ -218,7 +221,7 @@ final class CmdStanModel
             if (file_exists($file)) { throw new \RuntimeException('Input artifact already exists: '.$file); }
             return StanJson::write($input, $file);
         }
-        if (!is_string($input) || !is_file($input)) { throw new \InvalidArgumentException('Expected data array or existing input file.'); }
+        if (!is_string($input) || !is_file($input)) { throw new \InvalidArgumentException('Expected a data array, StanData, a table with toColumns(), or an existing input file.'); }
         return realpath($input);
     }
     private function run(string $method, array $o, array $launcher = []): CmdStanFit
@@ -239,7 +242,8 @@ final class CmdStanModel
         foreach ($ids as $id) {
             if (file_exists($dir.'/'.$basename.'-'.$id.'.csv')) { throw new \RuntimeException('Output already exists: '.$dir.'/'.$basename.'-'.$id.'.csv'); }
         }
-        $data = $this->inputFile($o['data'] ?? null, $dir, $basename.'-data');
+        $o['data'] = StanData::normalize($o['data'] ?? null);
+        $data = $this->inputFile($o['data'], $dir, $basename.'-data');
         if (($o['init'] ?? null) instanceof CmdStanFit) { $o['init'] = $this->initsFromFit($o['init'], $chains, is_array($o['seed'] ?? null) ? $o['seed'][0] : ($o['seed'] ?? null)); }
         $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = []; $initArrays = [];
         foreach ($ids as $i => $id) {

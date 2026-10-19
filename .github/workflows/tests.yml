@@ -45,9 +45,9 @@ jobs:
       - name: Check out posterior-draw kernels
         uses: actions/checkout@v4
         with:
-          repository: erikwestlund/php-stat-models
-          ref: e7457cb4267dd78307ae5b2863efa9578644a33a
-          path: .context/php-stat-models
+          repository: erikwestlund/php-stats
+          ref: b71e406ee58fc7a255687514b2818c3c615a517b
+          path: .context/php-stats
           persist-credentials: false
       - name: Install matching PHP headers and clang
         run: |
@@ -57,15 +57,15 @@ jobs:
           {
             echo "PHP_CONFIG=$(command -v php-config)"
             echo "PHP=$(command -v php)"
-            echo "PHP_STATS_LIBRARY=$PWD/.context/php-stat-models/target/release/libphp_stats.so"
+            echo "PHP_STATS_LIBRARY=$PWD/.context/php-stats/target/release/libphp_stats.so"
           } >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - name: Build and verify php_stats
         run: |
-          cargo build --manifest-path .context/php-stat-models/Cargo.toml --package php-stats --release --locked
-          php -d extension="$PHP_STATS_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("stats_normal_rng")) { throw new RuntimeException("FFI and seeded native draws are required by CI"); }'
-      - name: Test native kernels and moment matching
-        run: php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --filter '(DrawKernelsTest|MomentMatchTest)' --exclude-group integration --exclude-group compatibility --fail-on-skipped
+          cargo build --manifest-path .context/php-stats/Cargo.toml --package php-stats --release --locked
+          php -d extension="$PHP_STATS_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("stats_normal_rng") || !function_exists("stats_model_matrix") || !function_exists("stats_lmer")) { throw new RuntimeException("FFI, seeded native draws, stats_model_matrix, and stats_lmer are required by CI"); }'
+      - name: Test native kernels, moment matching, and model matrices
+        run: php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --filter '(DrawKernelsTest|MomentMatchTest|StanDataTest::testRealModelMatrix)' --exclude-group integration --exclude-group compatibility --fail-on-skipped
       - uses: actions/cache@v4
         id: cmdstan-cache
         with:

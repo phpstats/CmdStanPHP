@@ -22,7 +22,8 @@ function check_cmdstan_toolchain(): array { return CmdStan::checkToolchain(); }
 function options(array $set = []): array { return CmdStan::setOptions($set); }
 /** Reads one option, like R's getOption(name, default). */
 function cmdstan_option(string $name, mixed $default = null): mixed { return CmdStan::option($name, $default); }
-function write_stan_json(array $data, string $file): string { return StanJson::write($data, $file); }
+/** $data may also be a StanData or a table such as a phibble Frame; see StanData. */
+function write_stan_json(array|object $data, string $file): string { return StanJson::write($data, $file); }
 /**
  * Writes Stan code (a string or list of lines) to $file, or to dir/basename where dir defaults to the cmdstanr_write_stan_file_dir
  * option or the system temporary directory and basename to model_<hash>.stan. An identical existing file is left untouched

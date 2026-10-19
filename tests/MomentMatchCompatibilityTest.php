@@ -5,8 +5,9 @@ use CmdStan\{DrawKernels, Loo, MomentMatch, Process};
 use PHPUnit\Framework\Attributes\Group;
 /**
  * Compares moment matching with loo::loo_moment_match.default on identical draws and analytic densities. Without split
- * the result must match loo; with split it must match loo's split with the exact inverse and two-half r_eff, and loo's
- * own split must differ wherever a shift is combined with scaling or a covariance map.
+ * the result must match loo; with split it must match loo's split with the exact inverse and two-half r_eff. loo builds
+ * before stan-dev/loo#405 must differ wherever a shift is combined with scaling or a covariance map; later builds,
+ * which made the same corrections, must match exactly.
  */
 #[Group('compatibility')]
 final class MomentMatchCompatibilityTest extends TestCase
@@ -56,14 +57,24 @@ final class MomentMatchCompatibilityTest extends TestCase
     {
         foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['exact_split'], self::matched($name, true), $name.' split'); }
     }
+    /**
+     * loo 2.10.1.9000 builds before stan-dev/loo#405 (merged 2026-10-13, d69d44f) differ from CmdStanPHP's split as
+     * documented. Later builds made the same corrections, so their own split must match CmdStanPHP everywhere.
+     */
     public function testDifferencesFromLooSplitAreTheDocumentedOnes(): void
     {
         $i = count(self::$fixtures['shift_only']['x']) - 1;
         // Shifts only: the inverses agree, so elpd matches loo (the two-half r_eff can still change mcse and n_eff).
         $loo = self::$reference['shift_only']['loo_split']; $exact = self::$reference['shift_only']['exact_split'];
         self::assertEqualsWithDelta($loo['pointwise']['elpd_loo'][$i], $exact['pointwise']['elpd_loo'][$i], 1e-12);
-        // With scaling or a covariance map, loo evaluates the split proposal density at the wrong inverse points
-        // (MomentMatchTest::testAffineLogDeterminantEntersTheSplitProposal measures the resulting error).
+        $same = fn(string $name) => abs(self::$reference[$name]['loo_split']['pointwise']['elpd_loo'][count(self::$fixtures[$name]['x']) - 1] - self::$reference[$name]['exact_split']['pointwise']['elpd_loo'][count(self::$fixtures[$name]['x']) - 1]) <= 1e-6;
+        if ($same('shift_scale') || $same('cov')) {
+            // Corrected loo: its split is the reference for every design.
+            foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['loo_split'], self::matched($name, true), $name.' corrected loo split'); }
+            return;
+        }
+        // Earlier loo: with scaling or a covariance map, it evaluates the split proposal density at the wrong inverse
+        // points (MomentMatchTest::testAffineLogDeterminantEntersTheSplitProposal measures the resulting error).
         foreach (['shift_scale', 'cov'] as $name) {
             $i = count(self::$fixtures[$name]['x']) - 1;
             self::assertNotEqualsWithDelta(self::$reference[$name]['loo_split']['pointwise']['elpd_loo'][$i], self::$reference[$name]['exact_split']['pointwise']['elpd_loo'][$i], 1e-6, $name);

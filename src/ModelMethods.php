@@ -25,9 +25,11 @@ final class ModelMethods
     private ?\FFI $ffi = null;
     private ?\FFI\CData $handle = null;
     private array $info = [];
-    /** @param array|string|null $data Stan data array or JSON data file. */
-    public function __construct(private string $library, private array|string|null $data = null, private int $seed = 1)
+    private array|string|null $data;
+    /** @param array|object|string|null $data Stan data array, StanData, table (see StanData), or JSON data file. */
+    public function __construct(private string $library, array|object|string|null $data = null, private int $seed = 1)
     {
+        $this->data = StanData::normalize($data);
         if ($seed < 0 || $seed > 4294967295) { throw new \InvalidArgumentException('seed must be an unsigned 32-bit integer.'); }
         if (is_string($data) && !is_file($data)) { throw new \InvalidArgumentException('Data file not found: '.$data); }
         $this->library = realpath($library) ?: throw new \InvalidArgumentException('Native library not found: '.$library);
@@ -39,7 +41,7 @@ final class ModelMethods
         $hpp = NativeBuild::stanc($stan_file, NativeBuild::stancArgs($stanc_options), $timeout);
         return NativeBuild::library($stan_file, 'model_methods', $hpp, "#include \"model.hpp\"\n#include \"".NativeBuild::resources()."/model_methods.cpp\"\n", ['model_methods.cpp'], $output_dir, $timeout);
     }
-    public static function compile(string $stan_file, array|string|null $data = null, int $seed = 1, array $stanc_options = [], ?string $output_dir = null, ?float $timeout = null): self
+    public static function compile(string $stan_file, array|object|string|null $data = null, int $seed = 1, array $stanc_options = [], ?string $output_dir = null, ?float $timeout = null): self
     {
         return new self(self::build($stan_file, $stanc_options, $output_dir, $timeout), $data, $seed);
     }

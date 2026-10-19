@@ -27,6 +27,25 @@ $diagnostics = $fit->diagnostic_summary();
 
 An existing CmdStan installation is discovered from `CMDSTAN` or `~/.cmdstan/cmdstan-*`. You can also call `CmdStan\set_cmdstan_path()`. Installing a specified official release is supported with `CmdStan\install_cmdstan('2.37.0', cores: 2)`; this requires curl, tar, make, a supported C++ compiler, internet access, and enough memory for compilation. `release_url` and `release_file` install from another tarball.
 
+## Data frames and the phpstats family
+
+Model data can be a plain array, a [phibble](https://github.com/erikwestlund/phibble) data frame, or any object with `toModelData()` or `toColumns()`. Numeric columns become Stan arrays, factors and strings become 1-based indices with `J_<name>` level counts, and `N` is added. `CmdStan\StanData::fromColumns()` builds the hierarchical regression block (`N`, `K`, `X`, `y`, `J`, and `<group>_id`), and `StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $frame)` does the same through `stats_model_matrix()` from the `php_stats` extension, adding factor contrasts, factor responses, and random-slope matrices (`Z_<group>`). Fits return draws and summaries as columns, or as phibble frames when phibble is installed.
+
+```php
+$data = CmdStan\StanData::fromColumns($frame, 'score', ['hours'], 'school');
+$fit = $model->sample(data: $data, seed: 1);
+$draws = $fit->draws_columns('beta');   // ['beta[1]' => [...], '.chain' => [...], '.iteration' => [...], '.draw' => [...]]
+$frame = $fit->to_frame('beta');        // Phibble\Frame; needs erikwestlund/phibble
+```
+
+The [API reference](docs/api.md#data-frames-and-the-phpstats-family) documents the conventions. None of these packages is a Composer dependency.
+
+### Part of the phpstats family
+
+CmdStanPHP belongs to a family of PHP statistics packages: [php-stats](https://github.com/erikwestlund/php-stats) (the `php_stats` native extension), [phibble](https://github.com/erikwestlund/phibble) (data frames), [phplyr](https://github.com/erikwestlund/phplyr) (dplyr-style verbs), and [phiz](https://github.com/erikwestlund/phiz) (a Vega-Lite grammar of graphics). The family targets PHP 8.5. CmdStanPHP keeps PHP 8.2 support.
+
+## Documentation and tests
+
 Documentation lives in [docs/](docs/index.md), including installation, inference, API reference, compatibility, and testing. GitHub Actions builds and deploys it to GitHub Pages; select **Settings → Pages → Source → GitHub Actions** after the repository is published. No site has been published from this workspace.
 
 ```sh
