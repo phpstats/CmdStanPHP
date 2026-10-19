@@ -1,6 +1,5 @@
 ---
-layout: page
-title: Installation
+title: "Installation"
 ---
 
 ## Package setup

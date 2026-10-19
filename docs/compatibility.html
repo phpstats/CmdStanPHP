@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Compatibility contract – CmdStanPHP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility contract</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">CmdStanPHP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CmdStanPHP</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inference guide</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Compatibility contract</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Testing and GitHub Pages</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#supported-workflows" id="toc-supported-workflows" class="nav-link active" data-scroll-target="#supported-workflows">Supported workflows</a></li>
+  <li><a href="#php-adaptations" id="toc-php-adaptations" class="nav-link" data-scroll-target="#php-adaptations">PHP adaptations</a></li>
+  <li><a href="#not-implemented" id="toc-not-implemented" class="nav-link" data-scroll-target="#not-implemented">Not implemented</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility contract</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Compatibility contract</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This package ports CmdStanR’s core model/executable/CSV workflow to PHP. It does <strong>not</strong> claim full CmdStanR compatibility. The reference is the <a href="https://mc-stan.org/cmdstanr/reference/">CmdStanR API</a> and <a href="https://mc-stan.org/docs/cmdstan-guide/command_line_options.html">CmdStan CLI</a>, consulted during implementation. PHP interfaces preserve modern method and option names wherever their meaning transfers directly.</p>
+<section id="supported-workflows" class="level2">
+<h2 class="anchored" data-anchor-id="supported-workflows">Supported workflows</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>CmdStanR capability</th>
+<th>PHP implementation</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Installation path/version, source/JSON writing</td>
+<td>Namespaced functions</td>
+<td>Unit tests, local version detection; installer build is a CI step</td>
+</tr>
+<tr class="even">
+<td>Installation from a release URL or local tarball, overwrite, <code>make/local</code></td>
+<td><code>install_cmdstan()</code>, <code>cmdstan_make_local()</code></td>
+<td>Offline tests with generated tarballs; network downloads are exercised only by CI’s official-release install</td>
+</tr>
+<tr class="odd">
+<td>Model construction and compilation</td>
+<td><code>CmdStanModel</code>, <code>cmdstan_model()</code></td>
+<td>Real C++ builds</td>
+</tr>
+<tr class="even">
+<td>Syntax, formatting, declaration information</td>
+<td>stanc invocation</td>
+<td>Real stanc tests</td>
+</tr>
+<tr class="odd">
+<td>MCMC, parallel chains, warmup, IDs/seeds</td>
+<td><code>CmdStanMCMC</code></td>
+<td>Real posterior and reproducibility tests</td>
+</tr>
+<tr class="even">
+<td>BFGS/L-BFGS/Newton optimization</td>
+<td><code>CmdStanMLE</code></td>
+<td>Real L-BFGS and algorithm tests</td>
+</tr>
+<tr class="odd">
+<td>ADVI meanfield/fullrank</td>
+<td><code>CmdStanVB</code></td>
+<td>Real ADVI tests</td>
+</tr>
+<tr class="even">
+<td>Single/multi-path Pathfinder, per-path fits</td>
+<td><code>CmdStanPathfinder</code>, <code>single_path_fits()</code></td>
+<td>Real multi-path tests</td>
+</tr>
+<tr class="odd">
+<td>Laplace with supplied or automatic mode</td>
+<td><code>CmdStanLaplace</code></td>
+<td>Real tests for both modes</td>
+</tr>
+<tr class="even">
+<td>Standalone generated quantities</td>
+<td><code>CmdStanGQ</code></td>
+<td>Real multi-chain prediction tests</td>
+</tr>
+<tr class="odd">
+<td>Fixed-parameter sampling</td>
+<td><code>sample(fixed_param: true)</code></td>
+<td>Real generated quantities test</td>
+</tr>
+<tr class="even">
+<td>Finite-difference gradient checking</td>
+<td><code>CmdStanDiagnose</code></td>
+<td>Real model diagnostic test</td>
+</tr>
+<tr class="odd">
+<td>Batch log density and gradients</td>
+<td>Executable <code>log_prob</code> method</td>
+<td>Real log-density test</td>
+</tr>
+<tr class="even">
+<td>In-process log density, gradient, Hessian, constrain/unconstrain, variable skeleton</td>
+<td><code>init_model_methods()</code> and fit methods through PHP FFI</td>
+<td>Real model tests; CmdStanR comparison</td>
+</tr>
+<tr class="odd">
+<td>Calling user-defined Stan functions</td>
+<td><code>expose_functions()</code> through PHP FFI</td>
+<td>Real function tests; CmdStanR comparison</td>
+</tr>
+<tr class="even">
+<td>Initialization from MCMC, optimization, ADVI, Laplace, and Pathfinder fits</td>
+<td><code>init: $fit</code></td>
+<td>Real fit tests; unit tests of dimension matching and PSIS weighting</td>
+</tr>
+<tr class="odd">
+<td>CSV import/export, warmup removal, indexed names</td>
+<td><code>read_cmdstan_csv()</code>, <code>read_cmdstan_csv_list()</code>, <code>draws_to_csv()</code></td>
+<td>Unit round trips and real CSV imports</td>
+</tr>
+<tr class="even">
+<td>CSV metadata structure</td>
+<td><code>metadata()</code>, <code>chain_metadata()</code></td>
+<td>Key-by-key comparison with CmdStanR for five methods</td>
+</tr>
+<tr class="odd">
+<td>Draw selection/formats, including <code>draws_rvars</code></td>
+<td><code>draws()</code></td>
+<td>Unit tests; posterior comparison</td>
+</tr>
+<tr class="even">
+<td>Summaries, custom summary measures, diagnostics</td>
+<td><code>summary()</code>, <code>diagnostic_summary()</code></td>
+<td>Unit and real posterior tests; posterior comparison</td>
+</tr>
+<tr class="odd">
+<td>PSIS-LOO and WAIC</td>
+<td><code>CmdStanMCMC::loo()</code>, <code>waic()</code></td>
+<td>Unit tests; loo package comparison</td>
+</tr>
+<tr class="even">
+<td>Moment matching in <code>loo()</code></td>
+<td><code>loo(moment_match: true)</code> through model methods and the <code>phit</code> draw kernels</td>
+<td>Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison</td>
+</tr>
+<tr class="odd">
+<td>Logs, timing, metrics, configuration JSON, output persistence</td>
+<td>Fit methods</td>
+<td>Unit and integration tests</td>
+</tr>
+<tr class="even">
+<td>Global options</td>
+<td><code>options()</code>, <code>cmdstan_option()</code></td>
+<td>Unit tests</td>
+</tr>
+<tr class="odd">
+<td>bayesplot trace, histogram, density, interval, rank, scatter, and autocorrelation plots; loo’s Pareto k plot</td>
+<td><code>mcmc_trace()</code> and related functions, rendered as ASCII text, Vega-Lite specs, HTML, or SVG/PNG through vl-convert</td>
+<td>Unit tests of layout and specs; vl-convert renders in CI; plotted values compared with R and bayesplot</td>
+</tr>
+<tr class="even">
+<td>Example models</td>
+<td><code>cmdstanr_example()</code>, <code>print_example_program()</code></td>
+<td>Real example runs</td>
+</tr>
+<tr class="odd">
+<td>Deprecated argument and function names</td>
+<td>Mapped with <code>E_USER_DEPRECATED</code> notices</td>
+<td>Unit tests</td>
+</tr>
+<tr class="even">
+<td>MPI launching</td>
+<td><code>sample_mpi()</code></td>
+<td>Argument construction only; real MPI is unverified</td>
+</tr>
+<tr class="odd">
+<td>Threads, OpenCL, auxiliary files</td>
+<td>CLI/C++ options</td>
+<td>Thread and auxiliary-file tests; OpenCL hardware is unverified</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="php-adaptations" class="level2">
+<h2 class="anchored" data-anchor-id="php-adaptations">PHP adaptations</h2>
+<p>R named lists become associative PHP arrays; numeric arrays must be rectangular zero-indexed lists. R sparse matrices, complex numbers, NA, and automatic R object conversion have no PHP equivalent. Data frames and factors can come from phibble or any object with <code>toModelData()</code> or <code>toColumns()</code>, following the conventions in the <a href="./api.html#data-frames-and-the-phpstats-family">API reference</a>. <code>code()</code> returns one source string. Syntax errors throw exceptions rather than returning an R diagnostic list.</p>
+<p>R posterior objects become PHP arrays with documented shapes. All array indices are zero-based; draw metadata is one-based. <code>draws_array</code> retains iteration/chain axes, <code>draws_matrix</code> concatenates chains, <code>draws_df</code> is associative rows, <code>draws_list</code> maps variables to values per chain, and <code>draws_rvars</code> nests each variable’s draws by its dimensions. R tibble, posterior, bayesplot, and ggplot2 classes are not emulated. The default draws format follows CmdStanR: <code>draws_array</code> for MCMC and generated quantities and <code>draws_matrix</code> for other methods.</p>
+<p>Summary quantiles use linear interpolation (R’s default type 7). Scaled MAD uses 1.4826. The default MCMC summary delegates R-hat and bulk ESS to the installed CmdStan <code>stansummary</code> and computes tail ESS in PHP. Passing <code>measures</code> to <code>summary()</code> uses a PHP port of posterior’s <code>summarise_draws()</code>, including rank-normalized R-hat, bulk/tail ESS, and MCSE, so it does not need CmdStan. Results are checked against the installed reference R packages, but are not guaranteed bit-for-bit identical to every version of posterior. ADVI’s mean row is stored separately. ADVI and Laplace <code>log_p__</code> columns are normalized to <code>lp__</code> and their approximate densities to <code>lp_approx__</code>, matching CmdStanR. Non-MCMC convergence statistics are <code>NAN</code>.</p>
+<p><code>metadata()</code> returns one merged array with CmdStanR’s keys, such as <code>iter_sampling</code>, <code>max_treedepth</code>, and <code>stan_variable_sizes</code>, alongside CmdStan’s raw argument names. <code>chain_metadata()</code> returns the per-chain arrays. <code>inv_metric()</code> returns matrices by default and reads metric JSON when every chain has one.</p>
+<p>Model methods and exposed functions compile a shared library against the selected CmdStan and load it with PHP FFI. FFI is enabled for the CLI by default (<code>ffi.enable=preload</code>); web SAPIs need <code>ffi.enable=true</code> or preloading. Libraries are cached beside the Stan source with a fingerprint in the file name. Model methods drop constant terms and default to <code>jacobian: true</code>, as in CmdStanR. Unconstrained vectors are flat lists, and constrained variables are nested zero-based arrays with matrices as lists of rows. Fits serialize the library path, data, and seed, and reconnect on first use; the generated-quantities RNG then restarts from its seed.</p>
+<p>Initialization from a fit follows CmdStanR’s <code>process_init()</code>. MCMC draws are resampled without replacement, an optimization estimate is repeated, and ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights. Resampling uses PHP’s seeded Mt19937 engine, so a given seed selects different draws than CmdStanR does.</p>
+<p>Diagnostic checks are structured messages accessible with <code>diagnostic_warnings()</code>, rather than PHP runtime warnings. Console output is buffered; there is no R progress-bar or interrupt integration. <code>show_messages</code> controls stdout, <code>show_exceptions</code> controls stderr. Deprecated CmdStanR argument names raise <code>E_USER_DEPRECATED</code> and map to their replacements; conflicting old and new values throw. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves files that a run created and copies imported CSVs and user-supplied data files; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.</p>
+<p><code>options()</code> and <code>cmdstan_option()</code> provide CmdStanR’s global options that have a PHP meaning: default output directory, Stan file directory, forced recompilation, draws format, initialization warnings, verbose compilation, printed rows, line numbers, and <code>mc.cores</code>. <code>cmdstanr_no_ver_check</code> is accepted and has no effect because this package never checks for updates.</p>
+<p>Algorithm parameters left null use CmdStan’s defaults. PHP-level defaults include four sample chains, sequential execution unless requested, and one MPI chain. CmdStanR defaults for automatically saving metric/configuration JSON are not imposed; request <code>save_metric</code> or <code>save_cmdstan_config</code> explicitly. The installer defaults to one core where CmdStanR uses two. OpenCL and MPI require external toolchains/hardware. Windows has not been validated.</p>
+<p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with corrections to the split step and relative efficiencies. loo’s development version adopted the split corrections in <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo’s identity-map fallback while retaining the mean shift; its reason is recorded in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./inference.html">inference guide</a> describes the result.</p>
+</section>
+<section id="not-implemented" class="level2">
+<h2 class="anchored" data-anchor-id="not-implemented">Not implemented</h2>
+<p>The following CmdStanR features have no implementation:</p>
+<ul>
+<li><code>expose_functions(global = TRUE)</code>. Functions are called as methods of the returned <code>StanFunctions</code> object. Functions ending in <code>_lp</code> and overloaded functions are listed but cannot be called.</li>
+<li>bayesplot’s other plots, including pairs, areas, NUTS energy, and posterior predictive checks. Figures are not ggplot2 objects and cannot be extended with ggplot2 layers or themes.</li>
+<li>Posterior <code>rvar</code> arithmetic and R session hooks beyond the options listed above.</li>
+<li>Windows toolchain repair (<code>check_cmdstan_toolchain(fix = TRUE)</code>). The PHP toolchain check reports missing tools and does not install them.</li>
+<li>Parity with every CmdStanR version’s error and warning messages.</li>
+</ul>
+<p>No unsupported option is accepted silently. This repository’s tests validate the implemented contract against the installed CmdStanR, posterior, and loo packages; they are not the upstream CmdStanR test suite. Direct conformance tests run CmdStanR and PHP with the same seeds and compare draws, descriptive summaries, MCMC sampler diagnostics, CSV metadata, model methods, exposed functions, PSIS, LOO, WAIC, and posterior summary measures.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phpstats\.github\.io\/CmdStanPHP\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

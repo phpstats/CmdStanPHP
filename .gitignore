@@ -8,9 +8,7 @@
 /examples/normal
 /examples/generated
 /docs/_site/
-/docs/.jekyll-cache/
-/docs/.bundle/
-/docs/vendor/
+/docs/.quarto/
 *.cmdstanphp.json
 *_model_methods-*.so
 *_model_methods-*.dylib

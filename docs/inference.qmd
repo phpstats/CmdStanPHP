@@ -1,6 +1,5 @@
 ---
-layout: page
-title: Inference guide
+title: "Inference guide"
 ---
 
 ## MCMC

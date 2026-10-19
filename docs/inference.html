@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Inference guide – CmdStanPHP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./inference.html">Inference guide</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">CmdStanPHP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CmdStanPHP</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inference.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Inference guide</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility contract</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Testing and GitHub Pages</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#mcmc" id="toc-mcmc" class="nav-link active" data-scroll-target="#mcmc">MCMC</a></li>
+  <li><a href="#initialization-from-fits" id="toc-initialization-from-fits" class="nav-link" data-scroll-target="#initialization-from-fits">Initialization from fits</a></li>
+  <li><a href="#optimization-and-laplace" id="toc-optimization-and-laplace" class="nav-link" data-scroll-target="#optimization-and-laplace">Optimization and Laplace</a></li>
+  <li><a href="#advi-and-pathfinder" id="toc-advi-and-pathfinder" class="nav-link" data-scroll-target="#advi-and-pathfinder">ADVI and Pathfinder</a></li>
+  <li><a href="#generated-quantities-and-fixed-parameters" id="toc-generated-quantities-and-fixed-parameters" class="nav-link" data-scroll-target="#generated-quantities-and-fixed-parameters">Generated quantities and fixed parameters</a></li>
+  <li><a href="#diagnostics-and-log-density" id="toc-diagnostics-and-log-density" class="nav-link" data-scroll-target="#diagnostics-and-log-density">Diagnostics and log density</a></li>
+  <li><a href="#model-methods-and-stan-functions" id="toc-model-methods-and-stan-functions" class="nav-link" data-scroll-target="#model-methods-and-stan-functions">Model methods and Stan functions</a></li>
+  <li><a href="#loo-and-waic" id="toc-loo-and-waic" class="nav-link" data-scroll-target="#loo-and-waic">LOO and WAIC</a>
+  <ul class="collapse">
+  <li><a href="#moment-matching" id="toc-moment-matching" class="nav-link" data-scroll-target="#moment-matching">Moment matching</a></li>
+  </ul></li>
+  <li><a href="#figures" id="toc-figures" class="nav-link" data-scroll-target="#figures">Figures</a></li>
+  <li><a href="#results-and-persistence" id="toc-results-and-persistence" class="nav-link" data-scroll-target="#results-and-persistence">Results and persistence</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Inference guide</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="mcmc" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc">MCMC</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'examples/bernoulli.stan'</span>)<span class="ot">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> [<span class="st">'N'</span> =&gt; <span class="dv">10</span><span class="ot">,</span> <span class="st">'y'</span> =&gt; [<span class="dv">0</span><span class="ot">,</span><span class="dv">1</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">0</span><span class="ot">,</span><span class="dv">1</span>]]<span class="ot">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span> chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span> parallel_chains<span class="ot">:</span> <span class="dv">2</span><span class="ot">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    iter_warmup<span class="ot">:</span> <span class="dv">500</span><span class="ot">,</span> iter_sampling<span class="ot">:</span> <span class="dv">1000</span><span class="ot">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    adapt_delta<span class="ot">:</span> <span class="fl">0.9</span><span class="ot">,</span> max_treedepth<span class="ot">:</span> <span class="dv">12</span><span class="ot">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    output_dir<span class="ot">:</span> <span class="st">'output'</span><span class="ot">,</span> show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span>))<span class="ot">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;diagnostic_summary())<span class="ot">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;diagnostic_warnings())<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>chains</code> controls independent processes; <code>parallel_chains</code> bounds their concurrent execution. IDs are unique positive integers. A scalar seed is shared across chains and Stan uses IDs to create separate random streams; a seed list provides one seed per chain. For a threaded model, <code>threads_per_chain</code> sets both <code>num_threads</code> and <code>STAN_NUM_THREADS</code>. Budget CPU use as parallel chains multiplied by threads per chain.</p>
+<p><code>init</code> accepts a nonnegative numeric radius, a file, an associative parameter array, a list of files/arrays (one per chain), a callable accepting the chain ID, or a fit object. For example <code>init: fn($id) =&gt; ['theta' =&gt; $id / 5]</code>. Precomputed inverse metrics can be supplied with <code>inv_metric</code>, or <code>metric_file</code> for one file per chain. Use <code>metric: 'dense_e'</code> for matrix metrics.</p>
+<p>Diagnostics include divergent transitions, transitions reaching maximum tree depth, and E-BFMI. Checks populate <code>diagnostic_warnings()</code> rather than emitting PHP warnings. <code>diagnostics: []</code> or <code>null</code> disables automatic checks. <code>cmdstan_diagnose()</code> runs CmdStan’s diagnostic utility. Review diagnostics before relying on an estimate.</p>
+</section>
+<section id="initialization-from-fits" class="level2">
+<h2 class="anchored" data-anchor-id="initialization-from-fits">Initialization from fits</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pf</span> <span class="op">=</span> <span class="va">$model</span>-&gt;pathfinder(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span>)<span class="ot">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> init<span class="ot">:</span> <span class="va">$pf</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span> chains<span class="ot">:</span> <span class="dv">4</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A fit used as <code>init</code> supplies one draw per chain, as CmdStanR’s <code>process_init()</code> does. MCMC draws are resampled without replacement. An optimization fit repeats its estimate for every chain. ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights computed from <code>lp__ - lp_approx__</code>; too few distinct draws throws. Flat columns such as <code>beta[2,1]</code> become nested arrays matched to the model’s parameter declarations. Variables other than parameters are dropped, and draws containing NaN or infinite values throw. The seed controls resampling with PHP’s Mt19937 engine, so the selected draws differ from CmdStanR’s for the same seed.</p>
+</section>
+<section id="optimization-and-laplace" class="level2">
+<h2 class="anchored" data-anchor-id="optimization-and-laplace">Optimization and Laplace</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$mode</span> <span class="op">=</span> <span class="va">$model</span>-&gt;optimize(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> jacobian<span class="ot">:</span> <span class="kw">true</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span>)<span class="ot">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$mode</span>-&gt;mle())<span class="ot">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;laplace(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> mode<span class="ot">:</span> <span class="va">$mode</span><span class="ot">,</span> draws<span class="ot">:</span> <span class="dv">1000</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Optimization supports L-BFGS, BFGS, and Newton. <code>jacobian: false</code> is the optimization default; Laplace defaults to <code>true</code>. A fit supplied as a Laplace mode must agree on Jacobian adjustment. If no mode is supplied, the library optimizes first using the same data and Jacobian setting; <code>opt_args</code> supplies additional optimizer options. A mode can also be a parameter JSON file, optimizer CSV file, or associative parameter array.</p>
+</section>
+<section id="advi-and-pathfinder" class="level2">
+<h2 class="anchored" data-anchor-id="advi-and-pathfinder">ADVI and Pathfinder</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$vb</span> <span class="op">=</span> <span class="va">$model</span>-&gt;variational(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> algorithm<span class="ot">:</span> <span class="st">'meanfield'</span><span class="ot">,</span> draws<span class="ot">:</span> <span class="dv">1000</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span>)<span class="ot">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="va">$pf</span> <span class="op">=</span> <span class="va">$model</span>-&gt;pathfinder(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> num_paths<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span> single_path_draws<span class="ot">:</span> <span class="dv">500</span><span class="ot">,</span> draws<span class="ot">:</span> <span class="dv">1000</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>ADVI supports <code>meanfield</code> and <code>fullrank</code>. Its first CSV row is the variational mean and is excluded from posterior draws; retrieve it with <code>variational_mean()</code>. Pathfinder’s <code>single_path_draws</code> maps to <code>num_draws</code>, and <code>draws</code> maps to <code>num_psis_draws</code>. With <code>save_single_paths: true</code>, <code>single_path_fits()</code> returns one <code>CmdStanPathfinder</code> per path and <code>single_path_diagnostics()</code> decodes each path’s JSON output. These approximations have different convergence diagnostics than MCMC; summaries do not report MCMC ESS or R-hat for them.</p>
+</section>
+<section id="generated-quantities-and-fixed-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="generated-quantities-and-fixed-parameters">Generated quantities and fixed parameters</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$predictionModel</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'examples/generated.stan'</span>)<span class="ot">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">$gq</span> <span class="op">=</span> <span class="va">$predictionModel</span>-&gt;generate_quantities(<span class="va">$fit</span><span class="ot">,</span> data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span> parallel_chains<span class="ot">:</span> <span class="dv">2</span>)<span class="ot">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="va">$predictions</span> <span class="op">=</span> <span class="va">$gq</span>-&gt;draws(<span class="st">'prediction'</span><span class="ot">,</span> <span class="st">'draws_matrix'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Pass a fit object, a CSV filename, or a list of CSV filenames. Draw matrices can be exported first with <code>draws_to_csv()</code>. Parameter declarations must match the fitted model. Use <code>sample(fixed_param: true, iter_sampling: 100, ...)</code> to simulate generated quantities at fixed parameters; this selects one chain and zero warmup.</p>
+</section>
+<section id="diagnostics-and-log-density" class="level2">
+<h2 class="anchored" data-anchor-id="diagnostics-and-log-density">Diagnostics and log density</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$normal</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'examples/normal.stan'</span>)<span class="ot">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">$gradientCheck</span> <span class="op">=</span> <span class="va">$normal</span>-&gt;diagnose(init<span class="ot">:</span> <span class="dv">0</span>)<span class="ot">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$gradientCheck</span>-&gt;gradients()<span class="ot">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">$logDensity</span> <span class="op">=</span> <span class="va">$normal</span>-&gt;log_prob(unconstrained_params<span class="ot">:</span> [<span class="st">'params_r'</span> =&gt; [[<span class="fl">0.0</span>]<span class="ot">,</span> [<span class="fl">1.0</span>]]])<span class="ot">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$logDensity</span>-&gt;draws(format<span class="ot">:</span> <span class="st">'draws_matrix'</span>))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>log_prob()</code> takes exactly one of <code>unconstrained_params</code> or <code>constrained_params</code>, using CmdStan’s input JSON format. This runs the executable’s batch log-density method. The in-process methods below evaluate one point at a time without starting a process.</p>
+</section>
+<section id="model-methods-and-stan-functions" class="level2">
+<h2 class="anchored" data-anchor-id="model-methods-and-stan-functions">Model methods and Stan functions</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;init_model_methods(seed<span class="ot">:</span> <span class="dv">1</span>)<span class="ot">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">$u</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;unconstrain_variables([<span class="st">'theta'</span> =&gt; <span class="fl">0.3</span>])<span class="ot">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">$lp</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;log_prob(<span class="va">$u</span>)<span class="ot">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">$gradient</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;grad_log_prob(<span class="va">$u</span><span class="ot">,</span> jacobian<span class="ot">:</span> <span class="kw">false</span>)[<span class="st">'gradient'</span>]<span class="ot">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">$hessian</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;hessian(<span class="va">$u</span>)[<span class="st">'hessian'</span>]<span class="ot">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">$values</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;constrain_variables(<span class="va">$u</span>)<span class="ot">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">$unconstrained</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;unconstrain_draws(format<span class="ot">:</span> <span class="st">'draws_matrix'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Model methods compile a shared library from the model’s generated C++ with the selected CmdStan’s compiler settings and load it with PHP FFI. The first build takes a few seconds; later calls reuse the library cached beside the Stan source. The library is bound to the fit’s data and to a seed for the generated-quantities RNG. Log densities drop constant terms, and <code>jacobian</code> defaults to true, as in CmdStanR. An imported CSV fit needs the model: <code>$fit-&gt;init_model_methods(model: $model)</code>.</p>
+<p>Unconstrained values are flat lists in Stan’s order, and <code>unconstrain_draws()</code> labels them with Stan’s unconstrained names. Constrained values are keyed by variable name, with arrays and vectors as lists, matrices as lists of rows, and complex numbers as <code>[re, im]</code> pairs. <code>variable_skeleton()</code> reports each variable’s dimensions.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$functions</span> <span class="op">=</span> <span class="va">$model</span>-&gt;expose_functions()<span class="ot">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="va">$functions</span>-&gt;my_function(<span class="fl">1.5</span><span class="ot">,</span> [<span class="fl">1.0</span><span class="ot">,</span> <span class="fl">2.0</span>])<span class="ot">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="va">$functions</span>-&gt;call(<span class="st">'normal_draw_rng'</span><span class="ot">,</span> <span class="fl">0.0</span><span class="ot">,</span> <span class="fl">1.0</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">42</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>expose_functions()</code> compiles the model’s <code>functions</code> block. Arguments may be positional or named by their Stan names. Supported types are real, int, complex, vectors, matrices, arrays of these, and tuples. Functions ending in <code>_rng</code> take an optional <code>seed</code>. Density functions ending in <code>_lpdf</code> or <code>_lpmf</code> return the full density. Functions ending in <code>_lp</code> and overloaded functions cannot be called. <code>functions()</code> on the returned object lists each signature and whether it is supported.</p>
+<p>FFI is enabled for the CLI by default. Under PHP-FPM or another web SAPI, set <code>ffi.enable=true</code> or preload the library.</p>
+</section>
+<section id="loo-and-waic" class="level2">
+<h2 class="anchored" data-anchor-id="loo-and-waic">LOO and WAIC</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span>)<span class="ot">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$loo</span>[<span class="st">'elpd_loo'</span>]<span class="ot">,</span> <span class="st">' ± '</span><span class="ot">,</span> <span class="va">$loo</span>[<span class="st">'se_elpd_loo'</span>]<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$loo</span>[<span class="st">'diagnostics'</span>][<span class="st">'pareto_k'</span>])<span class="ot">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">$waic</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;waic(<span class="st">'log_lik'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>loo()</code> computes PSIS-LOO from a pointwise log-likelihood variable in generated quantities. It follows the loo package as called by CmdStanR, including relative efficiencies with <code>r_eff: true</code>. Results contain <code>estimates</code>, <code>pointwise</code> rows, Pareto k diagnostics, and <code>k_threshold</code>. Inspect observations whose Pareto k exceeds the threshold.</p>
+<section id="moment-matching" class="level3">
+<h3 class="anchored" data-anchor-id="moment-matching">Moment matching</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span><span class="ot">,</span> moment_match<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$loo</span>[<span class="st">'moment_match'</span>][<span class="st">'observations'</span>] <span class="kw">as</span> <span class="va">$o</span>) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="va">$o</span>[<span class="st">'observation'</span>]<span class="ot">,</span> <span class="st">': k '</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'pareto_k_initial'</span>]<span class="ot">,</span> <span class="st">' -&gt; '</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'pareto_k'</span>]<span class="ot">,</span> <span class="st">' ('</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'stop'</span>]<span class="ot">,</span> <span class="st">")</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>moment_match: true</code> applies importance-weighted moment matching (Paananen et al., 2021) to each observation whose Pareto k exceeds the threshold, as <code>loo::loo_moment_match()</code> does for CmdStanR. It needs model methods (FFI) and the posterior-draw kernels of the <code>phit</code> extension: <code>Phit\draws_moments()</code>, <code>Phit\draws_covariance_map()</code>, and <code>Phit\draws_affine()</code>. CmdStanPHP checks for these functions by name and throws a <code>RuntimeException</code> naming any that are missing. The options <code>max_iters</code> (default 30), <code>k_threshold</code> (default <code>min(1 - 1/log10(S), 0.7)</code>), <code>split</code> (default true), and <code>cov</code> (default true) have loo’s meanings. The covariance step runs only when there are at least ten draws per parameter.</p>
+<p>The draws are the fit’s post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is <code>log_prob()</code> with <code>jacobian: true</code> and |det T| comes from the kernel’s <code>log_abs_det</code>. The log-likelihood of a transformed draw is recomputed with <code>constrain_variables()</code>. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.</p>
+<p>The result keeps the shape of <code>loo()</code> and updates <code>pointwise</code>, <code>diagnostics</code>, <code>estimates</code>, the flat estimate keys, and <code>warnings</code>, as loo does. <code>influence_pareto_k</code> keeps its PSIS value. The added <code>moment_match</code> key lists each matched observation with its initial and final Pareto k, the full-posterior k (<code>pareto_kf</code>), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. <code>stop</code> is one of these values:</p>
+<ul>
+<li><code>k_below_threshold</code>: Pareto k reached the threshold.</li>
+<li><code>no_improvement</code>: no transformation lowered Pareto k.</li>
+<li><code>max_iters</code>: the iteration limit was reached.</li>
+<li><code>covariance_not_positive_definite</code>: a covariance could not be factorized, or the weighted covariance had fewer than two effective draws.</li>
+<li><code>singular_transform</code> or <code>nonfinite_transform</code>: an affine map was numerically singular or produced nonfinite values.</li>
+<li><code>model_error</code>: the model threw while evaluating transformed draws.</li>
+<li><code>invalid_log_ratios</code>: the transformed importance ratios could not be Pareto smoothed.</li>
+</ul>
+<p>In the last five cases the observation keeps its last accepted transformation, <code>message</code> records the failure, and a warning counts the affected observations. Covariances are never regularized. A failed weighted covariance instead uses loo’s identity linear map, retaining the mean shift and recording the reason in <code>covariance_fallbacks</code>. This normally repeats the rejected mean-shift step and ends with <code>no_improvement</code>. A split that fails falls back to the unsplit estimate and is recorded in <code>message</code>.</p>
+<p>The split step differs from loo 2.10.1 and from development builds before <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> (merged on 2026-10-13) in two ways. That pull request made the same two split corrections in loo, and the compatibility suite checks that a corrected loo’s split matches CmdStanPHP on its test designs. CmdStanPHP uses the exact inverse T⁻¹(y) = A⁻¹(y − m − t) + m of the accumulated map T(x) = A(x − m) + m + t. Accepted scale and covariance matrices are multiplied in acceptance order, so noncommuting transformations retain their original effect. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map, so loo evaluates part of the mixture density at the wrong points. CmdStanPHP also takes the split relative efficiency as the minimum over both halves of the draws, where loo uses the second half twice. Relative efficiencies are computed from exp(log_lik − max). loo exponentiates unshifted values, and posterior then reports NA when every value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match CmdStanR.</p>
+<p><code>CmdStan\MomentMatch::loo()</code> runs the same algorithm on any unconstrained draws with caller-supplied <code>log_prob_upars</code> and <code>log_lik_i_upars</code> callbacks. <code>CmdStan\DrawKernels</code> wraps the three kernels.</p>
+</section>
+</section>
+<section id="figures" class="level2">
+<h2 class="anchored" data-anchor-id="figures">Figures</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$density</span> <span class="op">=</span> CmdStan\mcmc_dens(<span class="va">$fit</span><span class="ot">,</span> <span class="st">'theta'</span>)<span class="ot">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$density</span>-&gt;ascii(<span class="dv">60</span><span class="ot">,</span> <span class="dv">10</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\mcmc_intervals(<span class="va">$fit</span>)-&gt;ascii(<span class="dv">60</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">file_put_contents</span>(<span class="st">'theta.html'</span><span class="ot">,</span> <span class="va">$density</span>-&gt;html())<span class="ot">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="va">$spec</span> <span class="op">=</span> <span class="va">$density</span>-&gt;vegaLite(width<span class="ot">:</span> <span class="dv">480</span><span class="ot">,</span> height<span class="ot">:</span> <span class="dv">240</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>theta: kernel density (bandwidth 0.02252)
+  |               ********
+  |             ***      ***
+  |            **          **
+  |           **            ***
+2 +          **               **
+  |         **                 ****
+  |        **                     ***
+  |      ***                        ****
+  |     **                             *******
+0 +******                                    ******************
+  +----+--------------------------------+----------------------
+       0                               0.5
+   theta (y: density)
+
+intervals: 50% inner, 90% outer, point = median
+theta |-----------[=========o==========]--------------------
+      +-----------------+--------------------------+--------
+                       0.2                        0.4
+       - outer, [=] inner, o = median</code></pre>
+<p>The figure functions follow bayesplot’s names and return a <code>Figure</code>. A figure holds the computed statistics in <code>data</code>, as documented on the <code>Figure</code> class, and renders them in several forms:</p>
+<ul>
+<li><code>ascii(width, height)</code> returns plain ASCII text for a terminal, log, or text report. Echoing a figure prints this form with default sizes.</li>
+<li><code>vegaLite(width, height, max_rows)</code> returns a <a href="https://vega.github.io/vega-lite/">Vega-Lite 5</a> spec as a PHP array with the data inlined, and <code>json()</code> returns the same spec as JSON that is safe to place in an HTML script element. Front ends render it with <code>vega-embed</code> or any other Vega-Lite runtime.</li>
+<li><code>html()</code> returns a standalone page that loads Vega, Vega-Lite, and vega-embed from the jsDelivr CDN.</li>
+<li><code>svg()</code> and <code>png(scale: 2.0)</code> render static images with <a href="https://github.com/vega/vl-convert">vl-convert</a>, a standalone binary that needs no Node or browser. Set <code>VL_CONVERT</code> to its path or put <code>vl-convert</code> on <code>PATH</code>.</li>
+</ul>
+<p>The available figures are:</p>
+<ul>
+<li><code>mcmc_trace($fit, 'theta')</code>: chains overlaid by iteration.</li>
+<li><code>mcmc_hist($fit, 'theta', bins: 30)</code>: histogram of all draws.</li>
+<li><code>mcmc_dens($fit, 'theta')</code> and <code>mcmc_dens_overlay($fit, 'theta')</code>: Gaussian kernel density of all draws, or one curve per chain.</li>
+<li><code>mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, prob_outer: 0.9, point_est: 'median')</code>: inner and outer intervals with a point estimate on a shared axis. Without a selection it plots every variable except <code>lp__</code>.</li>
+<li><code>mcmc_rank_hist($fit, 'theta', bins: 20)</code>: per-chain histograms of pooled ranks, with the count expected under uniform ranks marked.</li>
+<li><code>mcmc_scatter($fit, 'mu', 'sigma')</code>: joint draws, with divergent transitions marked on MCMC fits.</li>
+<li><code>mcmc_acf($fit, 'theta', lags: 20)</code>: per-chain autocorrelation bars.</li>
+<li><code>pareto_k_plot($fit-&gt;loo())</code>: Pareto k by observation, with the k threshold and k = 1 marked.</li>
+</ul>
+<p>A plotted variable names one element, such as <code>beta[2]</code>. <code>mcmc_intervals()</code> also accepts base names, which select every element. The functions take a fit or a <code>draws_array</code>.</p>
+<p>The bandwidth (R’s <code>bw.nrd0</code>), densities, quantiles, ranks, and autocorrelations are computed in PHP and checked against R and bayesplot. Vega-Lite specs carry these values and use no Vega-Lite density, binning, or quantile transforms, so every rendering shows the same numbers. The ASCII form rounds positions to character cells; use the figure’s <code>data</code> or the numeric methods, such as <code>summary()</code>, when exact values matter.</p>
+<p>Trace and scatter figures inline every draw. For large fits, <code>max_rows</code> keeps every k-th iteration of a trace, or every k-th draw of a scatter plus all divergent draws, so that about that many rows remain. Per-chain figures (rank histograms and autocorrelation) are faceted by chain, and their sizes apply to each chain’s panel.</p>
+</section>
+<section id="results-and-persistence" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-persistence">Results and persistence</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$rows</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;draws(<span class="st">'theta'</span><span class="ot">,</span> <span class="st">'draws_df'</span>)<span class="ot">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="va">$csvFiles</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;save_output_files(<span class="st">'saved'</span>)<span class="ot">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;save_object(<span class="st">'saved/fit.bin'</span>)<span class="ot">;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="va">$imported</span> <span class="op">=</span> CmdStan\read_cmdstan_csv(<span class="va">$csvFiles</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>draws_array</code> is <code>[iteration][chain][variable]</code>, with zero-based PHP indices and associative variable names. <code>draws_matrix</code> concatenates chain rows. <code>draws_df</code> adds one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> metadata. <code>draws_list</code> gives a variable-to-values map per chain. <code>draws_rvars</code> maps each variable’s base name to <code>dims</code>, <code>nchains</code>, <code>ndraws</code>, and <code>draws</code>, where <code>draws</code> is nested by the variable’s dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return <code>draws_array</code> and other fits return <code>draws_matrix</code>, unless the <code>cmdstanr_draws_format</code> option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as <code>beta</code> includes all <code>beta[i]</code> elements. Warmup is excluded unless <code>inc_warmup: true</code>.</p>
+<p><code>summary()</code> returns mean, median, sample SD, scaled MAD, requested quantiles (default q5/q95), and, for MCMC, rank-normalized R-hat, bulk ESS, and MCSE from CmdStan’s <code>stansummary</code>, plus tail ESS using posterior-compatible inclusive quantile indicators and Geyer’s truncation. Non-MCMC or fewer than four sampling draws return <code>NAN</code> for convergence statistics.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span><span class="ot">,</span> measures<span class="ot">:</span> [<span class="st">'mean'</span><span class="ot">,</span> <span class="st">'sd'</span><span class="ot">,</span> <span class="st">'rhat'</span><span class="ot">,</span> <span class="st">'ess_bulk'</span><span class="ot">,</span> <span class="st">'quantile2'</span>])<span class="ot">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="kw">null</span><span class="ot">,</span> [<span class="fl">0.1</span><span class="ot">,</span> <span class="fl">0.9</span>]<span class="ot">,</span> [<span class="st">'median'</span><span class="ot">,</span> <span class="st">'range'</span> =&gt; <span class="kw">fn</span>(<span class="dt">array</span> <span class="va">$x</span>) =&gt; <span class="fu">max</span>(<span class="va">$x</span>) <span class="op">-</span> <span class="fu">min</span>(<span class="va">$x</span>)])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>measures</code> argument follows posterior’s <code>summarise_draws()</code>. Named measures include <code>mean</code>, <code>median</code>, <code>sd</code>, <code>var</code>, <code>mad</code>, <code>quantile2</code>, <code>rhat</code>, <code>ess_bulk</code>, <code>ess_tail</code>, <code>mcse_mean</code>, <code>mcse_sd</code>, <code>mcse_quantile</code>, and the groups <code>default_summary_measures</code>, <code>default_convergence_measures</code>, and <code>default_mcse_measures</code>. A callable needs a string key. It receives all draws as one list, and also the list of chains if it declares a second parameter. These measures are computed in PHP and do not need CmdStan. Nonfinite values can also produce <code>NAN</code>; use appropriate JSON handling when exposing summaries over HTTP.</p>
+<p>Runs create private temporary output directories unless <code>output_dir</code> is supplied. Output directories persist after the fit object is collected; delete them explicitly when no longer needed. Saving output follows CmdStanR’s file naming and updates the fit’s paths. Files created by the run are moved, imported CSVs and user-supplied data files are copied, and existing destinations are never overwritten. Serialized fit objects embed parsed draws and cached MCMC summary statistics. Only unserialize files you trust. Serialized objects do not embed a CmdStan installation or provide standalone generated quantities without their CSV files.</p>
+<p>Console output is buffered until processes finish. <code>show_messages</code> controls stdout and <code>show_exceptions</code> controls stderr (defaults to the value of <code>show_messages</code>). Complete logs are retained in <code>output()</code>. A process failure throws <code>ProcessException</code> and cancels other running chains. Set <code>timeout</code> to bound each process in seconds.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phpstats\.github\.io\/CmdStanPHP\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

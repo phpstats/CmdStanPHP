@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+
+website:
+  site-url: "https://phpstats.github.io/CmdStanPHP/"
+  title: "CmdStanPHP"
+  repo-url: "https://github.com/phpstats/CmdStanPHP"
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - index.qmd
+      - installation.qmd
+      - inference.qmd
+      - section: "Reference"
+        contents:
+          - api.qmd
+          - compatibility.qmd
+      - testing.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    highlight-style: github

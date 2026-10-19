@@ -1,6 +1,5 @@
 ---
-layout: page
-title: Testing and GitHub Pages
+title: "Testing and GitHub Pages"
 ---
 
 ## Local verification
@@ -19,7 +18,7 @@ The unit suite does not need CmdStan. Moment-matching tests also need the `phit`
 
 The integration suite compiles the bundled models and invokes real CmdStan methods. It compares Bernoulli posterior estimates with their analytic mean, checks R-hat and ESS, verifies deterministic seeds with parallel chains, confirms modes and draw counts, and exercises generated quantities, fixed parameters, syntax/formatting, gradient checking, log density, input errors, metrics, and auxiliary files. It fits a hierarchical regression built with `StanData::fromColumns()`, runs a model on table data, and, when `phit` is loaded, fits `score ~ study_hours + (1 | school)` built with `StanData::fromFormula()` on phit's schools data and compares the posterior means with `Phit\fit_lmer()`. It also builds FFI libraries for model methods and exposed functions, initializes chains from fits, runs the example models, and computes LOO with and without moment matching. Tests that need FFI skip when it is unavailable. If CmdStan is not available, PHPUnit skips these tests; CI explicitly installs CmdStan so they execute there.
 
-Tests use small models and a modest number of draws. They do not constitute a full upstream CmdStanR conformance suite, do not test a real MPI cluster or OpenCL hardware, and do not establish native Windows support. The package's [compatibility contract](compatibility.md) lists remaining gaps.
+Tests use small models and a modest number of draws. They do not constitute a full upstream CmdStanR conformance suite, do not test a real MPI cluster or OpenCL hardware, and do not establish native Windows support. The package's [compatibility contract](compatibility.qmd) lists remaining gaps.
 
 The compatibility suite runs the same algorithms with CmdStanR and PHP using identical seeds and precision, then compares individual parameter/log-density draws, approximate densities, descriptive summaries, R-hat, bulk/tail ESS, and MCMC diagnostics. MCMC comparisons include even and odd chain lengths. Further comparisons cover CSV metadata keys, in-process log densities, gradients, Hessians, constrain/unconstrain results, exposed Stan functions, PSIS, LOO, LOO moment matching, WAIC, relative efficiency, and posterior summary measures. Moment matching is compared with `loo::loo_moment_match.default()` on analytic regression posteriors, both unmodified and with loo's split step corrected as documented, and with CmdStanR's `loo(moment_match = TRUE)` on a same-seed fit. The values behind the figures are compared with R and bayesplot. R, CmdStanR, posterior, loo, bayesplot, jsonlite, Rcpp, and RcppEigen are needed. These tests skip when their prerequisites are absent.
 
@@ -33,16 +32,19 @@ The integration jobs build `phit` from the pinned [`phpstats/phit`](https://gith
 
 ## Documentation site
 
-All site content is under `docs/`, using Jekyll and the Minima theme. `.github/workflows/pages.yml` independently builds and checks site links at a repository subpath on pull requests and main. These checks run even before GitHub Pages is enabled. Separate publication jobs build with the actual Pages base path and deploy from main or a manual dispatch on main. Deployment uses GitHub's Pages artifact and environment; no token beyond `GITHUB_TOKEN` is needed.
+All site content is under `docs/`, written in Quarto. Each page is a `.qmd` source with its rendered `.html` committed beside it, which is also the layout the phpstats.org site reads when it imports a package's documentation. No page executes code, so rendering needs neither CmdStan nor a Stan toolchain.
 
-After pushing this repository through your normal workflow, select **Settings → Pages → Build and deployment → Source → GitHub Actions**. The workflow then handles the build and deployment. Repository settings cannot be enabled by writing files alone, and no remote publication has been performed in this workspace.
-
-To preview locally with Ruby 3.1+:
+To render the site after editing a page:
 
 ```sh
-cd docs
-bundle install
-bundle exec jekyll serve
+quarto render docs
+rsync -a --exclude '.DS_Store' docs/_site/ docs/
 ```
 
-For a project-site path, build with `bundle exec jekyll build --baseurl /repository-name`. Navigation uses Jekyll's `relative_url` filter, so it works both at a domain root and a repository subpath. The Pages workflow obtains the correct base path from `actions/configure-pages`.
+Quarto writes the rendered site to the untracked `docs/_site`, and the second command publishes it beside the sources. Commit the regenerated `.html` files along with `search.json`, `sitemap.xml`, `robots.txt`, and `site_libs/` whenever a source page changes. To preview while editing, run `quarto preview docs`.
+
+Links between pages are written as relative `.qmd` targets, which Quarto renders as relative `.html` links. The site therefore works at a domain root, at a repository subpath, and when phpstats.org imports the rendered pages.
+
+`.github/workflows/pages.yml` checks the committed site's internal links with `scripts/check-docs.py` on pull requests and on main, so a broken link is caught before publication. These checks run even before GitHub Pages is enabled. A separate job publishes `docs/` from main or a manual dispatch on main. Deployment uses GitHub's Pages artifact and environment; no token beyond `GITHUB_TOKEN` is needed.
+
+After pushing this repository through your normal workflow, select **Settings → Pages → Build and deployment → Source → GitHub Actions**. The workflow then handles the publication. Repository settings cannot be enabled by writing files alone, and no remote publication has been performed in this workspace.

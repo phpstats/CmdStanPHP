@@ -1,0 +1,4 @@
+/.quarto/
+**/*.quarto_ipynb
+# Quarto writes a .nojekyll; the Pages artifact is served statically, so it is not needed.
+/.nojekyll
