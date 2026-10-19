@@ -1,0 +1,103 @@
+{
+    "title": "Sampling wall-clock time",
+    "description": "Wall-clock time of sample() with 4 parallel chains, 1,000 warmup and 1,000 sampling iterations, and seed 20261019, from the call until the fit is returned. Both interfaces read the output CSVs and check divergences, tree depth, and E-BFMI before returning. All three run the same compiled executable with the same arguments. \"CmdStan (direct)\" launches the four chain processes and waits for them with no interface, so the gap above it is the interface's own overhead: argument and data handling, process management, and reading the output. Median of 7 runs.",
+    "measure": "sample() wall-clock time",
+    "unit": "ms",
+    "environment": {
+        "cpu": "Apple M5 Ultra",
+        "php": "8.5.10",
+        "date": "2026-10-19",
+        "commit": "b298246",
+        "os": "Darwin 27.0.0",
+        "cmdstan": "2.40.0",
+        "r": "4.6.1",
+        "cmdstanr": "0.9.0",
+        "posterior": "1.7.1"
+    },
+    "rows": [
+        {
+            "case": "bernoulli",
+            "implementation": "CmdStan (direct)",
+            "value": 9.7,
+            "reps": [
+                11.0,
+                10.3,
+                9.7,
+                9.4,
+                9.9,
+                9.7,
+                9.1
+            ]
+        },
+        {
+            "case": "bernoulli",
+            "implementation": "CmdStanPHP",
+            "value": 17.9,
+            "reps": [
+                18.1,
+                18.2,
+                18.1,
+                16.9,
+                17.9,
+                17.7,
+                17.8
+            ]
+        },
+        {
+            "case": "bernoulli",
+            "implementation": "CmdStanR",
+            "value": 376.3,
+            "reps": [
+                385.1,
+                371.6,
+                385.3,
+                373.8,
+                376.3,
+                391.2,
+                367.0
+            ]
+        },
+        {
+            "case": "eight schools",
+            "implementation": "CmdStan (direct)",
+            "value": 28.4,
+            "reps": [
+                27.7,
+                28.4,
+                28.4,
+                28.2,
+                27.9,
+                28.4,
+                32.3
+            ]
+        },
+        {
+            "case": "eight schools",
+            "implementation": "CmdStanPHP",
+            "value": 57.7,
+            "reps": [
+                55.3,
+                56.1,
+                57.8,
+                57.7,
+                57.6,
+                57.9,
+                58.0
+            ]
+        },
+        {
+            "case": "eight schools",
+            "implementation": "CmdStanR",
+            "value": 380.9,
+            "reps": [
+                380.9,
+                375.6,
+                377.6,
+                376.7,
+                398.3,
+                427.6,
+                441.9
+            ]
+        }
+    ]
+}
