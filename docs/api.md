@@ -3,7 +3,7 @@ layout: page
 title: API reference
 ---
 
-All classes and functions are in the `CmdStan` namespace. Function and method names use CmdStanR's snake_case spelling. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. `null` generally leaves the installed CmdStan default in effect. Check the [compatibility contract]({{ '/compatibility/' | relative_url }}) for exceptions.
+All classes and functions are in the `CmdStan` namespace. Function and method names use CmdStanR's snake_case spelling. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. `null` generally leaves the installed CmdStan default in effect. Check the [compatibility contract](compatibility.md) for exceptions.
 
 ## Functions
 
