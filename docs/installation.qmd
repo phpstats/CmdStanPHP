@@ -4,12 +4,12 @@ title: "Installation"
 
 ## Package setup
 
-Until a package release is published, clone this repository and run `composer install`. For a consuming project, configure a Composer path or VCS repository and require `cmdstan/php`; the package name is not a claim that it has been published on Packagist.
+Until a package release is published, clone this repository and run `composer install`. For a consuming project, configure a Composer path or VCS repository and require `phpstats/cmdstanphp`; the package name is not a claim that it has been published on Packagist.
 
 ```json
 {
-  "repositories": [{"type": "path", "url": "../cmdstan-php"}],
-  "require": {"cmdstan/php": "@dev"}
+  "repositories": [{"type": "path", "url": "../cmdstanphp"}],
+  "require": {"phpstats/cmdstanphp": "@dev"}
 }
 ```
 

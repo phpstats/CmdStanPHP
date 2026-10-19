@@ -1,5 +1,5 @@
 {
-  "name": "cmdstan/php",
+  "name": "phpstats/cmdstanphp",
   "description": "A PHP interface to CmdStan inspired by CmdStanR",
   "type": "library",
   "license": "MIT",
