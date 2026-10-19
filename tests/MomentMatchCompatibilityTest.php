@@ -18,7 +18,7 @@ final class MomentMatchCompatibilityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if (!DrawKernels::available()) { self::markTestSkipped('The php_stats posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
+        if (!DrawKernels::available()) { self::markTestSkipped('The phit posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
         if (self::$reference !== null) { return; }
         try { Process::run(['Rscript', '-e', 'stopifnot(requireNamespace("jsonlite", quietly=TRUE), requireNamespace("loo", quietly=TRUE))']); }
         catch (\Throwable $e) { self::markTestSkipped('R with loo and jsonlite required: '.$e->getMessage()); }

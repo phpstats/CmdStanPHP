@@ -45,9 +45,9 @@ jobs:
       - name: Check out posterior-draw kernels
         uses: actions/checkout@v4
         with:
-          repository: erikwestlund/php-stats
-          ref: b71e406ee58fc7a255687514b2818c3c615a517b
-          path: .context/php-stats
+          repository: phpstats/phit
+          ref: bb9133ea39245977f0b79f77d168c7d4e9bdd107
+          path: .context/phit
           persist-credentials: false
       - name: Install matching PHP headers and clang
         run: |
@@ -57,15 +57,15 @@ jobs:
           {
             echo "PHP_CONFIG=$(command -v php-config)"
             echo "PHP=$(command -v php)"
-            echo "PHP_STATS_LIBRARY=$PWD/.context/php-stats/target/release/libphp_stats.so"
+            echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so"
           } >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Build and verify php_stats
+      - name: Build and verify phit
         run: |
-          cargo build --manifest-path .context/php-stats/Cargo.toml --package php-stats --release --locked
-          php -d extension="$PHP_STATS_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("stats_normal_rng") || !function_exists("stats_model_matrix") || !function_exists("stats_lmer")) { throw new RuntimeException("FFI, seeded native draws, stats_model_matrix, and stats_lmer are required by CI"); }'
+          cargo build --manifest-path .context/phit/Cargo.toml --package phit --release --locked
+          php -d extension="$PHIT_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("Phit\\dist_normal_rng") || !function_exists("Phit\\model_matrix") || !function_exists("Phit\\fit_lmer")) { throw new RuntimeException("FFI, seeded native draws, Phit\\model_matrix, and Phit\\fit_lmer are required by CI"); }'
       - name: Test native kernels, moment matching, and model matrices
-        run: php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --filter '(DrawKernelsTest|MomentMatchTest|StanDataTest::testRealModelMatrix)' --exclude-group integration --exclude-group compatibility --fail-on-skipped
+        run: php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --filter '(DrawKernelsTest|MomentMatchTest|StanDataTest::testRealModelMatrix)' --exclude-group integration --exclude-group compatibility --fail-on-skipped
       - uses: actions/cache@v4
         id: cmdstan-cache
         with:
@@ -75,13 +75,13 @@ jobs:
         if: steps.cmdstan-cache.outputs.cache-hit != 'true'
         run: php -r 'require "vendor/autoload.php"; CmdStan\install_cmdstan(getenv("CMDSTAN_RELEASE"), ".context/cmdstan", 2, 1800);'
       - name: Test real CmdStan models
-        run: php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --group integration --exclude-group compatibility --fail-on-skipped
+        run: php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --group integration --exclude-group compatibility --fail-on-skipped
       - name: Render figures with vl-convert
         run: |
           mkdir -p .context/vl-convert
           curl --fail --location --proto =https --output .context/vl-convert/vl.zip https://github.com/vega/vl-convert/releases/download/v1.9.0/vl-convert_linux-64.zip
           unzip -q .context/vl-convert/vl.zip -d .context/vl-convert
-          VL_CONVERT="$PWD/.context/vl-convert/bin/vl-convert" php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --filter VlConvert tests/PlotTest.php --fail-on-skipped
+          VL_CONVERT="$PWD/.context/vl-convert/bin/vl-convert" php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --filter VlConvert tests/PlotTest.php --fail-on-skipped
       - uses: r-lib/actions/setup-r@v2
         if: matrix.cmdstan == '2.40.0'
         with:
@@ -91,4 +91,4 @@ jobs:
         run: Rscript -e 'install.packages(c("cmdstanr", "posterior", "loo", "bayesplot", "jsonlite", "Rcpp", "RcppEigen"), repos = c("https://stan-dev.r-universe.dev", "https://cloud.r-project.org"))'
       - name: Compare with CmdStanR
         if: matrix.cmdstan == '2.40.0'
-        run: php -d extension="$PHP_STATS_LIBRARY" vendor/bin/phpunit --group compatibility --fail-on-skipped
+        run: php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --group compatibility --fail-on-skipped

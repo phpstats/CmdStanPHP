@@ -13,3 +13,7 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - notes
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true

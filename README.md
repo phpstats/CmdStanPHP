@@ -2,7 +2,7 @@
 
 A PHP 8.2+ interface to [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), with the model and fit API patterned after [CmdStanR](https://mc-stan.org/cmdstanr/). Runs real Stan programs through CmdStan; no R installation or PHP framework is needed.
 
-Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `expose_functions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `php_stats` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](docs/compatibility.md) for exact differences and unimplemented features.
+Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `expose_functions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `phit` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](docs/compatibility.md) for exact differences and unimplemented features.
 
 ```sh
 composer install
@@ -29,20 +29,20 @@ An existing CmdStan installation is discovered from `CMDSTAN` or `~/.cmdstan/cmd
 
 ## Data frames and the phpstats family
 
-Model data can be a plain array, a [phibble](https://github.com/erikwestlund/phibble) data frame, or any object with `toModelData()` or `toColumns()`. Numeric columns become Stan arrays, factors and strings become 1-based indices with `J_<name>` level counts, and `N` is added. `CmdStan\StanData::fromColumns()` builds the hierarchical regression block (`N`, `K`, `X`, `y`, `J`, and `<group>_id`), and `StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $frame)` does the same through `stats_model_matrix()` from the `php_stats` extension, adding factor contrasts, factor responses, and random-slope matrices (`Z_<group>`). Fits return draws and summaries as columns, or as phibble frames when phibble is installed.
+Model data can be a plain array, a [phibble](https://github.com/phpstats/phibble) data frame, or any object with `toModelData()` or `toColumns()`. Numeric columns become Stan arrays, factors and strings become 1-based indices with `J_<name>` level counts, and `N` is added. `CmdStan\StanData::fromColumns()` builds the hierarchical regression block (`N`, `K`, `X`, `y`, `J`, and `<group>_id`), and `StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $frame)` does the same through `Phit\model_matrix()` from the `phit` extension, adding factor contrasts, factor responses, and random-slope matrices (`Z_<group>`). Fits return draws and summaries as columns, or as phibble frames when phibble is installed.
 
 ```php
 $data = CmdStan\StanData::fromColumns($frame, 'score', ['hours'], 'school');
 $fit = $model->sample(data: $data, seed: 1);
 $draws = $fit->draws_columns('beta');   // ['beta[1]' => [...], '.chain' => [...], '.iteration' => [...], '.draw' => [...]]
-$frame = $fit->to_frame('beta');        // Phibble\Frame; needs erikwestlund/phibble
+$table = $fit->draws_table('beta');     // Phibble\DataFrame; needs phpstats/phibble
 ```
 
 The [API reference](docs/api.md#data-frames-and-the-phpstats-family) documents the conventions. None of these packages is a Composer dependency.
 
 ### Part of the phpstats family
 
-CmdStanPHP belongs to a family of PHP statistics packages: [php-stats](https://github.com/erikwestlund/php-stats) (the `php_stats` native extension), [phibble](https://github.com/erikwestlund/phibble) (data frames), [phplyr](https://github.com/erikwestlund/phplyr) (dplyr-style verbs), and [phiz](https://github.com/erikwestlund/phiz) (a Vega-Lite grammar of graphics). The family targets PHP 8.5. CmdStanPHP keeps PHP 8.2 support.
+CmdStanPHP belongs to a family of PHP statistics packages: [phit](https://github.com/phpstats/phit) (the `phit` native extension), [phibble](https://github.com/phpstats/phibble) (data frames), [phplyr](https://github.com/phpstats/phplyr) (dplyr-style verbs), and [phiz](https://github.com/phpstats/phiz) (a Vega-Lite grammar of graphics). The family targets PHP 8.5. CmdStanPHP keeps PHP 8.2 support.
 
 ## Documentation and tests
 

@@ -9,8 +9,8 @@
   },
   "suggest": {
     "ext-ffi": "Required for model methods (log_prob, gradients, constrain/unconstrain) and expose_functions()",
-    "ext-php_stats": "Required for loo(moment_match: true): provides the stats_draw_moments, stats_draw_covariance_map, and stats_draw_affine kernels; StanData::fromFormula() also needs its stats_model_matrix()",
-    "erikwestlund/phibble": "Data frames: pass a Phibble\\Frame as model data, and get draws and summaries back with to_frame() and summary_frame() (PHP 8.5)"
+    "ext-phit": "Required for loo(moment_match: true): provides the Phit\\draws_moments, Phit\\draws_covariance_map, and Phit\\draws_affine kernels; StanData::fromFormula() also needs its Phit\\model_matrix()",
+    "phpstats/phibble": "Data frames: pass a Phibble\\DataFrame as model data, and get draws and summaries back with draws_table() and summary_table() (PHP 8.5)"
   },
   "require-dev": {
     "phpunit/phpunit": "^11.5"

@@ -4,7 +4,7 @@ namespace CmdStan;
 /**
  * Importance-weighted moment matching for PSIS-LOO, ported from loo::loo_moment_match.default (Paananen et al., 2021) as
  * CmdStanMCMC$loo(moment_match = TRUE) calls it. Mean, covariance, covariance-map and affine computations use the
- * php_stats posterior-draw kernels (see DrawKernels); this class owns model evaluation, PSIS, iteration and diagnostics.
+ * phit posterior-draw kernels (see DrawKernels); this class owns model evaluation, PSIS, iteration and diagnostics.
  *
  * Coordinates: $upars are unconstrained draws [draw][parameter] in one fixed parameter order, with rows in the same
  * chain-major order as the log-likelihood draws. $log_prob_upars(list<list<float>> $upars): list<float> must return the
@@ -23,7 +23,7 @@ namespace CmdStan;
  * every value is tiny. Scale and covariance steps are composed in acceptance order for the split proposal. Otherwise,
  * without split or when only shifts are accepted, results follow loo.
  *
- * Failure policy: covariance matrices are never regularized. A transformation that cannot be built (php_stats 1003
+ * Failure policy: covariance matrices are never regularized. A transformation that cannot be built (phit 1003
  * nonfinite, 1004 singular affine map, 1005 covariance not numerically positive definite, or fewer than two effective
  * draws for a required covariance), a model evaluation that throws, or importance ratios that PSIS rejects end that
  * observation's iterations and keep its last accepted state, recorded under moment_match.observations[*].stop. This is

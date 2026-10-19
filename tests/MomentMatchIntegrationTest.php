@@ -29,7 +29,7 @@ final class MomentMatchIntegrationTest extends TestCase
     }
     private function fit(): CmdStanMCMC
     {
-        if (!DrawKernels::available()) { self::markTestSkipped('The php_stats posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
+        if (!DrawKernels::available()) { self::markTestSkipped('The phit posterior-draw kernels are required: '.implode(', ', DrawKernels::missing())); }
         try { CmdStan::path(); NativeBuild::requireFfi(); } catch (\RuntimeException $e) { self::markTestSkipped('CmdStan and PHP FFI are required: '.$e->getMessage()); }
         if (self::$fit !== null) { return self::$fit; }
         $dir = self::$fitDir = sys_get_temp_dir().'/cmdstanphp-mm-'.bin2hex(random_bytes(6)); mkdir($dir);

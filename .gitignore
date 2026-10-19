@@ -16,3 +16,6 @@
 *_model_methods-*.dylib
 *_functions-*.so
 *_functions-*.dylib
+
+# Agent worktrees
+/.claude/worktrees/

@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace CmdStan\Tests;
 /**
  * Conjugate regression y_j ~ normal(a + b x_j, 1), a, b ~ normal(0, 10), with one high-leverage last observation.
- * Posterior draws are exact (seeded php_stats normal draws through the posterior Cholesky factor), so log densities
+ * Posterior draws are exact (seeded phit normal draws through the posterior Cholesky factor), so log densities
  * and leave-one-out predictive densities are analytic. Rows are chain-major; log_lik is [iteration][chain]['log_lik[j]'], as CmdStanFit::draws() returns it.
  */
 final class MomentMatchFixture
@@ -16,12 +16,12 @@ final class MomentMatchFixture
     /** @return array{x: list<float>, y: list<float>, upars: list<list<float>>, log_lik: array, chains: int} */
     public static function regression(float $spread, float $leverageX, float $leverageY, int $observations, float $offset = 0.0, int $draws = 4000, int $chains = 4, int $seed = 1): array
     {
-        $noise = stats_normal_rng($observations, 11); $x = []; $y = [];
+        $noise = \Phit\dist_normal_rng($observations, 11); $x = []; $y = [];
         for ($j = 0; $j < $observations; ++$j) { $x[] = $offset + $spread * (-1 + 2 * $j / ($observations - 1)); $y[] = 0.5 + $x[$j] + $noise[$j]; }
         $x[] = $leverageX; $y[] = $leverageY;
         [$mean, $covariance] = self::posterior($x, $y);
         $l00 = sqrt($covariance[0][0]); $l10 = $covariance[1][0] / $l00; $l11 = sqrt($covariance[1][1] - $l10 ** 2);
-        $e1 = stats_normal_rng($draws, 2 * $seed - 1); $e2 = stats_normal_rng($draws, 2 * $seed); $upars = [];
+        $e1 = \Phit\dist_normal_rng($draws, 2 * $seed - 1); $e2 = \Phit\dist_normal_rng($draws, 2 * $seed); $upars = [];
         for ($s = 0; $s < $draws; ++$s) { $upars[] = [$mean[0] + $l00 * $e1[$s], $mean[1] + $l10 * $e1[$s] + $l11 * $e2[$s]]; }
         $perChain = intdiv($draws, $chains); $logLik = []; $names = array_map(fn($j) => 'log_lik['.($j + 1).']', array_keys($x));
         foreach ($upars as $s => $theta) { $logLik[$s % $perChain][intdiv($s, $perChain)] = array_combine($names, array_map(fn($xi, $yi) => self::pointwise($theta, $xi, $yi), $x, $y)); }

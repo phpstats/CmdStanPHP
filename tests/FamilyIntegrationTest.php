@@ -66,17 +66,17 @@ model {
   y ~ normal(X * beta + tau * z[school_id], sigma);
 }
 STAN;
-    /** score ~ study_hours + (1 | school) on php-stats' schools data, compared with stats_lmer()'s REML estimates. */
+    /** score ~ study_hours + (1 | school) on phit's schools data, compared with Phit\fit_lmer()'s REML estimates. */
     public function testFormulaHierarchicalFitAgreesWithStatsLmer(): void
     {
-        if (!function_exists('stats_model_matrix') || !function_exists('stats_lmer')) { self::markTestSkipped('Needs stats_model_matrix() and stats_lmer() from the php_stats extension.'); }
+        if (!function_exists('Phit\model_matrix') || !function_exists('Phit\fit_lmer')) { self::markTestSkipped('Needs Phit\model_matrix() and Phit\fit_lmer() from the phit extension.'); }
         $handle = fopen(__DIR__.'/fixtures/schools.csv', 'rb'); $header = fgetcsv($handle, escape: ''); $columns = [];
         while (($row = fgetcsv($handle, escape: '')) !== false) { foreach ($header as $i => $name) { $columns[$name][] = $name === 'school' ? $row[$i] : (float)$row[$i]; } }
         fclose($handle);
         $formula = 'score ~ study_hours + (1 | school)';
         $data = StanData::fromFormula($formula, $columns);
         self::assertSame(250, $data->data['N']); self::assertSame(12, $data->data['J']); self::assertSame(['(Intercept)', 'study_hours'], $data->columns);
-        $lmer = \stats_lmer($formula, $columns);
+        $lmer = \Phit\fit_lmer($formula, $columns);
         $fit = $this->model(self::FORMULA_PROGRAM, 'family_formula')->sample(data: $data, chains: 4, parallel_chains: 4, iter_warmup: 1000, iter_sampling: 2000, seed: 2024, adapt_delta: 0.95, show_messages: false, refresh: 0, output_dir: $this->dir, diagnostics: null);
         $summary = array_column($fit->summary(['beta', 'tau', 'sigma']), null, 'variable');
         // A smoke-test convergence bound; tau's R-hat varies by CmdStan release (1.0103 on 2.37 with 4 x 1000 draws).
