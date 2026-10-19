@@ -1,0 +1,24 @@
+{
+    "title": "Same-seed draws match CmdStanR",
+    "description": "The cached draws behind the vignettes, sampled by CmdStanPHP, against CmdStanR sampling the same compiled model with the same data, seed 20261019, and settings (4 chains, 1,000 warmup iterations). Every value of every variable, including lp__, transformed parameters, and generated quantities, must be identical.",
+    "reference": "CmdStanR 0.9.0 with CmdStan 2.40.0",
+    "tolerance": "exact (0)",
+    "cases": [
+        {
+            "name": "eight schools",
+            "quantity": "draws of 27 variables, 4 chains x 1000 iterations, same seed",
+            "n_compared": 108000,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "draws of 103 variables, 4 chains x 500 iterations, same seed",
+            "n_compared": 206000,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0,
+            "passed": true
+        }
+    ]
+}

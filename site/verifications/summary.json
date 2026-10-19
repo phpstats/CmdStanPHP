@@ -1,0 +1,152 @@
+{
+    "title": "Posterior summaries match posterior",
+    "description": "CmdStanPHP's summary(measures: ['default_summary_measures', 'default_convergence_measures']), computed in PHP from its cached draws, against posterior::summarise_draws() on the CmdStanR draws, for every variable of each model. The measures are mean, median, sd, mad, the 5% and 95% quantiles, rank-normalized split R-hat, and bulk and tail ESS.",
+    "reference": "posterior 1.7.1",
+    "tolerance": "|difference| <= 1e-8 x max(1, |reference|)",
+    "cases": [
+        {
+            "name": "eight schools",
+            "quantity": "mean",
+            "n_compared": 27,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 3.0427131092373233e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "median",
+            "n_compared": 27,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 2.1161192791218194e-16,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "sd",
+            "n_compared": 27,
+            "max_abs_error": 4.440892098500626e-15,
+            "max_rel_error": 2.5210768951361046e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "mad",
+            "n_compared": 27,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 2.304785679655536e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "q5",
+            "n_compared": 27,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 3.931671587735764e-16,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "q95",
+            "n_compared": 27,
+            "max_abs_error": 1.2434497875801753e-14,
+            "max_rel_error": 1.4366151580914683e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "rhat",
+            "n_compared": 27,
+            "max_abs_error": 4.6629367034256575e-15,
+            "max_rel_error": 4.6613789758480075e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "ess_bulk",
+            "n_compared": 27,
+            "max_abs_error": 1.8189894035458565e-11,
+            "max_rel_error": 4.235353528887981e-15,
+            "passed": true
+        },
+        {
+            "name": "eight schools",
+            "quantity": "ess_tail",
+            "n_compared": 27,
+            "max_abs_error": 7.912603905424476e-11,
+            "max_rel_error": 3.270094723527729e-14,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "mean",
+            "n_compared": 103,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.813451879150992e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "median",
+            "n_compared": 103,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 2.134418113734435e-16,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "sd",
+            "n_compared": 103,
+            "max_abs_error": 4.440892098500626e-15,
+            "max_rel_error": 4.317470354265556e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "mad",
+            "n_compared": 103,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 3.3800812980958484e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "q5",
+            "n_compared": 103,
+            "max_abs_error": 2.842170943040401e-14,
+            "max_rel_error": 2.15264726132535e-16,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "q95",
+            "n_compared": 103,
+            "max_abs_error": 1.3322676295501878e-15,
+            "max_rel_error": 4.302156307281995e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "rhat",
+            "n_compared": 103,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.881906712382345e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "ess_bulk",
+            "n_compared": 103,
+            "max_abs_error": 7.275957614183426e-12,
+            "max_rel_error": 4.854844369671596e-15,
+            "passed": true
+        },
+        {
+            "name": "regression",
+            "quantity": "ess_tail",
+            "n_compared": 103,
+            "max_abs_error": 3.3651303965598345e-11,
+            "max_rel_error": 2.3405798928765646e-14,
+            "passed": true
+        }
+    ]
+}

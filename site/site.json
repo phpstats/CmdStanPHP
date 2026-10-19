@@ -1,0 +1,50 @@
+{
+    "package": "cmdstanphp",
+    "title": "CmdStanPHP",
+    "tagline": "Stan from PHP, patterned after CmdStanR",
+    "summary": "CmdStanPHP runs real Stan programs through CmdStan from PHP 8.2 and later: compilation, parallel MCMC, optimization, variational inference, Pathfinder, Laplace, and standalone generated quantities. Fits give draws, posterior summaries with R-hat and ESS, PSIS-LOO with optional moment matching, WAIC, and diagnostic figures. Model data can come from plain arrays, phibble data frames, or R-style formulas through phit, and draws go back out as columns or data frames.",
+    "install": ["composer require cmdstan/php"],
+    "requires": [
+        "PHP ^8.2",
+        "CmdStan 2.37 or later (CmdStanPHP can install it with install_cmdstan())",
+        "Optional: ext-ffi for log densities, gradients, and expose_functions()",
+        "Optional: ext-phit for StanData::fromFormula() and moment-matched LOO",
+        "Optional: phpstats/phibble (PHP 8.5) for data frames in and out"
+    ],
+    "repository": "https://github.com/phpstats/CmdStanPHP",
+    "example": {
+        "chain": "$model = CmdStan\\cmdstan_model('examples/bernoulli.stan');\n$fit = $model->sample(\n    data: ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]],\n    chains: 4, parallel_chains: 2, seed: 123,\n    iter_warmup: 500, iter_sampling: 500,\n    show_messages: false,\n);\n$summary = $fit->summary('theta');",
+        "pipe": "$summary = 'examples/bernoulli.stan'\n    |> CmdStan\\cmdstan_model(...)\n    |> (fn($model) => $model->sample(\n        data: ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]],\n        chains: 4, parallel_chains: 2, seed: 123,\n        iter_warmup: 500, iter_sampling: 500,\n        show_messages: false,\n    ))\n    |> (fn($fit) => $fit->summary('theta'));",
+        "output": "variable    mean median     sd    mad     q5    q95   rhat ess_bulk ess_tail\ntheta       0.25   0.23   0.12   0.11   0.07   0.46   1.00      814      626"
+    },
+    "docs": {
+        "root": "docs",
+        "format": "markdown",
+        "nav": [
+            {"title": "Overview", "path": "index.md"},
+            {"title": "Installation", "path": "installation.md"},
+            {"title": "Inference", "path": "inference.md"},
+            {"title": "API reference", "path": "api.md"},
+            {"title": "Compatibility", "path": "compatibility.md"},
+            {"title": "Testing", "path": "testing.md"}
+        ]
+    },
+    "benchmarks": ["benchmarks/sample.json", "benchmarks/summary.json"],
+    "verifications": ["verifications/draws.json", "verifications/summary.json", "verifications/loo.json"],
+    "vignettes": [
+        {
+            "slug": "eight-schools",
+            "title": "Eight schools",
+            "summary": "A non-centered hierarchical model: posterior summaries, R-hat and ESS, interval plots, and PSIS-LOO with Pareto k diagnostics.",
+            "uses": ["cmdstan/php"],
+            "script": "vignettes/eight-schools.php"
+        },
+        {
+            "slug": "regression-ppc",
+            "title": "Regression with posterior predictive checks",
+            "summary": "A varying-intercept regression built from an R-style formula with StanData::fromFormula(), checked against replicated data.",
+            "uses": ["cmdstan/php", "phit"],
+            "script": "vignettes/regression-ppc.php"
+        }
+    ]
+}
