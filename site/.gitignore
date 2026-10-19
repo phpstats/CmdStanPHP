@@ -1,0 +1,3 @@
+# Compiled models and build files next to the Stan programs
+/models/*
+!/models/*.stan
