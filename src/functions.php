@@ -81,7 +81,7 @@ const EXAMPLES = ['logistic', 'schools', 'schools_ncp'];
 /**
  * CmdStanR's cmdstanr_example(): compiles a bundled example (logistic, schools, schools_ncp) in a cache directory (the
  * cmdstanphp_example_dir option, else <tmp>/cmdstanphp-examples) and fits it with its bundled data. Options are passed to the
- * method; quiet (default true) discards console output and force_recompile defaults to the cmdstanr_force_recompile option.
+ * method; quiet (default true) discards console output and forceRecompile defaults to the cmdstanr_force_recompile option.
  */
 function cmdstanr_example(string $example = 'logistic', string $method = 'sample', mixed ...$options): CmdStanFit
 {
@@ -89,8 +89,8 @@ function cmdstanr_example(string $example = 'logistic', string $method = 'sample
     if (!in_array($method, ['sample', 'optimize', 'laplace', 'variational', 'pathfinder', 'diagnose'], true)) { throw new \InvalidArgumentException('Unsupported example method: '.$method); }
     if (array_is_list($options) && count($options) === 1 && is_array($options[0])) { $options = $options[0]; }
     elseif ($options !== [] && array_is_list($options)) { throw new \InvalidArgumentException('Use named arguments or one options array.'); }
-    $quiet = $options['quiet'] ?? true; $force = $options['force_recompile'] ?? CmdStan::option('cmdstanr_force_recompile', false); unset($options['quiet'], $options['force_recompile']);
-    if (!is_bool($quiet) || !is_bool($force)) { throw new \InvalidArgumentException('quiet and force_recompile must be boolean.'); }
+    $quiet = $options['quiet'] ?? true; $force = $options['forceRecompile'] ?? CmdStan::option('cmdstanr_force_recompile', false); unset($options['quiet'], $options['forceRecompile']);
+    if (!is_bool($quiet) || !is_bool($force)) { throw new \InvalidArgumentException('quiet and forceRecompile must be boolean.'); }
     if (array_key_exists('data', $options)) { throw new \InvalidArgumentException('Example data is fixed; use cmdstan_model() for other data.'); }
     $dir = CmdStan::option('cmdstanphp_example_dir') ?? sys_get_temp_dir().'/cmdstanphp-examples';
     if (!is_dir($dir) && !mkdir($dir, 0700, true)) { throw new \RuntimeException('Cannot create example directory.'); }
