@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * Posterior-draw kernels from the phit extension, used by Loo::moment_match(). They are detected by function name
+ * Posterior-draw kernels from the phit extension, used by MomentMatch::loo(). They are detected by function name
  * because the extension's version metadata does not identify releases that include them. Draws are [draw][parameter]
  * lists in one fixed parameter order; results keep draw and parameter order. A failing kernel throws \Exception with
  * phit's code: 1001 invalid input, 1002 incompatible dimensions, 1003 nonfinite input or arithmetic, 1004 singular

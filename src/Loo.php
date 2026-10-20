@@ -6,21 +6,21 @@ namespace CmdStan;
  *
  * Log-likelihood input is a draws_array [iteration][chain][observation] (inner arrays may be keyed by names such as
  * 'log_lik[1]', as CmdStanFit::draws() returns) or a draws_matrix [draw][observation], treated as a single chain.
- * Draws are flattened chain-major like loo's llarray_to_matrix(). Moment matching is in MomentMatch (CmdStanMCMC::loo(moment_match: true)).
+ * Draws are flattened chain-major like loo's llarray_to_matrix(). Moment matching is in MomentMatch (CmdStanMCMC::loo(momentMatch: true)).
  */
 final class Loo
 {
     /**
-     * @param array|float|bool|null $r_eff true computes relative efficiencies like CmdStanR; false/null uses 1; floats are passed to PSIS
+     * @param array|float|bool|null $rEff true computes relative efficiencies like CmdStanR; false/null uses 1; floats are passed to PSIS
      * @return array{estimates: array<string, array{Estimate: float, SE: float}>, pointwise: list<array>, diagnostics: array{pareto_k: list<float>, n_eff: list<float>, r_eff: list<float>}, elpd_loo: float, p_loo: float, looic: float, se_elpd_loo: float, se_p_loo: float, se_looic: float, dims: array{0: int, 1: int}, observations: list<string|int>, k_threshold: float, warnings: list<string>}
      */
-    public static function loo(array $log_lik, array|float|bool|null $r_eff = true): array
+    public static function loo(array $logLik, array|float|bool|null $rEff = true): array
     {
-        [$columns, $chains, $names] = self::columns($log_lik);
+        [$columns, $chains, $names] = self::columns($logLik);
         foreach ($columns as $column) { foreach ($column as $v) { if (!is_finite($v)) { throw new \InvalidArgumentException(is_nan($v) ? 'NAs not allowed in input.' : 'All log-likelihood values must be finite.'); } } }
-        if ($r_eff === true) { $r_eff = self::relativeEffColumns(array_map(function ($column) { $max = max($column); return array_map(fn($v) => exp($v - $max), $column); }, $columns), $chains); }
-        elseif ($r_eff === false) { $r_eff = null; }
-        $psis = Psis::psisColumns(array_map(fn($column) => array_map(fn($v) => -$v, $column), $columns), $r_eff);
+        if ($rEff === true) { $rEff = self::relativeEffColumns(array_map(function ($column) { $max = max($column); return array_map(fn($v) => exp($v - $max), $column); }, $columns), $chains); }
+        elseif ($rEff === false) { $rEff = null; }
+        $psis = Psis::psisColumns(array_map(fn($column) => array_map(fn($v) => -$v, $column), $columns), $rEff);
         $s = count($columns[0]); $pointwise = [];
         foreach ($columns as $j => $ll) {
             $lw = $psis['log_weights'][$j];
@@ -35,16 +35,16 @@ final class Loo
             'dims' => [$s, count($columns)], 'observations' => $names, 'k_threshold' => $psis['k_threshold'], 'warnings' => $psis['warnings']];
     }
     /** CmdStanFit equivalent of CmdStanMCMC$loo(variables, r_eff); uses the post-warmup draws_array. */
-    public static function fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $r_eff = true): array
+    public static function fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $rEff = true): array
     {
-        return self::loo($fit->draws($variables, 'draws_array'), $r_eff);
+        return self::loo($fit->draws($variables, 'draws_array'), $rEff);
     }
     /**
      * @return array{estimates: array<string, array{Estimate: float, SE: float}>, pointwise: list<array{elpd_waic: float, p_waic: float, waic: float}>, elpd_waic: float, p_waic: float, waic: float, se_elpd_waic: float, se_p_waic: float, se_waic: float, dims: array{0: int, 1: int}, observations: list<string|int>, warnings: list<string>}
      */
-    public static function waic(array $log_lik): array
+    public static function waic(array $logLik): array
     {
-        [$columns, , $names] = self::columns($log_lik);
+        [$columns, , $names] = self::columns($logLik);
         foreach ($columns as $column) {
             foreach ($column as $v) {
                 if (is_nan($v)) { throw new \InvalidArgumentException('NAs not allowed in input.'); }
@@ -75,9 +75,9 @@ final class Loo
         return self::relativeEffColumns($columns, $chains);
     }
     /** relative_eff(exp(log_lik - max per observation)), exactly as CmdStanMCMC$loo(r_eff = TRUE) computes it. */
-    public static function relativeEffLogLik(array $log_lik): array
+    public static function relativeEffLogLik(array $logLik): array
     {
-        [$columns, $chains] = self::columns($log_lik);
+        [$columns, $chains] = self::columns($logLik);
         return self::relativeEffColumns(array_map(function ($column) { $max = max($column); return array_map(fn($v) => exp($v - $max), $column); }, $columns), $chains);
     }
     /**
@@ -109,19 +109,19 @@ final class Loo
         return array_map(fn($column) => Summary::essMean(array_chunk($column, $n)) / $s, $columns);
     }
     /** @internal loo:::mcse_elpd for one observation. */
-    public static function mcseElpd(array $ll, array $lw, float $elpd, float $r_eff): float
+    public static function mcseElpd(array $ll, array $lw, float $elpd, float $rEff): float
     {
         if (is_infinite($elpd) && $elpd < 0) { return NAN; }
         $sum = 0.0;
         foreach ($ll as $i => $v) { $sum += (exp($lw[$i]) * expm1($v - $elpd)) ** 2; }
-        $ratio = fdiv($sum, $r_eff);
+        $ratio = fdiv($sum, $rEff);
         if (is_finite($ratio)) { return sqrt(log1p($ratio)); }
         $terms = [];
         foreach ($ll as $i => $v) {
             $d = $v - $elpd; $logAbs = $d > 700 ? $d + log(-expm1(-$d)) : log(abs(expm1($d)));
             $terms[] = 2 * ($lw[$i] + $logAbs);
         }
-        $lvr = Special::logSumExp($terms) - log($r_eff);
+        $lvr = Special::logSumExp($terms) - log($rEff);
         return sqrt($lvr > 0 ? $lvr + log1p(exp(-$lvr)) : log1p(exp($lvr)));
     }
     /** @internal loo:::table_of_estimates: column sums and sqrt(N * var). */

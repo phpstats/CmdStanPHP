@@ -20,9 +20,9 @@ final class StanFunctions
     /** @param array<string, array> $functions As returned by functions(). */
     private function __construct(private ?string $library, private array $functions) {}
     /** Compile (or reuse) the functions library for a Stan file; libraries are cached next to the file. */
-    public static function compile(string $stan_file, array $stanc_options = [], ?string $output_dir = null, ?float $timeout = null): self
+    public static function compile(string $stanFile, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): self
     {
-        $hpp = NativeBuild::stanc($stan_file, array_merge(['--standalone-functions'], NativeBuild::stancArgs($stanc_options)), $timeout);
+        $hpp = NativeBuild::stanc($stanFile, array_merge(['--standalone-functions'], NativeBuild::stancArgs($stancOptions)), $timeout);
         $functions = self::parse($hpp);
         if ($functions === []) { throw new \RuntimeException('No standalone functions found to compile and expose.'); }
         $cases = '';
@@ -32,7 +32,7 @@ final class StanFunctions
         $cpp = "#include \"model.hpp\"\n#include \"".NativeBuild::resources()."/functions.cpp\"\n"
             ."extern \"C\" int cmdstanphp_call(int id, const double* in, int in_len, unsigned int seed, double** out, int* out_len, char** printed, char** err) {\n"
             ."  switch (id) {\n".$cases."  }\n  *err = cmdstanphp::copy_string(\"Unknown function.\");\n  return 1;\n}\n";
-        $library = NativeBuild::library($stan_file, 'functions', $hpp, $cpp, ['functions.cpp'], $output_dir, $timeout);
+        $library = NativeBuild::library($stanFile, 'functions', $hpp, $cpp, ['functions.cpp'], $outputDir, $timeout);
         foreach ($functions as &$f) { unset($f['pointer']); }
         unset($f);
         return new self($library, $functions);

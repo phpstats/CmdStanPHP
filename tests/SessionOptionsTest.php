@@ -42,7 +42,7 @@ final class SessionOptionsTest extends TestCase
         $a = write_stan_file('model {}'); self::assertMatchesRegularExpression('~/stan/model_[0-9a-f]{32}\.stan$~', $a);
         touch($a, time() - 100); clearstatcache(); $mtime = filemtime($a);
         self::assertSame($a, write_stan_file('model {}')); clearstatcache(); self::assertSame($mtime, filemtime($a));
-        self::assertNotSame($a, write_stan_file('model {}', hash_salt: 'x'));
+        self::assertNotSame($a, write_stan_file('model {}', hashSalt: 'x'));
         self::assertSame(realpath($this->dir).'/named.stan', write_stan_file(['data {}', 'model {}'], dir: $this->dir, basename: 'named'));
         self::assertSame("data {}\nmodel {}", file_get_contents($this->dir.'/named.stan'));
         $this->expectException(\InvalidArgumentException::class); write_stan_file('model {}', dir: $this->dir, basename: '../escape');
@@ -81,7 +81,7 @@ final class SessionOptionsTest extends TestCase
             ob_start(); $model->compile(); self::assertStringContainsString(' -j1 '.realpath($this->dir).'/m ', ob_get_clean()); self::assertFileExists($this->dir.'/m');
             ob_start(); $model->compile(); self::assertSame('', ob_get_clean());
             options(['cmdstanr_force_recompile' => true]); ob_start(); $model->compile(); self::assertStringContainsString('make -C', ob_get_clean());
-            $messages = $this->deprecations(function () use ($model) { ob_start(); $model->compile(force_recompile: false, threads: true, compile_hessian_method: true); ob_end_clean(); });
+            $messages = $this->deprecations(function () use ($model) { ob_start(); $model->compile(forceRecompile: false, threads: true, compileHessianMethod: true); ob_end_clean(); });
             self::assertCount(2, $messages); self::assertSame(['STAN_THREADS' => true], $model->cppOptions());
         } finally { $property->setValue(null, $previous); }
     }

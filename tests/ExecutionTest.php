@@ -23,7 +23,7 @@ final class ExecutionTest extends TestCase
     {
         $script = $this->dir.'/launcher.php'; $marker = $this->dir.'/launcher-args.json';
         file_put_contents($script, '<?php require '.var_export(__DIR__.'/../vendor/autoload.php', true).'; $args = array_slice($argv, 1); file_put_contents('.var_export($marker, true).', json_encode($args)); $result = CmdStan\\Process::run($args); echo $result["stdout"];');
-        $fit = $this->model()->sampleMpi(mpi_cmd: PHP_BINARY, mpi_args: [$script], iter_sampling: 2, show_messages: false, output_dir: $this->dir);
+        $fit = $this->model()->sampleMpi(mpiCmd: PHP_BINARY, mpiArgs: [$script], iter_sampling: 2, show_messages: false, output_dir: $this->dir);
         self::assertSame(1, $fit->numChains()); $args = json_decode(file_get_contents($marker), true);
         self::assertSame(realpath(__DIR__.'/fixtures/model.php'), $args[0]); self::assertContains('num_samples=2', $args);
     }

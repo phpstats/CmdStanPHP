@@ -6,12 +6,12 @@ final class CmdStanModel
     private string $stanFile;
     private string $exeFile;
     private ?StanFunctions $functions = null;
-    public function __construct(string $stan_file, ?string $exe_file = null)
+    public function __construct(string $stanFile, ?string $exeFile = null)
     {
-        $real = realpath($stan_file);
+        $real = realpath($stanFile);
         if ($real === false || !is_file($real) || pathinfo($real, PATHINFO_EXTENSION) !== 'stan') { throw new \InvalidArgumentException('Expected an existing .stan file.'); }
         $this->stanFile = $real;
-        $this->exeFile = $exe_file === null ? substr($real, 0, -5).CmdStan::suffix() : (realpath($exe_file) ?: $exe_file);
+        $this->exeFile = $exeFile === null ? substr($real, 0, -5).CmdStan::suffix() : (realpath($exeFile) ?: $exeFile);
     }
     public function stanFile(): string { return $this->stanFile; }
     public function exeFile(): string { return $this->exeFile; }
@@ -34,48 +34,48 @@ final class CmdStanModel
     public function exposeFunctions(?float $timeout = null): StanFunctions { return $this->functions ??= StanFunctions::compile($this->stanFile, $this->stancOptions(), timeout: $timeout); }
     public function functions(): StanFunctions { return $this->functions ?? throw new \RuntimeException('Functions have not been exposed; call exposeFunctions() first.'); }
     /** Line numbers default to the cmdstanr_print_line_numbers option and are right-aligned like CmdStanR's. */
-    public function print(?bool $line_numbers = null): void
+    public function print(?bool $lineNumbers = null): void
     {
         $lines = explode("\n", rtrim($this->code())); $width = strlen((string)count($lines));
-        foreach ($lines as $i => $line) { echo (($line_numbers ?? CmdStan::option('cmdstanr_print_line_numbers', false)) ? str_pad((string)($i + 1), $width, ' ', STR_PAD_LEFT).': ' : '').$line."\n"; }
+        foreach ($lines as $i => $line) { echo (($lineNumbers ?? CmdStan::option('cmdstanr_print_line_numbers', false)) ? str_pad((string)($i + 1), $width, ' ', STR_PAD_LEFT).': ' : '').$line."\n"; }
     }
-    /** force_recompile defaults to the cmdstanr_force_recompile option; cmdstanr_verbose echoes the make command and output. Deprecated: threads, compile_hessian_method. */
-    public function compile(?bool $force_recompile = null, array $stanc_options = [], array $cpp_options = [], int $cores = 1, ?float $timeout = null, ?bool $threads = null, ?bool $compile_hessian_method = null): self
+    /** forceRecompile defaults to the cmdstanr_force_recompile option; cmdstanr_verbose echoes the make command and output. Deprecated: threads, compileHessianMethod. */
+    public function compile(?bool $forceRecompile = null, array $stancOptions = [], array $cppOptions = [], int $cores = 1, ?float $timeout = null, ?bool $threads = null, ?bool $compileHessianMethod = null): self
     {
         if ($cores < 1) { throw new \InvalidArgumentException('cores must be positive.'); }
-        $force_recompile ??= CmdStan::option('cmdstanr_force_recompile', false);
-        if ($threads) { trigger_error("'threads' is deprecated. Please use 'cpp_options: ['STAN_THREADS' => true]' instead.", E_USER_DEPRECATED); $cpp_options['STAN_THREADS'] = true; }
-        if ($compile_hessian_method) { trigger_error("'compile_hessian_method' is deprecated. The hessian method is compiled with all models.", E_USER_DEPRECATED); }
-        $stancArgs = $this->stancArgs($stanc_options);
+        $forceRecompile ??= CmdStan::option('cmdstanr_force_recompile', false);
+        if ($threads) { trigger_error("'threads' is deprecated. Please use 'cpp_options: ['STAN_THREADS' => true]' instead.", E_USER_DEPRECATED); $cppOptions['STAN_THREADS'] = true; }
+        if ($compileHessianMethod) { trigger_error("'compileHessianMethod' is deprecated. The hessian method is compiled with all models.", E_USER_DEPRECATED); }
+        $stancArgs = $this->stancArgs($stancOptions);
         $makeOptions = [];
-        foreach ($cpp_options as $name => $value) {
+        foreach ($cppOptions as $name => $value) {
             if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', (string)$name)) { throw new \InvalidArgumentException('Invalid make option.'); }
             $value = $value === false ? '' : Options::scalar($value);
             if (preg_match('/[\r\n$`#;&|<>()"\'\\\\]/', $value)) { throw new \InvalidArgumentException('Unsafe make option value.'); }
             $makeOptions[] = strtoupper($name).'='.$value;
         }
-        $fingerprint = hash('sha256', json_encode([2, CmdStan::path(), CmdStan::version(), $stanc_options, $cpp_options], JSON_THROW_ON_ERROR));
+        $fingerprint = hash('sha256', json_encode([2, CmdStan::path(), CmdStan::version(), $stancOptions, $cppOptions], JSON_THROW_ON_ERROR));
         $receipt = $this->exeFile.'.cmdstanphp.json';
         $previous = is_file($receipt) ? json_decode(file_get_contents($receipt), true) : null;
         $changedOptions = ($previous['fingerprint'] ?? null) !== $fingerprint;
-        if (!$force_recompile && !$changedOptions && is_file($this->exeFile) && filemtime($this->exeFile) >= filemtime($this->stanFile)) { return $this; }
+        if (!$forceRecompile && !$changedOptions && is_file($this->exeFile) && filemtime($this->exeFile) >= filemtime($this->stanFile)) { return $this; }
         if ($this->exeFile !== substr($this->stanFile, 0, -5).CmdStan::suffix()) { throw new \LogicException('Compilation requires the executable to have the source basename.'); }
         $cmd = ['make', '-C', CmdStan::path(), '-j'.$cores];
-        if ($force_recompile || $changedOptions) {
+        if ($forceRecompile || $changedOptions) {
             foreach ([$this->exeFile, $this->hppFile(), substr($this->stanFile, 0, -5).'.o'] as $artifact) {
                 if (is_file($artifact) && !unlink($artifact)) { throw new \RuntimeException('Cannot remove stale artifact: '.$artifact); }
             }
         }
         $cmd[] = $this->exeFile;
         $cmd[] = $this->hppFile();
-        if ($stanc_options !== []) { $cmd[] = 'STANCFLAGS='.implode(' ', $stancArgs); }
+        if ($stancOptions !== []) { $cmd[] = 'STANCFLAGS='.implode(' ', $stancArgs); }
         array_push($cmd, ...$makeOptions);
         $verbose = CmdStan::option('cmdstanr_verbose', false);
         if ($verbose) { echo implode(' ', $cmd)."\n"; }
         $result = Process::run($cmd, timeout: $timeout);
         if ($verbose) { echo $result['stdout'].$result['stderr']; }
         if (!is_file($this->exeFile)) { throw new \RuntimeException('Compilation did not produce an executable.'); }
-        if (file_put_contents($receipt, json_encode(['fingerprint' => $fingerprint, 'cpp_options' => $cpp_options, 'stanc_options' => $stanc_options], JSON_THROW_ON_ERROR), LOCK_EX) === false) { throw new \RuntimeException('Cannot save compilation receipt.'); }
+        if (file_put_contents($receipt, json_encode(['fingerprint' => $fingerprint, 'cpp_options' => $cppOptions, 'stanc_options' => $stancOptions], JSON_THROW_ON_ERROR), LOCK_EX) === false) { throw new \RuntimeException('Cannot save compilation receipt.'); }
         return $this;
     }
     private function stancArgs(array $options): array
@@ -93,17 +93,17 @@ final class CmdStanModel
         }
         return $args;
     }
-    public function checkSyntax(array $stanc_options = []): bool
+    public function checkSyntax(array $stancOptions = []): bool
     {
         $hpp = self::temporaryFile('.hpp');
-        try { Process::run(array_merge([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--o='.$hpp], $this->stancArgs($stanc_options), [$this->stanFile])); }
+        try { Process::run(array_merge([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--o='.$hpp], $this->stancArgs($stancOptions), [$this->stanFile])); }
         finally { if (is_file($hpp)) { unlink($hpp); } }
         return true;
     }
-    public function format(bool $overwrite_file = false, array $stanc_options = []): string
+    public function format(bool $overwriteFile = false, array $stancOptions = []): string
     {
-        $result = Process::run(array_merge([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--auto-format'], $this->stancArgs($stanc_options), [$this->stanFile]));
-        if ($overwrite_file && file_put_contents($this->stanFile, $result['stdout'], LOCK_EX) === false) { throw new \RuntimeException('Cannot overwrite source.'); }
+        $result = Process::run(array_merge([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--auto-format'], $this->stancArgs($stancOptions), [$this->stanFile]));
+        if ($overwriteFile && file_put_contents($this->stanFile, $result['stdout'], LOCK_EX) === false) { throw new \RuntimeException('Cannot overwrite source.'); }
         return $result['stdout'];
     }
     public function variables(): array
@@ -123,12 +123,12 @@ final class CmdStanModel
      * file, a StanData, or a table such as a phibble DataFrame (any object with toModelData() or toColumns(); see StanData).
      */
     public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::deprecated(self::options($options), ['cores', 'num_cores', 'num_chains', 'num_warmup', 'num_samples', 'max_depth', 'stepsize', 'save_extra_diagnostics', 'validate_csv'])); }
-    public function sampleMpi(string $mpi_cmd = 'mpiexec', array $mpi_args = [], mixed ...$options): CmdStanMCMC
+    public function sampleMpi(string $mpiCmd = 'mpiexec', array $mpiArgs = [], mixed ...$options): CmdStanMCMC
     {
         $o = self::deprecated(self::options($options), ['validate_csv']); $o['chains'] ??= 1; $o['parallel_chains'] = 1;
-        if ($mpi_cmd === '') { throw new \InvalidArgumentException('mpi_cmd must identify a launcher.'); }
-        $launcher = [$mpi_cmd];
-        foreach ($mpi_args as $name => $value) {
+        if ($mpiCmd === '') { throw new \InvalidArgumentException('mpiCmd must identify a launcher.'); }
+        $launcher = [$mpiCmd];
+        foreach ($mpiArgs as $name => $value) {
             if (is_int($name)) { $launcher[] = Options::scalar($value); }
             else {
                 if (!preg_match('/^[A-Za-z][A-Za-z0-9_-]*$/D', $name)) { throw new \InvalidArgumentException('Invalid MPI argument name.'); }
@@ -158,9 +158,9 @@ final class CmdStanModel
         unset($o['opt_args']);
         return $this->run('laplace', $o);
     }
-    public function generateQuantities(CmdStanFit|array|string $fitted_params, mixed ...$options): CmdStanGQ
+    public function generateQuantities(CmdStanFit|array|string $fittedParams, mixed ...$options): CmdStanGQ
     {
-        $o = self::options($options); $o['fitted_params'] = $fitted_params instanceof CmdStanFit ? $fitted_params->outputFiles() : (array)$fitted_params;
+        $o = self::options($options); $o['fitted_params'] = $fittedParams instanceof CmdStanFit ? $fittedParams->outputFiles() : (array)$fittedParams;
         return $this->run('generate_quantities', $o);
     }
     public function diagnose(mixed ...$options): CmdStanDiagnose { return $this->run('diagnose', self::options($options)); }

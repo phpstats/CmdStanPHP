@@ -36,7 +36,7 @@ final class NativeCompatibilityTest extends TestCase
         self::assertEqualsWithDelta($ref['hessian']['grad_log_prob'], $hessian['grad_log_prob'], 1e-8);
         foreach ($ref['hessian']['hessian'] as $i => $row) { self::assertEqualsWithDelta($row, $hessian['hessian'][$i], 1e-6, 'hessian row '.$i); }
         self::assertEqualsWithDelta($ref['unconstrain_variables'], $model->unconstrainVariables($variables), 1e-12);
-        $constrained = $model->constrainVariables($u, generated_quantities: false);
+        $constrained = $model->constrainVariables($u, generatedQuantities: false);
         self::assertSame(array_keys($ref['constrain_variables']), array_keys($constrained));
         foreach ($ref['constrain_variables'] as $name => $value) {
             $value = is_array($value) && count($value) === 1 && !is_array($constrained[$name]) ? $value[0] : $value;

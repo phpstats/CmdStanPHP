@@ -20,7 +20,7 @@ final class CsvTest extends TestCase
         self::assertSame(4, count($fit->draws('x', 'draws_matrix')));
         self::assertSame([['theta' => [0.3,0.4]], ['theta' => [0.3,0.4]]], $fit->draws('theta', 'draws_list'));
         self::assertSame(['theta' => 0.3, '.chain' => 2, '.iteration' => 1, '.draw' => 3], $fit->draws('theta', 'draws_df')[2]);
-        self::assertCount(4, $fit->draws('theta', inc_warmup: true));
+        self::assertCount(4, $fit->draws('theta', incWarmup: true));
         self::assertSame(['divergent__','treedepth__','energy__'], array_keys($fit->samplerDiagnostics()[0][0]));
     }
     public function testSummaryAndDiagnostics(): void
@@ -155,7 +155,7 @@ final class CsvTest extends TestCase
     }
     public function testPrintHonoursMaxRows(): void
     {
-        $fit = CmdStanFit::fromCsv([$this->csv()]); ob_start(); $fit->print(max_rows: 2); $out = ob_get_clean();
+        $fit = CmdStanFit::fromCsv([$this->csv()]); ob_start(); $fit->print(maxRows: 2); $out = ob_get_clean();
         self::assertStringContainsString('# showing 2 of 4 rows', $out); self::assertCount(2, json_decode(substr($out, 0, strpos($out, "\n\n")), true));
         $previous = options(['cmdstanr_max_rows' => 1]); ob_start();
         try { $fit->print('x'); } finally { $out = ob_get_clean(); options($previous); }

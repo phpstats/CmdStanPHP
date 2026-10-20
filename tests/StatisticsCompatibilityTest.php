@@ -91,7 +91,7 @@ final class StatisticsCompatibilityTest extends TestCase
     public function testParetoSmoothingMatchesPosterior(): void
     {
         $in = self::$input; $ref = self::$reference['pareto'];
-        $cases = ['both' => Psis::paretoSmooth($in['smooth']), 'right' => Psis::paretoSmooth($in['smooth'], 'right', 1.0), 'left' => Psis::paretoSmooth($in['smooth'], 'left', 0.8), 'small' => Psis::paretoSmooth($in['smooth_small'], 'right'), 'log_weights' => Psis::paretoSmooth($in['log_weights'], are_log_weights: true)];
+        $cases = ['both' => Psis::paretoSmooth($in['smooth']), 'right' => Psis::paretoSmooth($in['smooth'], 'right', 1.0), 'left' => Psis::paretoSmooth($in['smooth'], 'left', 0.8), 'small' => Psis::paretoSmooth($in['smooth_small'], 'right'), 'log_weights' => Psis::paretoSmooth($in['log_weights'], areLogWeights: true)];
         foreach ($cases as $name => $result) {
             self::close($ref[$name]['x'], $result['x'], $name.' x');
             foreach ($ref[$name]['diagnostics'] as $key => $value) { self::close($value, $result['diagnostics'][$key], $name.' '.$key); }
@@ -149,7 +149,7 @@ final class StatisticsCompatibilityTest extends TestCase
         foreach (['two' => [$in['init_draws'], 2], 'recycled' => [$in['init_one'], 3]] as $name => [$columns, $chains]) {
             $rows = [];
             foreach ($columns['theta'] as $i => $unused) { $rows[] = array_map(fn($values) => $values[$i], $columns); }
-            $result = Inits::fromDraws($rows, $chains, $in['parameters'], warn_partial: false);
+            $result = Inits::fromDraws($rows, $chains, $in['parameters'], warnPartial: false);
             self::assertCount($chains, self::$reference['inits'][$name]);
             foreach (self::$reference['inits'][$name] as $i => $json) {
                 $expected = json_decode($json, true, flags: JSON_THROW_ON_ERROR);

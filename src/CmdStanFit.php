@@ -45,9 +45,9 @@ class CmdStanFit
         return is_file($m[1]) ? realpath($m[1]) : null;
     }
     public function numProcs(): int { return count($this->files); }
-    /** Fits only contain successful runs (a failing chain throws), so include_failed never adds files. */
-    public function configFiles(bool $include_failed = false): array { return $this->context['config_files'] ??= $this->relatedFiles('_config.json'); }
-    public function metricFiles(bool $include_failed = false): array { return $this->context['metric_files'] ??= $this->relatedFiles('_metric.json'); }
+    /** Fits only contain successful runs (a failing chain throws), so includeFailed never adds files. */
+    public function configFiles(bool $includeFailed = false): array { return $this->context['config_files'] ??= $this->relatedFiles('_config.json'); }
+    public function metricFiles(bool $includeFailed = false): array { return $this->context['metric_files'] ??= $this->relatedFiles('_metric.json'); }
     private function relatedFiles(string $suffix): array
     {
         return array_values(array_filter(array_map(fn($file) => substr($file, 0, -4).$suffix, $this->files), 'is_file'));
@@ -74,13 +74,13 @@ class CmdStanFit
     {
         return Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix()], $this->files))['stdout'];
     }
-    public function outputFiles(bool $include_failed = false): array { return $this->files; }
-    public function latentDynamicsFiles(bool $include_failed = false): array
+    public function outputFiles(bool $includeFailed = false): array { return $this->files; }
+    public function latentDynamicsFiles(bool $includeFailed = false): array
     {
         $files = array_values(array_filter($this->diagnosticFiles, 'is_file'));
         return $files !== [] ? $files : throw new \RuntimeException("No latent dynamics files found. Set 'save_latent_dynamics: true' when fitting the model.");
     }
-    public function profileFiles(bool $include_failed = false): array
+    public function profileFiles(bool $includeFailed = false): array
     {
         $files = array_values(array_filter($this->profileFiles, 'is_file'));
         return $files !== [] ? $files : throw new \RuntimeException('No profile files found. The model that produced the fit did not use any profiling.');
@@ -137,13 +137,13 @@ class CmdStanFit
      * draws_array is [iteration][chain][variable]; draws_matrix is chain-major rows. A null format uses the cmdstanr_draws_format
      * option, else CmdStanR's per-method default: draws_array for MCMC and generated quantities, draws_matrix otherwise.
      */
-    public function draws(array|string|null $variables = null, ?string $format = null, bool $inc_warmup = false): array
+    public function draws(array|string|null $variables = null, ?string $format = null, bool $incWarmup = false): array
     {
-        return $this->extract($this->select($variables), $format ?? $this->defaultFormat(), $inc_warmup);
+        return $this->extract($this->select($variables), $format ?? $this->defaultFormat(), $incWarmup);
     }
-    public function samplerDiagnostics(?string $format = null, bool $inc_warmup = false): array
+    public function samplerDiagnostics(?string $format = null, bool $incWarmup = false): array
     {
-        return $this->extract($this->select(null, true), $format ?? $this->defaultFormat(), $inc_warmup);
+        return $this->extract($this->select(null, true), $format ?? $this->defaultFormat(), $incWarmup);
     }
     private function defaultFormat(): string { return CmdStan::option('cmdstanr_draws_format') ?? ($this instanceof CmdStanMCMC || $this instanceof CmdStanGQ ? 'draws_array' : 'draws_matrix'); }
     /** $part selects post-warmup 'draws', 'warmup', 'both', or the optimizer 'estimate'. */
@@ -182,9 +182,9 @@ class CmdStanFit
      *
      * @return array<string, list<float|int>>
      */
-    public function drawsColumns(array|string|null $variables = null, bool $inc_warmup = false): array
+    public function drawsColumns(array|string|null $variables = null, bool $incWarmup = false): array
     {
-        $chains = $this->draws($variables, 'draws_list', $inc_warmup); $columns = array_fill_keys(array_keys($chains[0] ?? []), []); $meta = ['.chain' => [], '.iteration' => [], '.draw' => []]; $draw = 0;
+        $chains = $this->draws($variables, 'draws_list', $incWarmup); $columns = array_fill_keys(array_keys($chains[0] ?? []), []); $meta = ['.chain' => [], '.iteration' => [], '.draw' => []]; $draw = 0;
         foreach ($chains as $c => $chain) {
             foreach ($columns as $name => $_) { array_push($columns[$name], ...$chain[$name]); }
             $n = count(reset($chain) ?: []);
@@ -193,7 +193,7 @@ class CmdStanFit
         return $columns + $meta;
     }
     /** drawsTable(): drawsColumns() as a Phibble\DataFrame. Needs phpstats/phibble, which is optional; throws when it is not installed. */
-    public function drawsTable(array|string|null $variables = null, bool $inc_warmup = false): object { return Tables::dataFrame($this->drawsColumns($variables, $inc_warmup), 'drawsTable()'); }
+    public function drawsTable(array|string|null $variables = null, bool $incWarmup = false): object { return Tables::dataFrame($this->drawsColumns($variables, $incWarmup), 'drawsTable()'); }
     /** summary() turned into columns: 'variable' and one column per measure, one value per variable. */
     public function summaryColumns(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): array { return Tables::fromRows($this->summary($variables, $probs, $measures)); }
     /** summaryTable(): summaryColumns() as a Phibble\DataFrame. Needs phpstats/phibble; throws when it is not installed. */
@@ -388,22 +388,22 @@ class CmdStanFit
     private static function jacobian(bool $jacobian, ?bool $adjustment): bool
     {
         if ($adjustment === null) { return $jacobian; }
-        trigger_error("'jacobian_adjustment' is deprecated. Please use 'jacobian' instead.", E_USER_DEPRECATED);
+        trigger_error("'jacobianAdjustment' is deprecated. Please use 'jacobian' instead.", E_USER_DEPRECATED);
         return $adjustment;
     }
-    public function logProb(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): float { return $this->methods()->logProb($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
+    public function logProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): float { return $this->methods()->logProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function gradLogProb(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): array { return $this->methods()->gradLogProb($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
+    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->gradLogProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
     /** @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
-    public function hessian(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): array { return $this->methods()->hessian($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
+    public function hessian(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->hessian($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
     public function unconstrainVariables(array $variables): array { return $this->methods()->unconstrainVariables($variables); }
-    public function constrainVariables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->constrainVariables($unconstrained_variables, $transformed_parameters, $generated_quantities); }
-    public function variableSkeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->variableSkeleton($transformed_parameters, $generated_quantities); }
+    public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->constrainVariables($unconstrainedVariables, $transformedParameters, $generatedQuantities); }
+    public function variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->variableSkeleton($transformedParameters, $generatedQuantities); }
     /** Unconstrains this fit's draws, the draws in other CmdStan CSV files, or draws_df/draws_matrix rows, returned in a draws format. */
-    public function unconstrainDraws(?array $files = null, ?array $draws = null, ?string $format = null, bool $inc_warmup = false): array
+    public function unconstrainDraws(?array $files = null, ?array $draws = null, ?string $format = null, bool $incWarmup = false): array
     {
         if ($files !== null && $draws !== null) { throw new \InvalidArgumentException('Either a list of CSV files or a draws object can be passed, not both'); }
-        $rows = $draws ?? ($files !== null ? self::fromCsv($files) : $this)->draws(null, 'draws_df', $inc_warmup);
+        $rows = $draws ?? ($files !== null ? self::fromCsv($files) : $this)->draws(null, 'draws_df', $incWarmup);
         $names = $this->methods()->unconstrainedParamNames(); $chains = [];
         foreach (array_map(null, $rows, $this->methods()->unconstrainDraws($rows)) as [$row, $values]) { $chains[(int)($row['.chain'] ?? 1) - 1][] = array_combine($names, $values); }
         ksort($chains);
@@ -422,21 +422,21 @@ class CmdStanFit
         if (file_put_contents($file, serialize($this), LOCK_EX) === false) { throw new \RuntimeException('Cannot save fit object.'); }
         return $file;
     }
-    /** Emits summary JSON for at most max_rows variables (default: cmdstanr_max_rows option, else 10). */
-    public function print(array|string|null $variables = null, ?int $max_rows = null): void
+    /** Emits summary JSON for at most maxRows variables (default: cmdstanr_max_rows option, else 10). */
+    public function print(array|string|null $variables = null, ?int $maxRows = null): void
     {
-        $max = $max_rows ?? CmdStan::option('cmdstanr_max_rows', 10);
-        if ($max < 1) { throw new \InvalidArgumentException('max_rows must be positive.'); }
+        $max = $maxRows ?? CmdStan::option('cmdstanr_max_rows', 10);
+        if ($max < 1) { throw new \InvalidArgumentException('maxRows must be positive.'); }
         $selected = $this->select($variables);
         echo json_encode($this->summary(array_slice($selected, 0, $max)), JSON_PRETTY_PRINT | JSON_PARTIAL_OUTPUT_ON_ERROR)."\n";
-        if ($max < count($selected)) { echo "\n # showing ".$max.' of '.count($selected)." rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)\n"; }
+        if ($max < count($selected)) { echo "\n # showing ".$max.' of '.count($selected)." rows (change via 'maxRows' argument or 'cmdstanr_max_rows' option)\n"; }
     }
     /**
      * CmdStanR read_cmdstan_csv()'s list: metadata plus, by method, time/inv_metric/step_size/warmup_draws/post_warmup_draws/
      * warmup_sampler_diagnostics/post_warmup_sampler_diagnostics (sample), draws (variational, laplace, pathfinder),
      * point_estimates (optimize), generated_quantities, or gradients/lp (diagnose). Empty variables/diagnostics select none.
      */
-    public static function readCmdStanCsv(array $files, array|string|null $variables = null, array|string|null $sampler_diagnostics = null, ?string $format = null): array
+    public static function readCmdStanCsv(array $files, array|string|null $variables = null, array|string|null $samplerDiagnostics = null, ?string $format = null): array
     {
         $fit = self::fromCsv($files); $meta = $fit->metadata(); $method = $meta['method'] ?? 'sample';
         if ($method === 'diagnose') { $lp = $meta['lp'] ?? null; unset($meta['lp']); return ['metadata' => $meta, 'gradients' => $fit->parsed()[0]['gradients'], 'lp' => $lp]; }
@@ -451,7 +451,7 @@ class CmdStanFit
             }
             return array_values(array_unique($out));
         };
-        $vars = $pick($variables, $meta['variables']); $diag = $pick($sampler_diagnostics, $meta['sampler_diagnostics']);
+        $vars = $pick($variables, $meta['variables']); $diag = $pick($samplerDiagnostics, $meta['sampler_diagnostics']);
         $get = fn(array $columns, string $part) => $columns === [] || array_sum(array_map(fn($csv) => count($part === 'estimate' ? array_filter([$csv['estimate']]) : $csv[$part]), $fit->parsed())) === 0 ? null : $fit->extract($columns, $format, false, $part);
         if ($method === 'sample') {
             $ids = $meta['id']; $metric = $fit->invMetric(false);

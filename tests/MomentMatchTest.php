@@ -191,7 +191,7 @@ final class MomentMatchTest extends TestCase
         $cov = self::only(self::match(self::fixture(self::COV))); self::assertContains('cov', $cov['transforms']); self::assertContains('scale', $cov['transforms']);
         $unsplit = self::match(self::fixture(self::SHIFT_SCALE), split: false); self::assertFalse(self::only($unsplit)['split']);
         self::assertContains(MomentMatch::KF_WARNING, $unsplit['warnings']);
-        $capped = self::match(self::fixture(self::SHIFT_SCALE), max_iters: 2); self::assertSame('max_iters', self::only($capped)['stop']); self::assertCount(2, self::only($capped)['transforms']);
+        $capped = self::match(self::fixture(self::SHIFT_SCALE), maxIters: 2); self::assertSame('max_iters', self::only($capped)['stop']); self::assertCount(2, self::only($capped)['transforms']);
         self::assertContains(MomentMatch::MAX_ITERS_WARNING, $capped['warnings']);
     }
     public function testSingularWeightedCovarianceFallsBackWithoutRegularization(): void
@@ -232,8 +232,8 @@ final class MomentMatchTest extends TestCase
             'log_prob length' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], fn($rows) => array_slice($lp($rows), 1), $ll),
             'nonfinite posterior density' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], fn($rows) => array_fill(0, count($rows), -INF), $ll),
             'log_lik length' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], $lp, fn($rows, $i) => [0.0]),
-            'NAN threshold' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], $lp, $ll, k_threshold: NAN),
-            'max_iters' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], $lp, $ll, max_iters: 0),
+            'NAN threshold' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], $lp, $ll, kThreshold: NAN),
+            'max_iters' => fn() => MomentMatch::loo($loo, $f['upars'], $f['log_lik'], $lp, $ll, maxIters: 0),
             'unknown transform' => fn() => MomentMatch::transform('rotate', $f['upars'], array_fill(0, 4000, 0.0)),
         ];
         foreach ($cases as $label => $call) {

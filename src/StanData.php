@@ -42,7 +42,7 @@ final class StanData
         return $data;
     }
     /** Converts a table to Stan data; see the class description for the conventions. */
-    public static function fromTable(object $table, bool $add_n = true): self
+    public static function fromTable(object $table, bool $addN = true): self
     {
         $data = []; $levels = []; $n = null;
         foreach (self::tableColumns($table) as $name => $column) {
@@ -54,7 +54,7 @@ final class StanData
             else { $data[$name] = array_map(fn($value, $row) => self::cell($value, $name, $row), $values, array_keys($values)); }
         }
         foreach ($levels as $name => $labels) { $data['J_'.$name] ??= count($labels); }
-        if ($add_n && !array_key_exists('N', $data)) { $data = ['N' => $n ?? 0] + $data; }
+        if ($addN && !array_key_exists('N', $data)) { $data = ['N' => $n ?? 0] + $data; }
         return new self($data, $levels);
     }
     /**
@@ -95,14 +95,14 @@ final class StanData
      * of the random-effect terms, g_id and J_g (and J for a single grouping factor), and Z_g and Q_g when the terms
      * on g have columns other than the intercept. See fromModelMatrix() for the mapping. $missing is passed to
      * Phit\model_matrix(): 'drop' removes incomplete rows with one E_WARNING, and 'raise' rejects them.
-     * $drop_intercept removes the '(Intercept)' column of X for programs with a separate intercept parameter.
+     * $dropIntercept removes the '(Intercept)' column of X for programs with a separate intercept parameter.
      *
      * @param array<string, mixed>|object $data columns, factor descriptors, or a table (toModelData(), or toColumns()
      *     with types() and levels() for factors). Factors reach Phit\model_matrix() as 0-based descriptors, so their
      *     level order sets the reference level, a factor response's coding, and the order of group indices. Missing
      *     values are left for $missing to handle.
      */
-    public static function fromFormula(string $formula, array|object $data, bool $drop_intercept = false, string $missing = 'drop'): self
+    public static function fromFormula(string $formula, array|object $data, bool $dropIntercept = false, string $missing = 'drop'): self
     {
         if (!function_exists('Phit\model_matrix')) { throw new \RuntimeException('StanData::fromFormula() needs Phit\model_matrix() from the phit extension (https://github.com/phpstats/phit), which is not loaded or predates the function. Use StanData::fromColumns() without it.'); }
         $levels = []; $columns = [];
@@ -110,7 +110,7 @@ final class StanData
             if (is_array($column) && isset($column['levels'], $column['codes'])) { $levels[$name] = $column['levels']; }
             $columns[$name] = $column;
         }
-        return self::fromModelMatrix(\Phit\model_matrix($formula, $columns, $missing), $drop_intercept, $levels);
+        return self::fromModelMatrix(\Phit\model_matrix($formula, $columns, $missing), $dropIntercept, $levels);
     }
     /**
      * Maps a Phit\model_matrix() result to Stan data. This is the only code that depends on the result's shape.
@@ -123,7 +123,7 @@ final class StanData
      * - offset becomes offset when present.
      * - Each random-effect term's per-row group labels become g_id (1-based) and J_g, where g is the group name with
      *   characters other than letters, digits, and underscores replaced by '_' (so g2:g1 becomes g2_g1). Groups are
-     *   numbered in $group_levels[g] order when given (fromFormula() passes factor levels), else over sorted labels
+     *   numbered in $groupLevels[g] order when given (fromFormula() passes factor levels), else over sorted labels
      *   (numbers numerically, otherwise byte order). When g's terms have any column other than '(Intercept)', Z_g
      *   (N x Q_g rows) concatenates the z of every term on g, including intercept-only ones, so '(1 + x | g)' and
      *   '(1 | g) + (0 + x | g)' both give Z_g = [1, x]; Q_g is its width. Two groups that map to the same g are
@@ -131,13 +131,13 @@ final class StanData
      * - Every other key (retained_rows, dropped_rows, n_input, n_dropped, terms, assign, ...) is kept in $meta, and
      *   $meta['random'][g] holds each group's label, columns, and correlated flag.
      *
-     * @param array<string, list<string>> $group_levels level order by group name
+     * @param array<string, list<string>> $groupLevels level order by group name
      */
-    public static function fromModelMatrix(array $mm, bool $drop_intercept = false, array $group_levels = []): self
+    public static function fromModelMatrix(array $mm, bool $dropIntercept = false, array $groupLevels = []): self
     {
         foreach (['x', 'columns'] as $key) { if (!array_key_exists($key, $mm)) { throw new \UnexpectedValueException("Phit\model_matrix() result lacks '".$key."'."); } }
         $columns = array_values(array_map('strval', $mm['columns'])); $rows = array_map(fn($row) => array_map('floatval', array_values($row)), array_values($mm['x']));
-        $drop = $drop_intercept ? array_search('(Intercept)', $columns, true) : false;
+        $drop = $dropIntercept ? array_search('(Intercept)', $columns, true) : false;
         if ($drop !== false) { unset($columns[$drop]); $columns = array_values($columns); $rows = array_map(function ($row) use ($drop) { unset($row[$drop]); return array_values($row); }, $rows); }
         $n = count($rows); $data = ['N' => $n, 'K' => count($columns), 'X' => $rows]; $levels = [];
         $y = $mm['y'] ?? null;
@@ -173,7 +173,7 @@ final class StanData
             array_push($groups[$g]['columns'], ...$termColumns);
         }
         foreach ($groups as $g => $group) {
-            $order = $group_levels[$group['group']] ?? null;
+            $order = $groupLevels[$group['group']] ?? null;
             if ($order === null) { $factor = self::factor($group['labels'], $group['group']); $index = $factor['index']; $order = $factor['levels']; }
             else { $positions = array_flip($order); $index = array_map(fn($label) => ($positions[(string)$label] ?? throw new \UnexpectedValueException("Group '".$group['group']."' has an unknown level.")) + 1, $group['labels']); }
             $data[$g.'_id'] = $index; $data['J_'.$g] = count($order); $levels[$g.'_id'] = $order;

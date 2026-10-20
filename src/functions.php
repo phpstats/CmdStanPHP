@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 namespace CmdStan;
-/** force_recompile defaults to the cmdstanr_force_recompile option. */
-function cmdstan_model(string $stan_file, bool $compile = true, ?string $exe_file = null, array $stanc_options = [], array $cpp_options = [], ?bool $force_recompile = null): CmdStanModel
+/** forceRecompile defaults to the cmdstanr_force_recompile option. */
+function cmdstan_model(string $stanFile, bool $compile = true, ?string $exeFile = null, array $stancOptions = [], array $cppOptions = [], ?bool $forceRecompile = null): CmdStanModel
 {
-    $model = new CmdStanModel($stan_file, $exe_file);
-    if ($compile) { $model->compile(force_recompile: $force_recompile, stanc_options: $stanc_options, cpp_options: $cpp_options); }
+    $model = new CmdStanModel($stanFile, $exeFile);
+    if ($compile) { $model->compile(forceRecompile: $forceRecompile, stancOptions: $stancOptions, cppOptions: $cppOptions); }
     return $model;
 }
 function set_cmdstan_path(string $path): void { CmdStan::setPath($path); }
@@ -27,9 +27,9 @@ function write_stan_json(array|object $data, string $file): string { return Stan
 /**
  * Writes Stan code (a string or list of lines) to $file, or to dir/basename where dir defaults to the cmdstanr_write_stan_file_dir
  * option or the system temporary directory and basename to model_<hash>.stan. An identical existing file is left untouched
- * (keeping compiled executables current) unless force_overwrite.
+ * (keeping compiled executables current) unless forceOverwrite.
  */
-function write_stan_file(string|array $code, ?string $file = null, ?string $dir = null, ?string $basename = null, bool $force_overwrite = false, string $hash_salt = ''): string
+function write_stan_file(string|array $code, ?string $file = null, ?string $dir = null, ?string $basename = null, bool $forceOverwrite = false, string $hashSalt = ''): string
 {
     $code = is_array($code) ? implode("\n", $code) : $code;
     if ($file !== null && ($dir !== null || $basename !== null)) { throw new \InvalidArgumentException('Specify file or dir/basename, not both.'); }
@@ -37,8 +37,8 @@ function write_stan_file(string|array $code, ?string $file = null, ?string $dir 
         $dir ??= CmdStan::option('cmdstanr_write_stan_file_dir') ?? sys_get_temp_dir();
         if (!is_dir($dir) && !mkdir($dir, 0700, true)) { throw new \RuntimeException('Cannot create Stan file directory.'); }
         if ($basename !== null && (in_array($basename, ['.', '..'], true) || !preg_match('/^[A-Za-z0-9_.-]+$/D', $basename))) { throw new \InvalidArgumentException('basename must be a simple filename.'); }
-        $file = realpath($dir).'/'.($basename === null ? 'model_'.hash('xxh128', $hash_salt.$code).'.stan' : (str_ends_with($basename, '.stan') ? $basename : $basename.'.stan'));
-        if (!$force_overwrite && is_file($file) && str_replace("\r\n", "\n", (string)file_get_contents($file)) === str_replace("\r\n", "\n", $code)) { return $file; }
+        $file = realpath($dir).'/'.($basename === null ? 'model_'.hash('xxh128', $hashSalt.$code).'.stan' : (str_ends_with($basename, '.stan') ? $basename : $basename.'.stan'));
+        if (!$forceOverwrite && is_file($file) && str_replace("\r\n", "\n", (string)file_get_contents($file)) === str_replace("\r\n", "\n", $code)) { return $file; }
     }
     if (file_put_contents($file, $code, LOCK_EX) === false) { throw new \RuntimeException('Cannot write Stan file.'); }
     return realpath($file) ?: $file;
@@ -51,7 +51,7 @@ function write_stan_tempfile(string|array $code, ?string $dir = null): string
 }
 function read_cmdstan_csv(array|string $files): CmdStanFit { return CmdStanFit::fromCsv((array)$files); }
 /** CmdStanR's read_cmdstan_csv() list shape; see CmdStanFit::readCmdStanCsv(). */
-function read_cmdstan_csv_list(array|string $files, array|string|null $variables = null, array|string|null $sampler_diagnostics = null, ?string $format = null): array { return CmdStanFit::readCmdStanCsv((array)$files, $variables, $sampler_diagnostics, $format); }
+function read_cmdstan_csv_list(array|string $files, array|string|null $variables = null, array|string|null $samplerDiagnostics = null, ?string $format = null): array { return CmdStanFit::readCmdStanCsv((array)$files, $variables, $samplerDiagnostics, $format); }
 /** @deprecated Use read_cmdstan_csv(). */
 function read_sample_csv(array|string $files): CmdStanFit
 {
@@ -67,16 +67,16 @@ function num_threads(): ?int
     return $threads !== false && is_numeric($threads) ? (int)$threads : null;
 }
 /** Version first for compatibility with earlier releases; see Installer::install(). cores defaults to the mc.cores option, else 1. */
-function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $release_url = null, ?string $release_file = null, array $cpp_options = [], bool $check_toolchain = true): string
+function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true): string
 {
-    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $release_url, $release_file, $cpp_options, $check_toolchain);
+    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $releaseUrl, $releaseFile, $cppOptions, $checkToolchain);
 }
 function rebuild_cmdstan(?int $cores = null, ?float $timeout = null): void { Installer::rebuild($cores, $timeout); }
 /**
- * Writes cpp_options to <dir>/make/local (named entries as NAME=value with booleans as true/false, list entries as raw lines),
+ * Writes cppOptions to <dir>/make/local (named entries as NAME=value with booleans as true/false, list entries as raw lines),
  * appending unless append is false, and returns the current make/local lines. dir defaults to the selected CmdStan.
  */
-function cmdstan_make_local(?string $dir = null, array $cpp_options = [], bool $append = true): array { return Installer::makeLocal($dir, $cpp_options, $append); }
+function cmdstan_make_local(?string $dir = null, array $cppOptions = [], bool $append = true): array { return Installer::makeLocal($dir, $cppOptions, $append); }
 const EXAMPLES = ['logistic', 'schools', 'schools_ncp'];
 /**
  * CmdStanR's cmdstanr_example(): compiles a bundled example (logistic, schools, schools_ncp) in a cache directory (the
@@ -100,7 +100,7 @@ function cmdstanr_example(string $example = 'logistic', string $method = 'sample
         $temporary = $file.'.'.bin2hex(random_bytes(6));
         if (file_put_contents($temporary, $source, LOCK_EX) === false || !rename($temporary, $file)) { throw new \RuntimeException('Cannot write example program.'); }
     }
-    $model = cmdstan_model($file, force_recompile: $force);
+    $model = cmdstan_model($file, forceRecompile: $force);
     $options['data'] = realpath(__DIR__.'/../resources/examples/'.$example.'.data.json');
     if (!$quiet) { return $model->$method($options); }
     ob_start();
@@ -148,9 +148,9 @@ function mcmc_trace(CmdStanFit|array $draws, string $variable): Figure { return 
 function mcmc_hist(CmdStanFit|array $draws, string $variable, int $bins = 30): Figure { return Plot::hist($draws, $variable, $bins); }
 function mcmc_dens(CmdStanFit|array $draws, string $variable): Figure { return Plot::dens($draws, $variable); }
 function mcmc_dens_overlay(CmdStanFit|array $draws, string $variable): Figure { return Plot::dens($draws, $variable, true); }
-function mcmc_intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $prob_outer = 0.9, string $point_est = 'median'): Figure { return Plot::intervals($draws, $variables, $prob, $prob_outer, $point_est); }
+function mcmc_intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $probOuter = 0.9, string $pointEst = 'median'): Figure { return Plot::intervals($draws, $variables, $prob, $probOuter, $pointEst); }
 function mcmc_rank_hist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure { return Plot::rankHist($draws, $variable, $bins); }
-function mcmc_scatter(CmdStanFit|array $draws, string $x_variable, string $y_variable): Figure { return Plot::scatter($draws, $x_variable, $y_variable); }
+function mcmc_scatter(CmdStanFit|array $draws, string $xVariable, string $yVariable): Figure { return Plot::scatter($draws, $xVariable, $yVariable); }
 function mcmc_acf(CmdStanFit|array $draws, string $variable, int $lags = 20): Figure { return Plot::acf($draws, $variable, $lags); }
 /** loo's Pareto k diagnostic plot for a CmdStanMCMC::loo() or Loo::loo() result. */
 function pareto_k_plot(array $loo): Figure { return Plot::paretoK($loo); }

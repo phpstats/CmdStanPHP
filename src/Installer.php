@@ -5,38 +5,38 @@ final class Installer
 {
     /**
      * Installs CmdStan from an official release (version, or the latest release when no source is given), an https .tar.gz
-     * release_url, or a local release_file tarball. The installation directory is the archive's top-level directory.
+     * releaseUrl, or a local releaseFile tarball. The installation directory is the archive's top-level directory.
      * With overwrite, an existing installation is moved aside and only removed after the new build succeeds.
-     * cpp_options are written to make/local (append) before building.
+     * cppOptions are written to make/local (append) before building.
      */
-    public static function install(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $release_url = null, ?string $release_file = null, array $cpp_options = [], bool $check_toolchain = true): string
+    public static function install(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true): string
     {
         $cores ??= CmdStan::option('mc.cores', 1);
         if ($cores < 1) { throw new \InvalidArgumentException('cores must be positive.'); }
-        if (count(array_filter([$version, $release_url, $release_file], fn($x) => $x !== null)) > 1) { throw new \InvalidArgumentException('Specify only one of version, release_url and release_file.'); }
+        if (count(array_filter([$version, $releaseUrl, $releaseFile], fn($x) => $x !== null)) > 1) { throw new \InvalidArgumentException('Specify only one of version, releaseUrl and releaseFile.'); }
         if ($version !== null && !preg_match('/^2\.\d+\.\d+$/D', $version)) { throw new \InvalidArgumentException('Provide a stable CmdStan 2.x version.'); }
-        if ($release_url !== null && (!str_starts_with($release_url, 'https://') || !str_ends_with($release_url, '.tar.gz') || preg_match('/[\s\x00-\x1f]/', $release_url))) { throw new \InvalidArgumentException('release_url must be an https URL of a .tar.gz archive.'); }
-        if ($release_file !== null && (!is_file($release_file) || !str_ends_with($release_file, '.tar.gz'))) { throw new \InvalidArgumentException('release_file must be an existing .tar.gz archive.'); }
-        foreach ($cpp_options as $name => $value) { self::makeLocalLine($name, $value); }
+        if ($releaseUrl !== null && (!str_starts_with($releaseUrl, 'https://') || !str_ends_with($releaseUrl, '.tar.gz') || preg_match('/[\s\x00-\x1f]/', $releaseUrl))) { throw new \InvalidArgumentException('releaseUrl must be an https URL of a .tar.gz archive.'); }
+        if ($releaseFile !== null && (!is_file($releaseFile) || !str_ends_with($releaseFile, '.tar.gz'))) { throw new \InvalidArgumentException('releaseFile must be an existing .tar.gz archive.'); }
+        foreach ($cppOptions as $name => $value) { self::makeLocalLine($name, $value); }
         $dir ??= (getenv('HOME') ?: getenv('USERPROFILE')).'/.cmdstan';
         if (!is_dir($dir) && !mkdir($dir, 0700, true)) { throw new \RuntimeException('Cannot create installation directory.'); }
         $dir = realpath($dir);
         // Fail before downloading when the official release target is already known to exist.
         if ($version !== null && !$overwrite && file_exists($dir.'/cmdstan-'.$version)) { throw new \RuntimeException('Installation already exists: '.$dir.'/cmdstan-'.$version.'. Use overwrite: true to replace it.'); }
-        if ($check_toolchain) { CmdStan::checkToolchain($dir); }
+        if ($checkToolchain) { CmdStan::checkToolchain($dir); }
         $staging = $dir.'/.cmdstanphp-install-'.bin2hex(random_bytes(8)); mkdir($staging, 0700);
         $target = null; $backup = null; $created = false;
         try {
             $archive = $staging.'/release.tar.gz';
-            if ($release_file !== null) {
-                if (!copy($release_file, $archive)) { throw new \RuntimeException('Cannot copy release_file.'); }
+            if ($releaseFile !== null) {
+                if (!copy($releaseFile, $archive)) { throw new \RuntimeException('Cannot copy releaseFile.'); }
             } else {
-                if ($release_url === null) { $version ??= self::latestVersion($timeout); }
-                $url = $release_url ?? 'https://github.com/stan-dev/cmdstan/releases/download/v'.$version.'/cmdstan-'.$version.'.tar.gz';
+                if ($releaseUrl === null) { $version ??= self::latestVersion($timeout); }
+                $url = $releaseUrl ?? 'https://github.com/stan-dev/cmdstan/releases/download/v'.$version.'/cmdstan-'.$version.'.tar.gz';
                 Process::run(['curl', '--fail', '--location', '--retry', '3', '--proto', '=https', '--proto-redir', '=https', '--output', $archive, $url], timeout: $timeout);
             }
             $top = self::archiveRoot($archive, $timeout);
-            if ($version !== null && $release_url === null && $top !== 'cmdstan-'.$version) { throw new \RuntimeException('Release archive does not contain cmdstan-'.$version.'.'); }
+            if ($version !== null && $releaseUrl === null && $top !== 'cmdstan-'.$version) { throw new \RuntimeException('Release archive does not contain cmdstan-'.$version.'.'); }
             $target = $dir.'/'.$top;
             if (file_exists($target) && !$overwrite) { throw new \RuntimeException('Installation already exists: '.$target.'. Use overwrite: true to replace it.'); }
             $extract = $staging.'/extract'; mkdir($extract, 0700);
@@ -48,7 +48,7 @@ final class Installer
             }
             if (!rename($extract.'/'.$top, $target)) { throw new \RuntimeException('Cannot move extracted installation.'); }
             $created = true;
-            if ($cpp_options !== []) { self::makeLocal($target, $cpp_options, true); }
+            if ($cppOptions !== []) { self::makeLocal($target, $cppOptions, true); }
             // TBB runtime paths are embedded in binaries; build at the final location.
             Process::run(['make', '-C', $target, '-j'.$cores, 'build'], timeout: $timeout);
             CmdStan::setPath($target);
@@ -108,12 +108,12 @@ final class Installer
         return strtoupper($name).'='.$value;
     }
     /** CmdStanR's cmdstan_make_local(): optionally writes NAME=value (or unnamed raw) lines, then returns the current lines. */
-    public static function makeLocal(?string $dir = null, array $cpp_options = [], bool $append = true): array
+    public static function makeLocal(?string $dir = null, array $cppOptions = [], bool $append = true): array
     {
         $dir ??= CmdStan::path();
         $file = $dir.'/make/local';
-        if ($cpp_options !== [] || !$append) {
-            $lines = array_map(self::makeLocalLine(...), array_keys($cpp_options), array_values($cpp_options));
+        if ($cppOptions !== [] || !$append) {
+            $lines = array_map(self::makeLocalLine(...), array_keys($cppOptions), array_values($cppOptions));
             if (!is_dir($dir.'/make')) { throw new \InvalidArgumentException('Not a CmdStan directory: '.$dir); }
             if (file_put_contents($file, $lines === [] ? '' : implode("\n", $lines)."\n", ($append ? FILE_APPEND : 0) | LOCK_EX) === false) { throw new \RuntimeException('Cannot write make/local.'); }
         }

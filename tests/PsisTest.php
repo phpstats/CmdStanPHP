@@ -34,7 +34,7 @@ final class PsisTest extends TestCase
     {
         $lw = array_map('log', self::draws()); $smoothed = Psis::paretoSmoothLogWeights($lw);
         self::assertLessThanOrEqual(0.0, max($smoothed['x'])); self::assertTrue(is_finite($smoothed['diagnostics']['khat']));
-        self::assertSame(Psis::paretoSmooth($lw, 'left', are_log_weights: true), $smoothed);
+        self::assertSame(Psis::paretoSmooth($lw, 'left', areLogWeights: true), $smoothed);
     }
     public function testPsisMatchesLoo(): void
     {

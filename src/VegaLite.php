@@ -8,11 +8,11 @@ namespace CmdStan;
 final class VegaLite
 {
     private const DIVERGENT = '#d62728';
-    public static function spec(Figure $figure, int $width = 480, int $height = 240, ?int $max_rows = null): array
+    public static function spec(Figure $figure, int $width = 480, int $height = 240, ?int $maxRows = null): array
     {
         if ($width < 50 || $height < 30) { throw new \InvalidArgumentException('Vega-Lite figures need width >= 50 and height >= 30 pixels.'); }
-        if ($max_rows !== null && $max_rows < 1) { throw new \InvalidArgumentException('max_rows must be positive.'); }
-        $rows = self::thin($figure, $max_rows); $m = $figure->meta;
+        if ($maxRows !== null && $maxRows < 1) { throw new \InvalidArgumentException('maxRows must be positive.'); }
+        $rows = self::thin($figure, $maxRows); $m = $figure->meta;
         $spec = match ($figure->kind) {
             'trace' => ['mark' => ['type' => 'line', 'strokeWidth' => 0.8, 'opacity' => 0.8], 'encoding' => ['x' => self::q('iteration', 'iteration'), 'y' => self::q('value', $m['variable'], false), 'color' => self::chain()]],
             'hist' => ['mark' => ['type' => 'bar', 'binSpacing' => 1], 'encoding' => ['x' => self::q('x0', $m['variable']) + ['bin' => ['binned' => true]], 'x2' => ['field' => 'x1'], 'y' => self::q('count', 'count')]],
@@ -33,12 +33,12 @@ final class VegaLite
         $title = $divergent === null ? $figure->title : ['text' => $figure->title, 'subtitle' => 'red: '.$divergent.' divergent transition'.($divergent === 1 ? '' : 's')];
         return ['$schema' => Figure::VEGA_LITE_SCHEMA, 'title' => $title, 'data' => ['values' => $rows]] + $size + $spec;
     }
-    /** Keeps every k-th trace iteration or scatter draw (and every divergent draw) so at most about $max_rows remain. */
-    private static function thin(Figure $figure, ?int $max_rows): array
+    /** Keeps every k-th trace iteration or scatter draw (and every divergent draw) so at most about $maxRows remain. */
+    private static function thin(Figure $figure, ?int $maxRows): array
     {
         $n = count($figure->data);
-        if ($max_rows === null || $n <= $max_rows || !in_array($figure->kind, ['trace', 'scatter'], true)) { return $figure->data; }
-        $step = (int)ceil($n / $max_rows);
+        if ($maxRows === null || $n <= $maxRows || !in_array($figure->kind, ['trace', 'scatter'], true)) { return $figure->data; }
+        $step = (int)ceil($n / $maxRows);
         if ($figure->kind === 'trace') { return array_values(array_filter($figure->data, fn($row) => ($row['iteration'] - 1) % $step === 0)); }
         return array_values(array_filter($figure->data, fn($row, $i) => $i % $step === 0 || $row['divergent'], ARRAY_FILTER_USE_BOTH));
     }

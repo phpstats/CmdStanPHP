@@ -4,14 +4,14 @@ namespace CmdStan;
 final class CmdStanMCMC extends CmdStanFit
 {
     /**
-     * PSIS-LOO as in CmdStanR's loo() (see Loo::loo() for the result shape). moment_match: true needs the phit
-     * posterior-draw kernels and model methods; max_iters, k_threshold, split and cov are loo_moment_match()'s options
+     * PSIS-LOO as in CmdStanR's loo() (see Loo::loo() for the result shape). momentMatch: true needs the phit
+     * posterior-draw kernels and model methods; maxIters, kThreshold, split and cov are loo_moment_match()'s options
      * (see MomentMatch::loo() for the added moment_match key and the differences from loo).
      */
-    public function loo(string $variables = 'log_lik', array|float|bool|null $r_eff = true, bool $moment_match = false, int $max_iters = 30, ?float $k_threshold = null, bool $split = true, bool $cov = true): array
+    public function loo(string $variables = 'log_lik', array|float|bool|null $rEff = true, bool $momentMatch = false, int $maxIters = 30, ?float $kThreshold = null, bool $split = true, bool $cov = true): array
     {
-        if ($moment_match) { return MomentMatch::fromFit($this, $variables, $r_eff, $max_iters, $k_threshold, $split, $cov); }
-        return Loo::fromFit($this, $variables, $r_eff);
+        if ($momentMatch) { return MomentMatch::fromFit($this, $variables, $rEff, $maxIters, $kThreshold, $split, $cov); }
+        return Loo::fromFit($this, $variables, $rEff);
     }
     public function waic(string $variables = 'log_lik'): array { return Loo::waicFromFit($this, $variables); }
 }

@@ -31,7 +31,7 @@ final class FitIntegrationTest extends TestCase
         $model = $this->model(); $fit = $this->sample($model);
         $u = $fit->unconstrainVariables(['mu' => 0.5, 'sigma' => 2.0, 'z' => [0.1, -0.2]]);
         self::assertEqualsWithDelta([0.5, log(2.0), 0.1, -0.2], $u, 1e-12);
-        $constrained = $fit->constrainVariables($u, generated_quantities: false); self::assertEqualsWithDelta(2.0, $constrained['sigma'], 1e-12);
+        $constrained = $fit->constrainVariables($u, generatedQuantities: false); self::assertEqualsWithDelta(2.0, $constrained['sigma'], 1e-12);
         self::assertSame(['mu' => [], 'sigma' => [], 'z' => [2]], $fit->variableSkeleton(false, false));
         $grad = $fit->gradLogProb($u); self::assertEqualsWithDelta($fit->logProb($u), $grad['log_prob'], 1e-12); self::assertCount(4, $grad['gradient']);
         self::assertCount(4, $fit->hessian($u)['hessian']);

@@ -36,14 +36,14 @@ final class ModelMethods
         $this->connect();
     }
     /** Build (or reuse) the model-methods library for a Stan file and return its path. */
-    public static function build(string $stan_file, array $stanc_options = [], ?string $output_dir = null, ?float $timeout = null): string
+    public static function build(string $stanFile, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): string
     {
-        $hpp = NativeBuild::stanc($stan_file, NativeBuild::stancArgs($stanc_options), $timeout);
-        return NativeBuild::library($stan_file, 'model_methods', $hpp, "#include \"model.hpp\"\n#include \"".NativeBuild::resources()."/model_methods.cpp\"\n", ['model_methods.cpp'], $output_dir, $timeout);
+        $hpp = NativeBuild::stanc($stanFile, NativeBuild::stancArgs($stancOptions), $timeout);
+        return NativeBuild::library($stanFile, 'model_methods', $hpp, "#include \"model.hpp\"\n#include \"".NativeBuild::resources()."/model_methods.cpp\"\n", ['model_methods.cpp'], $outputDir, $timeout);
     }
-    public static function compile(string $stan_file, array|object|string|null $data = null, int $seed = 1, array $stanc_options = [], ?string $output_dir = null, ?float $timeout = null): self
+    public static function compile(string $stanFile, array|object|string|null $data = null, int $seed = 1, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): self
     {
-        return new self(self::build($stan_file, $stanc_options, $output_dir, $timeout), $data, $seed);
+        return new self(self::build($stanFile, $stancOptions, $outputDir, $timeout), $data, $seed);
     }
     public function library(): string { return $this->library; }
     public function seed(): int { return $this->seed; }
@@ -51,38 +51,38 @@ final class ModelMethods
     /** Unconstrained parameter names in draws notation (e.g. "s[1]", "S[3]"). */
     public function unconstrainedParamNames(): array { $this->model(); return array_map(Csv::variableName(...), $this->info['unconstrained']); }
     /** Flat constrained names in draws notation, in write order (column-major, matching CmdStan CSV columns). */
-    public function constrainedParamNames(bool $transformed_parameters = true, bool $generated_quantities = true): array
+    public function constrainedParamNames(bool $transformedParameters = true, bool $generatedQuantities = true): array
     {
-        return array_map(Csv::variableName(...), $this->select('constrained', $transformed_parameters, $generated_quantities));
+        return array_map(Csv::variableName(...), $this->select('constrained', $transformedParameters, $generatedQuantities));
     }
     /** Variable name => dimensions ([] for scalars; complex values have a trailing 2; tuple elements appear as name.k). */
-    public function variableSkeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array
+    public function variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array
     {
-        $info = $this->info(); $count = $info['blocks'][0] + ($transformed_parameters ? $info['blocks'][1] : 0);
+        $info = $this->info(); $count = $info['blocks'][0] + ($transformedParameters ? $info['blocks'][1] : 0);
         $out = [];
         foreach ($info['names'] as $i => $name) {
-            if ($i < $count || ($generated_quantities && $i >= $info['blocks'][0] + $info['blocks'][1])) { $out[$name] = $info['dims'][$i]; }
+            if ($i < $count || ($generatedQuantities && $i >= $info['blocks'][0] + $info['blocks'][1])) { $out[$name] = $info['dims'][$i]; }
         }
         return $out;
     }
-    public function logProb(array $unconstrained_variables, bool $jacobian = true): float
+    public function logProb(array $unconstrainedVariables, bool $jacobian = true): float
     {
-        $theta = $this->unconstrained($unconstrained_variables); $lp = $this->ffi->new('double'); $err = $this->ffi->new('char*');
+        $theta = $this->unconstrained($unconstrainedVariables); $lp = $this->ffi->new('double'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_log_density($this->handle, $theta, (int)$jacobian, \FFI::addr($lp), \FFI::addr($err)), $err);
         return $lp->cdata;
     }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function gradLogProb(array $unconstrained_variables, bool $jacobian = true): array
+    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true): array
     {
-        $theta = $this->unconstrained($unconstrained_variables); $n = $this->info['num_unconstrained'];
+        $theta = $this->unconstrained($unconstrainedVariables); $n = $this->info['num_unconstrained'];
         $lp = $this->ffi->new('double'); $grad = $this->ffi->new('double['.max(1, $n).']'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_log_density_gradient($this->handle, $theta, (int)$jacobian, \FFI::addr($lp), $grad, \FFI::addr($err)), $err);
         return ['log_prob' => $lp->cdata, 'gradient' => self::read($grad, $n)];
     }
     /** Finite differences of autodiff gradients, as in CmdStanR. @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
-    public function hessian(array $unconstrained_variables, bool $jacobian = true): array
+    public function hessian(array $unconstrainedVariables, bool $jacobian = true): array
     {
-        $theta = $this->unconstrained($unconstrained_variables); $n = $this->info['num_unconstrained'];
+        $theta = $this->unconstrained($unconstrainedVariables); $n = $this->info['num_unconstrained'];
         $lp = $this->ffi->new('double'); $grad = $this->ffi->new('double['.max(1, $n).']'); $hess = $this->ffi->new('double['.max(1, $n * $n).']'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_log_density_hessian($this->handle, $theta, (int)$jacobian, \FFI::addr($lp), $grad, $hess, \FFI::addr($err)), $err);
         $flat = self::read($hess, $n * $n); $rows = [];
@@ -120,13 +120,13 @@ final class ModelMethods
         return $out;
     }
     /** @return array<string, mixed> Variable name => float or nested list, shaped by variableSkeleton(). */
-    public function constrainVariables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array
+    public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array
     {
-        $theta = $this->unconstrained($unconstrained_variables); $size = $this->size($transformed_parameters, $generated_quantities);
+        $theta = $this->unconstrained($unconstrainedVariables); $size = $this->size($transformedParameters, $generatedQuantities);
         $values = $this->ffi->new('double['.max(1, $size).']'); $err = $this->ffi->new('char*');
-        $this->check($this->ffi->cmdstanphp_param_constrain($this->handle, $theta, (int)$transformed_parameters, (int)$generated_quantities, $values, $size, \FFI::addr($err)), $err);
-        $out = array_map(self::zeros(...), $this->variableSkeleton($transformed_parameters, $generated_quantities));
-        foreach ($this->select('paths', $transformed_parameters, $generated_quantities) as $k => [$name, $indices]) {
+        $this->check($this->ffi->cmdstanphp_param_constrain($this->handle, $theta, (int)$transformedParameters, (int)$generatedQuantities, $values, $size, \FFI::addr($err)), $err);
+        $out = array_map(self::zeros(...), $this->variableSkeleton($transformedParameters, $generatedQuantities));
+        foreach ($this->select('paths', $transformedParameters, $generatedQuantities) as $k => [$name, $indices]) {
             $ref = &$out[$name];
             foreach ($indices as $i) { $ref = &$ref[$i]; }
             $ref = $values[$k]; unset($ref);
@@ -165,13 +165,13 @@ final class ModelMethods
     }
     private function model(): \FFI\CData { if ($this->handle === null) { $this->connect(); } return $this->handle; }
     private function info(): array { $this->model(); return $this->info; }
-    private function size(bool $transformed_parameters, bool $generated_quantities): int { return count($this->select('constrained', $transformed_parameters, $generated_quantities)); }
+    private function size(bool $transformedParameters, bool $generatedQuantities): int { return count($this->select('constrained', $transformedParameters, $generatedQuantities)); }
     /** Entries of a flat per-value list ('constrained' or 'paths') for the requested blocks, in write_array order. */
-    private function select(string $key, bool $transformed_parameters, bool $generated_quantities): array
+    private function select(string $key, bool $transformedParameters, bool $generatedQuantities): array
     {
         $info = $this->info(); $sizes = [0, 0, 0];
         foreach ($info['dims'] as $i => $dims) { $sizes[$i < $info['blocks'][0] ? 0 : ($i < $info['blocks'][0] + $info['blocks'][1] ? 1 : 2)] += array_product($dims); }
-        return array_merge(array_slice($info[$key], 0, $sizes[0]), $transformed_parameters ? array_slice($info[$key], $sizes[0], $sizes[1]) : [], $generated_quantities ? array_slice($info[$key], $sizes[0] + $sizes[1], $sizes[2]) : []);
+        return array_merge(array_slice($info[$key], 0, $sizes[0]), $transformedParameters ? array_slice($info[$key], $sizes[0], $sizes[1]) : [], $generatedQuantities ? array_slice($info[$key], $sizes[0] + $sizes[1], $sizes[2]) : []);
     }
     private function unconstrained(array $values): \FFI\CData
     {

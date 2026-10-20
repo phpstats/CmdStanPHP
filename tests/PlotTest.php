@@ -86,7 +86,7 @@ final class PlotTest extends TestCase
     public function testVlConvertRendersEveryFigure(): void
     {
         if (!getenv('VL_CONVERT') && CmdStan::which('vl-convert') === null) { self::markTestSkipped('vl-convert is not installed; set VL_CONVERT to run this test.'); }
-        foreach (self::figures() as $name => $figure) { self::assertStringStartsWith('<svg', $figure->svg(max_rows: 200), $name); }
+        foreach (self::figures() as $name => $figure) { self::assertStringStartsWith('<svg', $figure->svg(maxRows: 200), $name); }
         self::assertStringStartsWith("\x89PNG", self::figures()['intervals']->png(scale: 1.0));
     }
     public function testFitsSupplyDrawsAndMarkDivergences(): void
@@ -101,7 +101,7 @@ final class PlotTest extends TestCase
     public function testInvalidRequestsThrow(): void
     {
         $d = self::draws();
-        foreach ([fn() => mcmc_trace($d, 'nope'), fn() => mcmc_trace($d, 'mu')->ascii(20), fn() => mcmc_hist($d, 'mu', 0), fn() => mcmc_hist($d, 'mu', 100)->ascii(), fn() => mcmc_intervals($d, prob: 0.95), fn() => mcmc_acf($d, 'mu', 500), fn() => mcmc_trace([[['v' => NAN]], [['v' => 1.0]]], 'v'), fn() => pareto_k_plot([]), fn() => mcmc_trace($d, 'mu')->vegaLite(10), fn() => mcmc_trace($d, 'mu')->vegaLite(max_rows: 0)] as $i => $call) {
+        foreach ([fn() => mcmc_trace($d, 'nope'), fn() => mcmc_trace($d, 'mu')->ascii(20), fn() => mcmc_hist($d, 'mu', 0), fn() => mcmc_hist($d, 'mu', 100)->ascii(), fn() => mcmc_intervals($d, prob: 0.95), fn() => mcmc_acf($d, 'mu', 500), fn() => mcmc_trace([[['v' => NAN]], [['v' => 1.0]]], 'v'), fn() => pareto_k_plot([]), fn() => mcmc_trace($d, 'mu')->vegaLite(10), fn() => mcmc_trace($d, 'mu')->vegaLite(maxRows: 0)] as $i => $call) {
             try { $call(); self::fail('Expected an exception for case '.$i.'.'); } catch (\InvalidArgumentException) { self::assertTrue(true); }
         }
     }

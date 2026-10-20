@@ -13,7 +13,7 @@ namespace CmdStan;
  */
 final class Inits
 {
-    public static function fromFit(CmdStanFit $fit, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warn_partial = true): array
+    public static function fromFit(CmdStanFit $fit, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warnPartial = true): array
     {
         if ($numProcs < 1) { throw new \InvalidArgumentException('At least one chain is required.'); }
         self::validateFit($fit, $parameters);
@@ -23,7 +23,7 @@ final class Inits
         elseif ($fit instanceof CmdStanPathfinder && !self::truthy(self::metadata($fit)['calculate_lp'] ?? true)) { $rows = $fit->draws(format: 'draws_df'); $rows = self::pick($rows, self::sampleNoReplace(array_fill(0, count($rows), 1.0), $numProcs, $rng)); $warnings = []; }
         elseif ($fit instanceof CmdStanVB || $fit instanceof CmdStanLaplace || $fit instanceof CmdStanPathfinder) { [$rows, $warnings] = self::approximate($fit, $numProcs, $rng); }
         else { throw new \InvalidArgumentException('Initial values can only be created from MCMC, optimization, variational, Laplace or Pathfinder fits.'); }
-        $result = self::fromDraws($rows, $numProcs, $parameters, $seed, $warn_partial);
+        $result = self::fromDraws($rows, $numProcs, $parameters, $seed, $warnPartial);
         $result['warnings'] = array_merge($warnings, $result['warnings']);
         return $result;
     }
@@ -31,7 +31,7 @@ final class Inits
      * cmdstanr:::process_init.draws for draws_df/draws_matrix rows (list of [variable => value]) or a draws_array
      * [iteration][chain][variable => value]. Fewer rows than chains are recycled; more are resampled without replacement.
      */
-    public static function fromDraws(array $draws, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warn_partial = true): array
+    public static function fromDraws(array $draws, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warnPartial = true): array
     {
         if ($numProcs < 1) { throw new \InvalidArgumentException('At least one chain is required.'); }
         $rows = self::rows($draws); $n = count($rows);
@@ -40,7 +40,7 @@ final class Inits
         elseif ($n > $numProcs) { $rows = self::pick($rows, self::sampleNoReplace(array_fill(0, $n, 1.0), $numProcs, new \Random\Randomizer(new \Random\Engine\Mt19937($seed)))); }
         $inits = [];
         foreach ($rows as $row) { $inits[] = self::nest($row, $parameters); }
-        return self::validate($inits, $numProcs, $parameters, $warn_partial);
+        return self::validate($inits, $numProcs, $parameters, $warnPartial);
     }
     /**
      * Automatic parameter-dimension matching for one draw: flat columns ('x[1,2]') become zero-based nested arrays sized
@@ -72,7 +72,7 @@ final class Inits
      * throw; missing (and unknown) parameters are reported as warnings; length-1 values of one-dimensional parameters
      * are wrapped in a list.
      */
-    public static function validate(array $inits, int $numProcs, ?array $parameters = null, bool $warn_partial = true): array
+    public static function validate(array $inits, int $numProcs, ?array $parameters = null, bool $warnPartial = true): array
     {
         if (!array_is_list($inits) || count(array_filter($inits, fn($x) => is_array($x) && ($x === [] || !array_is_list($x)))) !== count($inits)) { throw new \InvalidArgumentException("If 'init' is a list it must be a list of arrays keyed by parameter name."); }
         if (count($inits) !== $numProcs) { throw new \InvalidArgumentException("'init' has the wrong length. See documentation of 'init' argument."); }
@@ -85,8 +85,8 @@ final class Inits
                 $unknown = array_values(array_diff(array_map('strval', array_keys($init)), array_map('strval', array_keys($parameters))));
                 foreach ($parameters as $name => $info) { if (array_key_exists($name, $init) && (int)($info['dimensions'] ?? 0) === 1 && !is_array($init[$name])) { $init[$name] = [$init[$name]]; } }
                 $prefix = count($inits) > 1 ? 'chain '.($i + 1).': ' : '';
-                if ($missing !== [] && $warn_partial) { $warnings[] = ['chain' => $i + 1, 'type' => 'missing_parameters', 'parameters' => $missing, 'message' => 'Init values were only set for a subset of parameters. Missing init values for the following parameters: '.$prefix.implode(', ', $missing)]; }
-                if ($unknown !== [] && $warn_partial) { $warnings[] = ['chain' => $i + 1, 'type' => 'unknown_parameters', 'parameters' => $unknown, 'message' => 'Init values were supplied for names that are not model parameters and will be ignored: '.$prefix.implode(', ', $unknown)]; }
+                if ($missing !== [] && $warnPartial) { $warnings[] = ['chain' => $i + 1, 'type' => 'missing_parameters', 'parameters' => $missing, 'message' => 'Init values were only set for a subset of parameters. Missing init values for the following parameters: '.$prefix.implode(', ', $missing)]; }
+                if ($unknown !== [] && $warnPartial) { $warnings[] = ['chain' => $i + 1, 'type' => 'unknown_parameters', 'parameters' => $unknown, 'message' => 'Init values were supplied for names that are not model parameters and will be ignored: '.$prefix.implode(', ', $unknown)]; }
             }
             unset($init);
         }

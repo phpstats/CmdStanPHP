@@ -20,11 +20,11 @@ final class ModelTest extends TestCase
     public function testBadChainIds(): void { $this->expectException(\InvalidArgumentException::class); $this->model()->sample(chains: 2, chain_ids: [1,1]); }
     public function testWrongSeedCount(): void { $this->expectException(\InvalidArgumentException::class); $this->model()->sample(chains: 2, seed: [123]); }
     public function testRejectsPositionalOptions(): void { $this->expectException(\InvalidArgumentException::class); $this->model()->sample(1,2); }
-    public function testUnsafeMakeOptions(): void { $this->expectException(\InvalidArgumentException::class); (new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan')))->compile(cpp_options: ['CXXFLAGS' => '$(touch /tmp/bad)']); }
+    public function testUnsafeMakeOptions(): void { $this->expectException(\InvalidArgumentException::class); (new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan')))->compile(cppOptions: ['CXXFLAGS' => '$(touch /tmp/bad)']); }
     public function testMakeShellOperatorsAreRejected(): void
     {
         $model = new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'));
-        $this->expectException(\InvalidArgumentException::class); $model->compile(cpp_options: ['CXXFLAGS' => '-O3 && touch unwanted']);
+        $this->expectException(\InvalidArgumentException::class); $model->compile(cppOptions: ['CXXFLAGS' => '-O3 && touch unwanted']);
     }
     public function testDrawsCsvRoundTrip(): void
     {

@@ -7,9 +7,9 @@ namespace CmdStan;
  * phit posterior-draw kernels (see DrawKernels); this class owns model evaluation, PSIS, iteration and diagnostics.
  *
  * Coordinates: $upars are unconstrained draws [draw][parameter] in one fixed parameter order, with rows in the same
- * chain-major order as the log-likelihood draws. $log_prob_upars(list<list<float>> $upars): list<float> must return the
+ * chain-major order as the log-likelihood draws. $logProbUpars(list<list<float>> $upars): list<float> must return the
  * log density of the posterior these draws came from (for Stan, log_prob with jacobian: true, so the constraining
- * Jacobian is included); $log_lik_i_upars(list<list<float>> $upars, int $i): list<float> returns observation $i's
+ * Jacobian is included); $logLikIUpars(list<list<float>> $upars, int $i): list<float> returns observation $i's
  * log-likelihood (zero-based $i). Both return one value per row, in row order.
  *
  * Proposal densities: a transformed draw z = T(x) has density p(x) / |det T|, so every importance ratio subtracts
@@ -33,36 +33,36 @@ namespace CmdStan;
  */
 final class MomentMatch
 {
-    public const MAX_ITERS_WARNING = "The maximum number of moment matching iterations ('max_iters' argument) was reached. Increasing the value may improve accuracy.";
+    public const MAX_ITERS_WARNING = "The maximum number of moment matching iterations ('maxIters' argument) was reached. Increasing the value may improve accuracy.";
     public const KF_WARNING = "The accuracy of self-normalized importance sampling may be bad. Setting the argument 'split' to true will likely improve accuracy.";
     public const FAILURE_WARNING = 'Moment matching stopped early after a numerical or model failure for %d observation(s); see moment_match.observations.';
     private const PARETO_WARNING = "Some Pareto k diagnostic values are too high. See help('pareto-k-diagnostic') for details.";
     /**
-     * @param array $loo result of Loo::loo() for $log_lik
-     * @param array $log_lik the draws_array or draws_matrix given to Loo::loo()
+     * @param array $loo result of Loo::loo() for $logLik
+     * @param array $logLik the draws_array or draws_matrix given to Loo::loo()
      * @return array $loo with updated pointwise rows, diagnostics, estimates and warnings, plus moment_match: {k_threshold,
      *   split, cov, observations: list<{index, observation, pareto_k_initial, pareto_k, pareto_kf, r_eff, transforms,
      *   log_abs_det, split, stop, message, covariance_fallbacks}>}
      */
-    public static function loo(array $loo, array $upars, array $log_lik, callable $log_prob_upars, callable $log_lik_i_upars, int $max_iters = 30, ?float $k_threshold = null, bool $split = true, bool $cov = true): array
+    public static function loo(array $loo, array $upars, array $logLik, callable $logProbUpars, callable $logLikIUpars, int $maxIters = 30, ?float $kThreshold = null, bool $split = true, bool $cov = true): array
     {
         DrawKernels::require();
-        [$columns, $chains, $names] = Loo::columns($log_lik);
+        [$columns, $chains, $names] = Loo::columns($logLik);
         $s = count($columns[0]); $n = count($columns);
         if (($loo['dims'] ?? null) !== [$s, $n] || count($loo['pointwise'] ?? []) !== $n || count($loo['diagnostics']['pareto_k'] ?? []) !== $n) { throw new \InvalidArgumentException('The loo result does not match the log-likelihood draws.'); }
-        if ($k_threshold !== null && !is_finite($k_threshold)) { throw new \InvalidArgumentException('k_threshold must be finite.'); }
-        if ($max_iters < 1) { throw new \InvalidArgumentException('max_iters must be positive.'); }
+        if ($kThreshold !== null && !is_finite($kThreshold)) { throw new \InvalidArgumentException('kThreshold must be finite.'); }
+        if ($maxIters < 1) { throw new \InvalidArgumentException('maxIters must be positive.'); }
         $upars = self::draws($upars, $s);
         $p = count($upars[0]);
-        $k_threshold ??= min(1 - fdiv(1, log10($s)), 0.7);
+        $kThreshold ??= min(1 - fdiv(1, log10($s)), 0.7);
         $cov = $cov && $s >= 10 * $p;
-        $origLp = self::values($log_prob_upars($upars), $s, 'log_prob_upars');
-        foreach ($origLp as $v) { if (!is_finite($v)) { throw new \InvalidArgumentException('log_prob_upars must be finite for every posterior draw.'); } }
-        $model = ['log_prob' => $log_prob_upars, 'log_lik' => $log_lik_i_upars, 'orig_lp' => $origLp];
+        $origLp = self::values($logProbUpars($upars), $s, 'logProbUpars');
+        foreach ($origLp as $v) { if (!is_finite($v)) { throw new \InvalidArgumentException('logProbUpars must be finite for every posterior draw.'); } }
+        $model = ['log_prob' => $logProbUpars, 'log_lik' => $logLikIUpars, 'orig_lp' => $origLp];
         $observations = []; $maxReached = false; $failures = 0;
         foreach ($loo['diagnostics']['pareto_k'] as $i => $k) {
-            if (!($k > $k_threshold)) { continue; }
-            $r = self::observation($i, $upars, $columns[$i], $chains, $model, (float)$k, $max_iters, $k_threshold, $split, $cov);
+            if (!($k > $kThreshold)) { continue; }
+            $r = self::observation($i, $upars, $columns[$i], $chains, $model, (float)$k, $maxIters, $kThreshold, $split, $cov);
             $loo['pointwise'][$i] = ['elpd_loo' => $r['elpd_loo'], 'mcse_elpd_loo' => $r['mcse_elpd_loo'], 'p_loo' => $r['p_loo'], 'looic' => $r['looic']] + $loo['pointwise'][$i];
             $loo['diagnostics']['pareto_k'][$i] = $r['record']['pareto_k']; $loo['diagnostics']['n_eff'][$i] = $r['n_eff'];
             $loo['diagnostics']['r_eff'][$i] = $r['record']['r_eff'];
@@ -75,18 +75,18 @@ final class MomentMatch
         $warnings = array_values(array_filter($loo['warnings'] ?? [], fn($w) => $w !== self::PARETO_WARNING));
         if ($maxReached) { $warnings[] = self::MAX_ITERS_WARNING; }
         if ($failures > 0) { $warnings[] = sprintf(self::FAILURE_WARNING, $failures); }
-        if (!$split && count(array_filter($observations, fn($o) => $o['pareto_kf'] > $k_threshold)) > 0) { $warnings[] = self::KF_WARNING; }
-        if (count(array_filter($loo['diagnostics']['pareto_k'], fn($k) => $k > $k_threshold)) > 0) { $warnings[] = self::PARETO_WARNING; }
+        if (!$split && count(array_filter($observations, fn($o) => $o['pareto_kf'] > $kThreshold)) > 0) { $warnings[] = self::KF_WARNING; }
+        if (count(array_filter($loo['diagnostics']['pareto_k'], fn($k) => $k > $kThreshold)) > 0) { $warnings[] = self::PARETO_WARNING; }
         $loo['warnings'] = $warnings;
-        $loo['moment_match'] = ['k_threshold' => $k_threshold, 'split' => $split, 'cov' => $cov, 'observations' => $observations];
+        $loo['moment_match'] = ['k_threshold' => $kThreshold, 'split' => $split, 'cov' => $cov, 'observations' => $observations];
         return $loo;
     }
     /** CmdStanMCMC$loo(moment_match = TRUE): PSIS-LOO, then moment matching with the fit's model methods. */
-    public static function fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $r_eff = true, int $max_iters = 30, ?float $k_threshold = null, bool $split = true, bool $cov = true): array
+    public static function fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $rEff = true, int $maxIters = 30, ?float $kThreshold = null, bool $split = true, bool $cov = true): array
     {
         DrawKernels::require();
         $logLik = $fit->draws($variables, 'draws_array');
-        $loo = Loo::loo($logLik, $r_eff);
+        $loo = Loo::loo($logLik, $rEff);
         $fit->initModelMethods();
         $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
         $paths = array_map(fn($name) => self::path((string)$name, $variables), $loo['observations']);
@@ -98,7 +98,7 @@ final class MomentMatch
                 return $value;
             }, $rows);
         };
-        return self::loo($loo, $upars, $logLik, $logProb, $logLikI, $max_iters, $k_threshold, $split, $cov);
+        return self::loo($loo, $upars, $logLik, $logProb, $logLikI, $maxIters, $kThreshold, $split, $cov);
     }
     /**
      * One shift, scale or covariance step of loo:::shift(), shift_and_scale() and shift_and_cov() on the current draws.
@@ -230,7 +230,7 @@ final class MomentMatch
         $s = count($upars);
         try { $lp = $model['log_prob']($upars); $ll = $model['log_lik']($upars, $i); }
         catch (\Exception $e) { return ['stop' => 'model_error', 'message' => $e->getMessage()]; }
-        $lp = self::values($lp, $s, 'log_prob_upars'); $ll = self::values($ll, $s, 'log_lik_i_upars');
+        $lp = self::values($lp, $s, 'logProbUpars'); $ll = self::values($ll, $s, 'logLikIUpars');
         $lr = []; $lf = [];
         foreach ($lp as $j => $v) { $proposal = $model['orig_lp'][$j] - $logAbsDet; $r = $v - $ll[$j] - $proposal; $lr[] = is_nan($r) ? -INF : $r; $lf[] = $v - $proposal; }
         try { $is = Psis::psis($lr, $rEff); $isf = Psis::psis($lf, $rEff); }
@@ -248,9 +248,9 @@ final class MomentMatch
         try { $lpForward = $model['log_prob'](array_slice($z, 0, $half)); $lpInverse = $model['log_prob']($u); $ll = $model['log_lik']($z, $i); }
         catch (\Exception $e) { return ['stop' => 'split_failed', 'message' => $e->getMessage()]; }
         // Untransformed rows reuse the posterior log density: p(z) for the second half and p(T^-1 z) for the first.
-        $lpZ = array_merge(self::values($lpForward, $half, 'log_prob_upars'), array_slice($model['orig_lp'], $half));
-        $lpU = array_merge(array_slice($model['orig_lp'], 0, $half), self::values($lpInverse, $s - $half, 'log_prob_upars'));
-        $ll = self::values($ll, $s, 'log_lik_i_upars');
+        $lpZ = array_merge(self::values($lpForward, $half, 'logProbUpars'), array_slice($model['orig_lp'], $half));
+        $lpU = array_merge(array_slice($model['orig_lp'], 0, $half), self::values($lpInverse, $s - $half, 'logProbUpars'));
+        $ll = self::values($ll, $s, 'logLikIUpars');
         try {
             $lwi = Psis::psis(self::splitLogRatios($lpZ, $lpU, $ll, $t['forward']['log_abs_det']), $rEff)['log_weights'];
             $lwfi = Psis::psis(array_map(fn($a, $b) => is_nan($a + $b) ? -INF : $a + $b, $lwi, $ll), $rEff)['log_weights'];

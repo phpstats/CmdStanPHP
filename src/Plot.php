@@ -28,32 +28,32 @@ final class Plot
         $rows = array_map(fn($b) => ['x0' => $lo + $b * ($hi - $lo) / $bins, 'x1' => $lo + ($b + 1) * ($hi - $lo) / $bins, 'count' => $counts[$b]], range(0, $bins - 1));
         return new Figure('hist', $variable.': histogram of '.count($values).' draws, '.$bins.' bins', $rows, ['variable' => $variable, 'draws' => count($values), 'bins' => $bins]);
     }
-    /** Kernel density of all draws, or one curve per chain with $by_chain (bayesplot's mcmc_dens and mcmc_dens_overlay). */
-    public static function dens(CmdStanFit|array $draws, string $variable, bool $by_chain = false): Figure
+    /** Kernel density of all draws, or one curve per chain with $byChain (bayesplot's mcmc_dens and mcmc_dens_overlay). */
+    public static function dens(CmdStanFit|array $draws, string $variable, bool $byChain = false): Figure
     {
-        $chains = self::chains($draws, $variable); $sets = $by_chain ? $chains : [array_merge(...$chains)]; $rows = []; $bandwidths = [];
+        $chains = self::chains($draws, $variable); $sets = $byChain ? $chains : [array_merge(...$chains)]; $rows = []; $bandwidths = [];
         foreach ($sets as $c => $set) {
             $bw = $bandwidths[] = self::bandwidth($set); $lo = min($set) - 3 * $bw; $hi = max($set) + 3 * $bw;
             $at = array_map(fn($i) => $lo + $i * ($hi - $lo) / 511, range(0, 511));
-            foreach (self::density($set, $at, $bw) as $i => $d) { $rows[] = ['chain' => $by_chain ? $c + 1 : null, 'x' => $at[$i], 'density' => $d]; }
+            foreach (self::density($set, $at, $bw) as $i => $d) { $rows[] = ['chain' => $byChain ? $c + 1 : null, 'x' => $at[$i], 'density' => $d]; }
         }
-        return new Figure('dens', $variable.': kernel density', $rows, ['variable' => $variable, 'by_chain' => $by_chain, 'bandwidths' => $bandwidths, 'chains' => count($chains)]);
+        return new Figure('dens', $variable.': kernel density', $rows, ['variable' => $variable, 'by_chain' => $byChain, 'bandwidths' => $bandwidths, 'chains' => count($chains)]);
     }
     /**
      * Inner and outer posterior intervals with a point estimate (bayesplot's mcmc_intervals). A null selection uses
      * every variable except lp__ and other names ending in '__'; base names select all of their elements.
      */
-    public static function intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $prob_outer = 0.9, string $point_est = 'median'): Figure
+    public static function intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $probOuter = 0.9, string $pointEst = 'median'): Figure
     {
-        if (!($prob > 0 && $prob <= $prob_outer && $prob_outer <= 1)) { throw new \InvalidArgumentException('Require 0 < prob <= prob_outer <= 1.'); }
-        if (!in_array($point_est, ['median', 'mean', 'none'], true)) { throw new \InvalidArgumentException("point_est must be 'median', 'mean' or 'none'."); }
+        if (!($prob > 0 && $prob <= $probOuter && $probOuter <= 1)) { throw new \InvalidArgumentException('Require 0 < prob <= probOuter <= 1.'); }
+        if (!in_array($pointEst, ['median', 'mean', 'none'], true)) { throw new \InvalidArgumentException("pointEst must be 'median', 'mean' or 'none'."); }
         $rows = [];
         foreach (self::columns($draws, $variables) as $name => $values) {
             $q = fn(float $p) => CmdStanFit::quantile($values, $p);
-            $rows[] = ['variable' => (string)$name, 'll' => $q((1 - $prob_outer) / 2), 'l' => $q((1 - $prob) / 2), 'm' => match ($point_est) { 'median' => $q(0.5), 'mean' => array_sum($values) / count($values), default => null }, 'h' => $q((1 + $prob) / 2), 'hh' => $q((1 + $prob_outer) / 2)];
+            $rows[] = ['variable' => (string)$name, 'll' => $q((1 - $probOuter) / 2), 'l' => $q((1 - $prob) / 2), 'm' => match ($pointEst) { 'median' => $q(0.5), 'mean' => array_sum($values) / count($values), default => null }, 'h' => $q((1 + $prob) / 2), 'hh' => $q((1 + $probOuter) / 2)];
         }
-        $title = 'intervals: '.self::percent($prob).' inner, '.self::percent($prob_outer).' outer'.($point_est === 'none' ? '' : ', point = '.$point_est);
-        return new Figure('intervals', $title, $rows, ['prob' => $prob, 'prob_outer' => $prob_outer, 'point_est' => $point_est]);
+        $title = 'intervals: '.self::percent($prob).' inner, '.self::percent($probOuter).' outer'.($pointEst === 'none' ? '' : ', point = '.$pointEst);
+        return new Figure('intervals', $title, $rows, ['prob' => $prob, 'prob_outer' => $probOuter, 'point_est' => $pointEst]);
     }
     /** Per-chain histograms of pooled ranks (bayesplot's mcmc_rank_hist), with the count expected under uniform ranks. */
     public static function rankHist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure
@@ -69,14 +69,14 @@ final class Plot
         return new Figure('rank_hist', $variable.': rank histograms, '.$bins.' bins of '.$total.' pooled ranks', $rows, ['variable' => $variable, 'bins' => $bins, 'total' => $total, 'chains' => count($chains)]);
     }
     /** Joint draws of two variables (bayesplot's mcmc_scatter); MCMC fits flag divergent transitions. */
-    public static function scatter(CmdStanFit|array $draws, string $x_variable, string $y_variable): Figure
+    public static function scatter(CmdStanFit|array $draws, string $xVariable, string $yVariable): Figure
     {
-        $xs = array_merge(...self::chains($draws, $x_variable)); $ys = array_merge(...self::chains($draws, $y_variable)); $divergent = array_fill(0, count($xs), false); $flagged = false;
+        $xs = array_merge(...self::chains($draws, $xVariable)); $ys = array_merge(...self::chains($draws, $yVariable)); $divergent = array_fill(0, count($xs), false); $flagged = false;
         if ($draws instanceof CmdStanMCMC && array_key_exists('divergent__', $draws->samplerDiagnostics('draws_list')[0])) {
             $divergent = array_map(fn($flag) => $flag > 0, array_merge(...array_map(fn($chain) => $chain['divergent__'], $draws->samplerDiagnostics('draws_list')))); $flagged = true;
         }
         $rows = array_map(fn($x, $y, $d) => ['x' => $x, 'y' => $y, 'divergent' => $d], $xs, $ys, $divergent);
-        return new Figure('scatter', $y_variable.' against '.$x_variable, $rows, ['x_variable' => $x_variable, 'y_variable' => $y_variable, 'divergences' => $flagged]);
+        return new Figure('scatter', $yVariable.' against '.$xVariable, $rows, ['x_variable' => $xVariable, 'y_variable' => $yVariable, 'divergences' => $flagged]);
     }
     /** Per-chain autocorrelations for lags 0..$lags (bayesplot's mcmc_acf_bar). */
     public static function acf(CmdStanFit|array $draws, string $variable, int $lags = 20): Figure

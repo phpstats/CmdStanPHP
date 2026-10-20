@@ -40,7 +40,7 @@ final class MomentMatchIntegrationTest extends TestCase
     }
     public function testMomentMatchingThroughModelMethods(): void
     {
-        $fit = $this->fit(); $plain = $fit->loo(); $mm = $fit->loo(moment_match: true);
+        $fit = $this->fit(); $plain = $fit->loo(); $mm = $fit->loo(momentMatch: true);
         $outlier = 11; $matched = array_column($mm['moment_match']['observations'], null, 'index');
         self::assertGreaterThan($plain['k_threshold'], $plain['diagnostics']['pareto_k'][$outlier]);
         self::assertArrayHasKey($outlier, $matched); self::assertSame('log_lik[12]', $matched[$outlier]['observation']);
@@ -64,7 +64,7 @@ final class MomentMatchIntegrationTest extends TestCase
         $generic = MomentMatch::loo(Loo::loo($logLik), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
         self::assertSame($mm, $generic);
         // A matrix-shaped log-likelihood maps "log_lik_matrix[i,1]" to the same values.
-        $matrix = $fit->loo('log_lik_matrix', moment_match: true);
+        $matrix = $fit->loo('log_lik_matrix', momentMatch: true);
         self::assertSame('log_lik_matrix[12,1]', $matrix['moment_match']['observations'][array_search($outlier, array_column($matrix['moment_match']['observations'], 'index'), true)]['observation']);
         self::assertEqualsWithDelta($mm['elpd_loo'], $matrix['elpd_loo'], 1e-12);
     }
@@ -102,21 +102,21 @@ final class MomentMatchIntegrationTest extends TestCase
             foreach ($columns as $column) { foreach ($reference['pointwise'][$column] as $i => $v) { $close($v, $actual['pointwise'][$i][$column], "$label $column [$i]"); } }
             foreach ($reference['pareto_k'] as $i => $v) { self::assertEqualsWithDelta($v, $actual['diagnostics']['pareto_k'][$i], 1e-8, "$label pareto_k [$i]"); }
         };
-        $compare($ref['unsplit'], $unsplit = $fit->loo(moment_match: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
+        $compare($ref['unsplit'], $unsplit = $fit->loo(momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
         foreach ($ref['unsplit']['n_eff'] as $i => $v) { $close($v, $unsplit['diagnostics']['n_eff'][$i], "unsplit n_eff [$i]"); }
         // With shifts only, the exact and loo split inverses coincide; mcse and n_eff use the two-half r_eff.
-        $split = $fit->loo(moment_match: true);
+        $split = $fit->loo(momentMatch: true);
         foreach ($split['moment_match']['observations'] as $o) { self::assertSame([], array_diff($o['transforms'], ['shift'])); }
         $compare($ref['split'], $split, ['elpd_loo', 'p_loo', 'looic'], 'split');
     }
     public function testMomentMatchOptions(): void
     {
         $fit = $this->fit();
-        $unsplit = $fit->loo(moment_match: true, split: false, cov: false, max_iters: 5);
+        $unsplit = $fit->loo(momentMatch: true, split: false, cov: false, maxIters: 5);
         self::assertFalse($unsplit['moment_match']['split']); self::assertFalse($unsplit['moment_match']['cov']);
         foreach ($unsplit['moment_match']['observations'] as $o) { self::assertNotContains('cov', $o['transforms']); self::assertLessThanOrEqual(5, count($o['transforms'])); self::assertFalse($o['split']); }
-        $strict = $fit->loo(moment_match: true, k_threshold: 0.3);
-        self::assertSame(0.3, $strict['moment_match']['k_threshold']); self::assertGreaterThanOrEqual(count($fit->loo(moment_match: true)['moment_match']['observations']), count($strict['moment_match']['observations']));
-        try { $fit->loo('log_lik', moment_match: true, max_iters: 0); self::fail('max_iters must be positive.'); } catch (\InvalidArgumentException) { self::assertTrue(true); }
+        $strict = $fit->loo(momentMatch: true, kThreshold: 0.3);
+        self::assertSame(0.3, $strict['moment_match']['k_threshold']); self::assertGreaterThanOrEqual(count($fit->loo(momentMatch: true)['moment_match']['observations']), count($strict['moment_match']['observations']));
+        try { $fit->loo('log_lik', momentMatch: true, maxIters: 0); self::fail('max_iters must be positive.'); } catch (\InvalidArgumentException) { self::assertTrue(true); }
     }
 }

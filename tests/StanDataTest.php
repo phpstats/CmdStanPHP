@@ -30,7 +30,7 @@ final class StanDataTest extends TestCase
         self::assertSame(['N' => 3, 'y' => [0, 1, 1], 'x' => [0.5, 1.5, -2.0], 'flag' => [1, 0, 1], 'v' => [[1, 2], [3, 4], [5, 6]]], $data->data);
         self::assertSame([], $data->levels);
         self::assertSame(['n' => [1, 2], 'N' => [7, 7]], StanData::fromTable(self::frame(['n' => [1, 2], 'N' => [7, 7]]))->data, 'an existing N column is kept');
-        self::assertSame(['y' => [1]], StanData::fromTable(self::frame(['y' => [1]]), add_n: false)->data);
+        self::assertSame(['y' => [1]], StanData::fromTable(self::frame(['y' => [1]]), addN: false)->data);
     }
     public function testFactorColumnsUseTableLevelsAndAreOneBased(): void
     {
@@ -120,7 +120,7 @@ final class StanDataTest extends TestCase
         self::assertSame(['(Intercept)', 'x'], $data->columns); self::assertSame(['g_id' => ['a', 'b']], $data->levels);
         self::assertSame([0, 1, 3], $data->meta['retained_rows']); self::assertSame([2], $data->meta['dropped_rows']); self::assertSame(1, $data->meta['n_dropped']);
         self::assertSame(['group' => 'g', 'columns' => ['(Intercept)', 'x'], 'terms' => [['label' => '1 + x | g', 'columns' => ['(Intercept)', 'x'], 'correlated' => true]]], $data->meta['random']['g']);
-        $dropped = StanData::fromModelMatrix($mm, drop_intercept: true, group_levels: ['g' => ['b', 'a']]);
+        $dropped = StanData::fromModelMatrix($mm, dropIntercept: true, groupLevels: ['g' => ['b', 'a']]);
         self::assertSame([[0.5], [1.5], [2.5]], $dropped->data['X']); self::assertSame(1, $dropped->data['K']); self::assertSame(['x'], $dropped->columns); self::assertSame([1, 2, 1], $dropped->data['g_id']);
     }
     public function testModelMatrixResponsesInterceptGroupsAndOffsets(): void
@@ -169,7 +169,7 @@ final class StanDataTest extends TestCase
     {
         if (function_exists('Phit\model_matrix')) { self::markTestSkipped('The real Phit\model_matrix() is loaded.'); }
         eval('namespace Phit; function model_matrix(string $formula, mixed $data, string $missing = "drop"): array { $GLOBALS["model_matrix_call"] = [$formula, $data, $missing]; $labels = isset($data["g"]["codes"]) ? array_map(fn($c) => $c === null ? null : $data["g"]["levels"][$c], $data["g"]["codes"]) : $data["g"]; return ["y" => $data["y"], "x" => array_map(fn($x) => [1.0, $x], $data["x"]), "columns" => ["(Intercept)", "x"], "intercept" => true, "random" => [["label" => "1 | g", "group" => "g", "columns" => ["(Intercept)"], "correlated" => true, "z" => [[1.0], [1.0]], "groups" => $labels]], "retained_rows" => [0, 1], "dropped_rows" => []]; }');
-        $data = StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['b', 'a']]), drop_intercept: true, missing: 'raise');
+        $data = StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['b', 'a']]), dropIntercept: true, missing: 'raise');
         self::assertSame(['y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]], 'raise'], $GLOBALS['model_matrix_call'], 'factor columns are passed as descriptors that keep the level order');
         self::assertSame(['N' => 2, 'K' => 1, 'X' => [[3.0], [4.0]], 'y' => [1.0, 2.5], 'g_id' => [1, 2], 'J_g' => 2, 'J' => 2], $data->data, 'the table\'s factor levels set the group order');
         $model = ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]];
@@ -200,7 +200,7 @@ final class StanDataTest extends TestCase
     {
         self::requireModelMatrix();
         $warnings = []; set_error_handler(function (int $no, string $message) use (&$warnings) { $warnings[] = $message; return true; }, E_WARNING);
-        try { $data = StanData::fromFormula('y ~ x + f + (1 + x | g)', self::SCHOOLS, drop_intercept: true); } finally { restore_error_handler(); }
+        try { $data = StanData::fromFormula('y ~ x + f + (1 + x | g)', self::SCHOOLS, dropIntercept: true); } finally { restore_error_handler(); }
         self::assertCount(1, $warnings, 'Phit\model_matrix() warns once about dropped rows');
         self::assertSame(5, $data->data['N']); self::assertSame(['x', 'flo', 'fmid'], $data->columns); self::assertSame(3, $data->data['K']);
         self::assertSame([[0.5, 1.0, 0.0], [1.5, 0.0, 0.0], [2.5, 1.0, 0.0], [1.0, 0.0, 1.0], [2.0, 1.0, 0.0]], $data->data['X']);
