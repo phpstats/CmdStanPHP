@@ -168,7 +168,10 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#supported-workflows" id="toc-supported-workflows" class="nav-link active" data-scroll-target="#supported-workflows">Supported workflows</a></li>
+  <li><a href="#supported-workflows" id="toc-supported-workflows" class="nav-link active" data-scroll-target="#supported-workflows">Supported workflows</a>
+  <ul class="collapse">
+  <li><a href="#method-names" id="toc-method-names" class="nav-link" data-scroll-target="#method-names">Method names</a></li>
+  </ul></li>
   <li><a href="#php-adaptations" id="toc-php-adaptations" class="nav-link" data-scroll-target="#php-adaptations">PHP adaptations</a></li>
   <li><a href="#not-implemented" id="toc-not-implemented" class="nav-link" data-scroll-target="#not-implemented">Not implemented</a></li>
   </ul>
@@ -196,15 +199,10 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>This package ports CmdStanR’s core model/executable/CSV workflow to PHP. It does <strong>not</strong> claim full CmdStanR compatibility. The reference is the <a href="https://mc-stan.org/cmdstanr/reference/">CmdStanR API</a> and <a href="https://mc-stan.org/docs/cmdstan-guide/command_line_options.html">CmdStan CLI</a>, consulted during implementation. PHP interfaces preserve modern method and option names wherever their meaning transfers directly.</p>
+<p>This package ports CmdStanR’s core model/executable/CSV workflow to PHP. It does <strong>not</strong> claim full CmdStanR compatibility. The reference is the <a href="https://mc-stan.org/cmdstanr/reference/">CmdStanR API</a> and <a href="https://mc-stan.org/docs/cmdstan-guide/command_line_options.html">CmdStan CLI</a>, consulted during implementation. PHP interfaces preserve modern option names wherever their meaning transfers directly. Method names do not carry over: PSR-1 makes a PHP method name camelCase, so CmdStanR’s <code>fit$output_files()</code> is <code>$fit-&gt;outputFiles()</code> here. The <a href="#method-names">method names</a> table maps every one of them, and the package declares no snake_case alias beside the camelCase name.</p>
 <section id="supported-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="supported-workflows">Supported workflows</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>CmdStanR capability</th>
@@ -250,7 +248,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>Single/multi-path Pathfinder, per-path fits</td>
-<td><code>CmdStanPathfinder</code>, <code>single_path_fits()</code></td>
+<td><code>CmdStanPathfinder</code>, <code>singlePathFits()</code></td>
 <td>Real multi-path tests</td>
 </tr>
 <tr class="odd">
@@ -280,12 +278,12 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>In-process log density, gradient, Hessian, constrain/unconstrain, variable skeleton</td>
-<td><code>init_model_methods()</code> and fit methods through PHP FFI</td>
+<td><code>initModelMethods()</code> and fit methods through PHP FFI</td>
 <td>Real model tests; CmdStanR comparison</td>
 </tr>
 <tr class="odd">
 <td>Calling user-defined Stan functions</td>
-<td><code>expose_functions()</code> through PHP FFI</td>
+<td><code>exposeFunctions()</code> through PHP FFI</td>
 <td>Real function tests; CmdStanR comparison</td>
 </tr>
 <tr class="even">
@@ -300,7 +298,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>CSV metadata structure</td>
-<td><code>metadata()</code>, <code>chain_metadata()</code></td>
+<td><code>metadata()</code>, <code>chainMetadata()</code></td>
 <td>Key-by-key comparison with CmdStanR for five methods</td>
 </tr>
 <tr class="odd">
@@ -310,7 +308,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>Summaries, custom summary measures, diagnostics</td>
-<td><code>summary()</code>, <code>diagnostic_summary()</code></td>
+<td><code>summary()</code>, <code>diagnosticSummary()</code></td>
 <td>Unit and real posterior tests; posterior comparison</td>
 </tr>
 <tr class="odd">
@@ -320,7 +318,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>Moment matching in <code>loo()</code></td>
-<td><code>loo(moment_match: true)</code> through model methods and the <code>phit</code> draw kernels</td>
+<td><code>loo(momentMatch: true)</code> through model methods and the <code>phit</code> draw kernels</td>
 <td>Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison</td>
 </tr>
 <tr class="odd">
@@ -350,7 +348,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>MPI launching</td>
-<td><code>sample_mpi()</code></td>
+<td><code>sampleMpi()</code></td>
 <td>Argument construction only; real MPI is unverified</td>
 </tr>
 <tr class="odd">
@@ -358,18 +356,553 @@ ul.task-list li input[type="checkbox"] {
 <td>CLI/C++ options</td>
 <td>Thread and auxiliary-file tests; OpenCL hardware is unverified</td>
 </tr>
+<tr class="even">
+<td>CmdStanR, posterior, loo, and bayesplot method names</td>
+<td>camelCase, mapped one to one in <a href="#method-names">method names</a></td>
+<td>Signature inventory in the family repository</td>
+</tr>
 </tbody>
 </table>
+<section id="method-names" class="level3">
+<h3 class="anchored" data-anchor-id="method-names">Method names</h3>
+<p>The package named its methods after their CmdStanR, posterior, loo, and bayesplot counterparts, so <code>fit$output_files()</code> in R was <code>$fit-&gt;output_files()</code> here. PSR-1 makes a PHP method name camelCase, and this family declares no second spelling, so each R name now maps to one PHP name. Option names, CSV metadata keys, result-array keys, summary measure names, and the standalone functions are unchanged: <code>sample(iter_warmup: 500)</code> and <code>Summary::summarise($draws, ['ess_bulk'])</code> read as they always did. Every method whose name changed is below.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Before</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CmdStanModel</code></td>
+<td><code>check_syntax()</code></td>
+<td><code>checkSyntax()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>cpp_options()</code></td>
+<td><code>cppOptions()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>exe_file()</code></td>
+<td><code>exeFile()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>expose_functions()</code></td>
+<td><code>exposeFunctions()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>generate_quantities()</code></td>
+<td><code>generateQuantities()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>has_stan_file()</code></td>
+<td><code>hasStanFile()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>hpp_file()</code></td>
+<td><code>hppFile()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>include_paths()</code></td>
+<td><code>includePaths()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>log_prob()</code></td>
+<td><code>logProb()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>model_name()</code></td>
+<td><code>modelName()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>sample_mpi()</code></td>
+<td><code>sampleMpi()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>save_hpp_file()</code></td>
+<td><code>saveHppFile()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>stan_file()</code></td>
+<td><code>stanFile()</code></td>
+</tr>
+<tr class="even">
+<td><code>CmdStanFit</code></td>
+<td><code>chain_metadata()</code></td>
+<td><code>chainMetadata()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>check_diagnostics()</code></td>
+<td><code>checkDiagnostics()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>cmdstan_config()</code></td>
+<td><code>cmdstanConfig()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>cmdstan_diagnose()</code></td>
+<td><code>cmdstanDiagnose()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>cmdstan_summary()</code></td>
+<td><code>cmdstanSummary()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>config_files()</code></td>
+<td><code>configFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>constrain_variables()</code></td>
+<td><code>constrainVariables()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>data_file()</code></td>
+<td><code>dataFile()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>diagnostic_summary()</code></td>
+<td><code>diagnosticSummary()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>diagnostic_warnings()</code></td>
+<td><code>diagnosticWarnings()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>draws_columns()</code></td>
+<td><code>drawsColumns()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>draws_table()</code></td>
+<td><code>drawsTable()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>expose_functions()</code></td>
+<td><code>exposeFunctions()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>grad_log_prob()</code></td>
+<td><code>gradLogProb()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>init_model_methods()</code></td>
+<td><code>initModelMethods()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>inv_metric()</code></td>
+<td><code>invMetric()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>latent_dynamics_files()</code></td>
+<td><code>latentDynamicsFiles()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>log_prob()</code></td>
+<td><code>logProb()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>metric_files()</code></td>
+<td><code>metricFiles()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>num_chains()</code></td>
+<td><code>numChains()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>num_draws_sampling()</code></td>
+<td><code>numDrawsSampling()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>num_draws_warmup()</code></td>
+<td><code>numDrawsWarmup()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>num_procs()</code></td>
+<td><code>numProcs()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>output_files()</code></td>
+<td><code>outputFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>profile_files()</code></td>
+<td><code>profileFiles()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>return_codes()</code></td>
+<td><code>returnCodes()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>sampler_diagnostics()</code></td>
+<td><code>samplerDiagnostics()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>save_config_files()</code></td>
+<td><code>saveConfigFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>save_data_file()</code></td>
+<td><code>saveDataFile()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>save_latent_dynamics_files()</code></td>
+<td><code>saveLatentDynamicsFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>save_metric_files()</code></td>
+<td><code>saveMetricFiles()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>save_object()</code></td>
+<td><code>saveObject()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>save_output_files()</code></td>
+<td><code>saveOutputFiles()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>save_profile_files()</code></td>
+<td><code>saveProfileFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>step_size()</code></td>
+<td><code>stepSize()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>summary_columns()</code></td>
+<td><code>summaryColumns()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>summary_table()</code></td>
+<td><code>summaryTable()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>unconstrain_draws()</code></td>
+<td><code>unconstrainDraws()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>unconstrain_variables()</code></td>
+<td><code>unconstrainVariables()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>variable_skeleton()</code></td>
+<td><code>variableSkeleton()</code></td>
+</tr>
+<tr class="even">
+<td><code>CmdStanGQ</code></td>
+<td><code>fitted_params_files()</code></td>
+<td><code>fittedParamsFiles()</code></td>
+</tr>
+<tr class="odd">
+<td><code>CmdStanLaplace</code></td>
+<td><code>lp_approx()</code></td>
+<td><code>lpApprox()</code></td>
+</tr>
+<tr class="even">
+<td><code>CmdStanMLE</code></td>
+<td><code>optimized_params()</code></td>
+<td><code>optimizedParams()</code></td>
+</tr>
+<tr class="odd">
+<td><code>CmdStanPathfinder</code></td>
+<td><code>lp_approx()</code></td>
+<td><code>lpApprox()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>single_path_diagnostics()</code></td>
+<td><code>singlePathDiagnostics()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>single_path_files()</code></td>
+<td><code>singlePathFiles()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>single_path_fits()</code></td>
+<td><code>singlePathFits()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>single_path_json_files()</code></td>
+<td><code>singlePathJsonFiles()</code></td>
+</tr>
+<tr class="even">
+<td><code>CmdStanVB</code></td>
+<td><code>lp_approx()</code></td>
+<td><code>lpApprox()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>variational_mean()</code></td>
+<td><code>variationalMean()</code></td>
+</tr>
+<tr class="even">
+<td><code>ModelMethods</code></td>
+<td><code>constrain_variables()</code></td>
+<td><code>constrainVariables()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>constrained_param_names()</code></td>
+<td><code>constrainedParamNames()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>grad_log_prob()</code></td>
+<td><code>gradLogProb()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>log_prob()</code></td>
+<td><code>logProb()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>num_unconstrained()</code></td>
+<td><code>numUnconstrained()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>seed_rng()</code></td>
+<td><code>seedRng()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>unconstrain_draws()</code></td>
+<td><code>unconstrainDraws()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>unconstrain_variables()</code></td>
+<td><code>unconstrainVariables()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>unconstrained_param_names()</code></td>
+<td><code>unconstrainedParamNames()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>variable_skeleton()</code></td>
+<td><code>variableSkeleton()</code></td>
+</tr>
+<tr class="even">
+<td><code>Summary</code></td>
+<td><code>default_convergence_measures()</code></td>
+<td><code>defaultConvergenceMeasures()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>default_mcse_measures()</code></td>
+<td><code>defaultMcseMeasures()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>default_summary_measures()</code></td>
+<td><code>defaultSummaryMeasures()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ess_basic()</code></td>
+<td><code>essBasic()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>ess_bulk()</code></td>
+<td><code>essBulk()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ess_mean()</code></td>
+<td><code>essMean()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>ess_median()</code></td>
+<td><code>essMedian()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ess_quantile()</code></td>
+<td><code>essQuantile()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>ess_sd()</code></td>
+<td><code>essSd()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ess_tail()</code></td>
+<td><code>essTail()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>mcse_mean()</code></td>
+<td><code>mcseMean()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>mcse_median()</code></td>
+<td><code>mcseMedian()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>mcse_quantile()</code></td>
+<td><code>mcseQuantile()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>mcse_sd()</code></td>
+<td><code>mcseSd()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>rhat_basic()</code></td>
+<td><code>rhatBasic()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>split_chains()</code></td>
+<td><code>splitChains()</code></td>
+</tr>
+<tr class="even">
+<td><code>Psis</code></td>
+<td><code>pareto_khat()</code></td>
+<td><code>paretoKhat()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>pareto_smooth()</code></td>
+<td><code>paretoSmooth()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>pareto_smooth_log_weights()</code></td>
+<td><code>paretoSmoothLogWeights()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ps_convergence_rate()</code></td>
+<td><code>psConvergenceRate()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>ps_khat_threshold()</code></td>
+<td><code>psKhatThreshold()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>ps_min_ss()</code></td>
+<td><code>psMinSs()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>ps_tail_length()</code></td>
+<td><code>psTailLength()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>qgeneralized_pareto()</code></td>
+<td><code>qgeneralizedPareto()</code></td>
+</tr>
+<tr class="even">
+<td><code>Loo</code></td>
+<td><code>pareto_k_table()</code></td>
+<td><code>paretoKTable()</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><code>relative_eff()</code></td>
+<td><code>relativeEff()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>relative_eff_log_lik()</code></td>
+<td><code>relativeEffLogLik()</code></td>
+</tr>
+<tr class="odd">
+<td><code>Plot</code></td>
+<td><code>pareto_k()</code></td>
+<td><code>paretoK()</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>rank_hist()</code></td>
+<td><code>rankHist()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 <section id="php-adaptations" class="level2">
 <h2 class="anchored" data-anchor-id="php-adaptations">PHP adaptations</h2>
 <p>R named lists become associative PHP arrays; numeric arrays must be rectangular zero-indexed lists. R sparse matrices, complex numbers, NA, and automatic R object conversion have no PHP equivalent. Data frames and factors can come from phibble or any object with <code>toModelData()</code> or <code>toColumns()</code>, following the conventions in the <a href="./api.html#data-frames-and-the-phpstats-family">API reference</a>. <code>code()</code> returns one source string. Syntax errors throw exceptions rather than returning an R diagnostic list.</p>
 <p>R posterior objects become PHP arrays with documented shapes. All array indices are zero-based; draw metadata is one-based. <code>draws_array</code> retains iteration/chain axes, <code>draws_matrix</code> concatenates chains, <code>draws_df</code> is associative rows, <code>draws_list</code> maps variables to values per chain, and <code>draws_rvars</code> nests each variable’s draws by its dimensions. R tibble, posterior, bayesplot, and ggplot2 classes are not emulated. The default draws format follows CmdStanR: <code>draws_array</code> for MCMC and generated quantities and <code>draws_matrix</code> for other methods.</p>
 <p>Summary quantiles use linear interpolation (R’s default type 7). Scaled MAD uses 1.4826. The default MCMC summary delegates R-hat and bulk ESS to the installed CmdStan <code>stansummary</code> and computes tail ESS in PHP. Passing <code>measures</code> to <code>summary()</code> uses a PHP port of posterior’s <code>summarise_draws()</code>, including rank-normalized R-hat, bulk/tail ESS, and MCSE, so it does not need CmdStan. Results are checked against the installed reference R packages, but are not guaranteed bit-for-bit identical to every version of posterior. ADVI’s mean row is stored separately. ADVI and Laplace <code>log_p__</code> columns are normalized to <code>lp__</code> and their approximate densities to <code>lp_approx__</code>, matching CmdStanR. Non-MCMC convergence statistics are <code>NAN</code>.</p>
-<p><code>metadata()</code> returns one merged array with CmdStanR’s keys, such as <code>iter_sampling</code>, <code>max_treedepth</code>, and <code>stan_variable_sizes</code>, alongside CmdStan’s raw argument names. <code>chain_metadata()</code> returns the per-chain arrays. <code>inv_metric()</code> returns matrices by default and reads metric JSON when every chain has one.</p>
+<p><code>metadata()</code> returns one merged array with CmdStanR’s keys, such as <code>iter_sampling</code>, <code>max_treedepth</code>, and <code>stan_variable_sizes</code>, alongside CmdStan’s raw argument names. <code>chainMetadata()</code> returns the per-chain arrays. <code>invMetric()</code> returns matrices by default and reads metric JSON when every chain has one.</p>
 <p>Model methods and exposed functions compile a shared library against the selected CmdStan and load it with PHP FFI. FFI is enabled for the CLI by default (<code>ffi.enable=preload</code>); web SAPIs need <code>ffi.enable=true</code> or preloading. Libraries are cached beside the Stan source with a fingerprint in the file name. Model methods drop constant terms and default to <code>jacobian: true</code>, as in CmdStanR. Unconstrained vectors are flat lists, and constrained variables are nested zero-based arrays with matrices as lists of rows. Fits serialize the library path, data, and seed, and reconnect on first use; the generated-quantities RNG then restarts from its seed.</p>
 <p>Initialization from a fit follows CmdStanR’s <code>process_init()</code>. MCMC draws are resampled without replacement, an optimization estimate is repeated, and ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights. Resampling uses PHP’s seeded Mt19937 engine, so a given seed selects different draws than CmdStanR does.</p>
-<p>Diagnostic checks are structured messages accessible with <code>diagnostic_warnings()</code>, rather than PHP runtime warnings. Console output is buffered; there is no R progress-bar or interrupt integration. <code>show_messages</code> controls stdout, <code>show_exceptions</code> controls stderr. Deprecated CmdStanR argument names raise <code>E_USER_DEPRECATED</code> and map to their replacements; conflicting old and new values throw. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves files that a run created and copies imported CSVs and user-supplied data files; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.</p>
+<p>Diagnostic checks are structured messages accessible with <code>diagnosticWarnings()</code>, rather than PHP runtime warnings. Console output is buffered; there is no R progress-bar or interrupt integration. <code>show_messages</code> controls stdout, <code>show_exceptions</code> controls stderr. Deprecated CmdStanR argument names raise <code>E_USER_DEPRECATED</code> and map to their replacements; conflicting old and new values throw. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves files that a run created and copies imported CSVs and user-supplied data files; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.</p>
 <p><code>options()</code> and <code>cmdstan_option()</code> provide CmdStanR’s global options that have a PHP meaning: default output directory, Stan file directory, forced recompilation, draws format, initialization warnings, verbose compilation, printed rows, line numbers, and <code>mc.cores</code>. <code>cmdstanr_no_ver_check</code> is accepted and has no effect because this package never checks for updates.</p>
 <p>Algorithm parameters left null use CmdStan’s defaults. PHP-level defaults include four sample chains, sequential execution unless requested, and one MPI chain. CmdStanR defaults for automatically saving metric/configuration JSON are not imposed; request <code>save_metric</code> or <code>save_cmdstan_config</code> explicitly. The installer defaults to one core where CmdStanR uses two. OpenCL and MPI require external toolchains/hardware. Windows has not been validated.</p>
 <p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with corrections to the split step and relative efficiencies. loo’s development version adopted the split corrections in <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo’s identity-map fallback while retaining the mean shift; its reason is recorded in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./inference.html">inference guide</a> describes the result.</p>

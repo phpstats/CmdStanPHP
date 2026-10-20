@@ -14,15 +14,15 @@ $fit = $model->sample(
     output_dir: 'output', show_messages: false,
 );
 print_r($fit->summary('theta'));
-print_r($fit->diagnostic_summary());
-print_r($fit->diagnostic_warnings());
+print_r($fit->diagnosticSummary());
+print_r($fit->diagnosticWarnings());
 ```
 
 `chains` controls independent processes; `parallel_chains` bounds their concurrent execution. IDs are unique positive integers. A scalar seed is shared across chains and Stan uses IDs to create separate random streams; a seed list provides one seed per chain. For a threaded model, `threads_per_chain` sets both `num_threads` and `STAN_NUM_THREADS`. Budget CPU use as parallel chains multiplied by threads per chain.
 
 `init` accepts a nonnegative numeric radius, a file, an associative parameter array, a list of files/arrays (one per chain), a callable accepting the chain ID, or a fit object. For example `init: fn($id) => ['theta' => $id / 5]`. Precomputed inverse metrics can be supplied with `inv_metric`, or `metric_file` for one file per chain. Use `metric: 'dense_e'` for matrix metrics.
 
-Diagnostics include divergent transitions, transitions reaching maximum tree depth, and E-BFMI. Checks populate `diagnostic_warnings()` rather than emitting PHP warnings. `diagnostics: []` or `null` disables automatic checks. `cmdstan_diagnose()` runs CmdStan's diagnostic utility. Review diagnostics before relying on an estimate.
+Diagnostics include divergent transitions, transitions reaching maximum tree depth, and E-BFMI. Checks populate `diagnosticWarnings()` rather than emitting PHP warnings. `diagnostics: []` or `null` disables automatic checks. `cmdstanDiagnose()` runs CmdStan's diagnostic utility. Review diagnostics before relying on an estimate.
 
 ## Initialization from fits
 
@@ -50,13 +50,13 @@ $vb = $model->variational(data: $data, algorithm: 'meanfield', draws: 1000, seed
 $pf = $model->pathfinder(data: $data, num_paths: 4, single_path_draws: 500, draws: 1000, seed: 123);
 ```
 
-ADVI supports `meanfield` and `fullrank`. Its first CSV row is the variational mean and is excluded from posterior draws; retrieve it with `variational_mean()`. Pathfinder's `single_path_draws` maps to `num_draws`, and `draws` maps to `num_psis_draws`. With `save_single_paths: true`, `single_path_fits()` returns one `CmdStanPathfinder` per path and `single_path_diagnostics()` decodes each path's JSON output. These approximations have different convergence diagnostics than MCMC; summaries do not report MCMC ESS or R-hat for them.
+ADVI supports `meanfield` and `fullrank`. Its first CSV row is the variational mean and is excluded from posterior draws; retrieve it with `variationalMean()`. Pathfinder's `single_path_draws` maps to `num_draws`, and `draws` maps to `num_psis_draws`. With `save_single_paths: true`, `singlePathFits()` returns one `CmdStanPathfinder` per path and `singlePathDiagnostics()` decodes each path's JSON output. These approximations have different convergence diagnostics than MCMC; summaries do not report MCMC ESS or R-hat for them.
 
 ## Generated quantities and fixed parameters
 
 ```php
 $predictionModel = CmdStan\cmdstan_model('examples/generated.stan');
-$gq = $predictionModel->generate_quantities($fit, data: $data, seed: 123, parallel_chains: 2);
+$gq = $predictionModel->generateQuantities($fit, data: $data, seed: 123, parallel_chains: 2);
 $predictions = $gq->draws('prediction', 'draws_matrix');
 ```
 
@@ -68,35 +68,35 @@ Pass a fit object, a CSV filename, or a list of CSV filenames. Draw matrices can
 $normal = CmdStan\cmdstan_model('examples/normal.stan');
 $gradientCheck = $normal->diagnose(init: 0);
 echo $gradientCheck->gradients();
-$logDensity = $normal->log_prob(unconstrained_params: ['params_r' => [[0.0], [1.0]]]);
+$logDensity = $normal->logProb(unconstrained_params: ['params_r' => [[0.0], [1.0]]]);
 print_r($logDensity->draws(format: 'draws_matrix'));
 ```
 
-`log_prob()` takes exactly one of `unconstrained_params` or `constrained_params`, using CmdStan's input JSON format. This runs the executable's batch log-density method. The in-process methods below evaluate one point at a time without starting a process.
+`logProb()` takes exactly one of `unconstrained_params` or `constrained_params`, using CmdStan's input JSON format. This runs the executable's batch log-density method. The in-process methods below evaluate one point at a time without starting a process.
 
 ## Model methods and Stan functions
 
 ```php
-$fit->init_model_methods(seed: 1);
-$u = $fit->unconstrain_variables(['theta' => 0.3]);
-$lp = $fit->log_prob($u);
-$gradient = $fit->grad_log_prob($u, jacobian: false)['gradient'];
+$fit->initModelMethods(seed: 1);
+$u = $fit->unconstrainVariables(['theta' => 0.3]);
+$lp = $fit->logProb($u);
+$gradient = $fit->gradLogProb($u, jacobian: false)['gradient'];
 $hessian = $fit->hessian($u)['hessian'];
-$values = $fit->constrain_variables($u);
-$unconstrained = $fit->unconstrain_draws(format: 'draws_matrix');
+$values = $fit->constrainVariables($u);
+$unconstrained = $fit->unconstrainDraws(format: 'draws_matrix');
 ```
 
-Model methods compile a shared library from the model's generated C++ with the selected CmdStan's compiler settings and load it with PHP FFI. The first build takes a few seconds; later calls reuse the library cached beside the Stan source. The library is bound to the fit's data and to a seed for the generated-quantities RNG. Log densities drop constant terms, and `jacobian` defaults to true, as in CmdStanR. An imported CSV fit needs the model: `$fit->init_model_methods(model: $model)`.
+Model methods compile a shared library from the model's generated C++ with the selected CmdStan's compiler settings and load it with PHP FFI. The first build takes a few seconds; later calls reuse the library cached beside the Stan source. The library is bound to the fit's data and to a seed for the generated-quantities RNG. Log densities drop constant terms, and `jacobian` defaults to true, as in CmdStanR. An imported CSV fit needs the model: `$fit->initModelMethods(model: $model)`.
 
-Unconstrained values are flat lists in Stan's order, and `unconstrain_draws()` labels them with Stan's unconstrained names. Constrained values are keyed by variable name, with arrays and vectors as lists, matrices as lists of rows, and complex numbers as `[re, im]` pairs. `variable_skeleton()` reports each variable's dimensions.
+Unconstrained values are flat lists in Stan's order, and `unconstrainDraws()` labels them with Stan's unconstrained names. Constrained values are keyed by variable name, with arrays and vectors as lists, matrices as lists of rows, and complex numbers as `[re, im]` pairs. `variableSkeleton()` reports each variable's dimensions.
 
 ```php
-$functions = $model->expose_functions();
+$functions = $model->exposeFunctions();
 $functions->my_function(1.5, [1.0, 2.0]);
 $functions->call('normal_draw_rng', 0.0, 1.0, seed: 42);
 ```
 
-`expose_functions()` compiles the model's `functions` block. Arguments may be positional or named by their Stan names. Supported types are real, int, complex, vectors, matrices, arrays of these, and tuples. Functions ending in `_rng` take an optional `seed`. Density functions ending in `_lpdf` or `_lpmf` return the full density. Functions ending in `_lp` and overloaded functions cannot be called. `functions()` on the returned object lists each signature and whether it is supported.
+`exposeFunctions()` compiles the model's `functions` block. Arguments may be positional or named by their Stan names. Supported types are real, int, complex, vectors, matrices, arrays of these, and tuples. Functions ending in `_rng` take an optional `seed`. Density functions ending in `_lpdf` or `_lpmf` return the full density. Functions ending in `_lp` and overloaded functions cannot be called. `functions()` on the returned object lists each signature and whether it is supported.
 
 FFI is enabled for the CLI by default. Under PHP-FPM or another web SAPI, set `ffi.enable=true` or preload the library.
 
@@ -109,20 +109,20 @@ print_r($loo['diagnostics']['pareto_k']);
 $waic = $fit->waic('log_lik');
 ```
 
-`loo()` computes PSIS-LOO from a pointwise log-likelihood variable in generated quantities. It follows the loo package as called by CmdStanR, including relative efficiencies with `r_eff: true`. Results contain `estimates`, `pointwise` rows, Pareto k diagnostics, and `k_threshold`. Inspect observations whose Pareto k exceeds the threshold.
+`loo()` computes PSIS-LOO from a pointwise log-likelihood variable in generated quantities. It follows the loo package as called by CmdStanR, including relative efficiencies with `rEff: true`. Results contain `estimates`, `pointwise` rows, Pareto k diagnostics, and `k_threshold`. Inspect observations whose Pareto k exceeds the threshold.
 
 ### Moment matching
 
 ```php
-$loo = $fit->loo('log_lik', moment_match: true);
+$loo = $fit->loo('log_lik', momentMatch: true);
 foreach ($loo['moment_match']['observations'] as $o) {
     echo $o['observation'], ': k ', $o['pareto_k_initial'], ' -> ', $o['pareto_k'], ' (', $o['stop'], ")\n";
 }
 ```
 
-`moment_match: true` applies importance-weighted moment matching (Paananen et al., 2021) to each observation whose Pareto k exceeds the threshold, as `loo::loo_moment_match()` does for CmdStanR. It needs model methods (FFI) and the posterior-draw kernels of the `phit` extension: `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`. CmdStanPHP checks for these functions by name and throws a `RuntimeException` naming any that are missing. The options `max_iters` (default 30), `k_threshold` (default `min(1 - 1/log10(S), 0.7)`), `split` (default true), and `cov` (default true) have loo's meanings. The covariance step runs only when there are at least ten draws per parameter.
+`momentMatch: true` applies importance-weighted moment matching (Paananen et al., 2021) to each observation whose Pareto k exceeds the threshold, as `loo::loo_moment_match()` does for CmdStanR. It needs model methods (FFI) and the posterior-draw kernels of the `phit` extension: `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`. CmdStanPHP checks for these functions by name and throws a `RuntimeException` naming any that are missing. The options `max_iters` (default 30), `k_threshold` (default `min(1 - 1/log10(S), 0.7)`), `split` (default true), and `cov` (default true) have loo's meanings. The covariance step runs only when there are at least ten draws per parameter.
 
-The draws are the fit's post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is `log_prob()` with `jacobian: true` and |det T| comes from the kernel's `log_abs_det`. The log-likelihood of a transformed draw is recomputed with `constrain_variables()`. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.
+The draws are the fit's post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is `logProb()` with `jacobian: true` and |det T| comes from the kernel's `log_abs_det`. The log-likelihood of a transformed draw is recomputed with `constrainVariables()`. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.
 
 The result keeps the shape of `loo()` and updates `pointwise`, `diagnostics`, `estimates`, the flat estimate keys, and `warnings`, as loo does. `influence_pareto_k` keeps its PSIS value. The added `moment_match` key lists each matched observation with its initial and final Pareto k, the full-posterior k (`pareto_kf`), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. `stop` is one of these values:
 
@@ -138,7 +138,7 @@ In the last five cases the observation keeps its last accepted transformation, `
 
 The split step differs from loo 2.10.1 and from development builds before [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405) (merged on 2026-10-13) in two ways. That pull request made the same two split corrections in loo, and the compatibility suite checks that a corrected loo's split matches CmdStanPHP on its test designs. CmdStanPHP uses the exact inverse T⁻¹(y) = A⁻¹(y − m − t) + m of the accumulated map T(x) = A(x − m) + m + t. Accepted scale and covariance matrices are multiplied in acceptance order, so noncommuting transformations retain their original effect. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map, so loo evaluates part of the mixture density at the wrong points. CmdStanPHP also takes the split relative efficiency as the minimum over both halves of the draws, where loo uses the second half twice. Relative efficiencies are computed from exp(log_lik − max). loo exponentiates unshifted values, and posterior then reports NA when every value is tiny. Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match CmdStanR.
 
-`CmdStan\MomentMatch::loo()` runs the same algorithm on any unconstrained draws with caller-supplied `log_prob_upars` and `log_lik_i_upars` callbacks. `CmdStan\DrawKernels` wraps the three kernels.
+`CmdStan\MomentMatch::loo()` runs the same algorithm on any unconstrained draws with caller-supplied `logProbUpars` and `logLikIUpars` callbacks. `CmdStan\DrawKernels` wraps the three kernels.
 
 ## Figures
 
@@ -176,7 +176,7 @@ theta |-----------[=========o==========]--------------------
 The figure functions follow bayesplot's names and return a `Figure`. A figure holds the computed statistics in `data`, as documented on the `Figure` class, and renders them in several forms:
 
 - `ascii(width, height)` returns plain ASCII text for a terminal, log, or text report. Echoing a figure prints this form with default sizes.
-- `vegaLite(width, height, max_rows)` returns a [Vega-Lite 5](https://vega.github.io/vega-lite/) spec as a PHP array with the data inlined, and `json()` returns the same spec as JSON that is safe to place in an HTML script element. Front ends render it with `vega-embed` or any other Vega-Lite runtime.
+- `vegaLite(width, height, maxRows)` returns a [Vega-Lite 5](https://vega.github.io/vega-lite/) spec as a PHP array with the data inlined, and `json()` returns the same spec as JSON that is safe to place in an HTML script element. Front ends render it with `vega-embed` or any other Vega-Lite runtime.
 - `html()` returns a standalone page that loads Vega, Vega-Lite, and vega-embed from the jsDelivr CDN.
 - `svg()` and `png(scale: 2.0)` render static images with [vl-convert](https://github.com/vega/vl-convert), a standalone binary that needs no Node or browser. Set `VL_CONVERT` to its path or put `vl-convert` on `PATH`.
 
@@ -185,7 +185,7 @@ The available figures are:
 - `mcmc_trace($fit, 'theta')`: chains overlaid by iteration.
 - `mcmc_hist($fit, 'theta', bins: 30)`: histogram of all draws.
 - `mcmc_dens($fit, 'theta')` and `mcmc_dens_overlay($fit, 'theta')`: Gaussian kernel density of all draws, or one curve per chain.
-- `mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, prob_outer: 0.9, point_est: 'median')`: inner and outer intervals with a point estimate on a shared axis. Without a selection it plots every variable except `lp__`.
+- `mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, probOuter: 0.9, pointEst: 'median')`: inner and outer intervals with a point estimate on a shared axis. Without a selection it plots every variable except `lp__`.
 - `mcmc_rank_hist($fit, 'theta', bins: 20)`: per-chain histograms of pooled ranks, with the count expected under uniform ranks marked.
 - `mcmc_scatter($fit, 'mu', 'sigma')`: joint draws, with divergent transitions marked on MCMC fits.
 - `mcmc_acf($fit, 'theta', lags: 20)`: per-chain autocorrelation bars.
@@ -195,18 +195,18 @@ A plotted variable names one element, such as `beta[2]`. `mcmc_intervals()` also
 
 The bandwidth (R's `bw.nrd0`), densities, quantiles, ranks, and autocorrelations are computed in PHP and checked against R and bayesplot. Vega-Lite specs carry these values and use no Vega-Lite density, binning, or quantile transforms, so every rendering shows the same numbers. The ASCII form rounds positions to character cells; use the figure's `data` or the numeric methods, such as `summary()`, when exact values matter.
 
-Trace and scatter figures inline every draw. For large fits, `max_rows` keeps every k-th iteration of a trace, or every k-th draw of a scatter plus all divergent draws, so that about that many rows remain. Per-chain figures (rank histograms and autocorrelation) are faceted by chain, and their sizes apply to each chain's panel.
+Trace and scatter figures inline every draw. For large fits, `maxRows` keeps every k-th iteration of a trace, or every k-th draw of a scatter plus all divergent draws, so that about that many rows remain. Per-chain figures (rank histograms and autocorrelation) are faceted by chain, and their sizes apply to each chain's panel.
 
 ## Results and persistence
 
 ```php
 $rows = $fit->draws('theta', 'draws_df');
-$csvFiles = $fit->save_output_files('saved');
-$fit->save_object('saved/fit.bin');
+$csvFiles = $fit->saveOutputFiles('saved');
+$fit->saveObject('saved/fit.bin');
 $imported = CmdStan\read_cmdstan_csv($csvFiles);
 ```
 
-`draws_array` is `[iteration][chain][variable]`, with zero-based PHP indices and associative variable names. `draws_matrix` concatenates chain rows. `draws_df` adds one-based `.chain`, `.iteration`, and `.draw` metadata. `draws_list` gives a variable-to-values map per chain. `draws_rvars` maps each variable's base name to `dims`, `nchains`, `ndraws`, and `draws`, where `draws` is nested by the variable's dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return `draws_array` and other fits return `draws_matrix`, unless the `cmdstanr_draws_format` option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as `beta` includes all `beta[i]` elements. Warmup is excluded unless `inc_warmup: true`.
+`draws_array` is `[iteration][chain][variable]`, with zero-based PHP indices and associative variable names. `draws_matrix` concatenates chain rows. `draws_df` adds one-based `.chain`, `.iteration`, and `.draw` metadata. `draws_list` gives a variable-to-values map per chain. `draws_rvars` maps each variable's base name to `dims`, `nchains`, `ndraws`, and `draws`, where `draws` is nested by the variable's dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return `draws_array` and other fits return `draws_matrix`, unless the `cmdstanr_draws_format` option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as `beta` includes all `beta[i]` elements. Warmup is excluded unless `incWarmup: true`.
 
 `summary()` returns mean, median, sample SD, scaled MAD, requested quantiles (default q5/q95), and, for MCMC, rank-normalized R-hat, bulk ESS, and MCSE from CmdStan's `stansummary`, plus tail ESS using posterior-compatible inclusive quantile indicators and Geyer's truncation. Non-MCMC or fewer than four sampling draws return `NAN` for convergence statistics.
 

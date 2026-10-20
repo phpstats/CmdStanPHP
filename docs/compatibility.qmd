@@ -2,7 +2,7 @@
 title: "Compatibility contract"
 ---
 
-This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does **not** claim full CmdStanR compatibility. The reference is the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/) and [CmdStan CLI](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html), consulted during implementation. PHP interfaces preserve modern method and option names wherever their meaning transfers directly.
+This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does **not** claim full CmdStanR compatibility. The reference is the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/) and [CmdStan CLI](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html), consulted during implementation. PHP interfaces preserve modern option names wherever their meaning transfers directly. Method names do not carry over: PSR-1 makes a PHP method name camelCase, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()` here. The [method names](#method-names) table maps every one of them, and the package declares no snake_case alias beside the camelCase name.
 
 ## Supported workflows
 
@@ -15,28 +15,145 @@ This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does
 | MCMC, parallel chains, warmup, IDs/seeds | `CmdStanMCMC` | Real posterior and reproducibility tests |
 | BFGS/L-BFGS/Newton optimization | `CmdStanMLE` | Real L-BFGS and algorithm tests |
 | ADVI meanfield/fullrank | `CmdStanVB` | Real ADVI tests |
-| Single/multi-path Pathfinder, per-path fits | `CmdStanPathfinder`, `single_path_fits()` | Real multi-path tests |
+| Single/multi-path Pathfinder, per-path fits | `CmdStanPathfinder`, `singlePathFits()` | Real multi-path tests |
 | Laplace with supplied or automatic mode | `CmdStanLaplace` | Real tests for both modes |
 | Standalone generated quantities | `CmdStanGQ` | Real multi-chain prediction tests |
 | Fixed-parameter sampling | `sample(fixed_param: true)` | Real generated quantities test |
 | Finite-difference gradient checking | `CmdStanDiagnose` | Real model diagnostic test |
 | Batch log density and gradients | Executable `log_prob` method | Real log-density test |
-| In-process log density, gradient, Hessian, constrain/unconstrain, variable skeleton | `init_model_methods()` and fit methods through PHP FFI | Real model tests; CmdStanR comparison |
-| Calling user-defined Stan functions | `expose_functions()` through PHP FFI | Real function tests; CmdStanR comparison |
+| In-process log density, gradient, Hessian, constrain/unconstrain, variable skeleton | `initModelMethods()` and fit methods through PHP FFI | Real model tests; CmdStanR comparison |
+| Calling user-defined Stan functions | `exposeFunctions()` through PHP FFI | Real function tests; CmdStanR comparison |
 | Initialization from MCMC, optimization, ADVI, Laplace, and Pathfinder fits | `init: $fit` | Real fit tests; unit tests of dimension matching and PSIS weighting |
 | CSV import/export, warmup removal, indexed names | `read_cmdstan_csv()`, `read_cmdstan_csv_list()`, `draws_to_csv()` | Unit round trips and real CSV imports |
-| CSV metadata structure | `metadata()`, `chain_metadata()` | Key-by-key comparison with CmdStanR for five methods |
+| CSV metadata structure | `metadata()`, `chainMetadata()` | Key-by-key comparison with CmdStanR for five methods |
 | Draw selection/formats, including `draws_rvars` | `draws()` | Unit tests; posterior comparison |
-| Summaries, custom summary measures, diagnostics | `summary()`, `diagnostic_summary()` | Unit and real posterior tests; posterior comparison |
+| Summaries, custom summary measures, diagnostics | `summary()`, `diagnosticSummary()` | Unit and real posterior tests; posterior comparison |
 | PSIS-LOO and WAIC | `CmdStanMCMC::loo()`, `waic()` | Unit tests; loo package comparison |
-| Moment matching in `loo()` | `loo(moment_match: true)` through model methods and the `phit` draw kernels | Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison |
+| Moment matching in `loo()` | `loo(momentMatch: true)` through model methods and the `phit` draw kernels | Unit tests on analytic posteriors; loo package comparison; same-seed CmdStanR comparison |
 | Logs, timing, metrics, configuration JSON, output persistence | Fit methods | Unit and integration tests |
 | Global options | `options()`, `cmdstan_option()` | Unit tests |
 | bayesplot trace, histogram, density, interval, rank, scatter, and autocorrelation plots; loo's Pareto k plot | `mcmc_trace()` and related functions, rendered as ASCII text, Vega-Lite specs, HTML, or SVG/PNG through vl-convert | Unit tests of layout and specs; vl-convert renders in CI; plotted values compared with R and bayesplot |
 | Example models | `cmdstanr_example()`, `print_example_program()` | Real example runs |
 | Deprecated argument and function names | Mapped with `E_USER_DEPRECATED` notices | Unit tests |
-| MPI launching | `sample_mpi()` | Argument construction only; real MPI is unverified |
+| MPI launching | `sampleMpi()` | Argument construction only; real MPI is unverified |
 | Threads, OpenCL, auxiliary files | CLI/C++ options | Thread and auxiliary-file tests; OpenCL hardware is unverified |
+| CmdStanR, posterior, loo, and bayesplot method names | camelCase, mapped one to one in [method names](#method-names) | Signature inventory in the family repository |
+
+### Method names
+
+The package named its methods after their CmdStanR, posterior, loo, and
+bayesplot counterparts, so `fit$output_files()` in R was
+`$fit->output_files()` here. PSR-1 makes a PHP method name camelCase, and
+this family declares no second spelling, so each R name now maps to one
+PHP name. Option names, CSV metadata keys, result-array keys, summary
+measure names, and the standalone functions are unchanged:
+`sample(iter_warmup: 500)` and `Summary::summarise($draws, ['ess_bulk'])`
+read as they always did. Every method whose name changed is below.
+
+| Class | Before | Now |
+| --- | --- | --- |
+| `CmdStanModel` | `check_syntax()` | `checkSyntax()` |
+|  | `cpp_options()` | `cppOptions()` |
+|  | `exe_file()` | `exeFile()` |
+|  | `expose_functions()` | `exposeFunctions()` |
+|  | `generate_quantities()` | `generateQuantities()` |
+|  | `has_stan_file()` | `hasStanFile()` |
+|  | `hpp_file()` | `hppFile()` |
+|  | `include_paths()` | `includePaths()` |
+|  | `log_prob()` | `logProb()` |
+|  | `model_name()` | `modelName()` |
+|  | `sample_mpi()` | `sampleMpi()` |
+|  | `save_hpp_file()` | `saveHppFile()` |
+|  | `stan_file()` | `stanFile()` |
+| `CmdStanFit` | `chain_metadata()` | `chainMetadata()` |
+|  | `check_diagnostics()` | `checkDiagnostics()` |
+|  | `cmdstan_config()` | `cmdstanConfig()` |
+|  | `cmdstan_diagnose()` | `cmdstanDiagnose()` |
+|  | `cmdstan_summary()` | `cmdstanSummary()` |
+|  | `config_files()` | `configFiles()` |
+|  | `constrain_variables()` | `constrainVariables()` |
+|  | `data_file()` | `dataFile()` |
+|  | `diagnostic_summary()` | `diagnosticSummary()` |
+|  | `diagnostic_warnings()` | `diagnosticWarnings()` |
+|  | `draws_columns()` | `drawsColumns()` |
+|  | `draws_table()` | `drawsTable()` |
+|  | `expose_functions()` | `exposeFunctions()` |
+|  | `grad_log_prob()` | `gradLogProb()` |
+|  | `init_model_methods()` | `initModelMethods()` |
+|  | `inv_metric()` | `invMetric()` |
+|  | `latent_dynamics_files()` | `latentDynamicsFiles()` |
+|  | `log_prob()` | `logProb()` |
+|  | `metric_files()` | `metricFiles()` |
+|  | `num_chains()` | `numChains()` |
+|  | `num_draws_sampling()` | `numDrawsSampling()` |
+|  | `num_draws_warmup()` | `numDrawsWarmup()` |
+|  | `num_procs()` | `numProcs()` |
+|  | `output_files()` | `outputFiles()` |
+|  | `profile_files()` | `profileFiles()` |
+|  | `return_codes()` | `returnCodes()` |
+|  | `sampler_diagnostics()` | `samplerDiagnostics()` |
+|  | `save_config_files()` | `saveConfigFiles()` |
+|  | `save_data_file()` | `saveDataFile()` |
+|  | `save_latent_dynamics_files()` | `saveLatentDynamicsFiles()` |
+|  | `save_metric_files()` | `saveMetricFiles()` |
+|  | `save_object()` | `saveObject()` |
+|  | `save_output_files()` | `saveOutputFiles()` |
+|  | `save_profile_files()` | `saveProfileFiles()` |
+|  | `step_size()` | `stepSize()` |
+|  | `summary_columns()` | `summaryColumns()` |
+|  | `summary_table()` | `summaryTable()` |
+|  | `unconstrain_draws()` | `unconstrainDraws()` |
+|  | `unconstrain_variables()` | `unconstrainVariables()` |
+|  | `variable_skeleton()` | `variableSkeleton()` |
+| `CmdStanGQ` | `fitted_params_files()` | `fittedParamsFiles()` |
+| `CmdStanLaplace` | `lp_approx()` | `lpApprox()` |
+| `CmdStanMLE` | `optimized_params()` | `optimizedParams()` |
+| `CmdStanPathfinder` | `lp_approx()` | `lpApprox()` |
+|  | `single_path_diagnostics()` | `singlePathDiagnostics()` |
+|  | `single_path_files()` | `singlePathFiles()` |
+|  | `single_path_fits()` | `singlePathFits()` |
+|  | `single_path_json_files()` | `singlePathJsonFiles()` |
+| `CmdStanVB` | `lp_approx()` | `lpApprox()` |
+|  | `variational_mean()` | `variationalMean()` |
+| `ModelMethods` | `constrain_variables()` | `constrainVariables()` |
+|  | `constrained_param_names()` | `constrainedParamNames()` |
+|  | `grad_log_prob()` | `gradLogProb()` |
+|  | `log_prob()` | `logProb()` |
+|  | `num_unconstrained()` | `numUnconstrained()` |
+|  | `seed_rng()` | `seedRng()` |
+|  | `unconstrain_draws()` | `unconstrainDraws()` |
+|  | `unconstrain_variables()` | `unconstrainVariables()` |
+|  | `unconstrained_param_names()` | `unconstrainedParamNames()` |
+|  | `variable_skeleton()` | `variableSkeleton()` |
+| `Summary` | `default_convergence_measures()` | `defaultConvergenceMeasures()` |
+|  | `default_mcse_measures()` | `defaultMcseMeasures()` |
+|  | `default_summary_measures()` | `defaultSummaryMeasures()` |
+|  | `ess_basic()` | `essBasic()` |
+|  | `ess_bulk()` | `essBulk()` |
+|  | `ess_mean()` | `essMean()` |
+|  | `ess_median()` | `essMedian()` |
+|  | `ess_quantile()` | `essQuantile()` |
+|  | `ess_sd()` | `essSd()` |
+|  | `ess_tail()` | `essTail()` |
+|  | `mcse_mean()` | `mcseMean()` |
+|  | `mcse_median()` | `mcseMedian()` |
+|  | `mcse_quantile()` | `mcseQuantile()` |
+|  | `mcse_sd()` | `mcseSd()` |
+|  | `rhat_basic()` | `rhatBasic()` |
+|  | `split_chains()` | `splitChains()` |
+| `Psis` | `pareto_khat()` | `paretoKhat()` |
+|  | `pareto_smooth()` | `paretoSmooth()` |
+|  | `pareto_smooth_log_weights()` | `paretoSmoothLogWeights()` |
+|  | `ps_convergence_rate()` | `psConvergenceRate()` |
+|  | `ps_khat_threshold()` | `psKhatThreshold()` |
+|  | `ps_min_ss()` | `psMinSs()` |
+|  | `ps_tail_length()` | `psTailLength()` |
+|  | `qgeneralized_pareto()` | `qgeneralizedPareto()` |
+| `Loo` | `pareto_k_table()` | `paretoKTable()` |
+|  | `relative_eff()` | `relativeEff()` |
+|  | `relative_eff_log_lik()` | `relativeEffLogLik()` |
+| `Plot` | `pareto_k()` | `paretoK()` |
+|  | `rank_hist()` | `rankHist()` |
 
 ## PHP adaptations
 
@@ -46,13 +163,13 @@ R posterior objects become PHP arrays with documented shapes. All array indices 
 
 Summary quantiles use linear interpolation (R's default type 7). Scaled MAD uses 1.4826. The default MCMC summary delegates R-hat and bulk ESS to the installed CmdStan `stansummary` and computes tail ESS in PHP. Passing `measures` to `summary()` uses a PHP port of posterior's `summarise_draws()`, including rank-normalized R-hat, bulk/tail ESS, and MCSE, so it does not need CmdStan. Results are checked against the installed reference R packages, but are not guaranteed bit-for-bit identical to every version of posterior. ADVI's mean row is stored separately. ADVI and Laplace `log_p__` columns are normalized to `lp__` and their approximate densities to `lp_approx__`, matching CmdStanR. Non-MCMC convergence statistics are `NAN`.
 
-`metadata()` returns one merged array with CmdStanR's keys, such as `iter_sampling`, `max_treedepth`, and `stan_variable_sizes`, alongside CmdStan's raw argument names. `chain_metadata()` returns the per-chain arrays. `inv_metric()` returns matrices by default and reads metric JSON when every chain has one.
+`metadata()` returns one merged array with CmdStanR's keys, such as `iter_sampling`, `max_treedepth`, and `stan_variable_sizes`, alongside CmdStan's raw argument names. `chainMetadata()` returns the per-chain arrays. `invMetric()` returns matrices by default and reads metric JSON when every chain has one.
 
 Model methods and exposed functions compile a shared library against the selected CmdStan and load it with PHP FFI. FFI is enabled for the CLI by default (`ffi.enable=preload`); web SAPIs need `ffi.enable=true` or preloading. Libraries are cached beside the Stan source with a fingerprint in the file name. Model methods drop constant terms and default to `jacobian: true`, as in CmdStanR. Unconstrained vectors are flat lists, and constrained variables are nested zero-based arrays with matrices as lists of rows. Fits serialize the library path, data, and seed, and reconnect on first use; the generated-quantities RNG then restarts from its seed.
 
 Initialization from a fit follows CmdStanR's `process_init()`. MCMC draws are resampled without replacement, an optimization estimate is repeated, and ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights. Resampling uses PHP's seeded Mt19937 engine, so a given seed selects different draws than CmdStanR does.
 
-Diagnostic checks are structured messages accessible with `diagnostic_warnings()`, rather than PHP runtime warnings. Console output is buffered; there is no R progress-bar or interrupt integration. `show_messages` controls stdout, `show_exceptions` controls stderr. Deprecated CmdStanR argument names raise `E_USER_DEPRECATED` and map to their replacements; conflicting old and new values throw. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves files that a run created and copies imported CSVs and user-supplied data files; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.
+Diagnostic checks are structured messages accessible with `diagnosticWarnings()`, rather than PHP runtime warnings. Console output is buffered; there is no R progress-bar or interrupt integration. `show_messages` controls stdout, `show_exceptions` controls stderr. Deprecated CmdStanR argument names raise `E_USER_DEPRECATED` and map to their replacements; conflicting old and new values throw. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves files that a run created and copies imported CSVs and user-supplied data files; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.
 
 `options()` and `cmdstan_option()` provide CmdStanR's global options that have a PHP meaning: default output directory, Stan file directory, forced recompilation, draws format, initialization warnings, verbose compilation, printed rows, line numbers, and `mc.cores`. `cmdstanr_no_ver_check` is accepted and has no effect because this package never checks for updates.
 

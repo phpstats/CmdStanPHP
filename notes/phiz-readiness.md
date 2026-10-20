@@ -17,7 +17,7 @@ This directory is excluded from the documentation site.
 | Standalone HTML page | `Figure::html()` | vega, vega-lite, and vega-embed from jsDelivr pinned to major versions 5, 5, and 6, an escaped `<title>`, and one `vegaEmbed()` call. |
 | Schema pinning | `Figure::VEGA_LITE_SCHEMA` | Vega-Lite 5 schema URL, kept in step with the vl-convert `--vl-version`. |
 | Encoding helpers | `VegaLite::q()`, `VegaLite::facet()`, `VegaLite::number()` | Quantitative encodings with optional `zero: false`, one-row-per-group faceting with shared y scales and `'chain ' + datum.value` style labels, and exact number formatting for expressions. |
-| Size validation | `VegaLite::spec()` | Minimum width and height and positive `max_rows`. |
+| Size validation | `VegaLite::spec()` | Minimum width and height and positive `maxRows`. |
 | Systematic thinning | `VegaLite::thin()` | Keep every k-th row to bound inline data. The rule that keeps every divergent draw is Stan-specific and would stay as a filter supplied by CmdStanPHP. |
 | ASCII canvas | `AsciiChart` grid, `put()`, `col()`, `row()`, `line()`, `bar()`, `frame()`, `xAxis()`, `ticks()`, `num()` | A character-cell renderer with axes, tick selection, captions, and legends. phiz could offer it as a text backend if it wants one. The per-kind renderers would stay. |
 | Statistical helpers | `Plot::bandwidth()`, `density()`, `autocorrelation()`, `ranks()`, `range()`, `CmdStanFit::quantile()` | R's `bw.nrd0`, Gaussian kernel density on 512 points, `acf()`, `rank()` with averaged ties, padded ranges, and type 7 quantiles. These fit php-stats (`stats_*` functions) or phiz stat layers better than CmdStanPHP, and they are already checked against R here. |
@@ -26,7 +26,7 @@ This directory is excluded from the documentation site.
 
 These stay in CmdStanPHP and would later be rebuilt on phiz layers:
 
-- The bayesplot and loo figures: `Plot::trace()`, `hist()`, `dens()` (pooled and by chain), `intervals()`, `rank_hist()`, `scatter()` with divergent transitions, `acf()`, and `pareto_k()`, and the `mcmc_*` and `pareto_k_plot()` functions.
+- The bayesplot and loo figures: `Plot::trace()`, `hist()`, `dens()` (pooled and by chain), `intervals()`, `rankHist()`, `scatter()` with divergent transitions, `acf()`, and `paretoK()`, and the `mcmc_*` and `pareto_k_plot()` functions.
 - Draw access: `Plot::chains()` and `Plot::columns()`, which read fits and `draws_array` input, select variable elements such as `beta[2]`, and reject non-finite draws.
 - The `Figure` data contract: kind, title, data rows by kind (documented on `Figure`), and metadata such as the bandwidths, bin counts, the k threshold, and whether divergences were flagged.
 - Kind-specific Vega-Lite layers: the interval rules and point layer, the rank histogram's expected-count rule, the divergent-point layer and subtitle, and the Pareto k threshold and k = 1 rules.

@@ -3,7 +3,7 @@
     "title": "CmdStanPHP",
     "tagline": "Stan modeling and inference from PHP.",
     "summary": [
-        "CmdStanPHP compiles Stan programs from PHP, runs inference through CmdStan, and returns the posterior draws as typed PHP objects. It ports CmdStanR's model, executable, and CSV workflow and keeps CmdStanR's snake_case names for methods and options, so a translated R script reads much like its original. Inference methods take PHP named arguments or one associative options array, and they reject an unknown option instead of ignoring it.",
+        "CmdStanPHP compiles Stan programs from PHP, runs inference through CmdStan, and returns the posterior draws as typed PHP objects. It ports CmdStanR's model, executable, and CSV workflow and keeps CmdStanR's snake_case names for its standalone functions and for CmdStan's options, with camelCase methods, so a translated R script reads much like its original. Inference methods take PHP named arguments or one associative options array, and they reject an unknown option instead of ignoring it.",
         "The inference methods are MCMC with parallel chains, L-BFGS, BFGS, and Newton optimization, meanfield and fullrank ADVI, single- and multi-path Pathfinder, Laplace approximation, standalone generated quantities, and finite-difference gradient checking. Each one returns a fit object carrying draws in posterior's formats, summaries with rank-normalized R-hat and bulk and tail effective sample size, per-chain sampler diagnostics, and PSIS-LOO and WAIC, with optional moment matching in LOO.",
         "PHP's FFI extension gives in-process access to a compiled model: its log density, gradients, Hessian, constrain and unconstrain transforms, and its user-defined Stan functions called as PHP methods. The bayesplot diagnostics are computed in PHP, including trace, histogram, density, intervals, rank histograms, scatter, autocorrelation, and loo's Pareto k plot. Each one renders as ASCII text for a terminal or a log, a Vega-Lite spec for a front end, a standalone HTML page, or an SVG or PNG image through vl-convert.",
         "The package needs PHP 8.2 or newer, a CmdStan installation, and PHP's proc_open. It has no runtime Composer dependency beyond the JSON extension, and its own installer downloads and builds an official CmdStan release. Model data can be a phibble data frame or any object that exposes its columns, StanData builds hierarchical regression data from columns or from an R-style formula, and draws and summaries come back as plain column arrays or as a phibble DataFrame. None of the other phpstats packages is required."
@@ -15,7 +15,7 @@
     "requires": [
         "PHP 8.2 or newer, with the JSON extension and proc_open enabled",
         "CmdStan 2.31 or newer, with make and a C++ toolchain; CI covers 2.37 and 2.40",
-        "The FFI extension for in-process model methods and expose_functions()",
+        "The FFI extension for in-process model methods and exposeFunctions()",
         "The phit extension for moment matching in loo() and for StanData::fromFormula()"
     ],
     "repository": "https://github.com/phpstats/CmdStanPHP",

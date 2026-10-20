@@ -2,7 +2,7 @@
 
 A PHP 8.2+ interface to [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), with the model and fit API patterned after [CmdStanR](https://mc-stan.org/cmdstanr/). Runs real Stan programs through CmdStan; no R installation or PHP framework is needed.
 
-Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `expose_functions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `phit` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](https://phpstats.github.io/CmdStanPHP/compatibility.html) for exact differences and unimplemented features.
+Supports compilation, parallel MCMC, optimization, ADVI, Pathfinder, Laplace, standalone generated quantities, gradient diagnostics, log density, Stan JSON, CSV import/export, posterior summaries, and fit persistence. In-process log densities, gradients, Hessians, constrain/unconstrain methods, and `exposeFunctions()` use PHP FFI. Fits can initialize new runs, and MCMC fits compute PSIS-LOO, with optional moment matching through the `phit` extension, and WAIC. Trace, density, interval, rank, scatter, autocorrelation, and Pareto k figures render as ASCII text, Vega-Lite charts, HTML, or SVG/PNG. MPI launching is implemented but requires an MPI toolchain and is not covered by the local integration suite. **This is not a complete replacement for every CmdStanR feature.** See the [compatibility contract](https://phpstats.github.io/CmdStanPHP/compatibility.html) for exact differences and unimplemented features.
 
 ```sh
 composer install
@@ -22,10 +22,10 @@ $fit = $model->sample(
 );
 $summary = $fit->summary('theta');
 $draws = $fit->draws('theta', format: 'draws_df');
-$diagnostics = $fit->diagnostic_summary();
+$diagnostics = $fit->diagnosticSummary();
 ```
 
-An existing CmdStan installation is discovered from `CMDSTAN` or `~/.cmdstan/cmdstan-*`. You can also call `CmdStan\set_cmdstan_path()`. Installing a specified official release is supported with `CmdStan\install_cmdstan('2.37.0', cores: 2)`; this requires curl, tar, make, a supported C++ compiler, internet access, and enough memory for compilation. `release_url` and `release_file` install from another tarball.
+An existing CmdStan installation is discovered from `CMDSTAN` or `~/.cmdstan/cmdstan-*`. You can also call `CmdStan\set_cmdstan_path()`. Installing a specified official release is supported with `CmdStan\install_cmdstan('2.37.0', cores: 2)`; this requires curl, tar, make, a supported C++ compiler, internet access, and enough memory for compilation. `releaseUrl` and `releaseFile` install from another tarball.
 
 ## Data frames and the phpstats family
 
@@ -34,8 +34,8 @@ Model data can be a plain array, a [phibble](https://github.com/phpstats/phibble
 ```php
 $data = CmdStan\StanData::fromColumns($frame, 'score', ['hours'], 'school');
 $fit = $model->sample(data: $data, seed: 1);
-$draws = $fit->draws_columns('beta');   // ['beta[1]' => [...], '.chain' => [...], '.iteration' => [...], '.draw' => [...]]
-$table = $fit->draws_table('beta');     // Phibble\DataFrame; needs phpstats/phibble
+$draws = $fit->drawsColumns('beta');   // ['beta[1]' => [...], '.chain' => [...], '.iteration' => [...], '.draw' => [...]]
+$table = $fit->drawsTable('beta');     // Phibble\DataFrame; needs phpstats/phibble
 ```
 
 The [API reference](https://phpstats.github.io/CmdStanPHP/api.html#data-frames-and-the-phpstats-family) documents the conventions. None of these packages is a Composer dependency.

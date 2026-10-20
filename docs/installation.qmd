@@ -13,7 +13,7 @@ Until a package release is published, clone this repository and run `composer in
 }
 ```
 
-PHP 8.2+ with JSON, Composer, and enabled `proc_open` are required. In-process model methods and `expose_functions()` also need the FFI extension (`ext-ffi`). It is enabled for the CLI by default; web SAPIs need `ffi.enable=true` or preloading. Moment matching in `loo()` additionally needs the `phit` extension (`ext-phit`) with its posterior-draw kernels. CmdStanPHP detects `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()` by name, because the extension's version metadata does not identify builds that include them. Rendering figures as SVG or PNG needs the [vl-convert](https://github.com/vega/vl-convert/releases) binary; ASCII, Vega-Lite, and HTML output need nothing extra. Compilation needs make and a C++ toolchain supported by [CmdStan](https://mc-stan.org/docs/cmdstan-guide/installation.html). On macOS install the Xcode command-line tools. On Linux install a C++ compiler and make. Windows requires CmdStan's supported Windows toolchain; native Windows has not been validated by this project's CI. WSL offers the tested Linux execution path.
+PHP 8.2+ with JSON, Composer, and enabled `proc_open` are required. In-process model methods and `exposeFunctions()` also need the FFI extension (`ext-ffi`). It is enabled for the CLI by default; web SAPIs need `ffi.enable=true` or preloading. Moment matching in `loo()` additionally needs the `phit` extension (`ext-phit`) with its posterior-draw kernels. CmdStanPHP detects `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()` by name, because the extension's version metadata does not identify builds that include them. Rendering figures as SVG or PNG needs the [vl-convert](https://github.com/vega/vl-convert/releases) binary; ASCII, Vega-Lite, and HTML output need nothing extra. Compilation needs make and a C++ toolchain supported by [CmdStan](https://mc-stan.org/docs/cmdstan-guide/installation.html). On macOS install the Xcode command-line tools. On Linux install a C++ compiler and make. Windows requires CmdStan's supported Windows toolchain; native Windows has not been validated by this project's CI. WSL offers the tested Linux execution path.
 
 ## CmdStan selection
 
@@ -36,21 +36,21 @@ $path = CmdStan\install_cmdstan('2.37.0', cores: 2, timeout: 1800);
 The installer downloads the specified release from GitHub over HTTPS, checks archive entry paths and links, extracts in a private staging directory, builds at the final location to preserve runtime library paths, and selects the resulting installation. Without a version it installs the latest release.
 
 ```php
-CmdStan\install_cmdstan(release_file: '/downloads/cmdstan-2.40.0.tar.gz', cpp_options: ['STAN_THREADS' => true]);
+CmdStan\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz', cppOptions: ['STAN_THREADS' => true]);
 CmdStan\install_cmdstan('2.40.0', overwrite: true, cores: 4);
-print_r(CmdStan\cmdstan_make_local(cpp_options: ['CXXFLAGS' => '-O3']));
+print_r(CmdStan\cmdstan_make_local(cppOptions: ['CXXFLAGS' => '-O3']));
 ```
 
-`release_url` accepts an HTTPS `.tar.gz` URL and `release_file` a local tarball. The version is then read from the archive's top-level `cmdstan-*` directory. `cpp_options` are written to `make/local` before building. The installer refuses to replace an existing version unless `overwrite: true`; the old installation is moved aside and deleted only after the new build succeeds, and a failed build restores it. `cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`. curl, tar, make, internet access, disk space, and sufficient memory are needed. Versions are explicit so an application does not unexpectedly change its statistical backend. `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on the selected installation; only call it when you intend to rebuild that toolchain.
+`releaseUrl` accepts an HTTPS `.tar.gz` URL and `releaseFile` a local tarball. The version is then read from the archive's top-level `cmdstan-*` directory. `cppOptions` are written to `make/local` before building. The installer refuses to replace an existing version unless `overwrite: true`; the old installation is moved aside and deleted only after the new build succeeds, and a failed build restores it. `cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`. curl, tar, make, internet access, disk space, and sufficient memory are needed. Versions are explicit so an application does not unexpectedly change its statistical backend. `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on the selected installation; only call it when you intend to rebuild that toolchain.
 
 ## Compile a model
 
 ```php
-$model = CmdStan\cmdstan_model('model.stan', cpp_options: ['STAN_THREADS' => true]);
-$model->check_syntax(stanc_options: ['warn-pedantic' => true]);
-$model->compile(force_recompile: true, cores: 2);
+$model = CmdStan\cmdstan_model('model.stan', cppOptions: ['STAN_THREADS' => true]);
+$model->checkSyntax(stancOptions: ['warn-pedantic' => true]);
+$model->compile(forceRecompile: true, cores: 2);
 ```
 
-Executables and generated headers live beside the Stan source. Use a source directory without whitespace or make metacharacters. Data and output paths can contain spaces. Source changes trigger compilation; changes in included Stan files should use `force_recompile: true`. Changes in the selected CmdStan installation or stanc/C++ options force a model rebuild; a fingerprint receipt beside the executable tracks those settings. Switching shared CmdStan settings may require `rebuild_cmdstan()`.
+Executables and generated headers live beside the Stan source. Use a source directory without whitespace or make metacharacters. Data and output paths can contain spaces. Source changes trigger compilation; changes in included Stan files should use `forceRecompile: true`. Changes in the selected CmdStan installation or stanc/C++ options force a model rebuild; a fingerprint receipt beside the executable tracks those settings. Switching shared CmdStan settings may require `rebuild_cmdstan()`.
 
-If you already have an executable, supply `exe_file` and `compile: false` along with its Stan source. `compile()` requires an executable with the source's basename.
+If you already have an executable, supply `exeFile` and `compile: false` along with its Stan source. `compile()` requires an executable with the source's basename.

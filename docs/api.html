@@ -251,7 +251,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>All classes and functions are in the <code>CmdStan</code> namespace. Function and method names use CmdStanR’s snake_case spelling. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. <code>null</code> generally leaves the installed CmdStan default in effect. Check the <a href="./compatibility.html">compatibility contract</a> for exceptions.</p>
+<p>All classes and functions are in the <code>CmdStan</code> namespace. Standalone functions keep CmdStanR’s snake_case spelling. Methods, parameters, and properties are camelCase, as PSR-1 and this family’s conventions require, so CmdStanR’s <code>fit$output_files()</code> is <code>$fit-&gt;outputFiles()</code>; the <a href="./compatibility.html#method-names">compatibility contract</a> maps every renamed method. CmdStan option names are unchanged. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. <code>null</code> generally leaves the installed CmdStan default in effect. Check the <a href="./compatibility.html">compatibility contract</a> for exceptions.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <table class="caption-top table">
@@ -267,7 +267,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>cmdstan_model(stan_file, compile: true, exe_file: null, stanc_options: [], cpp_options: [], force_recompile: null)</code></td>
+<td><code>cmdstan_model(stanFile, compile: true, exeFile: null, stancOptions: [], cppOptions: [], forceRecompile: null)</code></td>
 <td>Construct and optionally compile a model</td>
 </tr>
 <tr class="even">
@@ -283,11 +283,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Return paths and versions of make, CmdStan’s C++ compiler, and stanc; throws when make or the compiler is missing. It does not prove a compilation will succeed</td>
 </tr>
 <tr class="odd">
-<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, release_url: null, release_file: null, cpp_options: [], check_toolchain: true)</code></td>
+<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true)</code></td>
 <td>Download or unpack and build a release (see the installation guide)</td>
 </tr>
 <tr class="even">
-<td><code>cmdstan_make_local(dir: null, cpp_options: [], append: true)</code></td>
+<td><code>cmdstan_make_local(dir: null, cppOptions: [], append: true)</code></td>
 <td>Read or write CmdStan’s <code>make/local</code></td>
 </tr>
 <tr class="odd">
@@ -299,7 +299,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Set global options, returning previous values, or read one option</td>
 </tr>
 <tr class="odd">
-<td><code>write_stan_file(code, file: null, dir: null, basename: null, force_overwrite: false, hash_salt: '')</code></td>
+<td><code>write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')</code></td>
 <td>Write Stan source to <code>model_&lt;hash&gt;.stan</code>, reusing identical files</td>
 </tr>
 <tr class="even">
@@ -311,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Import one or more CmdStan CSV files into a typed fit</td>
 </tr>
 <tr class="even">
-<td><code>read_cmdstan_csv_list(files, variables: null, sampler_diagnostics: null, format: null)</code></td>
+<td><code>read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)</code></td>
 <td>Return CmdStanR’s <code>read_cmdstan_csv()</code> list shape</td>
 </tr>
 <tr class="odd">
@@ -337,8 +337,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="model-methods" class="level2">
 <h2 class="anchored" data-anchor-id="model-methods">Model methods</h2>
-<p><code>stan_file()</code>, <code>exe_file()</code>, <code>hpp_file()</code>, and <code>code()</code> return paths or source text. <code>expose_functions(timeout: null)</code> compiles the model’s user-defined functions and returns a <code>StanFunctions</code> object; <code>functions()</code> returns it afterwards. <code>model_name()</code>, <code>has_stan_file()</code>, <code>cpp_options()</code>, and <code>include_paths()</code> expose model identity and recorded compiler settings. <code>print(line_numbers: false)</code> writes source to stdout. <code>save_hpp_file(dir)</code> copies the generated header. <code>variables()</code> returns stanc’s JSON information for source-level declarations and dimensions. <code>format(overwrite_file: false, stanc_options: [])</code> returns formatted Stan and optionally overwrites the source. <code>check_syntax(stanc_options: [])</code> throws on invalid Stan and returns true on success.</p>
-<p><code>compile(force_recompile: null, stanc_options: [], cpp_options: [], cores: 1, timeout: null)</code> compiles via CmdStan’s makefile and returns the model. Compiler options use associative arrays, e.g.&nbsp;<code>['warn-pedantic' =&gt; true]</code> or <code>['STAN_THREADS' =&gt; true]</code>. Make values containing command expansions or shell metacharacters are rejected. stanc option values with whitespace are not supported. Changing options removes stale model artifacts before rebuilding.</p>
+<p><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code>, and <code>code()</code> return paths or source text. <code>exposeFunctions(timeout: null)</code> compiles the model’s user-defined functions and returns a <code>StanFunctions</code> object; <code>functions()</code> returns it afterwards. <code>modelName()</code>, <code>hasStanFile()</code>, <code>cppOptions()</code>, and <code>includePaths()</code> expose model identity and recorded compiler settings. <code>print(lineNumbers: false)</code> writes source to stdout. <code>saveHppFile(dir)</code> copies the generated header. <code>variables()</code> returns stanc’s JSON information for source-level declarations and dimensions. <code>format(overwriteFile: false, stancOptions: [])</code> returns formatted Stan and optionally overwrites the source. <code>checkSyntax(stancOptions: [])</code> throws on invalid Stan and returns true on success.</p>
+<p><code>compile(forceRecompile: null, stancOptions: [], cppOptions: [], cores: 1, timeout: null)</code> compiles via CmdStan’s makefile and returns the model. Compiler options use associative arrays, e.g.&nbsp;<code>['warn-pedantic' =&gt; true]</code> or <code>['STAN_THREADS' =&gt; true]</code>. Make values containing command expansions or shell metacharacters are rejected. stanc option values with whitespace are not supported. Changing options removes stale model artifacts before rebuilding.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -354,7 +354,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>sample()</code> / <code>sample_mpi()</code></td>
+<td><code>sample()</code> / <code>sampleMpi()</code></td>
 <td><code>CmdStanMCMC</code></td>
 <td>2.31+ supported baseline</td>
 </tr>
@@ -379,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>2.32+</td>
 </tr>
 <tr class="even">
-<td><code>generate_quantities(fitted_params, ...)</code></td>
+<td><code>generateQuantities(fittedParams, ...)</code></td>
 <td><code>CmdStanGQ</code></td>
 <td>2.31+</td>
 </tr>
@@ -389,7 +389,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>2.31+</td>
 </tr>
 <tr class="even">
-<td><code>log_prob()</code></td>
+<td><code>logProb()</code></td>
 <td><code>CmdStanFit</code></td>
 <td>2.31+</td>
 </tr>
@@ -399,7 +399,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="shared-options" class="level3">
 <h3 class="anchored" data-anchor-id="shared-options">Shared options</h3>
 <p><code>data</code>, <code>seed</code>, <code>refresh</code>, <code>init</code>, <code>output_dir</code>, <code>output_basename</code>, <code>sig_figs</code>, <code>threads</code>, <code>threads_per_chain</code>, <code>num_threads</code>, <code>opencl_ids</code>, <code>show_messages</code>, <code>show_exceptions</code>, <code>save_latent_dynamics</code>, <code>save_cmdstan_config</code>, <code>timeout</code>.</p>
-<p><code>init</code> additionally accepts a fit object (see the inference guide). Deprecated CmdStanR names are mapped with an <code>E_USER_DEPRECATED</code> notice: on <code>sample()</code>, <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>; on <code>optimize()</code>, <code>laplace()</code>, and <code>log_prob()</code>, <code>jacobian_adjustment</code>.</p>
+<p><code>init</code> additionally accepts a fit object (see the inference guide). Deprecated CmdStanR names are mapped with an <code>E_USER_DEPRECATED</code> notice: on <code>sample()</code>, <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>; on <code>optimize()</code>, <code>laplace()</code>, and <code>logProb()</code>, <code>jacobian_adjustment</code>.</p>
 <p>Thread options are aliases, with precedence <code>threads_per_chain</code>, <code>threads</code>, then <code>num_threads</code>. Prefer the argument appropriate to the method. <code>sig_figs</code> is 1–18. <code>opencl_ids</code> contains platform/device IDs and requires an OpenCL build. <code>output_basename</code> contains only letters, numbers, dots, underscores, and hyphens. <code>save_latent_dynamics</code> creates auxiliary diagnostic CSVs; these may be empty for some algorithms. <code>save_cmdstan_config</code> requests CmdStan configuration JSON beside the CSVs.</p>
 </section>
 <section id="method-specific-options" class="level3">
@@ -410,57 +410,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>variational:</strong> <code>algorithm</code>, <code>iter</code>, <code>grad_samples</code>, <code>elbo_samples</code>, <code>eta</code>, <code>adapt_engaged</code>, <code>adapt_iter</code>, <code>tol_rel_obj</code>, <code>eval_elbo</code>, <code>output_samples</code>, <code>draws</code> (alias for <code>output_samples</code>).</li>
 <li><strong>pathfinder:</strong> <code>init_alpha</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>single_path_draws</code>, <code>draws</code>, <code>num_paths</code>, <code>max_lbfgs_iters</code>, <code>num_elbo_draws</code>, <code>save_single_paths</code>, <code>psis_resample</code>, <code>calculate_lp</code>.</li>
 <li><strong>laplace:</strong> <code>mode</code>, <code>opt_args</code>, <code>jacobian</code> (default true), <code>draws</code>, <code>calculate_lp</code>.</li>
-<li><strong>generate_quantities:</strong> required <code>fitted_params</code> is a fit, filename, or filename list; <code>parallel_chains</code> controls concurrency.</li>
+<li><strong>generate_quantities:</strong> required <code>fittedParams</code> is a fit, filename, or filename list; <code>parallel_chains</code> controls concurrency.</li>
 <li><strong>diagnose:</strong> <code>epsilon</code>, <code>error</code> for finite-difference gradient checks.</li>
 <li><strong>log_prob:</strong> exactly one of <code>unconstrained_params</code>, <code>constrained_params</code>, and optional <code>jacobian</code>.</li>
 </ul>
-<p><code>sample_mpi(mpi_cmd: 'mpiexec', mpi_args: [], ...options)</code> accepts sampling options, defaults to one chain, and executes chains sequentially. An associative MPI argument such as <code>['n' =&gt; 4]</code> becomes <code>-n 4</code>; a list is passed as a literal argument vector. Compile with <code>['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc']</code> and install an MPI runtime. MPI launch construction is unit-tested; a real MPI cluster run is not validated here.</p>
+<p><code>sampleMpi(mpiCmd: 'mpiexec', mpiArgs: [], ...options)</code> accepts sampling options, defaults to one chain, and executes chains sequentially. An associative MPI argument such as <code>['n' =&gt; 4]</code> becomes <code>-n 4</code>; a list is passed as a literal argument vector. Compile with <code>['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc']</code> and install an MPI runtime. MPI launch construction is unit-tested; a real MPI cluster run is not validated here.</p>
 </section>
 </section>
 <section id="fit-methods" class="level2">
 <h2 class="anchored" data-anchor-id="fit-methods">Fit methods</h2>
 <ul>
-<li><code>draws(variables: null, format: null, inc_warmup: false)</code>: select posterior variables. Formats are <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, <code>draws_list</code>, and <code>draws_rvars</code>; <code>null</code> uses the <code>cmdstanr_draws_format</code> option or the method default.</li>
-<li><code>sampler_diagnostics(format: null, inc_warmup: false)</code>: diagnostic columns ending in <code>__</code>, excluding <code>lp__</code>.</li>
+<li><code>draws(variables: null, format: null, incWarmup: false)</code>: select posterior variables. Formats are <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, <code>draws_list</code>, and <code>draws_rvars</code>; <code>null</code> uses the <code>cmdstanr_draws_format</code> option or the method default.</li>
+<li><code>samplerDiagnostics(format: null, incWarmup: false)</code>: diagnostic columns ending in <code>__</code>, excluding <code>lp__</code>.</li>
 <li><code>summary(variables: null, probs: [0.05, 0.95], measures: [])</code>: descriptive and MCMC convergence summaries, or the requested summary measures.</li>
-<li><code>diagnostic_summary()</code>: per-chain <code>num_divergent</code>, <code>num_max_treedepth</code>, and <code>ebfmi</code> arrays.</li>
-<li><code>check_diagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])</code>, <code>diagnostic_warnings()</code>: check and read messages.</li>
-<li><code>cmdstan_diagnose()</code>: invoke CmdStan’s diagnostic utility and return text.</li>
-<li><code>metadata()</code>, <code>chain_metadata()</code>, <code>variables()</code>, <code>num_chains()</code>, <code>num_draws_sampling()</code>, <code>num_draws_warmup()</code>: inspect parsed CSV.</li>
-<li><code>step_size()</code>, <code>inv_metric(matrix: true)</code>: adaptation results, one entry per chain.</li>
+<li><code>diagnosticSummary()</code>: per-chain <code>num_divergent</code>, <code>num_max_treedepth</code>, and <code>ebfmi</code> arrays.</li>
+<li><code>checkDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])</code>, <code>diagnosticWarnings()</code>: check and read messages.</li>
+<li><code>cmdstanDiagnose()</code>: invoke CmdStan’s diagnostic utility and return text.</li>
+<li><code>metadata()</code>, <code>chainMetadata()</code>, <code>variables()</code>, <code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>: inspect parsed CSV.</li>
+<li><code>stepSize()</code>, <code>invMetric(matrix: true)</code>: adaptation results, one entry per chain.</li>
 <li><code>time()</code>: per-chain warmup, sampling, and total time when available.</li>
-<li><code>output()</code>, <code>return_codes()</code>: captured console output and process status. Imported fits have no process logs or status codes.</li>
-<li><code>output_files()</code>, <code>latent_dynamics_files()</code>, <code>profile_files()</code>, <code>profiles()</code>: output paths and parsed profiling data. The file accessors accept <code>include_failed</code> for CmdStanR compatibility; fits only contain successful runs. Latent-dynamics and profile accessors throw when no such files exist.</li>
-<li><code>data_file()</code>, <code>config_files()</code>, <code>metric_files()</code>, <code>cmdstan_config()</code>, <code>metric()</code>: data and auxiliary JSON paths and their decoded contents. Imported fits use the data file recorded in the CSV when it still exists.</li>
-<li><code>code()</code>, <code>num_procs()</code>, <code>lp()</code>, <code>cmdstan_summary()</code>: stored source, number of processes, log-density matrix, and native text summary. Imported CSV fits do not include source code.</li>
-<li><code>save_output_files()</code>, <code>save_latent_dynamics_files()</code>, <code>save_profile_files()</code>, <code>save_data_file()</code>, <code>save_config_files()</code>, <code>save_metric_files()</code>: each takes <code>dir: '.', basename: null, timestamp: true, random: true</code> and names files <code>basename-YYYYmmddHHMM-id-xxxxxx.ext</code> as CmdStanR does. Files created by the run are moved; imported and user-supplied files are copied. Existing destinations are never overwritten.</li>
-<li><code>save_object(file)</code>: serialize parsed fit data (and native MCMC summary statistics) to a PHP object file.</li>
-<li><code>print(variables: null, max_rows: null)</code>: emit summary JSON to stdout, limited to <code>cmdstanr_max_rows</code> (default 10) variables.</li>
-<li><code>draws_columns()</code>, <code>summary_columns()</code>, <code>draws_table()</code>, <code>summary_table()</code>: column-oriented draws and summaries for data frames; see <a href="#data-frames-and-the-phpstats-family">data frames</a>.</li>
+<li><code>output()</code>, <code>returnCodes()</code>: captured console output and process status. Imported fits have no process logs or status codes.</li>
+<li><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code>, <code>profiles()</code>: output paths and parsed profiling data. The file accessors accept <code>includeFailed</code> for CmdStanR compatibility; fits only contain successful runs. Latent-dynamics and profile accessors throw when no such files exist.</li>
+<li><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code>, <code>cmdstanConfig()</code>, <code>metric()</code>: data and auxiliary JSON paths and their decoded contents. Imported fits use the data file recorded in the CSV when it still exists.</li>
+<li><code>code()</code>, <code>numProcs()</code>, <code>lp()</code>, <code>cmdstanSummary()</code>: stored source, number of processes, log-density matrix, and native text summary. Imported CSV fits do not include source code.</li>
+<li><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code>: each takes <code>dir: '.', basename: null, timestamp: true, random: true</code> and names files <code>basename-YYYYmmddHHMM-id-xxxxxx.ext</code> as CmdStanR does. Files created by the run are moved; imported and user-supplied files are copied. Existing destinations are never overwritten.</li>
+<li><code>saveObject(file)</code>: serialize parsed fit data (and native MCMC summary statistics) to a PHP object file.</li>
+<li><code>print(variables: null, maxRows: null)</code>: emit summary JSON to stdout, limited to <code>cmdstanr_max_rows</code> (default 10) variables.</li>
+<li><code>drawsColumns()</code>, <code>summaryColumns()</code>, <code>drawsTable()</code>, <code>summaryTable()</code>: column-oriented draws and summaries for data frames; see <a href="#data-frames-and-the-phpstats-family">data frames</a>.</li>
 </ul>
 <section id="model-methods-1" class="level3">
 <h3 class="anchored" data-anchor-id="model-methods-1">Model methods</h3>
-<p>These methods need PHP FFI. The first call compiles a shared library for the fit’s model and data; <code>init_model_methods(seed: 1, verbose: false, hessian: false, model: null)</code> does this explicitly. Imported CSV fits must pass <code>model:</code>.</p>
+<p>These methods need PHP FFI. The first call compiles a shared library for the fit’s model and data; <code>initModelMethods(seed: 1, verbose: false, hessian: false, model: null)</code> does this explicitly. Imported CSV fits must pass <code>model:</code>.</p>
 <ul>
-<li><code>log_prob(unconstrained_variables, jacobian: true)</code>: log density with constants dropped.</li>
-<li><code>grad_log_prob(...)</code>: <code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code>.</li>
+<li><code>logProb(unconstrainedVariables, jacobian: true)</code>: log density with constants dropped.</li>
+<li><code>gradLogProb(...)</code>: <code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code>.</li>
 <li><code>hessian(...)</code>: <code>['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]</code>.</li>
-<li><code>unconstrain_variables(variables)</code>: a flat unconstrained list from parameter values keyed by name.</li>
-<li><code>unconstrain_draws(files: null, draws: null, format: null, inc_warmup: false)</code>: the fit’s draws, another set of CSV files, or <code>draws_df</code> rows, in unconstrained space.</li>
-<li><code>constrain_variables(unconstrained_variables, transformed_parameters: true, generated_quantities: true)</code>: variables keyed by name as nested arrays.</li>
-<li><code>variable_skeleton(transformed_parameters: true, generated_quantities: true)</code>: variable name to dimension list.</li>
-<li><code>expose_functions(timeout: null)</code> / <code>functions()</code>: the model’s user-defined functions.</li>
+<li><code>unconstrainVariables(variables)</code>: a flat unconstrained list from parameter values keyed by name.</li>
+<li><code>unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)</code>: the fit’s draws, another set of CSV files, or <code>draws_df</code> rows, in unconstrained space.</li>
+<li><code>constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)</code>: variables keyed by name as nested arrays.</li>
+<li><code>variableSkeleton(transformedParameters: true, generatedQuantities: true)</code>: variable name to dimension list.</li>
+<li><code>exposeFunctions(timeout: null)</code> / <code>functions()</code>: the model’s user-defined functions.</li>
 </ul>
-<p><code>jacobian_adjustment</code> is accepted as a deprecated alias of <code>jacobian</code>. <code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
+<p><code>jacobianAdjustment</code> is accepted as a deprecated alias of <code>jacobian</code>. <code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
 </section>
 <section id="method-specific-fit-methods" class="level3">
 <h3 class="anchored" data-anchor-id="method-specific-fit-methods">Method-specific fit methods</h3>
-<p><code>CmdStanMCMC</code> adds <code>loo(variables: 'log_lik', r_eff: true, moment_match: false, max_iters: 30, k_threshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. Both return <code>estimates</code> (each with <code>Estimate</code> and <code>SE</code>), <code>pointwise</code> rows, and flat keys such as <code>elpd_loo</code> and <code>se_elpd_loo</code>; LOO also returns <code>diagnostics</code> with Pareto k values. <code>moment_match: true</code> needs model methods and the <code>phit</code> posterior-draw kernels, and adds a <code>moment_match</code> key; see the inference guide.</p>
-<p><code>CmdStanMLE</code> adds <code>mle()</code>/<code>optimized_params()</code> (final optimizer row) and <code>lp()</code>; its <code>summary()</code> returns <code>variable</code>/<code>estimate</code> rows, matching CmdStanR’s optimization summary. <code>CmdStanVB</code> adds <code>variational_mean()</code> and <code>lp_approx()</code>. Pathfinder and Laplace also expose <code>lp_approx()</code>; Laplace exposes <code>mode()</code>, and generated quantities fits expose <code>fitted_params_files()</code>. <code>CmdStanPathfinder</code> adds <code>single_path_files()</code>, <code>single_path_json_files()</code>, <code>single_path_fits()</code>, and <code>single_path_diagnostics()</code> for runs with <code>save_single_paths: true</code>. <code>CmdStanDiagnose</code> adds <code>gradients()</code> (gradient-check console output).</p>
+<p><code>CmdStanMCMC</code> adds <code>loo(variables: 'log_lik', rEff: true, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. Both return <code>estimates</code> (each with <code>Estimate</code> and <code>SE</code>), <code>pointwise</code> rows, and flat keys such as <code>elpd_loo</code> and <code>se_elpd_loo</code>; LOO also returns <code>diagnostics</code> with Pareto k values. <code>momentMatch: true</code> needs model methods and the <code>phit</code> posterior-draw kernels, and adds a <code>moment_match</code> key; see the inference guide.</p>
+<p><code>CmdStanMLE</code> adds <code>mle()</code>/<code>optimizedParams()</code> (final optimizer row) and <code>lp()</code>; its <code>summary()</code> returns <code>variable</code>/<code>estimate</code> rows, matching CmdStanR’s optimization summary. <code>CmdStanVB</code> adds <code>variationalMean()</code> and <code>lpApprox()</code>. Pathfinder and Laplace also expose <code>lpApprox()</code>; Laplace exposes <code>mode()</code>, and generated quantities fits expose <code>fittedParamsFiles()</code>. <code>CmdStanPathfinder</code> adds <code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, and <code>singlePathDiagnostics()</code> for runs with <code>save_single_paths: true</code>. <code>CmdStanDiagnose</code> adds <code>gradients()</code> (gradient-check console output).</p>
 </section>
 <section id="statistics-helpers" class="level3">
 <h3 class="anchored" data-anchor-id="statistics-helpers">Statistics helpers</h3>
-<p><code>CmdStan\Figure</code> renders computed figures with <code>ascii()</code>, <code>vegaLite()</code>, <code>json()</code>, <code>html()</code>, <code>svg()</code>, and <code>png()</code>; casting a figure to a string gives its ASCII form. <code>CmdStan\Plot</code> computes the figures, plus <code>bandwidth()</code>, <code>density()</code>, <code>autocorrelation()</code>, and <code>ranks()</code> for the values they draw. <code>CmdStan\Psis</code> (<code>pareto_smooth()</code>, <code>pareto_khat()</code>, <code>psis()</code>, <code>gpdfit()</code>), <code>CmdStan\Loo</code> (<code>loo()</code>, <code>waic()</code>, <code>relative_eff()</code>), <code>CmdStan\MomentMatch</code> (<code>loo()</code> on unconstrained draws with log-density and log-likelihood callbacks, <code>fromFit()</code>), <code>CmdStan\DrawKernels</code> (detection of and wrappers for the <code>phit</code> draw kernels), <code>CmdStan\Summary</code> (<code>summarise()</code> and each posterior measure), <code>CmdStan\Rvars</code>, and <code>CmdStan\Inits</code> (<code>fromFit()</code>, <code>fromDraws()</code>, <code>nest()</code>, <code>validate()</code>) operate on plain draws arrays. Their docblocks describe the input and output shapes.</p>
+<p><code>CmdStan\Figure</code> renders computed figures with <code>ascii()</code>, <code>vegaLite()</code>, <code>json()</code>, <code>html()</code>, <code>svg()</code>, and <code>png()</code>; casting a figure to a string gives its ASCII form. <code>CmdStan\Plot</code> computes the figures, plus <code>bandwidth()</code>, <code>density()</code>, <code>autocorrelation()</code>, and <code>ranks()</code> for the values they draw. <code>CmdStan\Psis</code> (<code>paretoSmooth()</code>, <code>paretoKhat()</code>, <code>psis()</code>, <code>gpdfit()</code>), <code>CmdStan\Loo</code> (<code>loo()</code>, <code>waic()</code>, <code>relativeEff()</code>), <code>CmdStan\MomentMatch</code> (<code>loo()</code> on unconstrained draws with log-density and log-likelihood callbacks, <code>fromFit()</code>), <code>CmdStan\DrawKernels</code> (detection of and wrappers for the <code>phit</code> draw kernels), <code>CmdStan\Summary</code> (<code>summarise()</code> and each posterior measure), <code>CmdStan\Rvars</code>, and <code>CmdStan\Inits</code> (<code>fromFit()</code>, <code>fromDraws()</code>, <code>nest()</code>, <code>validate()</code>) operate on plain draws arrays. Their docblocks describe the input and output shapes.</p>
 </section>
 </section>
 <section id="data-frames-and-the-phpstats-family" class="level2">
@@ -468,7 +468,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>CmdStanPHP works with the <a href="#part-of-the-phpstats-family">phpstats family</a> without depending on it. phibble is detected by method and class names. The <code>phit</code> extension is detected by function name.</p>
 <section id="data-in" class="level3">
 <h3 class="anchored" data-anchor-id="data-in">Data in</h3>
-<p>Every <code>data</code> argument (<code>sample()</code>, <code>sample_mpi()</code>, <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, <code>laplace()</code>, <code>generate_quantities()</code>, <code>diagnose()</code>, and <code>log_prob()</code>) and <code>write_stan_json()</code> accept a plain array, a JSON file, a <code>CmdStan\StanData</code>, or a table. A table is any object with <code>toModelData()</code> or <code>toColumns()</code>, such as a <a href="https://github.com/phpstats/phibble">phibble</a> <code>Phibble\DataFrame</code>. <code>toModelData()</code> is used when both exist. <code>StanData::fromTable($table, add_n: true)</code> performs the same conversion and keeps the factor labels.</p>
+<p>Every <code>data</code> argument (<code>sample()</code>, <code>sampleMpi()</code>, <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, <code>laplace()</code>, <code>generateQuantities()</code>, <code>diagnose()</code>, and <code>logProb()</code>) and <code>write_stan_json()</code> accept a plain array, a JSON file, a <code>CmdStan\StanData</code>, or a table. A table is any object with <code>toModelData()</code> or <code>toColumns()</code>, such as a <a href="https://github.com/phpstats/phibble">phibble</a> <code>Phibble\DataFrame</code>. <code>toModelData()</code> is used when both exist. <code>StanData::fromTable($table, addN: true)</code> performs the same conversion and keeps the factor labels.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -508,7 +508,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Factor levels come from a <code>toModelData()</code> descriptor (<code>['levels' =&gt; list&lt;string&gt;, 'codes' =&gt; list&lt;?int&gt;, 'ordered' =&gt; bool]</code>, with 0-based codes, as phibble’s <code>DataFrame::toModelData()</code> returns them since phibble <a href="https://github.com/phpstats/phibble/commit/93858fa">93858fa</a>; add <code>'base' =&gt; 1</code> for 1-based codes) or, for a <code>toColumns()</code> table, from <code>levels($name)</code> when <code>types()</code> reports a factor. The <code>ordered</code> flag is ignored. Labels cannot be written to Stan JSON, so they are returned in <code>StanData::$levels</code>, keyed by data variable, where label <code>i</code> has index <code>i + 1</code>. The conversion adds <code>N</code>, the row count, unless the table has a column named <code>N</code>, and adds <code>J_&lt;name&gt;</code> unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.</p>
-<p>Fit methods use CmdStanR-style snake_case names. <code>StanData</code> and <code>Tables</code> constructors use camelCase <code>from...()</code> names, like the package’s other static helpers such as <code>CmdStanFit::fromCsv()</code> and <code>Inits::fromFit()</code>. <code>StanData</code> is a value object with readonly <code>data</code>, <code>levels</code>, <code>columns</code> (the names of the columns of <code>X</code>), and <code>meta</code>. <code>toArray()</code> returns <code>data</code>, and <code>with(['prior_scale' =&gt; 2.5])</code> adds or replaces variables.</p>
+<p>Fit methods are camelCase, as are <code>StanData</code>‘s and <code>Tables</code>’ <code>from...()</code> constructors and the package’s other static helpers, such as <code>CmdStanFit::fromCsv()</code> and <code>Inits::fromFit()</code>. <code>StanData</code> is a value object with readonly <code>data</code>, <code>levels</code>, <code>columns</code> (the names of the columns of <code>X</code>), and <code>meta</code>. <code>toArray()</code> returns <code>data</code>, and <code>with(['prior_scale' =&gt; 2.5])</code> adds or replaces variables.</p>
 </section>
 <section id="regression-data" class="level3">
 <h3 class="anchored" data-anchor-id="regression-data">Regression data</h3>
@@ -566,7 +566,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; school_id;</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, drop_intercept: false, missing: 'drop')</code> builds regression data from an R-style formula through <code>Phit\model_matrix()</code> in the <a href="https://github.com/phpstats/phit"><code>phit</code></a> extension (phit <code>741d38f</code> and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the <code>(Intercept)</code> column in <code>X</code> unless <code>drop_intercept: true</code>. <code>$data</code> can be columns, factor descriptors, or a table, whose <code>toModelData()</code> is passed unchanged. Without the function, <code>fromFormula()</code> throws a <code>RuntimeException</code> that names the requirement. <code>StanData::fromModelMatrix($result)</code> maps an existing <code>Phit\model_matrix()</code> result and is the only code that depends on its shape.</p>
+<p><code>StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')</code> builds regression data from an R-style formula through <code>Phit\model_matrix()</code> in the <a href="https://github.com/phpstats/phit"><code>phit</code></a> extension (phit <code>741d38f</code> and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the <code>(Intercept)</code> column in <code>X</code> unless <code>dropIntercept: true</code>. <code>$data</code> can be columns, factor descriptors, or a table, whose <code>toModelData()</code> is passed unchanged. Without the function, <code>fromFormula()</code> throws a <code>RuntimeException</code> that names the requirement. <code>StanData::fromModelMatrix($result)</code> maps an existing <code>Phit\model_matrix()</code> result and is the only code that depends on its shape.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -624,9 +624,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="draws-and-summaries-out" class="level3">
 <h3 class="anchored" data-anchor-id="draws-and-summaries-out">Draws and summaries out</h3>
 <ul>
-<li><code>draws_columns(variables: null, inc_warmup: false)</code> returns draws as columns, like posterior’s <code>as_draws_df()</code>: one list per variable element (such as <code>beta[2]</code>), then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns.</li>
-<li><code>summary_columns(variables: null, probs: [0.05, 0.95], measures: [])</code> returns <code>summary()</code> as columns: <code>variable</code> and one column per measure.</li>
-<li><code>draws_table()</code> and <code>summary_table()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.5, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
+<li><code>drawsColumns(variables: null, incWarmup: false)</code> returns draws as columns, like posterior’s <code>as_draws_df()</code>: one list per variable element (such as <code>beta[2]</code>), then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns.</li>
+<li><code>summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])</code> returns <code>summary()</code> as columns: <code>variable</code> and one column per measure.</li>
+<li><code>drawsTable()</code> and <code>summaryTable()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.5, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
 <li><code>CmdStan\Tables::fromRows($rows)</code> converts any list of associative rows, such as <code>loo()['pointwise']</code>, to columns.</li>
 </ul>
 <p>The column arrays need no other package and suit any data frame library that accepts name-to-values columns.</p>
