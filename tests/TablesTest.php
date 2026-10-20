@@ -41,8 +41,8 @@ final class TablesTest extends TestCase
     {
         if (!class_exists(Tables::DATAFRAME_CLASS)) { require __DIR__.'/fixtures/PhibbleDataFrameStub.php'; }
         $fit = CmdStanFit::fromCsv([$this->csv()]);
-        $frame = $fit->drawsTable('theta');
-        self::assertInstanceOf(Tables::DATAFRAME_CLASS, $frame); self::assertSame($fit->drawsColumns('theta'), $frame->toColumns());
+        $df = $fit->drawsTable('theta');
+        self::assertInstanceOf(Tables::DATAFRAME_CLASS, $df); self::assertSame($fit->drawsColumns('theta'), $df->toColumns());
         self::assertSame($fit->summaryColumns('theta', measures: ['mean']), $fit->summaryTable('theta', measures: ['mean'])->toColumns());
     }
 }

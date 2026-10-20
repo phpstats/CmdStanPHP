@@ -221,9 +221,9 @@ final class StanDataTest extends TestCase
     {
         self::requireModelMatrix();
         $columns = self::SCHOOLS; $columns['y'][3] = 6.0; $columns['g'][3] = null;
-        $frame = self::frame($columns, ['f' => 'factor', 'r' => 'factor'], ['f' => ['lo', 'mid', 'hi'], 'r' => ['yes', 'no']]);
+        $df = self::frame($columns, ['f' => 'factor', 'r' => 'factor'], ['f' => ['lo', 'mid', 'hi'], 'r' => ['yes', 'no']]);
         $warnings = []; set_error_handler(function (int $no, string $message) use (&$warnings) { $warnings[] = $message; return true; }, E_WARNING);
-        try { $data = StanData::fromFormula('r ~ f + (1 | g)', $frame); } finally { restore_error_handler(); }
+        try { $data = StanData::fromFormula('r ~ f + (1 | g)', $df); } finally { restore_error_handler(); }
         self::assertCount(1, $warnings); self::assertSame(5, $data->data['N'], 'the row with a missing group label is dropped');
         self::assertSame(['(Intercept)', 'fmid', 'fhi'], $data->columns, "the table's first level is the reference");
         self::assertSame(['yes', 'no'], $data->levels['y']); self::assertSame([1, 0, 1, 0, 1], $data->data['y'], 'the response follows the table level order');

@@ -155,7 +155,7 @@ Fit methods are camelCase, as are `StanData`'s and `Tables`' `from...()` constru
 Groups are numbered over sorted unique values (numbers numerically, otherwise in `strcmp` order) or over a factor's levels, and the labels are in `levels['<g>_id']`. Predictors must be numeric. `intercept: true` prepends a column of ones named `(Intercept)`. It is off by default because Stan programs usually give the intercept its own parameter.
 
 ```php
-$data = CmdStan\StanData::fromColumns($frame, 'score', ['hours'], 'school');
+$data = CmdStan\StanData::fromColumns($df, 'score', ['hours'], 'school');
 $fit = $model->sample(data: $data, seed: 1);
 ```
 
