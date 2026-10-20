@@ -44,7 +44,7 @@ final class CmdStanModel
     {
         if ($cores < 1) { throw new \InvalidArgumentException('cores must be positive.'); }
         $forceRecompile ??= CmdStan::option('cmdstanr_force_recompile', false);
-        if ($threads) { trigger_error("'threads' is deprecated. Please use 'cpp_options: ['STAN_THREADS' => true]' instead.", E_USER_DEPRECATED); $cppOptions['STAN_THREADS'] = true; }
+        if ($threads) { trigger_error("'threads' is deprecated. Please use 'cppOptions: ['STAN_THREADS' => true]' instead.", E_USER_DEPRECATED); $cppOptions['STAN_THREADS'] = true; }
         if ($compileHessianMethod) { trigger_error("'compileHessianMethod' is deprecated. The hessian method is compiled with all models.", E_USER_DEPRECATED); }
         $stancArgs = $this->stancArgs($stancOptions);
         $makeOptions = [];
