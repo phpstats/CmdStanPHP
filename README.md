@@ -29,7 +29,7 @@ An existing CmdStan installation is discovered from `CMDSTAN` or `~/.cmdstan/cmd
 
 ## Data frames and the phpstats family
 
-Model data can be a plain array, a [phibble](https://github.com/phpstats/phibble) data frame, or any object with `toModelData()` or `toColumns()`. Numeric columns become Stan arrays, factors and strings become 1-based indices with `J_<name>` level counts, and `N` is added. `CmdStan\StanData::fromColumns()` builds the hierarchical regression block (`N`, `K`, `X`, `y`, `J`, and `<group>_id`), and `StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $frame)` does the same through `Phit\model_matrix()` from the `phit` extension, adding factor contrasts, factor responses, and random-slope matrices (`Z_<group>`). Fits return draws and summaries as columns, or as phibble frames when phibble is installed.
+Model data can be a plain array, a [phibble](https://github.com/phpstats/phibble) data frame, or any object with `toModelData()` or `toColumns()`. Numeric columns become Stan arrays, factors and strings become 1-based indices with `J_<name>` level counts, and `N` is added. `CmdStan\StanData::fromColumns()` builds the hierarchical regression block (`N`, `K`, `X`, `y`, `J`, and `<group>_id`), and `StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $frame)` does the same through `Phit\model_matrix()` from the `phit` extension, adding factor contrasts, factor responses, and random-slope matrices (`Z_<group>`). Fits return draws and summaries as columns, or as phibble DataFrames when phibble is installed.
 
 ```php
 $data = CmdStan\StanData::fromColumns($frame, 'score', ['hours'], 'school');
