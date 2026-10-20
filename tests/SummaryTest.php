@@ -9,12 +9,12 @@ final class SummaryTest extends TestCase
     {
         // Reference values from posterior 1.7.1.
         $x = self::CHAINS;
-        self::assertEqualsWithDelta(0.92748682491962331, Summary::rhat($x), 1e-14); self::assertEqualsWithDelta(0.9248959974913783, Summary::rhat_basic($x), 1e-14);
-        foreach (['ess_bulk', 'ess_tail', 'ess_basic', 'ess_sd', 'ess_mean'] as $measure) { self::assertEqualsWithDelta(10.0, Summary::$measure($x), 1e-12, $measure); }
-        self::assertEqualsWithDelta(0.26466960535732093, Summary::mcse_mean($x), 1e-14); self::assertEqualsWithDelta(0.13837633051596696, Summary::mcse_sd($x), 1e-14);
-        self::assertEqualsWithDelta(0.3, Summary::mcse_median($x), 1e-14);
-        $mcse = Summary::mcse_quantile($x); self::assertSame(['mcse_q5', 'mcse_q95'], array_keys($mcse)); self::assertEqualsWithDelta(0.4, $mcse['mcse_q5'], 1e-14); self::assertEqualsWithDelta(0.45, $mcse['mcse_q95'], 1e-14);
-        self::assertSame(['ess_q5', 'ess_q95'], array_keys(Summary::ess_quantile($x)));
+        self::assertEqualsWithDelta(0.92748682491962331, Summary::rhat($x), 1e-14); self::assertEqualsWithDelta(0.9248959974913783, Summary::rhatBasic($x), 1e-14);
+        foreach (['ess_bulk', 'ess_tail', 'ess_basic', 'ess_sd', 'ess_mean'] as $measure) { self::assertEqualsWithDelta(10.0, Summary::measure($measure, $x), 1e-12, $measure); }
+        self::assertEqualsWithDelta(0.26466960535732093, Summary::mcseMean($x), 1e-14); self::assertEqualsWithDelta(0.13837633051596696, Summary::mcseSd($x), 1e-14);
+        self::assertEqualsWithDelta(0.3, Summary::mcseMedian($x), 1e-14);
+        $mcse = Summary::mcseQuantile($x); self::assertSame(['mcse_q5', 'mcse_q95'], array_keys($mcse)); self::assertEqualsWithDelta(0.4, $mcse['mcse_q5'], 1e-14); self::assertEqualsWithDelta(0.45, $mcse['mcse_q95'], 1e-14);
+        self::assertSame(['ess_q5', 'ess_q95'], array_keys(Summary::essQuantile($x)));
         self::assertEqualsWithDelta(0.96369, Summary::mad($x), 1e-14); self::assertEqualsWithDelta(0.95, Summary::median($x), 1e-15);
         $q = Summary::quantile2($x, [0.1, 0.5, 0.9]); self::assertSame(['q10', 'q50', 'q90'], array_keys($q));
         self::assertEqualsWithDelta(0.06, $q['q10'], 1e-14); self::assertEqualsWithDelta(2.11, $q['q90'], 1e-14);
@@ -22,16 +22,16 @@ final class SummaryTest extends TestCase
     public function testFlatVectorsAreOneChainAndOddChainsDropTheMiddleDraw(): void
     {
         $flat = array_merge(...self::CHAINS);
-        self::assertSame(Summary::ess_bulk([$flat]), Summary::ess_bulk($flat));
-        self::assertSame([[1.0, 2.0], [4.0, 5.0]], Summary::split_chains([[1, 2, 3, 4, 5]]));
+        self::assertSame(Summary::essBulk([$flat]), Summary::essBulk($flat));
+        self::assertSame([[1.0, 2.0], [4.0, 5.0]], Summary::splitChains([[1, 2, 3, 4, 5]]));
     }
     public function testDegenerateInputsAreNan(): void
     {
         foreach (['rhat', 'ess_bulk', 'ess_tail', 'mcse_mean', 'mcse_sd'] as $measure) {
-            self::assertNan(Summary::$measure([[1, 1, 1, 1], [1, 1, 1, 1]]), $measure);
-            self::assertNan(Summary::$measure([[1, 2, NAN, 4], [1, 2, 3, 4]]), $measure);
+            self::assertNan(Summary::measure($measure, [[1, 1, 1, 1], [1, 1, 1, 1]]), $measure);
+            self::assertNan(Summary::measure($measure, [[1, 2, NAN, 4], [1, 2, 3, 4]]), $measure);
         }
-        self::assertNan(Summary::ess_basic([[1, 2], [3, 4]]));
+        self::assertNan(Summary::essBasic([[1, 2], [3, 4]]));
         self::assertNan(Summary::quantile2([1, NAN])['q5']);
         $this->expectException(\InvalidArgumentException::class); Summary::rhat([[1, 2, 3], [1, 2]]);
     }

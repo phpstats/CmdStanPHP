@@ -47,16 +47,16 @@ final class ModelMethods
     }
     public function library(): string { return $this->library; }
     public function seed(): int { return $this->seed; }
-    public function num_unconstrained(): int { $this->model(); return $this->info['num_unconstrained']; }
+    public function numUnconstrained(): int { $this->model(); return $this->info['num_unconstrained']; }
     /** Unconstrained parameter names in draws notation (e.g. "s[1]", "S[3]"). */
-    public function unconstrained_param_names(): array { $this->model(); return array_map(Csv::variableName(...), $this->info['unconstrained']); }
+    public function unconstrainedParamNames(): array { $this->model(); return array_map(Csv::variableName(...), $this->info['unconstrained']); }
     /** Flat constrained names in draws notation, in write order (column-major, matching CmdStan CSV columns). */
-    public function constrained_param_names(bool $transformed_parameters = true, bool $generated_quantities = true): array
+    public function constrainedParamNames(bool $transformed_parameters = true, bool $generated_quantities = true): array
     {
         return array_map(Csv::variableName(...), $this->select('constrained', $transformed_parameters, $generated_quantities));
     }
     /** Variable name => dimensions ([] for scalars; complex values have a trailing 2; tuple elements appear as name.k). */
-    public function variable_skeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array
+    public function variableSkeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array
     {
         $info = $this->info(); $count = $info['blocks'][0] + ($transformed_parameters ? $info['blocks'][1] : 0);
         $out = [];
@@ -65,14 +65,14 @@ final class ModelMethods
         }
         return $out;
     }
-    public function log_prob(array $unconstrained_variables, bool $jacobian = true): float
+    public function logProb(array $unconstrained_variables, bool $jacobian = true): float
     {
         $theta = $this->unconstrained($unconstrained_variables); $lp = $this->ffi->new('double'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_log_density($this->handle, $theta, (int)$jacobian, \FFI::addr($lp), \FFI::addr($err)), $err);
         return $lp->cdata;
     }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function grad_log_prob(array $unconstrained_variables, bool $jacobian = true): array
+    public function gradLogProb(array $unconstrained_variables, bool $jacobian = true): array
     {
         $theta = $this->unconstrained($unconstrained_variables); $n = $this->info['num_unconstrained'];
         $lp = $this->ffi->new('double'); $grad = $this->ffi->new('double['.max(1, $n).']'); $err = $this->ffi->new('char*');
@@ -90,10 +90,10 @@ final class ModelMethods
         return ['log_prob' => $lp->cdata, 'grad_log_prob' => self::read($grad, $n), 'hessian' => $rows];
     }
     /** @param array<string, mixed> $variables Parameter name => value; extra entries are ignored. */
-    public function unconstrain_variables(array $variables): array
+    public function unconstrainVariables(array $variables): array
     {
         $missing = [];
-        foreach ($this->variable_skeleton(false, false) as $name => $dims) {
+        foreach ($this->variableSkeleton(false, false) as $name => $dims) {
             if (array_product($dims) === 0) { continue; }
             if (!array_key_exists($name, $variables)) { $missing[] = $name; continue; }
             if (self::shape($variables[$name], $name) !== $dims) { throw new \InvalidArgumentException('Parameter '.$name.' must have dimensions ['.implode(',', $dims).'].'); }
@@ -108,9 +108,9 @@ final class ModelMethods
         return $this->unconstrain($flat);
     }
     /** @param list<array<string, float>> $draws Rows keyed by draws names such as "theta" or "x[1,2]". @return list<list<float>> */
-    public function unconstrain_draws(array $draws): array
+    public function unconstrainDraws(array $draws): array
     {
-        $names = $this->constrained_param_names(false, false); $out = [];
+        $names = $this->constrainedParamNames(false, false); $out = [];
         foreach ($draws as $row) {
             if (!is_array($row)) { throw new \InvalidArgumentException('Each draw must be an associative row.'); }
             $missing = array_diff($names, array_keys($row));
@@ -119,13 +119,13 @@ final class ModelMethods
         }
         return $out;
     }
-    /** @return array<string, mixed> Variable name => float or nested list, shaped by variable_skeleton(). */
-    public function constrain_variables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array
+    /** @return array<string, mixed> Variable name => float or nested list, shaped by variableSkeleton(). */
+    public function constrainVariables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array
     {
         $theta = $this->unconstrained($unconstrained_variables); $size = $this->size($transformed_parameters, $generated_quantities);
         $values = $this->ffi->new('double['.max(1, $size).']'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_param_constrain($this->handle, $theta, (int)$transformed_parameters, (int)$generated_quantities, $values, $size, \FFI::addr($err)), $err);
-        $out = array_map(self::zeros(...), $this->variable_skeleton($transformed_parameters, $generated_quantities));
+        $out = array_map(self::zeros(...), $this->variableSkeleton($transformed_parameters, $generated_quantities));
         foreach ($this->select('paths', $transformed_parameters, $generated_quantities) as $k => [$name, $indices]) {
             $ref = &$out[$name];
             foreach ($indices as $i) { $ref = &$ref[$i]; }
@@ -133,8 +133,8 @@ final class ModelMethods
         }
         return $out;
     }
-    /** Reseed the RNG used for generated quantities by constrain_variables(). */
-    public function seed_rng(int $seed): void
+    /** Reseed the RNG used for generated quantities by constrainVariables(). */
+    public function seedRng(int $seed): void
     {
         if ($seed < 0 || $seed > 4294967295) { throw new \InvalidArgumentException('seed must be an unsigned 32-bit integer.'); }
         $this->ffi->cmdstanphp_seed($this->model(), $seed);
@@ -175,7 +175,7 @@ final class ModelMethods
     }
     private function unconstrained(array $values): \FFI\CData
     {
-        $n = $this->num_unconstrained();
+        $n = $this->numUnconstrained();
         if (!array_is_list($values)) { throw new \InvalidArgumentException('Unconstrained variables must be a list of numbers.'); }
         if (count($values) !== $n) { throw new \InvalidArgumentException('Model has '.$n.' unconstrained parameter(s), but '.count($values).' were provided!'); }
         foreach ($values as $value) { if (!is_int($value) && !is_float($value)) { throw new \InvalidArgumentException('Unconstrained variables must be numbers.'); } }
@@ -184,7 +184,7 @@ final class ModelMethods
     private function unconstrain(array $flat): array
     {
         foreach ($flat as $value) { if (!is_int($value) && !is_float($value)) { throw new \InvalidArgumentException('Parameter values must be numbers.'); } }
-        $n = $this->num_unconstrained(); $out = $this->ffi->new('double['.max(1, $n).']'); $err = $this->ffi->new('char*');
+        $n = $this->numUnconstrained(); $out = $this->ffi->new('double['.max(1, $n).']'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_param_unconstrain($this->handle, NativeBuild::doubles($this->ffi, $flat), count($flat), $out, \FFI::addr($err)), $err);
         return self::read($out, $n);
     }
@@ -199,7 +199,7 @@ final class ModelMethods
         for ($i = 0; $i < $n; ++$i) { $out[] = $buffer[$i]; }
         return $out;
     }
-    /** Map a CmdStan flat name ("a.2.1", "z.imag", "t:2.1", "at.1:2.3") to [variable_skeleton key, zero-based indices]. */
+    /** Map a CmdStan flat name ("a.2.1", "z.imag", "t:2.1", "at.1:2.3") to [variableSkeleton key, zero-based indices]. */
     private static function path(string $name): array
     {
         $length = strcspn($name, '.:'); $key = substr($name, 0, $length); $indices = [];

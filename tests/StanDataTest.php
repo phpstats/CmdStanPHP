@@ -85,9 +85,9 @@ final class StanDataTest extends TestCase
     {
         $model = new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'), __DIR__.'/fixtures/model.php');
         $fit = $model->sample(data: self::frame(['y' => [0, 1], 'g' => ['b', 'a']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
-        self::assertSame(['N' => 2, 'y' => [0, 1], 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($fit->data_file()), true));
+        self::assertSame(['N' => 2, 'y' => [0, 1], 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($fit->dataFile()), true));
         $fit = $model->optimize(data: StanData::fromColumns(['y' => [3], 'x' => [1.5]], 'y', ['x'])->with(['scale' => 2]), output_dir: $this->dir, show_messages: false);
-        self::assertSame(['N' => 1, 'K' => 1, 'X' => [[1.5]], 'y' => [3], 'scale' => 2], json_decode(file_get_contents($fit->data_file()), true));
+        self::assertSame(['N' => 1, 'K' => 1, 'X' => [[1.5]], 'y' => [3], 'scale' => 2], json_decode(file_get_contents($fit->dataFile()), true));
     }
     public function testFromColumnsBuildsTheHierarchicalRegressionBlock(): void
     {

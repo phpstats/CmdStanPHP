@@ -10,6 +10,6 @@ final class CmdStanMLE extends CmdStanFit
         $values = $this->draws($variables, 'draws_matrix'); $last = $values === [] ? [] : end($values);
         return array_map(fn($name, $value) => ['variable' => $name, 'estimate' => $value], array_keys($last), array_values($last));
     }
-    public function optimized_params(): array { return $this->mle(); }
+    public function optimizedParams(): array { return $this->mle(); }
     public function lp(): float { return $this->mle()['lp__'] ?? NAN; }
 }

@@ -34,19 +34,19 @@ final class Psis
         return ['k' => $k, 'sigma' => $sigma];
     }
     /** Generalized Pareto quantile function (posterior::qgeneralized_pareto). */
-    public static function qgeneralized_pareto(array|float $p, float $mu = 0.0, float $sigma = 1.0, float $k = 0.0): array|float
+    public static function qgeneralizedPareto(array|float $p, float $mu = 0.0, float $sigma = 1.0, float $k = 0.0): array|float
     {
-        if (is_array($p)) { return array_map(fn($q) => self::qgeneralized_pareto((float)$q, $mu, $sigma, $k), $p); }
+        if (is_array($p)) { return array_map(fn($q) => self::qgeneralizedPareto((float)$q, $mu, $sigma, $k), $p); }
         if (is_nan($sigma) || $sigma <= 0) { return NAN; }
         return $k == 0.0 ? $mu - $sigma * log1p(-$p) : $mu + $sigma * expm1(-$k * log1p(-$p)) / $k;
     }
-    public static function ps_tail_length(int $ndraws, float $r_eff): float
+    public static function psTailLength(int $ndraws, float $r_eff): float
     {
         return is_nan($r_eff) ? NAN : floor($ndraws * $r_eff > 225 ? 3 * sqrt(fdiv($ndraws, $r_eff)) : $ndraws / 5);
     }
-    public static function ps_khat_threshold(int $ndraws): float { return 1 - fdiv(1, log10($ndraws)); }
-    public static function ps_min_ss(float $k): float { return is_nan($k) ? NAN : ($k < 1 ? 10 ** (1 / (1 - max(0.0, $k))) : INF); }
-    public static function ps_convergence_rate(float $k, int $ndraws): float
+    public static function psKhatThreshold(int $ndraws): float { return 1 - fdiv(1, log10($ndraws)); }
+    public static function psMinSs(float $k): float { return is_nan($k) ? NAN : ($k < 1 ? 10 ** (1 / (1 - max(0.0, $k))) : INF); }
+    public static function psConvergenceRate(float $k, int $ndraws): float
     {
         if (is_nan($k)) { return NAN; }
         if ($k < 0) { return 1.0; }
@@ -61,7 +61,7 @@ final class Psis
      * @param ?float $r_eff null uses ess_tail(x) / ndraws, treating x as one chain
      * @return array{x: list<float>, diagnostics: array{khat: float, min_ss: float, khat_threshold: float, convergence_rate: float}, warnings: list<string>}
      */
-    public static function pareto_smooth(array $x, string $tail = 'both', ?float $r_eff = null, ?int $ndraws_tail = null, bool $are_log_weights = false, bool $smooth_draws = true): array
+    public static function paretoSmooth(array $x, string $tail = 'both', ?float $r_eff = null, ?int $ndraws_tail = null, bool $are_log_weights = false, bool $smooth_draws = true): array
     {
         $x = array_map('floatval', array_values($x)); $warnings = [];
         $na = fn(array $x, array $warnings) => ['x' => $x, 'diagnostics' => ['khat' => NAN, 'min_ss' => NAN, 'khat_threshold' => NAN, 'convergence_rate' => NAN], 'warnings' => $warnings];
@@ -71,32 +71,32 @@ final class Psis
         }
         if ($are_log_weights) { $tail = 'right'; }
         if (!in_array($tail, ['both', 'right', 'left'], true)) { throw new \InvalidArgumentException("tail must be 'both', 'right' or 'left'."); }
-        $ndraws = count($x); $r_eff ??= Summary::ess_tail([$x]) / $ndraws;
-        $length = $ndraws_tail ?? self::ps_tail_length($ndraws, $r_eff);
+        $ndraws = count($x); $r_eff ??= Summary::essTail([$x]) / $ndraws;
+        $length = $ndraws_tail ?? self::psTailLength($ndraws, $r_eff);
         if (is_nan($length)) { return $na($x, ['Input contains infinite or NA values, is constant, or has constant tail. Fitting of generalized Pareto distribution not performed.']); }
         if ($length < 5) { $warnings[] = 'Number of tail draws cannot be less than 5. Changing to 5.'; $length = 5; }
         if ($length >= $ndraws) { $warnings[] = 'Tail draws ('.$length.') not strictly less than total draws ('.$ndraws.'). Fitting of generalized Pareto distribution not performed.'; return $na($x, $warnings); }
         if ($tail === 'both') {
             if ($length > $ndraws / 2) { $length = $ndraws / 2; $warnings[] = 'Number of tail draws cannot be more than half the total number of draws if both tails are fit, changing to '.$length.'.'; }
-            [$x, $left] = self::ps_tail($x, $length, 'left', $are_log_weights, $smooth_draws);
-            [$x, $right] = self::ps_tail($x, $length, 'right', $are_log_weights, $smooth_draws);
+            [$x, $left] = self::psTail($x, $length, 'left', $are_log_weights, $smooth_draws);
+            [$x, $right] = self::psTail($x, $length, 'right', $are_log_weights, $smooth_draws);
             $k = is_nan($left) && is_nan($right) ? NAN : max(is_nan($left) ? -INF : $left, is_nan($right) ? -INF : $right);
-        } else { [$x, $k] = self::ps_tail($x, $length, $tail, $are_log_weights, $smooth_draws); }
+        } else { [$x, $k] = self::psTail($x, $length, $tail, $are_log_weights, $smooth_draws); }
         if (is_nan($k)) { return $na($x, $warnings); }
-        return ['x' => $x, 'diagnostics' => ['khat' => $k, 'min_ss' => self::ps_min_ss($k), 'khat_threshold' => self::ps_khat_threshold($ndraws), 'convergence_rate' => self::ps_convergence_rate($k, $ndraws)], 'warnings' => $warnings];
+        return ['x' => $x, 'diagnostics' => ['khat' => $k, 'min_ss' => self::psMinSs($k), 'khat_threshold' => self::psKhatThreshold($ndraws), 'convergence_rate' => self::psConvergenceRate($k, $ndraws)], 'warnings' => $warnings];
     }
     /** posterior::pareto_khat: the Pareto k diagnostic without smoothing the draws. */
-    public static function pareto_khat(array $x, string $tail = 'both', ?float $r_eff = null, ?int $ndraws_tail = null, bool $are_log_weights = false): float
+    public static function paretoKhat(array $x, string $tail = 'both', ?float $r_eff = null, ?int $ndraws_tail = null, bool $are_log_weights = false): float
     {
-        return self::pareto_smooth($x, $tail, $r_eff, $ndraws_tail, $are_log_weights, false)['diagnostics']['khat'];
+        return self::paretoSmooth($x, $tail, $r_eff, $ndraws_tail, $are_log_weights, false)['diagnostics']['khat'];
     }
     /** posterior::pareto_smooth_log_weights: right-tail smoothing of log weights (shifted so that the maximum is 0). */
-    public static function pareto_smooth_log_weights(array $log_weights): array
+    public static function paretoSmoothLogWeights(array $log_weights): array
     {
-        return self::pareto_smooth($log_weights, 'right', are_log_weights: true);
+        return self::paretoSmooth($log_weights, 'right', are_log_weights: true);
     }
     /** posterior:::ps_tail. Returns [x, k]; k is NAN when no fit was performed. */
-    private static function ps_tail(array $x, float $ndrawsTail, string $tail, bool $areLogWeights, bool $smoothDraws): array
+    private static function psTail(array $x, float $ndrawsTail, string $tail, bool $areLogWeights, bool $smoothDraws): array
     {
         if ($ndrawsTail < 5) { return [$x, NAN]; }
         if ($areLogWeights) { $max = max($x); $x = array_map(fn($v) => $v - $max, $x); }
@@ -113,7 +113,7 @@ final class Psis
         if (is_finite($k) && $smoothDraws) {
             $count = count($tailValues);
             foreach ($tailIds as $i => $id) {
-                $value = self::qgeneralized_pareto(($i + 1 - 0.5) / $count, $cutoff, $fit['sigma'], $k);
+                $value = self::qgeneralizedPareto(($i + 1 - 0.5) / $count, $cutoff, $fit['sigma'], $k);
                 if ($areLogWeights) { $value = log($value); }
                 $x[$id] = $value > $maxTail ? $maxTail : $value;
             }
@@ -181,7 +181,7 @@ final class Psis
                 $k = is_nan($fit['k']) ? INF : $fit['k'];
                 if (is_finite($k)) {
                     $expCutoff = exp($cutoff);
-                    foreach ($tailIds as $i => $id) { $lw[$id] = log(self::qgeneralized_pareto(($i + 1 - 0.5) / $tailLen, 0.0, $fit['sigma'], $k) + $expCutoff); }
+                    foreach ($tailIds as $i => $id) { $lw[$id] = log(self::qgeneralizedPareto(($i + 1 - 0.5) / $tailLen, 0.0, $fit['sigma'], $k) + $expCutoff); }
                 }
             }
         }

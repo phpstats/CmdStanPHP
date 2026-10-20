@@ -29,7 +29,7 @@ final class CompatibilityTest extends TestCase
         $options['output_dir'] = $this->dir.'/r'; mkdir($options['output_dir']);
         $config = $this->dir.'/options.json'; file_put_contents($config, json_encode($options, JSON_THROW_ON_ERROR));
         $output = $this->dir.'/reference.json';
-        Process::run(['Rscript', __DIR__.'/fixtures/reference.R', $method, $model->stan_file(), $model->exe_file(), $config, $output], env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
+        Process::run(['Rscript', __DIR__.'/fixtures/reference.R', $method, $model->stanFile(), $model->exeFile(), $config, $output], env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
         $reference = json_decode(file_get_contents($output), true, flags: JSON_THROW_ON_ERROR);
         $draws = $phpFit->draws(format: 'draws_df'); self::assertCount(count($reference['draws']), $draws);
         foreach ($reference['draws'] as $i => $row) {
@@ -38,13 +38,13 @@ final class CompatibilityTest extends TestCase
             }
         }
         if ($method === 'sample') {
-            $diagnostics = $phpFit->diagnostic_summary();
+            $diagnostics = $phpFit->diagnosticSummary();
             foreach (['num_divergent', 'num_max_treedepth', 'ebfmi'] as $name) {
                 foreach ($reference['diagnostics'][$name] as $i => $value) { self::assertEqualsWithDelta($value, $diagnostics[$name][$i], 1e-12, $name); }
             }
         }
         if (in_array($method, ['variational', 'pathfinder', 'laplace'], true)) {
-            $approx = $phpFit->lp_approx();
+            $approx = $phpFit->lpApprox();
             self::assertCount(count($reference['approx_lp']), $approx);
             foreach ($reference['approx_lp'] as $i => $row) {
                 foreach ((array)$row as $j => $value) { self::assertEqualsWithDelta($value, $approx[$i][$j], 1e-13, $method.' approximate lp'); }
@@ -64,7 +64,7 @@ final class CompatibilityTest extends TestCase
         $options = ['data' => ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]], 'seed' => 123, 'show_messages' => false, 'output_dir' => $this->dir] + ($method === 'sample' ? ['chains' => 2, 'iter_warmup' => 50, 'iter_sampling' => 20, 'save_warmup' => true] : []);
         $fit = $model->$method($options);
         $script = 'm <- cmdstanr::read_cmdstan_csv(commandArgs(TRUE)[-1])$metadata; m$time <- NULL; m$stan_variable_sizes <- lapply(m$stan_variable_sizes, as.list); jsonlite::write_json(list(names = names(m), metadata = m[!names(m) %in% c("init", "fitted_params", "profile_file", "file", "data_file", "diagnostic_file", "start_datetime")]), commandArgs(TRUE)[1], digits = NA, auto_unbox = TRUE)';
-        Process::run(array_merge(['Rscript', '-e', $script, $this->dir.'/meta.json'], $fit->output_files()), env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
+        Process::run(array_merge(['Rscript', '-e', $script, $this->dir.'/meta.json'], $fit->outputFiles()), env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
         $reference = json_decode(file_get_contents($this->dir.'/meta.json'), true, flags: JSON_THROW_ON_ERROR); $meta = $fit->metadata();
         self::assertSame([], array_values(array_diff($reference['names'], array_keys($meta), ['time'])), 'CmdStanR metadata keys missing in PHP');
         foreach ($reference['metadata'] as $key => $value) {

@@ -29,20 +29,20 @@ final class FitIntegrationTest extends TestCase
     {
         try { NativeBuild::requireFfi(); } catch (\RuntimeException $e) { self::markTestSkipped($e->getMessage()); }
         $model = $this->model(); $fit = $this->sample($model);
-        $u = $fit->unconstrain_variables(['mu' => 0.5, 'sigma' => 2.0, 'z' => [0.1, -0.2]]);
+        $u = $fit->unconstrainVariables(['mu' => 0.5, 'sigma' => 2.0, 'z' => [0.1, -0.2]]);
         self::assertEqualsWithDelta([0.5, log(2.0), 0.1, -0.2], $u, 1e-12);
-        $constrained = $fit->constrain_variables($u, generated_quantities: false); self::assertEqualsWithDelta(2.0, $constrained['sigma'], 1e-12);
-        self::assertSame(['mu' => [], 'sigma' => [], 'z' => [2]], $fit->variable_skeleton(false, false));
-        $grad = $fit->grad_log_prob($u); self::assertEqualsWithDelta($fit->log_prob($u), $grad['log_prob'], 1e-12); self::assertCount(4, $grad['gradient']);
+        $constrained = $fit->constrainVariables($u, generated_quantities: false); self::assertEqualsWithDelta(2.0, $constrained['sigma'], 1e-12);
+        self::assertSame(['mu' => [], 'sigma' => [], 'z' => [2]], $fit->variableSkeleton(false, false));
+        $grad = $fit->gradLogProb($u); self::assertEqualsWithDelta($fit->logProb($u), $grad['log_prob'], 1e-12); self::assertCount(4, $grad['gradient']);
         self::assertCount(4, $fit->hessian($u)['hessian']);
-        $unconstrained = $fit->unconstrain_draws(format: 'draws_matrix'); self::assertCount(200, $unconstrained);
+        $unconstrained = $fit->unconstrainDraws(format: 'draws_matrix'); self::assertCount(200, $unconstrained);
         $first = $fit->draws(['sigma'], 'draws_matrix')[0]['sigma']; self::assertEqualsWithDelta(log($first), $unconstrained[0]['sigma'], 1e-9);
-        self::assertCount(100, $fit->unconstrain_draws(files: [$fit->output_files()[1]], format: 'draws_array'));
-        $imported = CmdStanFit::fromCsv($fit->output_files());
-        try { $imported->log_prob($u); self::fail('Imported fits need the model.'); } catch (\RuntimeException) {}
-        $imported->init_model_methods(model: $model); self::assertSame(['mu', 'sigma', 'z[1]', 'z[2]'], array_keys($imported->unconstrain_draws(format: 'draws_matrix')[0]));
-        self::assertEqualsWithDelta(4.0, $fit->expose_functions()->twice(2.0), 1e-12); self::assertEqualsWithDelta(3.0, $model->expose_functions()->twice(1.5), 1e-12);
-        self::assertSame($fit->log_prob($u), unserialize(serialize($fit))->log_prob($u));
+        self::assertCount(100, $fit->unconstrainDraws(files: [$fit->outputFiles()[1]], format: 'draws_array'));
+        $imported = CmdStanFit::fromCsv($fit->outputFiles());
+        try { $imported->logProb($u); self::fail('Imported fits need the model.'); } catch (\RuntimeException) {}
+        $imported->initModelMethods(model: $model); self::assertSame(['mu', 'sigma', 'z[1]', 'z[2]'], array_keys($imported->unconstrainDraws(format: 'draws_matrix')[0]));
+        self::assertEqualsWithDelta(4.0, $fit->exposeFunctions()->twice(2.0), 1e-12); self::assertEqualsWithDelta(3.0, $model->exposeFunctions()->twice(1.5), 1e-12);
+        self::assertSame($fit->logProb($u), unserialize(serialize($fit))->logProb($u));
     }
     public function testInitFromFitsLooRvarsAndMeasures(): void
     {
@@ -52,7 +52,7 @@ final class FitIntegrationTest extends TestCase
         $inits = glob($this->dir.'/warm/*-init-*.json'); self::assertCount(2, $inits);
         foreach ($inits as $file) { $init = json_decode(file_get_contents($file), true); self::assertEqualsWithDelta($mle->mle()['mu'], $init['mu'], 1e-12); self::assertCount(2, $init['z']); self::assertArrayNotHasKey('log_lik', $init); }
         $pathfinder = $model->pathfinder(data: $this->data(), seed: 3, show_messages: false, output_dir: $this->dir);
-        self::assertSame(2, $this->sample($model, init: $pathfinder)->num_chains()); self::assertSame(2, $this->sample($model, init: $fit)->num_chains());
+        self::assertSame(2, $this->sample($model, init: $pathfinder)->numChains()); self::assertSame(2, $this->sample($model, init: $fit)->numChains());
         $loo = $fit->loo(); self::assertCount(6, $loo['pointwise']); self::assertEqualsWithDelta($loo['elpd_loo'], -$loo['looic'] / 2, 1e-9);
         self::assertStringContainsString('of 6)', (string)\CmdStan\pareto_k_plot($loo)); self::assertStringContainsString('chain 2 = o', (string)\CmdStan\mcmc_trace($fit, 'mu'));
         self::assertStringContainsString('X = divergent transition', (string)\CmdStan\mcmc_scatter($fit, 'mu', 'sigma')); self::assertStringContainsString('z[2] |', (string)\CmdStan\mcmc_intervals($fit, ['mu', 'z']));

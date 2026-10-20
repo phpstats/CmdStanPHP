@@ -114,7 +114,7 @@ final class Inits
     /** cmdstanr:::process_init_approx: importance resampling with lw = lp__ - lp_approx__. Returns [rows, warnings]. */
     private static function approximate(CmdStanFit $fit, int $numProcs, \Random\Randomizer $rng): array
     {
-        $rows = $fit->draws(format: 'draws_df'); $approx = $fit->lp_approx(); $lw = []; $warnings = [];
+        $rows = $fit->draws(format: 'draws_df'); $approx = $fit->lpApprox(); $lw = []; $warnings = [];
         foreach ($rows as $i => $row) {
             $value = ($row['lp__'] ?? NAN) - ($approx[$row['.iteration'] - 1][$row['.chain'] - 1] ?? NAN);
             $lw[$i] = is_finite($value) ? $value : -INF;
@@ -131,7 +131,7 @@ final class Inits
             $keep = array_values($first); sort($keep); $rows = self::pick($rows, $keep);
             $weights = array_map(fn($i) => exp($lw[$i] - $max), $keep);
         } else {
-            $smoothed = Psis::pareto_smooth(array_map(fn($v) => exp($v - $max), $lw), 'right', 1.0);
+            $smoothed = Psis::paretoSmooth(array_map(fn($v) => exp($v - $max), $lw), 'right', 1.0);
             $weights = $smoothed['x'];
             foreach ($smoothed['warnings'] as $message) { $warnings[] = ['chain' => null, 'type' => 'pareto_smooth', 'parameters' => [], 'message' => $message]; }
         }
@@ -139,7 +139,7 @@ final class Inits
     }
     private static function validateFit(CmdStanFit $fit, ?array $parameters): void
     {
-        $codes = $fit->return_codes();
+        $codes = $fit->returnCodes();
         if ($codes !== [] && count(array_filter($codes, fn($c) => $c !== 0)) === count($codes)) { throw new \RuntimeException('We are unable to create initial values from a model with no samples. Please check the results of the model used for inits before continuing.'); }
         if ($parameters !== null) {
             $available = array_map(fn($name) => Rvars::parseName($name)[0], $fit->variables());

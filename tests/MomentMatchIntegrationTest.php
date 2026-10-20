@@ -60,8 +60,8 @@ final class MomentMatchIntegrationTest extends TestCase
         self::assertSame($matched[$outlier]['pareto_k'], $mm['diagnostics']['pareto_k'][$outlier]);
         foreach ($plain['pointwise'] as $j => $row) { if (!isset($matched[$j])) { self::assertSame($row, $mm['pointwise'][$j]); } }
         // The same run through the generic API with the fit's own callbacks gives an identical result.
-        $logLik = $fit->draws('log_lik', 'draws_array'); $upars = array_map('array_values', $fit->unconstrain_draws(format: 'draws_matrix'));
-        $generic = MomentMatch::loo(Loo::loo($logLik), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->log_prob($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrain_variables($r)['log_lik'][$i], $rows));
+        $logLik = $fit->draws('log_lik', 'draws_array'); $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
+        $generic = MomentMatch::loo(Loo::loo($logLik), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
         self::assertSame($mm, $generic);
         // A matrix-shaped log-likelihood maps "log_lik_matrix[i,1]" to the same values.
         $matrix = $fit->loo('log_lik_matrix', moment_match: true);
@@ -70,15 +70,15 @@ final class MomentMatchIntegrationTest extends TestCase
     }
     public function testUnconstrainedRowsStayAlignedWithLogLikelihoodDraws(): void
     {
-        $fit = $this->fit(); $upars = array_map('array_values', $fit->unconstrain_draws(format: 'draws_matrix'));
+        $fit = $this->fit(); $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
         $columns = Loo::columns($fit->draws('log_lik', 'draws_array'))[0]; $draws = $fit->draws(['sigma'], 'draws_matrix');
-        self::assertCount(4000, $upars); self::assertSame(['alpha', 'beta', 'sigma'], array_keys($fit->unconstrain_draws(format: 'draws_matrix')[0]));
+        self::assertCount(4000, $upars); self::assertSame(['alpha', 'beta', 'sigma'], array_keys($fit->unconstrainDraws(format: 'draws_matrix')[0]));
         foreach ([0, 999, 1000, 2500, 3999] as $s) {
             self::assertEqualsWithDelta(log($draws[$s]['sigma']), $upars[$s][2], 1e-12, 'sigma is unconstrained with log');
-            $recomputed = $fit->constrain_variables($upars[$s])['log_lik'];
+            $recomputed = $fit->constrainVariables($upars[$s])['log_lik'];
             foreach ($columns as $j => $column) { self::assertEqualsWithDelta($column[$s], $recomputed[$j], 1e-4 * max(1.0, abs($column[$s])), "draw $s observation $j"); }
             // log_prob includes the log-transform Jacobian, the proposal density moment matching needs.
-            self::assertEqualsWithDelta($fit->log_prob($upars[$s], jacobian: false) + $upars[$s][2], $fit->log_prob($upars[$s]), 1e-10);
+            self::assertEqualsWithDelta($fit->logProb($upars[$s], jacobian: false) + $upars[$s][2], $fit->logProb($upars[$s]), 1e-10);
         }
     }
     #[Group('compatibility')]
@@ -91,7 +91,7 @@ final class MomentMatchIntegrationTest extends TestCase
         $options = ['data' => self::DATA, 'chains' => 4, 'iter_warmup' => 500, 'iter_sampling' => 1000, 'seed' => 20261012, 'refresh' => 0, 'show_messages' => false, 'show_exceptions' => false, 'sig_figs' => 18, 'save_metric' => false, 'save_cmdstan_config' => false];
         $fit = $model->sample($options + ['output_dir' => $this->dir]);
         $options['output_dir'] = $this->dir.'/r'; mkdir($options['output_dir']); file_put_contents($this->dir.'/options.json', json_encode($options, JSON_THROW_ON_ERROR));
-        copy($model->stan_file(), $options['output_dir'].'/regression.stan');
+        copy($model->stanFile(), $options['output_dir'].'/regression.stan');
         Process::run(['Rscript', __DIR__.'/fixtures/moment_match_cmdstanr.R', $options['output_dir'].'/regression.stan', $this->dir.'/options.json', $this->dir.'/reference.json'], env: ['CMDSTAN' => CmdStan::path()], timeout: 900);
         $ref = json_decode(file_get_contents($this->dir.'/reference.json'), true, flags: JSON_THROW_ON_ERROR);
         self::assertEqualsWithDelta($ref['lp'], array_column($fit->draws('lp__', 'draws_matrix'), 'lp__'), 1e-12, 'same draws');

@@ -69,13 +69,13 @@ final class Loo
      * posterior::ess_mean per observation divided by the total number of draws. NAN where ESS is undefined.
      * @return list<float>
      */
-    public static function relative_eff(array $x): array
+    public static function relativeEff(array $x): array
     {
         [$columns, $chains] = self::columns($x);
         return self::relativeEffColumns($columns, $chains);
     }
     /** relative_eff(exp(log_lik - max per observation)), exactly as CmdStanMCMC$loo(r_eff = TRUE) computes it. */
-    public static function relative_eff_log_lik(array $log_lik): array
+    public static function relativeEffLogLik(array $log_lik): array
     {
         [$columns, $chains] = self::columns($log_lik);
         return self::relativeEffColumns(array_map(function ($column) { $max = max($column); return array_map(fn($v) => exp($v - $max), $column); }, $columns), $chains);
@@ -84,7 +84,7 @@ final class Loo
      * Pareto k summary like loo::pareto_k_table: counts, proportions and minimum n_eff per k interval.
      * @return array{k_threshold: float, rows: list<array{interval: string, count: int, proportion: float, min_n_eff: float}>}
      */
-    public static function pareto_k_table(array $loo): array
+    public static function paretoKTable(array $loo): array
     {
         $threshold = $loo['k_threshold']; $label = number_format(round($threshold, 2), 2, '.', '');
         $label = rtrim(rtrim($label, '0'), '.');
@@ -106,7 +106,7 @@ final class Loo
     public static function relativeEffColumns(array $columns, int $chains): array
     {
         $s = count($columns[0] ?? []); $n = intdiv($s, $chains);
-        return array_map(fn($column) => Summary::ess_mean(array_chunk($column, $n)) / $s, $columns);
+        return array_map(fn($column) => Summary::essMean(array_chunk($column, $n)) / $s, $columns);
     }
     /** @internal loo:::mcse_elpd for one observation. */
     public static function mcseElpd(array $ll, array $lw, float $elpd, float $r_eff): float

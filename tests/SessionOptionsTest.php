@@ -82,7 +82,7 @@ final class SessionOptionsTest extends TestCase
             ob_start(); $model->compile(); self::assertSame('', ob_get_clean());
             options(['cmdstanr_force_recompile' => true]); ob_start(); $model->compile(); self::assertStringContainsString('make -C', ob_get_clean());
             $messages = $this->deprecations(function () use ($model) { ob_start(); $model->compile(force_recompile: false, threads: true, compile_hessian_method: true); ob_end_clean(); });
-            self::assertCount(2, $messages); self::assertSame(['STAN_THREADS' => true], $model->cpp_options());
+            self::assertCount(2, $messages); self::assertSame(['STAN_THREADS' => true], $model->cppOptions());
         } finally { $property->setValue(null, $previous); }
     }
 }

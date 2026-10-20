@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace CmdStan;
 final class CmdStanLaplace extends CmdStanFit
 {
-    public function lp_approx(): array { return $this->approximateLp('lp_approx__'); }
+    public function lpApprox(): array { return $this->approximateLp('lp_approx__'); }
     public function mode(): array
     {
         $mode = $this->context['mode'] ?? null;

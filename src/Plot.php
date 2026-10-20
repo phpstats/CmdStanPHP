@@ -56,7 +56,7 @@ final class Plot
         return new Figure('intervals', $title, $rows, ['prob' => $prob, 'prob_outer' => $prob_outer, 'point_est' => $point_est]);
     }
     /** Per-chain histograms of pooled ranks (bayesplot's mcmc_rank_hist), with the count expected under uniform ranks. */
-    public static function rank_hist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure
+    public static function rankHist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure
     {
         if ($bins < 1) { throw new \InvalidArgumentException('bins must be positive.'); }
         $chains = self::chains($draws, $variable); $ranks = self::ranks(array_merge(...$chains)); $total = count($ranks); $rows = []; $offset = 0;
@@ -72,8 +72,8 @@ final class Plot
     public static function scatter(CmdStanFit|array $draws, string $x_variable, string $y_variable): Figure
     {
         $xs = array_merge(...self::chains($draws, $x_variable)); $ys = array_merge(...self::chains($draws, $y_variable)); $divergent = array_fill(0, count($xs), false); $flagged = false;
-        if ($draws instanceof CmdStanMCMC && array_key_exists('divergent__', $draws->sampler_diagnostics('draws_list')[0])) {
-            $divergent = array_map(fn($flag) => $flag > 0, array_merge(...array_map(fn($chain) => $chain['divergent__'], $draws->sampler_diagnostics('draws_list')))); $flagged = true;
+        if ($draws instanceof CmdStanMCMC && array_key_exists('divergent__', $draws->samplerDiagnostics('draws_list')[0])) {
+            $divergent = array_map(fn($flag) => $flag > 0, array_merge(...array_map(fn($chain) => $chain['divergent__'], $draws->samplerDiagnostics('draws_list')))); $flagged = true;
         }
         $rows = array_map(fn($x, $y, $d) => ['x' => $x, 'y' => $y, 'divergent' => $d], $xs, $ys, $divergent);
         return new Figure('scatter', $y_variable.' against '.$x_variable, $rows, ['x_variable' => $x_variable, 'y_variable' => $y_variable, 'divergences' => $flagged]);
@@ -88,7 +88,7 @@ final class Plot
         return new Figure('acf', $variable.': autocorrelation, lags 0-'.$lags, $rows, ['variable' => $variable, 'lags' => $lags, 'chains' => count($chains)]);
     }
     /** Pareto k by observation from a loo() result (loo's plot method). */
-    public static function pareto_k(array $loo): Figure
+    public static function paretoK(array $loo): Figure
     {
         $k = array_values($loo['diagnostics']['pareto_k'] ?? $loo['pareto_k'] ?? throw new \InvalidArgumentException('Expected a loo() result with Pareto k diagnostics.'));
         if ($k === []) { throw new \InvalidArgumentException('No Pareto k values to plot.'); }

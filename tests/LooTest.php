@@ -15,7 +15,7 @@ final class LooTest extends TestCase
     {
         // Reference values from loo 2.10 via loo.array(ll, r_eff = relative_eff(exp(ll - max))), as CmdStanMCMC$loo() does.
         $ll = self::logLik();
-        foreach ([0.81381630518640447, 0.43086491115097808, 0.45634201814248365] as $j => $r) { self::assertEqualsWithDelta($r, Loo::relative_eff_log_lik($ll)[$j], 1e-12); }
+        foreach ([0.81381630518640447, 0.43086491115097808, 0.45634201814248365] as $j => $r) { self::assertEqualsWithDelta($r, Loo::relativeEffLogLik($ll)[$j], 1e-12); }
         $loo = Loo::loo($ll);
         self::assertSame([60, 3], $loo['dims']); self::assertSame(['log_lik[1]', 'log_lik[2]', 'log_lik[3]'], $loo['observations']);
         $expected = ['elpd_loo' => [-5.3744328541781794, 4.9690123282117193], 'p_loo' => [1.0410599969386696, 0.98784104378770221], 'looic' => [10.748865708356359, 9.9380246564234387]];
@@ -41,12 +41,12 @@ final class LooTest extends TestCase
         $matrix = array_merge(...array_map(fn($c) => array_column(self::logLik(), $c), [0, 1]));
         $loo = Loo::loo($matrix, 1.0); self::assertSame([60, 3], $loo['dims']); self::assertSame([1.0, 1.0, 1.0], $loo['diagnostics']['r_eff']);
         $plain = Loo::loo(self::logLik(), false); self::assertSame($plain['estimates'], $loo['estimates']);
-        self::assertNan(Loo::relative_eff([[[1.0, 2.0]], [[1.0, 3.0]], [[1.0, 4.0]], [[1.0, 5.0]]])[0]);
+        self::assertNan(Loo::relativeEff([[[1.0, 2.0]], [[1.0, 3.0]], [[1.0, 4.0]], [[1.0, 5.0]]])[0]);
         $constant = Loo::loo(array_map(fn($row) => [0.0, $row['log_lik[1]']], $matrix), true); self::assertSame(1.0, $constant['diagnostics']['r_eff'][0]);
     }
     public function testParetoKTable(): void
     {
-        $table = Loo::pareto_k_table(['k_threshold' => 0.7, 'diagnostics' => ['pareto_k' => [0.1, 0.8, 1.5, 0.2], 'n_eff' => [40.0, 5.0, 1.0, 30.0]]]);
+        $table = Loo::paretoKTable(['k_threshold' => 0.7, 'diagnostics' => ['pareto_k' => [0.1, 0.8, 1.5, 0.2], 'n_eff' => [40.0, 5.0, 1.0, 30.0]]]);
         self::assertSame(['(-Inf, 0.7]', '(0.7, 1]', '(1, Inf)'], array_column($table['rows'], 'interval'));
         self::assertSame([2, 1, 1], array_column($table['rows'], 'count')); self::assertSame(30.0, $table['rows'][0]['min_n_eff']); self::assertNan($table['rows'][1]['min_n_eff']);
     }

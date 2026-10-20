@@ -20,9 +20,9 @@ namespace CmdStan;
 final class Summary
 {
     private const MEASURES = ['mean', 'median', 'sd', 'var', 'mad', 'quantile2', 'rhat', 'rhat_basic', 'ess_bulk', 'ess_tail', 'ess_basic', 'ess_mean', 'ess_sd', 'ess_median', 'ess_quantile', 'mcse_mean', 'mcse_median', 'mcse_sd', 'mcse_quantile'];
-    public static function default_summary_measures(): array { return ['mean', 'median', 'sd', 'mad', 'quantile2']; }
-    public static function default_convergence_measures(): array { return ['rhat', 'ess_bulk', 'ess_tail']; }
-    public static function default_mcse_measures(): array { return ['mcse_mean', 'mcse_median', 'mcse_sd', 'mcse_quantile']; }
+    public static function defaultSummaryMeasures(): array { return ['mean', 'median', 'sd', 'mad', 'quantile2']; }
+    public static function defaultConvergenceMeasures(): array { return ['rhat', 'ess_bulk', 'ess_tail']; }
+    public static function defaultMcseMeasures(): array { return ['mcse_mean', 'mcse_median', 'mcse_sd', 'mcse_quantile']; }
     /**
      * @param array $draws draws_list as returned by CmdStanFit::draws(format: 'draws_list'): [chain][variable => list<float>]
      * @return list<array> one row per variable: ['variable' => name, <measure columns>...]
@@ -30,7 +30,7 @@ final class Summary
     public static function summarise(array $draws, array $measures = [], array $probs = [0.05, 0.95]): array
     {
         foreach ($probs as $p) { if (!is_numeric($p) || $p < 0 || $p > 1) { throw new \InvalidArgumentException("'probs' must contain values between 0 and 1."); } }
-        $funs = self::measures($measures === [] ? [...self::default_summary_measures(), ...self::default_convergence_measures()] : $measures);
+        $funs = self::measures($measures === [] ? [...self::defaultSummaryMeasures(), ...self::defaultConvergenceMeasures()] : $measures);
         $variables = []; foreach ($draws as $chain) { foreach ($chain as $name => $values) { $variables[$name] = true; } }
         $out = [];
         foreach (array_keys($variables) as $name) {
@@ -55,12 +55,23 @@ final class Summary
         foreach ($draws as $iteration) { foreach ($iteration as $c => $values) { foreach ($values as $name => $value) { $out[$c][$name][] = $value; } } }
         return $out;
     }
+    /** A measure group, named as posterior names it; null when the string is not a group. */
+    private static function group(string $name): ?array
+    {
+        return match ($name) {
+            'default_summary_measures' => self::defaultSummaryMeasures(),
+            'default_convergence_measures' => self::defaultConvergenceMeasures(),
+            'default_mcse_measures' => self::defaultMcseMeasures(),
+            default => null,
+        };
+    }
     private static function measures(array $measures): array
     {
         $funs = [];
         foreach ($measures as $key => $measure) {
-            if (is_string($measure) && in_array($measure, ['default_summary_measures', 'default_convergence_measures', 'default_mcse_measures'], true)) {
-                foreach (self::$measure() as $m) { $funs[$m] = $m; }
+            $group = is_string($measure) ? self::group($measure) : null;
+            if ($group !== null) {
+                foreach ($group as $m) { $funs[$m] = $m; }
                 continue;
             }
             if (is_string($measure)) {
@@ -86,10 +97,10 @@ final class Summary
     {
         return match ($name) {
             'mean' => self::mean($x), 'median' => self::median($x), 'sd' => self::sd($x), 'var' => self::var($x), 'mad' => self::mad($x),
-            'quantile2' => self::quantile2($x, $probs), 'ess_quantile' => self::ess_quantile($x, $probs), 'mcse_quantile' => self::mcse_quantile($x, $probs),
-            'rhat' => self::rhat($x), 'rhat_basic' => self::rhat_basic($x), 'ess_bulk' => self::ess_bulk($x), 'ess_tail' => self::ess_tail($x), 'ess_basic' => self::ess_basic($x),
-            'ess_mean' => self::ess_mean($x), 'ess_sd' => self::ess_sd($x), 'ess_median' => self::ess_median($x),
-            'mcse_mean' => self::mcse_mean($x), 'mcse_median' => self::mcse_median($x), 'mcse_sd' => self::mcse_sd($x),
+            'quantile2' => self::quantile2($x, $probs), 'ess_quantile' => self::essQuantile($x, $probs), 'mcse_quantile' => self::mcseQuantile($x, $probs),
+            'rhat' => self::rhat($x), 'rhat_basic' => self::rhatBasic($x), 'ess_bulk' => self::essBulk($x), 'ess_tail' => self::essTail($x), 'ess_basic' => self::essBasic($x),
+            'ess_mean' => self::essMean($x), 'ess_sd' => self::essSd($x), 'ess_median' => self::essMedian($x),
+            'mcse_mean' => self::mcseMean($x), 'mcse_median' => self::mcseMedian($x), 'mcse_sd' => self::mcseSd($x),
             default => throw new \InvalidArgumentException("Cannot find function '".$name."'."),
         };
     }
@@ -115,7 +126,7 @@ final class Summary
         return abs(max($values) - min($values)) < PHP_FLOAT_EPSILON;
     }
     /** posterior:::.split_chains: halves each chain, dropping the middle draw of odd-length chains. */
-    public static function split_chains(array $x): array
+    public static function splitChains(array $x): array
     {
         $chains = self::matrix($x); $n = count($chains[0]);
         if ($n === 1) { return $chains; }
@@ -149,73 +160,73 @@ final class Summary
     {
         $chains = self::matrix($x); $values = array_merge(...$chains);
         foreach ($values as $v) { if (is_nan($v)) { return NAN; } }
-        $bulk = self::rhatRaw(self::zScale(self::split_chains($chains)));
+        $bulk = self::rhatRaw(self::zScale(self::splitChains($chains)));
         $median = Special::median($values);
         $folded = array_map(fn($chain) => array_map(fn($v) => abs($v - $median), $chain), $chains);
         foreach (array_merge(...$folded) as $v) { if (is_nan($v)) { return NAN; } }
-        $tail = self::rhatRaw(self::zScale(self::split_chains($folded)));
+        $tail = self::rhatRaw(self::zScale(self::splitChains($folded)));
         return is_nan($bulk) || is_nan($tail) ? NAN : max($bulk, $tail);
     }
-    public static function rhat_basic(array $x, bool $split = true): float { $chains = self::matrix($x); return self::rhatRaw($split ? self::split_chains($chains) : $chains); }
-    public static function ess_basic(array $x, bool $split = true): float { $chains = self::matrix($x); return self::essRaw($split ? self::split_chains($chains) : $chains); }
-    public static function ess_mean(array $x): float { return self::essRaw(self::split_chains($x)); }
-    public static function ess_bulk(array $x): float
+    public static function rhatBasic(array $x, bool $split = true): float { $chains = self::matrix($x); return self::rhatRaw($split ? self::splitChains($chains) : $chains); }
+    public static function essBasic(array $x, bool $split = true): float { $chains = self::matrix($x); return self::essRaw($split ? self::splitChains($chains) : $chains); }
+    public static function essMean(array $x): float { return self::essRaw(self::splitChains($x)); }
+    public static function essBulk(array $x): float
     {
         $chains = self::matrix($x);
         foreach (array_merge(...$chains) as $v) { if (is_nan($v)) { return NAN; } }
-        return self::essRaw(self::zScale(self::split_chains($chains)));
+        return self::essRaw(self::zScale(self::splitChains($chains)));
     }
-    public static function ess_sd(array $x): float
+    public static function essSd(array $x): float
     {
         $chains = self::matrix($x); $mean = Special::mean(array_merge(...$chains));
-        return self::essRaw(self::split_chains(array_map(fn($chain) => array_map(fn($v) => ($v - $mean) ** 2, $chain), $chains)));
+        return self::essRaw(self::splitChains(array_map(fn($chain) => array_map(fn($v) => ($v - $mean) ** 2, $chain), $chains)));
     }
-    private static function essQuantile(array $chains, float $prob): float
+    private static function essQuantileAt(array $chains, float $prob): float
     {
         $values = array_merge(...$chains);
         if (self::shouldReturnNa($values)) { return NAN; }
         if ($prob == 1.0) { $len = count($values); $prob = ($len - 0.5) / $len; }
         $threshold = Special::quantile($values, $prob);
-        return self::essRaw(self::split_chains(array_map(fn($chain) => array_map(fn($v) => $v <= $threshold ? 1.0 : 0.0, $chain), $chains)));
+        return self::essRaw(self::splitChains(array_map(fn($chain) => array_map(fn($v) => $v <= $threshold ? 1.0 : 0.0, $chain), $chains)));
     }
     /** @return array<string, float> keyed ess_q5, ess_q95, ... */
-    public static function ess_quantile(array $x, array $probs = [0.05, 0.95]): array
+    public static function essQuantile(array $x, array $probs = [0.05, 0.95]): array
     {
         $chains = self::matrix($x); $out = [];
-        foreach ($probs as $p) { self::checkProb($p); $out['ess_q'.self::percent((float)$p)] = self::essQuantile($chains, (float)$p); }
+        foreach ($probs as $p) { self::checkProb($p); $out['ess_q'.self::percent((float)$p)] = self::essQuantileAt($chains, (float)$p); }
         return $out;
     }
-    public static function ess_median(array $x): float { return self::essQuantile(self::matrix($x), 0.5); }
-    public static function ess_tail(array $x): float
+    public static function essMedian(array $x): float { return self::essQuantileAt(self::matrix($x), 0.5); }
+    public static function essTail(array $x): float
     {
-        $chains = self::matrix($x); $low = self::essQuantile($chains, 0.05); $high = self::essQuantile($chains, 0.95);
+        $chains = self::matrix($x); $low = self::essQuantileAt($chains, 0.05); $high = self::essQuantileAt($chains, 0.95);
         return is_nan($low) || is_nan($high) ? NAN : min($low, $high);
     }
-    public static function mcse_mean(array $x): float { return fdiv(self::sd($x), sqrt(self::ess_mean($x))); }
-    public static function mcse_sd(array $x): float
+    public static function mcseMean(array $x): float { return fdiv(self::sd($x), sqrt(self::essMean($x))); }
+    public static function mcseSd(array $x): float
     {
         $chains = self::matrix($x); $mean = Special::mean(array_merge(...$chains));
         $squared = array_map(fn($chain) => array_map(fn($v) => ($v - $mean) ** 2, $chain), $chains); $flat = array_merge(...$squared);
-        $ess = self::ess_mean($squared); $evar = Special::mean($flat);
+        $ess = self::essMean($squared); $evar = Special::mean($flat);
         $varvar = fdiv(Special::mean(array_map(fn($v) => $v * $v, $flat)) - $evar ** 2, $ess);
         return sqrt(fdiv($varvar, $evar) / 4);
     }
-    private static function mcseQuantile(array $chains, float $prob): float
+    private static function mcseQuantileAt(array $chains, float $prob): float
     {
-        $ess = self::essQuantile($chains, $prob);
+        $ess = self::essQuantileAt($chains, $prob);
         if (is_nan($ess)) { return NAN; }
         $a1 = Special::qbeta(0.1586553, $ess * $prob + 1, $ess * (1 - $prob) + 1); $a2 = Special::qbeta(0.8413447, $ess * $prob + 1, $ess * (1 - $prob) + 1);
         $sorted = array_merge(...$chains); sort($sorted, SORT_NUMERIC); $s = count($sorted);
         return ($sorted[min((int)ceil($a2 * $s), $s) - 1] - $sorted[max((int)floor($a1 * $s), 1) - 1]) / 2;
     }
     /** @return array<string, float> keyed mcse_q5, mcse_q95, ... */
-    public static function mcse_quantile(array $x, array $probs = [0.05, 0.95]): array
+    public static function mcseQuantile(array $x, array $probs = [0.05, 0.95]): array
     {
         $chains = self::matrix($x); $out = [];
-        foreach ($probs as $p) { self::checkProb($p); $out['mcse_q'.self::percent((float)$p)] = self::mcseQuantile($chains, (float)$p); }
+        foreach ($probs as $p) { self::checkProb($p); $out['mcse_q'.self::percent((float)$p)] = self::mcseQuantileAt($chains, (float)$p); }
         return $out;
     }
-    public static function mcse_median(array $x): float { return self::mcseQuantile(self::matrix($x), 0.5); }
+    public static function mcseMedian(array $x): float { return self::mcseQuantileAt(self::matrix($x), 0.5); }
     public static function mean(array $x): float { return Special::mean(self::flat($x)); }
     public static function median(array $x): float { return Special::median(self::flat($x)); }
     public static function var(array $x): float

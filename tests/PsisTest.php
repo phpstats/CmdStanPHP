@@ -11,30 +11,30 @@ final class PsisTest extends TestCase
         $fit = Psis::gpdfit(array_map(fn($i) => $i ** 1.5 / 10, range(1, 20)));
         self::assertEqualsWithDelta(-0.12595626041574046, $fit['k'], 1e-12); self::assertEqualsWithDelta(5.3595509754188733, $fit['sigma'], 1e-11);
         self::assertNan(Psis::gpdfit([1, 1, 1, 1, 2])['k']);
-        self::assertEqualsWithDelta(1.0, Psis::qgeneralized_pareto(1 - exp(-1)), 1e-15); self::assertNan(Psis::qgeneralized_pareto(0.5, 0, -1, 0.2));
+        self::assertEqualsWithDelta(1.0, Psis::qgeneralizedPareto(1 - exp(-1)), 1e-15); self::assertNan(Psis::qgeneralizedPareto(0.5, 0, -1, 0.2));
     }
     public function testRightTailSmoothingMatchesPosterior(): void
     {
-        $x = self::draws(); $smoothed = Psis::pareto_smooth($x, 'right', 1.0); $d = $smoothed['diagnostics'];
+        $x = self::draws(); $smoothed = Psis::paretoSmooth($x, 'right', 1.0); $d = $smoothed['diagnostics'];
         self::assertEqualsWithDelta(0.51488191575094633, $d['khat'], 1e-12); self::assertEqualsWithDelta(115.17382406854071, $d['min_ss'], 1e-9);
         self::assertEqualsWithDelta(0.77773198861635207, $d['convergence_rate'], 1e-12); self::assertEqualsWithDelta(1 - 1 / log10(100), $d['khat_threshold'], 1e-15);
         self::assertEqualsWithDelta(47.459354076397318, max($smoothed['x']), 1e-10); self::assertSame(27, array_search(max($x), $x, true));
         self::assertCount(20, array_filter(array_keys($x), fn($i) => $x[$i] !== $smoothed['x'][$i])); self::assertSame([], $smoothed['warnings']);
-        self::assertEqualsWithDelta(0.51488191575094633, Psis::pareto_khat($x), 1e-12);
+        self::assertEqualsWithDelta(0.51488191575094633, Psis::paretoKhat($x), 1e-12);
     }
     public function testUnsmoothableInputsReturnNaDiagnosticsAndWarnings(): void
     {
-        $constant = Psis::pareto_smooth([2, 2, 2, 2, 2, 2]); self::assertNan($constant['diagnostics']['khat']); self::assertCount(1, $constant['warnings']);
+        $constant = Psis::paretoSmooth([2, 2, 2, 2, 2, 2]); self::assertNan($constant['diagnostics']['khat']); self::assertCount(1, $constant['warnings']);
         self::assertSame([2.0, 2.0, 2.0, 2.0, 2.0, 2.0], $constant['x']);
-        $short = Psis::pareto_smooth([1, 2, 3, 4, 5], 'right', 1.0); self::assertNan($short['diagnostics']['khat']); self::assertStringContainsString('not strictly less', end($short['warnings']));
-        self::assertNan(Psis::pareto_khat([1, INF, 3, 4, 5, 6, 7]));
-        $this->expectException(\InvalidArgumentException::class); Psis::pareto_smooth(self::draws(), 'middle');
+        $short = Psis::paretoSmooth([1, 2, 3, 4, 5], 'right', 1.0); self::assertNan($short['diagnostics']['khat']); self::assertStringContainsString('not strictly less', end($short['warnings']));
+        self::assertNan(Psis::paretoKhat([1, INF, 3, 4, 5, 6, 7]));
+        $this->expectException(\InvalidArgumentException::class); Psis::paretoSmooth(self::draws(), 'middle');
     }
     public function testLogWeightSmoothingShiftsToZeroMaximum(): void
     {
-        $lw = array_map('log', self::draws()); $smoothed = Psis::pareto_smooth_log_weights($lw);
+        $lw = array_map('log', self::draws()); $smoothed = Psis::paretoSmoothLogWeights($lw);
         self::assertLessThanOrEqual(0.0, max($smoothed['x'])); self::assertTrue(is_finite($smoothed['diagnostics']['khat']));
-        self::assertSame(Psis::pareto_smooth($lw, 'left', are_log_weights: true), $smoothed);
+        self::assertSame(Psis::paretoSmooth($lw, 'left', are_log_weights: true), $smoothed);
     }
     public function testPsisMatchesLoo(): void
     {
@@ -62,8 +62,8 @@ final class PsisTest extends TestCase
     }
     public function testExtraDiagnostics(): void
     {
-        self::assertSame(1.0, Psis::ps_convergence_rate(-0.2, 100)); self::assertSame(0.0, Psis::ps_convergence_rate(1.2, 100));
-        self::assertEqualsWithDelta(1 - 1 / log(100), Psis::ps_convergence_rate(0.5, 100), 1e-15);
-        self::assertSame(10.0, Psis::ps_min_ss(-0.5)); self::assertSame(INF, Psis::ps_min_ss(1.0)); self::assertSame(300.0, Psis::ps_tail_length(10000, 1.0));
+        self::assertSame(1.0, Psis::psConvergenceRate(-0.2, 100)); self::assertSame(0.0, Psis::psConvergenceRate(1.2, 100));
+        self::assertEqualsWithDelta(1 - 1 / log(100), Psis::psConvergenceRate(0.5, 100), 1e-15);
+        self::assertSame(10.0, Psis::psMinSs(-0.5)); self::assertSame(INF, Psis::psMinSs(1.0)); self::assertSame(300.0, Psis::psTailLength(10000, 1.0));
     }
 }

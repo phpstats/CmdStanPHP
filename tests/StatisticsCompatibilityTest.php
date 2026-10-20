@@ -91,18 +91,18 @@ final class StatisticsCompatibilityTest extends TestCase
     public function testParetoSmoothingMatchesPosterior(): void
     {
         $in = self::$input; $ref = self::$reference['pareto'];
-        $cases = ['both' => Psis::pareto_smooth($in['smooth']), 'right' => Psis::pareto_smooth($in['smooth'], 'right', 1.0), 'left' => Psis::pareto_smooth($in['smooth'], 'left', 0.8), 'small' => Psis::pareto_smooth($in['smooth_small'], 'right'), 'log_weights' => Psis::pareto_smooth($in['log_weights'], are_log_weights: true)];
+        $cases = ['both' => Psis::paretoSmooth($in['smooth']), 'right' => Psis::paretoSmooth($in['smooth'], 'right', 1.0), 'left' => Psis::paretoSmooth($in['smooth'], 'left', 0.8), 'small' => Psis::paretoSmooth($in['smooth_small'], 'right'), 'log_weights' => Psis::paretoSmooth($in['log_weights'], are_log_weights: true)];
         foreach ($cases as $name => $result) {
             self::close($ref[$name]['x'], $result['x'], $name.' x');
             foreach ($ref[$name]['diagnostics'] as $key => $value) { self::close($value, $result['diagnostics'][$key], $name.' '.$key); }
         }
-        self::close($ref['khat'], Psis::pareto_khat($in['smooth']), 'khat');
+        self::close($ref['khat'], Psis::paretoKhat($in['smooth']), 'khat');
         $fit = Psis::gpdfit($in['gpd']); self::close($ref['gpdfit']['k'], $fit['k'], 'gpd k'); self::close($ref['gpdfit']['sigma'], $fit['sigma'], 'gpd sigma');
     }
     public function testPsisRelativeEfficiencyLooAndWaicMatchLoo(): void
     {
         $in = self::$input; $ref = self::$reference;
-        $rEff = Loo::relative_eff_log_lik($in['log_lik']); self::close($ref['relative_eff'], $rEff, 'relative_eff');
+        $rEff = Loo::relativeEffLogLik($in['log_lik']); self::close($ref['relative_eff'], $rEff, 'relative_eff');
         $rows = []; foreach ([0, 1, 2, 3] as $c) { foreach ($in['log_lik'] as $iteration) { $rows[] = array_map(fn($v) => -$v, $iteration[$c]); } }
         $psis = Psis::psis($rows, $rEff);
         self::close($ref['psis']['log_weights'], $psis['log_weights'], 'psis log weights'); self::close($ref['psis']['pareto_k'], $psis['pareto_k'], 'psis k'); self::close($ref['psis']['n_eff'], $psis['n_eff'], 'psis n_eff');

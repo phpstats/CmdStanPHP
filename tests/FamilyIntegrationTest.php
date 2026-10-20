@@ -41,10 +41,10 @@ STAN;
         $data = StanData::fromColumns(['y' => $y, 'x' => $x, 'school' => $school], 'y', ['x'], 'school');
         self::assertSame(['east', 'north', 'south'], $data->levels['school_id']);
         $fit = $this->model(self::PROGRAM, 'family_hier')->sample(data: $data, chains: 2, iter_warmup: 300, iter_sampling: 300, seed: 11, adapt_delta: 0.95, show_messages: false, refresh: 0, output_dir: $this->dir, diagnostics: null);
-        $columns = $fit->draws_columns(['alpha', 'beta']);
+        $columns = $fit->drawsColumns(['alpha', 'beta']);
         self::assertSame(['alpha', 'beta[1]', '.chain', '.iteration', '.draw'], array_keys($columns)); self::assertCount(600, $columns['beta[1]']);
         self::assertEqualsWithDelta(2.0, array_sum($columns['beta[1]']) / 600, 0.25);
-        $summary = $fit->summary_columns('beta'); self::assertSame(['beta[1]'], $summary['variable']); self::assertLessThan(1.05, $summary['rhat'][0]);
+        $summary = $fit->summaryColumns('beta'); self::assertSame(['beta[1]'], $summary['variable']); self::assertLessThan(1.05, $summary['rhat'][0]);
     }
     private const FORMULA_PROGRAM = <<<'STAN'
 data {

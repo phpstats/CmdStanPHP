@@ -8,8 +8,8 @@ final class ModelTest extends TestCase
     private function model(): CmdStanModel { return new CmdStanModel(write_stan_file('parameters { real x; } model { x ~ normal(0, 1); }', $this->dir.'/model.stan'), PHP_BINARY); }
     public function testModelCodeAndPaths(): void
     {
-        $m = $this->model(); self::assertStringContainsString('normal', $m->code()); self::assertSame(realpath($this->dir).'/model.stan', $m->stan_file());
-        self::assertSame(realpath($this->dir).'/model.hpp', $m->hpp_file()); self::assertSame(realpath(PHP_BINARY), $m->exe_file());
+        $m = $this->model(); self::assertStringContainsString('normal', $m->code()); self::assertSame(realpath($this->dir).'/model.stan', $m->stanFile());
+        self::assertSame(realpath($this->dir).'/model.hpp', $m->hppFile()); self::assertSame(realpath(PHP_BINARY), $m->exeFile());
     }
     public function testMissingModel(): void { $this->expectException(\InvalidArgumentException::class); new CmdStanModel($this->dir.'/missing.stan'); }
     public function testUncompiledModel(): void

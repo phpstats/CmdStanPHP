@@ -37,25 +37,25 @@ class CmdStanFit
     }
     public function code(): string { return $this->context['code'] ?? throw new \RuntimeException('Stan source is unavailable for imported CSVs.'); }
     /** Imported fits fall back to the data file recorded in the CSV header when it still exists. */
-    public function data_file(): ?string { return array_key_exists('data_file', $this->context) ? $this->context['data_file'] : $this->context['data_file'] = $this->recordedDataFile(); }
+    public function dataFile(): ?string { return array_key_exists('data_file', $this->context) ? $this->context['data_file'] : $this->context['data_file'] = $this->recordedDataFile(); }
     private function recordedDataFile(): ?string
     {
         $comments = $this->parsed()[0]['comments']; $section = array_search('data', $comments, true);
         if ($section === false || !preg_match('/^file = (.+)$/', $comments[$section + 1] ?? '', $m)) { return null; }
         return is_file($m[1]) ? realpath($m[1]) : null;
     }
-    public function num_procs(): int { return count($this->files); }
+    public function numProcs(): int { return count($this->files); }
     /** Fits only contain successful runs (a failing chain throws), so include_failed never adds files. */
-    public function config_files(bool $include_failed = false): array { return $this->context['config_files'] ??= $this->relatedFiles('_config.json'); }
-    public function metric_files(bool $include_failed = false): array { return $this->context['metric_files'] ??= $this->relatedFiles('_metric.json'); }
+    public function configFiles(bool $include_failed = false): array { return $this->context['config_files'] ??= $this->relatedFiles('_config.json'); }
+    public function metricFiles(bool $include_failed = false): array { return $this->context['metric_files'] ??= $this->relatedFiles('_metric.json'); }
     private function relatedFiles(string $suffix): array
     {
         return array_values(array_filter(array_map(fn($file) => substr($file, 0, -4).$suffix, $this->files), 'is_file'));
     }
     /** Decoded save_cmdstan_config JSON (CmdStan 2.34+), one array per process. */
-    public function cmdstan_config(): array { return array_map(fn($file) => json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR), $this->config_files()); }
+    public function cmdstanConfig(): array { return array_map(fn($file) => json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR), $this->configFiles()); }
     /** Decoded save_metric JSON (stepsize, metric_type, inv_metric), one array per chain. */
-    public function metric(): array { return array_map(fn($file) => json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR), $this->metric_files()); }
+    public function metric(): array { return array_map(fn($file) => json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR), $this->metricFiles()); }
     public function lp(): array|float
     {
         return array_map(fn($iteration) => array_map(fn($chain) => $chain['lp__'], $iteration), $this->draws('lp__', 'draws_array'));
@@ -70,32 +70,32 @@ class CmdStanFit
         }
         return $out;
     }
-    public function cmdstan_summary(): string
+    public function cmdstanSummary(): string
     {
         return Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix()], $this->files))['stdout'];
     }
-    public function output_files(bool $include_failed = false): array { return $this->files; }
-    public function latent_dynamics_files(bool $include_failed = false): array
+    public function outputFiles(bool $include_failed = false): array { return $this->files; }
+    public function latentDynamicsFiles(bool $include_failed = false): array
     {
         $files = array_values(array_filter($this->diagnosticFiles, 'is_file'));
         return $files !== [] ? $files : throw new \RuntimeException("No latent dynamics files found. Set 'save_latent_dynamics: true' when fitting the model.");
     }
-    public function profile_files(bool $include_failed = false): array
+    public function profileFiles(bool $include_failed = false): array
     {
         $files = array_values(array_filter($this->profileFiles, 'is_file'));
         return $files !== [] ? $files : throw new \RuntimeException('No profile files found. The model that produced the fit did not use any profiling.');
     }
-    public function return_codes(): array { return array_column($this->results, 'exit_code'); }
+    public function returnCodes(): array { return array_column($this->results, 'exit_code'); }
     public function output(): array { return array_map(fn($r) => $r['stdout'].$r['stderr'], $this->results); }
     /** Per-chain CSV metadata (CmdStanR read_csv_metadata() keys plus CmdStan's raw argument keys). */
-    public function chain_metadata(): array { return array_column($this->parsed(), 'metadata'); }
+    public function chainMetadata(): array { return array_column($this->parsed(), 'metadata'); }
     /**
      * CmdStanR-style merged metadata: the first chain's metadata with id/seed/init/step_size/step_size_adaptation/fitted_params
      * collected across chains (seed collapses to a scalar when shared), time as per-chain rows, and missing keys filled from config JSON.
      */
     public function metadata(): array
     {
-        $chains = $this->chain_metadata(); $meta = $chains[0];
+        $chains = $this->chainMetadata(); $meta = $chains[0];
         foreach (['seed', 'init', 'step_size', 'step_size_adaptation', 'fitted_params'] as $key) {
             $values = array_values(array_filter(array_column($chains, $key), fn($v) => $v !== null));
             if ($values !== []) { $meta[$key] = $values; }
@@ -103,7 +103,7 @@ class CmdStanFit
         $meta['id'] = $this->procIds();
         if (isset($meta['seed']) && count(array_unique($meta['seed'], SORT_REGULAR)) === 1) { $meta['seed'] = $meta['seed'][0]; }
         $meta['time'] = array_values(array_filter(array_column($chains, 'time')));
-        $config = $this->config_files() === [] ? [] : self::flattenConfig($this->cmdstan_config()[0]);
+        $config = $this->configFiles() === [] ? [] : self::flattenConfig($this->cmdstanConfig()[0]);
         return $meta + $config;
     }
     private static function flattenConfig(array $config, array $out = []): array
@@ -117,9 +117,9 @@ class CmdStanFit
     }
     private function procIds(): array { return $this->context['ids'] ?? array_map(fn($csv, $i) => (int)($csv['metadata']['id'] ?? $i + 1), $this->parsed(), array_keys($this->parsed())); }
     private function modelName(): string { return $this->context['model_name'] ?? preg_replace('/_model$/', '', (string)($this->parsed()[0]['metadata']['model_name'] ?? 'model')); }
-    public function num_chains(): int { return count($this->files); }
-    public function num_draws_sampling(): int { return count($this->parsed()[0]['draws']); }
-    public function num_draws_warmup(): int { return count($this->parsed()[0]['warmup']); }
+    public function numChains(): int { return count($this->files); }
+    public function numDrawsSampling(): int { return count($this->parsed()[0]['draws']); }
+    public function numDrawsWarmup(): int { return count($this->parsed()[0]['warmup']); }
     public function variables(): array { return array_values(array_filter($this->parsed()[0]['variables'], fn($v) => !str_ends_with($v, '__') || $v === 'lp__')); }
     private function select(array|string|null $variables, bool $diagnostics = false): array
     {
@@ -141,7 +141,7 @@ class CmdStanFit
     {
         return $this->extract($this->select($variables), $format ?? $this->defaultFormat(), $inc_warmup);
     }
-    public function sampler_diagnostics(?string $format = null, bool $inc_warmup = false): array
+    public function samplerDiagnostics(?string $format = null, bool $inc_warmup = false): array
     {
         return $this->extract($this->select(null, true), $format ?? $this->defaultFormat(), $inc_warmup);
     }
@@ -182,7 +182,7 @@ class CmdStanFit
      *
      * @return array<string, list<float|int>>
      */
-    public function draws_columns(array|string|null $variables = null, bool $inc_warmup = false): array
+    public function drawsColumns(array|string|null $variables = null, bool $inc_warmup = false): array
     {
         $chains = $this->draws($variables, 'draws_list', $inc_warmup); $columns = array_fill_keys(array_keys($chains[0] ?? []), []); $meta = ['.chain' => [], '.iteration' => [], '.draw' => []]; $draw = 0;
         foreach ($chains as $c => $chain) {
@@ -192,12 +192,12 @@ class CmdStanFit
         }
         return $columns + $meta;
     }
-    /** draws_columns() as a Phibble\DataFrame. Needs phpstats/phibble, which is optional; throws when it is not installed. */
-    public function draws_table(array|string|null $variables = null, bool $inc_warmup = false): object { return Tables::dataFrame($this->draws_columns($variables, $inc_warmup), 'draws_table()'); }
+    /** drawsTable(): drawsColumns() as a Phibble\DataFrame. Needs phpstats/phibble, which is optional; throws when it is not installed. */
+    public function drawsTable(array|string|null $variables = null, bool $inc_warmup = false): object { return Tables::dataFrame($this->drawsColumns($variables, $inc_warmup), 'drawsTable()'); }
     /** summary() turned into columns: 'variable' and one column per measure, one value per variable. */
-    public function summary_columns(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): array { return Tables::fromRows($this->summary($variables, $probs, $measures)); }
-    /** summary_columns() as a Phibble\DataFrame. Needs phpstats/phibble; throws when it is not installed. */
-    public function summary_table(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): object { return Tables::dataFrame($this->summary_columns($variables, $probs, $measures), 'summary_table()'); }
+    public function summaryColumns(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): array { return Tables::fromRows($this->summary($variables, $probs, $measures)); }
+    /** summaryTable(): summaryColumns() as a Phibble\DataFrame. Needs phpstats/phibble; throws when it is not installed. */
+    public function summaryTable(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): object { return Tables::dataFrame($this->summaryColumns($variables, $probs, $measures), 'summaryTable()'); }
     public static function quantile(array $values, float $p): float
     {
         if ($values === []) { return NAN; }
@@ -214,7 +214,7 @@ class CmdStanFit
         if ($measures !== []) { return Summary::summarise($this->draws($variables, 'draws_list'), $measures, $probs); }
         foreach ($probs as $p) { if (!is_numeric($p) || !is_finite((float)$p) || $p < 0 || $p > 1) { throw new \InvalidArgumentException('Quantile probabilities must be in [0,1].'); } }
         $vars = $this->select($variables); $rows = $this->draws($vars, 'draws_matrix'); $out = [];
-        $native = $this instanceof CmdStanMCMC && $this->num_draws_sampling() >= 4 ? $this->nativeSummary() : [];
+        $native = $this instanceof CmdStanMCMC && $this->numDrawsSampling() >= 4 ? $this->nativeSummary() : [];
         foreach ($vars as $v) {
             $values = array_column($rows, $v); $n = count($values); $mean = $n ? array_sum($values) / $n : NAN;
             $sd = $n > 1 ? sqrt(array_sum(array_map(fn($x) => ($x - $mean) ** 2, $values)) / ($n - 1)) : NAN;
@@ -250,7 +250,7 @@ class CmdStanFit
             return $this->nativeStatistics = $out;
         } finally { if (is_file($file)) { unlink($file); } }
     }
-    public function diagnostic_summary(): array
+    public function diagnosticSummary(): array
     {
         $result = ['num_divergent' => [], 'num_max_treedepth' => [], 'ebfmi' => []];
         foreach ($this->parsed() as $csv) {
@@ -268,9 +268,9 @@ class CmdStanFit
         return $result;
     }
     /** Checks are retained as structured messages, rather than PHP runtime warnings. */
-    public function check_diagnostics(array $checks = ['divergences', 'treedepth', 'ebfmi']): array
+    public function checkDiagnostics(array $checks = ['divergences', 'treedepth', 'ebfmi']): array
     {
-        $summary = $this->diagnostic_summary(); $warnings = [];
+        $summary = $this->diagnosticSummary(); $warnings = [];
         foreach ($summary['num_divergent'] as $i => $divergent) {
             if (in_array('divergences', $checks, true) && $divergent > 0) { $warnings[] = 'Chain '.($i + 1).': '.(int)$divergent.' divergent transitions.'; }
             if (in_array('treedepth', $checks, true) && $summary['num_max_treedepth'][$i] > 0) { $warnings[] = 'Chain '.($i + 1).': '.$summary['num_max_treedepth'][$i].' transitions at maximum tree depth.'; }
@@ -278,11 +278,11 @@ class CmdStanFit
         }
         return $this->diagnosticWarnings = $warnings;
     }
-    public function diagnostic_warnings(): array { return $this->diagnosticWarnings; }
+    public function diagnosticWarnings(): array { return $this->diagnosticWarnings; }
     public function profiles(): array
     {
         $profiles = [];
-        foreach ($this->profile_files() as $file) {
+        foreach ($this->profileFiles() as $file) {
             $handle = fopen($file, 'rb'); $rows = [];
             try {
                 $header = fgetcsv($handle, escape: '');
@@ -295,7 +295,7 @@ class CmdStanFit
         }
         return $profiles;
     }
-    public function cmdstan_diagnose(): string
+    public function cmdstanDiagnose(): string
     {
         $r = Process::run(array_merge([CmdStan::path().'/bin/diagnose'.CmdStan::suffix()], $this->files));
         return $r['stdout'].$r['stderr'];
@@ -304,9 +304,9 @@ class CmdStanFit
      * Per-chain inverse metric, from save_metric JSON when every chain has one, else from the CSV adaptation comments.
      * With matrix (CmdStanR's default) diagonal metrics are expanded to matrices; otherwise diagonal metrics are vectors.
      */
-    public function inv_metric(bool $matrix = true): array
+    public function invMetric(bool $matrix = true): array
     {
-        $json = $this->metric_files() !== [] && count($this->metric_files()) === count($this->files) ? $this->metric() : null; $out = [];
+        $json = $this->metricFiles() !== [] && count($this->metricFiles()) === count($this->files) ? $this->metric() : null; $out = [];
         foreach ($this->parsed() as $i => $csv) {
             $value = $json === null ? $csv['inv_metric'] : $json[$i]['inv_metric'] ?? [];
             $value = array_map(fn($x) => is_array($x) ? array_map('floatval', $x) : (float)$x, (array)$value);
@@ -316,7 +316,7 @@ class CmdStanFit
         }
         return $out;
     }
-    public function step_size(): array { return array_column($this->parsed(), 'step_size'); }
+    public function stepSize(): array { return array_column($this->parsed(), 'step_size'); }
     public function time(): array
     {
         $chains = [];
@@ -342,83 +342,83 @@ class CmdStanFit
         return $targets;
     }
     private function saveArgs(?string $basename, string $suffix = ''): string { return ($basename ?? $this->modelName()).$suffix; }
-    public function save_output_files(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveOutputFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
-        $this->config_files(); $this->metric_files(); $this->pinFiles();
+        $this->configFiles(); $this->metricFiles(); $this->pinFiles();
         return $this->files = $this->saveFiles($this->files, $dir, $this->saveArgs($basename), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
     }
     /** Hook for subclasses to resolve paths derived from output file names before those files move. */
     protected function pinFiles(): void {}
-    public function save_latent_dynamics_files(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveLatentDynamicsFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
-        return $this->diagnosticFiles = $this->saveFiles($this->latent_dynamics_files(true), $dir, $this->saveArgs($basename, '-diagnostic'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
+        return $this->diagnosticFiles = $this->saveFiles($this->latentDynamicsFiles(true), $dir, $this->saveArgs($basename, '-diagnostic'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
     }
-    public function save_profile_files(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveProfileFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
-        return $this->profileFiles = $this->saveFiles($this->profile_files(true), $dir, $this->saveArgs($basename, '-profile'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
+        return $this->profileFiles = $this->saveFiles($this->profileFiles(true), $dir, $this->saveArgs($basename, '-profile'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
     }
     /** Data written from a PHP array is moved; a user-supplied data file is copied and left in place. */
-    public function save_data_file(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): ?string
+    public function saveDataFile(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): ?string
     {
-        $file = $this->data_file();
+        $file = $this->dataFile();
         if ($file === null) { return null; }
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         return $this->context['data_file'] = $this->saveFiles([$file], $dir, $this->saveArgs($basename), null, $ext === '' ? '' : '.'.$ext, $timestamp, $random, ($this->context['owned'] ?? false) && ($this->context['data_owned'] ?? false))[0];
     }
-    public function save_config_files(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveConfigFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
-        return $this->context['config_files'] = $this->saveFiles($this->config_files(true), $dir, $this->saveArgs($basename, '-config'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
+        return $this->context['config_files'] = $this->saveFiles($this->configFiles(true), $dir, $this->saveArgs($basename, '-config'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
     }
-    public function save_metric_files(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveMetricFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
-        return $this->context['metric_files'] = $this->saveFiles($this->metric_files(true), $dir, $this->saveArgs($basename, '-metric'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
+        return $this->context['metric_files'] = $this->saveFiles($this->metricFiles(true), $dir, $this->saveArgs($basename, '-metric'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
     }
     /**
      * Compiles (or reuses) the in-process model-methods library via PHP FFI and binds it to the fit's data. Imported CSV
      * fits must pass the model. Hessians are always available, so $hessian and $verbose are accepted only for CmdStanR parity.
      */
-    public function init_model_methods(int $seed = 1, bool $verbose = false, bool $hessian = false, ?CmdStanModel $model = null): void
+    public function initModelMethods(int $seed = 1, bool $verbose = false, bool $hessian = false, ?CmdStanModel $model = null): void
     {
-        if ($model !== null) { $this->context['stan_file'] = $model->stan_file(); unset($this->context['model_methods']); }
+        if ($model !== null) { $this->context['stan_file'] = $model->stanFile(); unset($this->context['model_methods']); }
         if (isset($this->context['model_methods'])) { return; }
-        $stan = $this->context['stan_file'] ?? throw new \RuntimeException('Model methods need the Stan model; pass model: to init_model_methods() for imported CSVs.');
-        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $this->data_file(), $seed);
+        $stan = $this->context['stan_file'] ?? throw new \RuntimeException('Model methods need the Stan model; pass model: to initModelMethods() for imported CSVs.');
+        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $this->dataFile(), $seed);
     }
-    private function methods(): ModelMethods { $this->init_model_methods(); return $this->context['model_methods']; }
+    private function methods(): ModelMethods { $this->initModelMethods(); return $this->context['model_methods']; }
     private static function jacobian(bool $jacobian, ?bool $adjustment): bool
     {
         if ($adjustment === null) { return $jacobian; }
         trigger_error("'jacobian_adjustment' is deprecated. Please use 'jacobian' instead.", E_USER_DEPRECATED);
         return $adjustment;
     }
-    public function log_prob(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): float { return $this->methods()->log_prob($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
+    public function logProb(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): float { return $this->methods()->logProb($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function grad_log_prob(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): array { return $this->methods()->grad_log_prob($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
+    public function gradLogProb(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): array { return $this->methods()->gradLogProb($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
     /** @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
     public function hessian(array $unconstrained_variables, bool $jacobian = true, ?bool $jacobian_adjustment = null): array { return $this->methods()->hessian($unconstrained_variables, self::jacobian($jacobian, $jacobian_adjustment)); }
-    public function unconstrain_variables(array $variables): array { return $this->methods()->unconstrain_variables($variables); }
-    public function constrain_variables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->constrain_variables($unconstrained_variables, $transformed_parameters, $generated_quantities); }
-    public function variable_skeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->variable_skeleton($transformed_parameters, $generated_quantities); }
+    public function unconstrainVariables(array $variables): array { return $this->methods()->unconstrainVariables($variables); }
+    public function constrainVariables(array $unconstrained_variables, bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->constrainVariables($unconstrained_variables, $transformed_parameters, $generated_quantities); }
+    public function variableSkeleton(bool $transformed_parameters = true, bool $generated_quantities = true): array { return $this->methods()->variableSkeleton($transformed_parameters, $generated_quantities); }
     /** Unconstrains this fit's draws, the draws in other CmdStan CSV files, or draws_df/draws_matrix rows, returned in a draws format. */
-    public function unconstrain_draws(?array $files = null, ?array $draws = null, ?string $format = null, bool $inc_warmup = false): array
+    public function unconstrainDraws(?array $files = null, ?array $draws = null, ?string $format = null, bool $inc_warmup = false): array
     {
         if ($files !== null && $draws !== null) { throw new \InvalidArgumentException('Either a list of CSV files or a draws object can be passed, not both'); }
         $rows = $draws ?? ($files !== null ? self::fromCsv($files) : $this)->draws(null, 'draws_df', $inc_warmup);
-        $names = $this->methods()->unconstrained_param_names(); $chains = [];
-        foreach (array_map(null, $rows, $this->methods()->unconstrain_draws($rows)) as [$row, $values]) { $chains[(int)($row['.chain'] ?? 1) - 1][] = array_combine($names, $values); }
+        $names = $this->methods()->unconstrainedParamNames(); $chains = [];
+        foreach (array_map(null, $rows, $this->methods()->unconstrainDraws($rows)) as [$row, $values]) { $chains[(int)($row['.chain'] ?? 1) - 1][] = array_combine($names, $values); }
         ksort($chains);
         return self::shape(array_values($chains), $names, $format ?? $this->defaultFormat());
     }
     /** CmdStanR's expose_functions() for the model that produced the fit. */
-    public function expose_functions(?float $timeout = null): StanFunctions
+    public function exposeFunctions(?float $timeout = null): StanFunctions
     {
-        return $this->context['functions'] ??= StanFunctions::compile($this->context['stan_file'] ?? throw new \RuntimeException('Exposing functions needs the Stan model; use CmdStanModel::expose_functions() for imported CSVs.'), $this->context['stanc_options'] ?? [], timeout: $timeout);
+        return $this->context['functions'] ??= StanFunctions::compile($this->context['stan_file'] ?? throw new \RuntimeException('Exposing functions needs the Stan model; use CmdStanModel::exposeFunctions() for imported CSVs.'), $this->context['stanc_options'] ?? [], timeout: $timeout);
     }
-    public function functions(): StanFunctions { return $this->context['functions'] ?? throw new \RuntimeException('Functions have not been exposed; call expose_functions() first.'); }
-    public function save_object(string $file): string
+    public function functions(): StanFunctions { return $this->context['functions'] ?? throw new \RuntimeException('Functions have not been exposed; call exposeFunctions() first.'); }
+    public function saveObject(string $file): string
     {
         $this->parsed();
-        if ($this instanceof CmdStanMCMC && $this->num_draws_sampling() >= 4) { $this->nativeSummary(); }
+        if ($this instanceof CmdStanMCMC && $this->numDrawsSampling() >= 4) { $this->nativeSummary(); }
         if (file_put_contents($file, serialize($this), LOCK_EX) === false) { throw new \RuntimeException('Cannot save fit object.'); }
         return $file;
     }
@@ -454,8 +454,8 @@ class CmdStanFit
         $vars = $pick($variables, $meta['variables']); $diag = $pick($sampler_diagnostics, $meta['sampler_diagnostics']);
         $get = fn(array $columns, string $part) => $columns === [] || array_sum(array_map(fn($csv) => count($part === 'estimate' ? array_filter([$csv['estimate']]) : $csv[$part]), $fit->parsed())) === 0 ? null : $fit->extract($columns, $format, false, $part);
         if ($method === 'sample') {
-            $ids = $meta['id']; $metric = $fit->inv_metric(false);
-            return ['metadata' => $meta, 'time' => ['total' => null, 'chains' => $meta['time']], 'inv_metric' => array_filter(array_combine($ids, $metric), fn($m) => $m !== []), 'step_size' => array_filter(array_combine($ids, $fit->step_size()), fn($x) => $x !== null), 'warmup_draws' => $get($vars, 'warmup'), 'post_warmup_draws' => $get($vars, 'draws'), 'warmup_sampler_diagnostics' => $get($diag, 'warmup'), 'post_warmup_sampler_diagnostics' => $get($diag, 'draws')];
+            $ids = $meta['id']; $metric = $fit->invMetric(false);
+            return ['metadata' => $meta, 'time' => ['total' => null, 'chains' => $meta['time']], 'inv_metric' => array_filter(array_combine($ids, $metric), fn($m) => $m !== []), 'step_size' => array_filter(array_combine($ids, $fit->stepSize()), fn($x) => $x !== null), 'warmup_draws' => $get($vars, 'warmup'), 'post_warmup_draws' => $get($vars, 'draws'), 'warmup_sampler_diagnostics' => $get($diag, 'warmup'), 'post_warmup_sampler_diagnostics' => $get($diag, 'draws')];
         }
         return match ($method) { 'optimize' => ['metadata' => $meta, 'point_estimates' => $get($vars, 'estimate')], 'generate_quantities' => ['metadata' => $meta, 'generated_quantities' => $get($vars, 'draws')], default => ['metadata' => $meta, 'draws' => $get($vars, 'draws')] };
     }

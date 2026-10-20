@@ -87,13 +87,13 @@ final class MomentMatch
         DrawKernels::require();
         $logLik = $fit->draws($variables, 'draws_array');
         $loo = Loo::loo($logLik, $r_eff);
-        $fit->init_model_methods();
-        $upars = array_map('array_values', $fit->unconstrain_draws(format: 'draws_matrix'));
+        $fit->initModelMethods();
+        $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
         $paths = array_map(fn($name) => self::path((string)$name, $variables), $loo['observations']);
-        $logProb = fn(array $rows) => array_map(fn($row) => $fit->log_prob($row), $rows);
+        $logProb = fn(array $rows) => array_map(fn($row) => $fit->logProb($row), $rows);
         $logLikI = function (array $rows, int $i) use ($fit, $variables, $paths) {
             return array_map(function ($row) use ($fit, $variables, $paths, $i) {
-                $value = $fit->constrain_variables($row)[$variables];
+                $value = $fit->constrainVariables($row)[$variables];
                 foreach ($paths[$i] as $index) { $value = $value[$index]; }
                 return $value;
             }, $rows);
@@ -289,7 +289,7 @@ final class MomentMatch
         foreach ($values as $v) { if (!is_int($v) && !is_float($v)) { throw new \InvalidArgumentException($name.' must return numbers.'); } }
         return array_map('floatval', $values);
     }
-    /** Zero-based indices into constrain_variables()[$variable] for a draws column name such as "log_lik[2,3]". */
+    /** Zero-based indices into constrainVariables()[$variable] for a draws column name such as "log_lik[2,3]". */
     private static function path(string $name, string $variable): array
     {
         if ($name === $variable) { return []; }

@@ -149,8 +149,8 @@ function mcmc_hist(CmdStanFit|array $draws, string $variable, int $bins = 30): F
 function mcmc_dens(CmdStanFit|array $draws, string $variable): Figure { return Plot::dens($draws, $variable); }
 function mcmc_dens_overlay(CmdStanFit|array $draws, string $variable): Figure { return Plot::dens($draws, $variable, true); }
 function mcmc_intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $prob_outer = 0.9, string $point_est = 'median'): Figure { return Plot::intervals($draws, $variables, $prob, $prob_outer, $point_est); }
-function mcmc_rank_hist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure { return Plot::rank_hist($draws, $variable, $bins); }
+function mcmc_rank_hist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure { return Plot::rankHist($draws, $variable, $bins); }
 function mcmc_scatter(CmdStanFit|array $draws, string $x_variable, string $y_variable): Figure { return Plot::scatter($draws, $x_variable, $y_variable); }
 function mcmc_acf(CmdStanFit|array $draws, string $variable, int $lags = 20): Figure { return Plot::acf($draws, $variable, $lags); }
 /** loo's Pareto k diagnostic plot for a CmdStanMCMC::loo() or Loo::loo() result. */
-function pareto_k_plot(array $loo): Figure { return Plot::pareto_k($loo); }
+function pareto_k_plot(array $loo): Figure { return Plot::paretoK($loo); }

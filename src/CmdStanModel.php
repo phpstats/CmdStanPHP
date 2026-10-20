@@ -13,26 +13,26 @@ final class CmdStanModel
         $this->stanFile = $real;
         $this->exeFile = $exe_file === null ? substr($real, 0, -5).CmdStan::suffix() : (realpath($exe_file) ?: $exe_file);
     }
-    public function stan_file(): string { return $this->stanFile; }
-    public function exe_file(): string { return $this->exeFile; }
-    public function hpp_file(): string { return substr($this->stanFile, 0, -5).'.hpp'; }
+    public function stanFile(): string { return $this->stanFile; }
+    public function exeFile(): string { return $this->exeFile; }
+    public function hppFile(): string { return substr($this->stanFile, 0, -5).'.hpp'; }
     public function code(): string { return (string)file_get_contents($this->stanFile); }
-    public function has_stan_file(): bool { return is_file($this->stanFile); }
-    public function model_name(): string { return pathinfo($this->stanFile, PATHINFO_FILENAME); }
-    public function cpp_options(): array
+    public function hasStanFile(): bool { return is_file($this->stanFile); }
+    public function modelName(): string { return pathinfo($this->stanFile, PATHINFO_FILENAME); }
+    public function cppOptions(): array
     {
         $receipt = $this->exeFile.'.cmdstanphp.json';
         return is_file($receipt) ? (json_decode(file_get_contents($receipt), true)['cpp_options'] ?? []) : [];
     }
-    public function include_paths(): array { return (array)($this->stancOptions()['include-paths'] ?? []); }
+    public function includePaths(): array { return (array)($this->stancOptions()['include-paths'] ?? []); }
     private function stancOptions(): array
     {
         $receipt = $this->exeFile.'.cmdstanphp.json';
         return is_file($receipt) ? (json_decode(file_get_contents($receipt), true)['stanc_options'] ?? []) : [];
     }
     /** CmdStanR's expose_functions(): compiles user-defined Stan functions into a library called through PHP FFI. */
-    public function expose_functions(?float $timeout = null): StanFunctions { return $this->functions ??= StanFunctions::compile($this->stanFile, $this->stancOptions(), timeout: $timeout); }
-    public function functions(): StanFunctions { return $this->functions ?? throw new \RuntimeException('Functions have not been exposed; call expose_functions() first.'); }
+    public function exposeFunctions(?float $timeout = null): StanFunctions { return $this->functions ??= StanFunctions::compile($this->stanFile, $this->stancOptions(), timeout: $timeout); }
+    public function functions(): StanFunctions { return $this->functions ?? throw new \RuntimeException('Functions have not been exposed; call exposeFunctions() first.'); }
     /** Line numbers default to the cmdstanr_print_line_numbers option and are right-aligned like CmdStanR's. */
     public function print(?bool $line_numbers = null): void
     {
@@ -62,12 +62,12 @@ final class CmdStanModel
         if ($this->exeFile !== substr($this->stanFile, 0, -5).CmdStan::suffix()) { throw new \LogicException('Compilation requires the executable to have the source basename.'); }
         $cmd = ['make', '-C', CmdStan::path(), '-j'.$cores];
         if ($force_recompile || $changedOptions) {
-            foreach ([$this->exeFile, $this->hpp_file(), substr($this->stanFile, 0, -5).'.o'] as $artifact) {
+            foreach ([$this->exeFile, $this->hppFile(), substr($this->stanFile, 0, -5).'.o'] as $artifact) {
                 if (is_file($artifact) && !unlink($artifact)) { throw new \RuntimeException('Cannot remove stale artifact: '.$artifact); }
             }
         }
         $cmd[] = $this->exeFile;
-        $cmd[] = $this->hpp_file();
+        $cmd[] = $this->hppFile();
         if ($stanc_options !== []) { $cmd[] = 'STANCFLAGS='.implode(' ', $stancArgs); }
         array_push($cmd, ...$makeOptions);
         $verbose = CmdStan::option('cmdstanr_verbose', false);
@@ -93,7 +93,7 @@ final class CmdStanModel
         }
         return $args;
     }
-    public function check_syntax(array $stanc_options = []): bool
+    public function checkSyntax(array $stanc_options = []): bool
     {
         $hpp = self::temporaryFile('.hpp');
         try { Process::run(array_merge([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--o='.$hpp], $this->stancArgs($stanc_options), [$this->stanFile])); }
@@ -111,11 +111,11 @@ final class CmdStanModel
         $result = Process::run([CmdStan::path().'/bin/stanc'.CmdStan::suffix(), '--info', $this->stanFile]);
         return json_decode($result['stdout'], true, flags: JSON_THROW_ON_ERROR);
     }
-    public function save_hpp_file(string $dir): string
+    public function saveHppFile(string $dir): string
     {
-        if (!is_dir($dir) || !is_file($this->hpp_file())) { throw new \InvalidArgumentException('Header and destination directory must exist.'); }
-        $target = rtrim($dir, '/\\').'/'.basename($this->hpp_file());
-        if (!copy($this->hpp_file(), $target)) { throw new \RuntimeException('Cannot copy header.'); }
+        if (!is_dir($dir) || !is_file($this->hppFile())) { throw new \InvalidArgumentException('Header and destination directory must exist.'); }
+        $target = rtrim($dir, '/\\').'/'.basename($this->hppFile());
+        if (!copy($this->hppFile(), $target)) { throw new \RuntimeException('Cannot copy header.'); }
         return $target;
     }
     /**
@@ -123,7 +123,7 @@ final class CmdStanModel
      * file, a StanData, or a table such as a phibble DataFrame (any object with toModelData() or toColumns(); see StanData).
      */
     public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::deprecated(self::options($options), ['cores', 'num_cores', 'num_chains', 'num_warmup', 'num_samples', 'max_depth', 'stepsize', 'save_extra_diagnostics', 'validate_csv'])); }
-    public function sample_mpi(string $mpi_cmd = 'mpiexec', array $mpi_args = [], mixed ...$options): CmdStanMCMC
+    public function sampleMpi(string $mpi_cmd = 'mpiexec', array $mpi_args = [], mixed ...$options): CmdStanMCMC
     {
         $o = self::deprecated(self::options($options), ['validate_csv']); $o['chains'] ??= 1; $o['parallel_chains'] = 1;
         if ($mpi_cmd === '') { throw new \InvalidArgumentException('mpi_cmd must identify a launcher.'); }
@@ -153,18 +153,18 @@ final class CmdStanModel
         if ($o['mode'] instanceof CmdStanMLE) {
             $meta = $o['mode']->metadata();
             if (isset($meta['jacobian']) && (bool)$meta['jacobian'] !== ($o['jacobian'] ?? true)) { throw new \InvalidArgumentException('Laplace and optimizer jacobian settings must match.'); }
-            $o['mode'] = $o['mode']->output_files()[0];
+            $o['mode'] = $o['mode']->outputFiles()[0];
         }
         unset($o['opt_args']);
         return $this->run('laplace', $o);
     }
-    public function generate_quantities(CmdStanFit|array|string $fitted_params, mixed ...$options): CmdStanGQ
+    public function generateQuantities(CmdStanFit|array|string $fitted_params, mixed ...$options): CmdStanGQ
     {
-        $o = self::options($options); $o['fitted_params'] = $fitted_params instanceof CmdStanFit ? $fitted_params->output_files() : (array)$fitted_params;
+        $o = self::options($options); $o['fitted_params'] = $fitted_params instanceof CmdStanFit ? $fitted_params->outputFiles() : (array)$fitted_params;
         return $this->run('generate_quantities', $o);
     }
     public function diagnose(mixed ...$options): CmdStanDiagnose { return $this->run('diagnose', self::options($options)); }
-    public function log_prob(mixed ...$options): CmdStanFit
+    public function logProb(mixed ...$options): CmdStanFit
     {
         CmdStan::requireVersion('2.31.0'); $o = self::deprecated(self::options($options), ['jacobian_adjustment']);
         if (isset($o['unconstrained_params']) === isset($o['constrained_params'])) { throw new \InvalidArgumentException('Specify exactly one parameter file.'); }
@@ -284,9 +284,9 @@ final class CmdStanModel
             if ($o['show_exceptions'] ?? ($o['show_messages'] ?? true)) { echo $r['stderr']; }
         }
         $class = CmdStanFit::classForMethod($method);
-        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['code' => $this->code(), 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->model_name(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->stancOptions(), 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
+        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['code' => $this->code(), 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->modelName(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->stancOptions(), 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
         $checks = array_key_exists('diagnostics', $o) ? ($o['diagnostics'] ?? []) : ['divergences', 'treedepth', 'ebfmi'];
-        if ($method === 'sample' && !($o['fixed_param'] ?? false) && $checks !== []) { $fit->check_diagnostics($checks); }
+        if ($method === 'sample' && !($o['fixed_param'] ?? false) && $checks !== []) { $fit->checkDiagnostics($checks); }
         return $fit;
     }
 }
