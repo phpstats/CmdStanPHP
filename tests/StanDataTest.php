@@ -7,7 +7,7 @@ use function CmdStan\{write_stan_file, write_stan_json};
 final class StanDataTest extends TestCase
 {
     /** A table shaped like a phibble DataFrame: toColumns() gives factor labels, types() and levels() describe factors. */
-    private static function frame(array $columns, array $types = [], array $levels = []): object
+    private static function dataFrame(array $columns, array $types = [], array $levels = []): object
     {
         return new class($columns, $types, $levels) {
             public function __construct(private array $columns, private array $types, private array $levels) {}
@@ -26,23 +26,23 @@ final class StanDataTest extends TestCase
     }
     public function testNumericColumnsBecomeArraysAndNIsAdded(): void
     {
-        $data = StanData::fromTable(self::frame(['y' => [0, 1, 1], 'x' => [0.5, 1.5, -2.0], 'flag' => [true, false, true], 'v' => [[1, 2], [3, 4], [5, 6]]]));
+        $data = StanData::fromTable(self::dataFrame(['y' => [0, 1, 1], 'x' => [0.5, 1.5, -2.0], 'flag' => [true, false, true], 'v' => [[1, 2], [3, 4], [5, 6]]]));
         self::assertSame(['N' => 3, 'y' => [0, 1, 1], 'x' => [0.5, 1.5, -2.0], 'flag' => [1, 0, 1], 'v' => [[1, 2], [3, 4], [5, 6]]], $data->data);
         self::assertSame([], $data->levels);
-        self::assertSame(['n' => [1, 2], 'N' => [7, 7]], StanData::fromTable(self::frame(['n' => [1, 2], 'N' => [7, 7]]))->data, 'an existing N column is kept');
-        self::assertSame(['y' => [1]], StanData::fromTable(self::frame(['y' => [1]]), addN: false)->data);
+        self::assertSame(['n' => [1, 2], 'N' => [7, 7]], StanData::fromTable(self::dataFrame(['n' => [1, 2], 'N' => [7, 7]]))->data, 'an existing N column is kept');
+        self::assertSame(['y' => [1]], StanData::fromTable(self::dataFrame(['y' => [1]]), addN: false)->data);
     }
     public function testFactorColumnsUseTableLevelsAndAreOneBased(): void
     {
-        $data = StanData::fromTable(self::frame(['g' => ['b', 'a', 'c', 'b'], 'y' => [1.0, 2.0, 3.0, 4.0]], ['g' => 'factor', 'y' => 'float'], ['g' => ['c', 'b', 'a']]));
+        $data = StanData::fromTable(self::dataFrame(['g' => ['b', 'a', 'c', 'b'], 'y' => [1.0, 2.0, 3.0, 4.0]], ['g' => 'factor', 'y' => 'float'], ['g' => ['c', 'b', 'a']]));
         self::assertSame(['N' => 4, 'g' => [2, 3, 1, 2], 'y' => [1.0, 2.0, 3.0, 4.0], 'J_g' => 3], $data->data);
         self::assertSame(['g' => ['c', 'b', 'a']], $data->levels);
-        $enum = StanData::fromTable(self::frame(['g' => ['x', 'y']], ['g' => FactorType::Factor], ['g' => ['y', 'x']]));
+        $enum = StanData::fromTable(self::dataFrame(['g' => ['x', 'y']], ['g' => FactorType::Factor], ['g' => ['y', 'x']]));
         self::assertSame([2, 1], $enum->data['g'], 'backed enum types such as Phibble\Type::Factor are recognized');
     }
     public function testStringColumnsBecomeFactorsWithSortedLevels(): void
     {
-        $data = StanData::fromTable(self::frame(['school' => ['b', 'a', 'b', 'c'], 'J_school' => [9, 9, 9, 9]]));
+        $data = StanData::fromTable(self::dataFrame(['school' => ['b', 'a', 'b', 'c'], 'J_school' => [9, 9, 9, 9]]));
         self::assertSame([2, 1, 2, 3], $data->data['school']); self::assertSame(['a', 'b', 'c'], $data->levels['school']);
         self::assertSame([9, 9, 9, 9], $data->data['J_school'], 'J_<name> never replaces a column');
     }
@@ -69,13 +69,13 @@ final class StanDataTest extends TestCase
     {
         $model = isset($columns['__model']); unset($columns['__model']);
         $this->expectExceptionMessage($message);
-        StanData::fromTable($model ? self::modelData($columns) : self::frame($columns));
+        StanData::fromTable($model ? self::modelData($columns) : self::dataFrame($columns));
     }
     public function testNormalizeAndJsonWriterAcceptTables(): void
     {
         self::assertNull(StanData::normalize(null)); self::assertSame(['N' => 1], StanData::normalize(['N' => 1]));
         self::assertSame(['a' => 1], StanData::normalize(new StanData(['a' => 1], ['a' => ['x']])));
-        $file = write_stan_json(self::frame(['g' => ['b', 'a']]), $this->dir.'/table.json');
+        $file = write_stan_json(self::dataFrame(['g' => ['b', 'a']]), $this->dir.'/table.json');
         self::assertSame(['N' => 2, 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($file), true));
         $file = write_stan_json(StanData::fromColumns(['y' => [1.0], 'x' => [2]], 'y', 'x'), $this->dir.'/columns.json');
         self::assertSame(['N' => 1, 'K' => 1, 'X' => [[2.0]], 'y' => [1.0]], json_decode(file_get_contents($file), true));
@@ -84,7 +84,7 @@ final class StanDataTest extends TestCase
     public function testModelMethodsWriteTableData(): void
     {
         $model = new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'), __DIR__.'/fixtures/model.php');
-        $fit = $model->sample(data: self::frame(['y' => [0, 1], 'g' => ['b', 'a']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
+        $fit = $model->sample(data: self::dataFrame(['y' => [0, 1], 'g' => ['b', 'a']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
         self::assertSame(['N' => 2, 'y' => [0, 1], 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($fit->dataFile()), true));
         $fit = $model->optimize(data: StanData::fromColumns(['y' => [3], 'x' => [1.5]], 'y', ['x'])->with(['scale' => 2]), output_dir: $this->dir, show_messages: false);
         self::assertSame(['N' => 1, 'K' => 1, 'X' => [[1.5]], 'y' => [3], 'scale' => 2], json_decode(file_get_contents($fit->dataFile()), true));
@@ -101,12 +101,12 @@ final class StanDataTest extends TestCase
     }
     public function testFromColumnsAcceptsTablesAndKeepsFactorLevels(): void
     {
-        $data = StanData::fromColumns(self::frame(['y' => [1, 0, 1], 'x' => [0.1, 0.2, 0.3], 'g' => ['b', 'a', 'b']], ['g' => 'factor'], ['g' => ['b', 'a']]), 'y', 'x', 'g');
+        $data = StanData::fromColumns(self::dataFrame(['y' => [1, 0, 1], 'x' => [0.1, 0.2, 0.3], 'g' => ['b', 'a', 'b']], ['g' => 'factor'], ['g' => ['b', 'a']]), 'y', 'x', 'g');
         self::assertSame([1, 2, 1], $data->data['g_id']); self::assertSame(['b', 'a'], $data->levels['g_id']);
     }
     public function testFromColumnsRejectsUnusableColumns(): void
     {
-        foreach ([fn() => StanData::fromColumns(['y' => [1]], 'y', 'x'), fn() => StanData::fromColumns(['y' => [1], 'x' => ['a']], 'y', 'x'), fn() => StanData::fromColumns(['y' => [1, 2], 'x' => [1]], 'y', 'x'), fn() => StanData::fromColumns(['y' => [null]], 'y'), fn() => StanData::fromColumns(['y' => [1], 'g' => [null]], 'y', [], 'g'), fn() => StanData::fromColumns(self::frame(['y' => ['a']]), 'y')] as $i => $call) {
+        foreach ([fn() => StanData::fromColumns(['y' => [1]], 'y', 'x'), fn() => StanData::fromColumns(['y' => [1], 'x' => ['a']], 'y', 'x'), fn() => StanData::fromColumns(['y' => [1, 2], 'x' => [1]], 'y', 'x'), fn() => StanData::fromColumns(['y' => [null]], 'y'), fn() => StanData::fromColumns(['y' => [1], 'g' => [null]], 'y', [], 'g'), fn() => StanData::fromColumns(self::dataFrame(['y' => ['a']]), 'y')] as $i => $call) {
             try { $call(); self::fail('Case '.$i.' should throw.'); } catch (\InvalidArgumentException) { self::assertTrue(true); }
         }
     }
@@ -155,7 +155,7 @@ final class StanDataTest extends TestCase
     }
     public function testFromColumnsIgnoresUnusedTableColumns(): void
     {
-        $data = StanData::fromColumns(self::frame(['y' => [1, 0], 'x' => [0.1, 0.2], 'notes' => [null, 'x']]), 'y', 'x');
+        $data = StanData::fromColumns(self::dataFrame(['y' => [1, 0], 'x' => [0.1, 0.2], 'notes' => [null, 'x']]), 'y', 'x');
         self::assertSame([1, 0], $data->data['y']); self::assertArrayNotHasKey('notes', $data->data);
     }
     public function testFromFormulaRequiresStatsModelMatrix(): void
@@ -169,7 +169,7 @@ final class StanDataTest extends TestCase
     {
         if (function_exists('Phit\model_matrix')) { self::markTestSkipped('The real Phit\model_matrix() is loaded.'); }
         eval('namespace Phit; function model_matrix(string $formula, mixed $data, string $missing = "drop"): array { $GLOBALS["model_matrix_call"] = [$formula, $data, $missing]; $labels = isset($data["g"]["codes"]) ? array_map(fn($c) => $c === null ? null : $data["g"]["levels"][$c], $data["g"]["codes"]) : $data["g"]; return ["y" => $data["y"], "x" => array_map(fn($x) => [1.0, $x], $data["x"]), "columns" => ["(Intercept)", "x"], "intercept" => true, "random" => [["label" => "1 | g", "group" => "g", "columns" => ["(Intercept)"], "correlated" => true, "z" => [[1.0], [1.0]], "groups" => $labels]], "retained_rows" => [0, 1], "dropped_rows" => []]; }');
-        $data = StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['b', 'a']]), dropIntercept: true, missing: 'raise');
+        $data = StanData::fromFormula('y ~ x + (1 | g)', self::dataFrame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['b', 'a']]), dropIntercept: true, missing: 'raise');
         self::assertSame(['y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]], 'raise'], $GLOBALS['model_matrix_call'], 'factor columns are passed as descriptors that keep the level order');
         self::assertSame(['N' => 2, 'K' => 1, 'X' => [[3.0], [4.0]], 'y' => [1.0, 2.5], 'g_id' => [1, 2], 'J_g' => 2, 'J' => 2], $data->data, 'the table\'s factor levels set the group order');
         $model = ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [0, 1], 'ordered' => false]];
@@ -178,7 +178,7 @@ final class StanDataTest extends TestCase
         self::assertSame([1, 2], $data->data['g_id'], 'descriptor levels set the group order'); self::assertSame(['b', 'a'], $data->levels['g_id']);
         try { StanData::fromFormula('y ~ x + (1 | g)', ['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['levels' => ['b', 'a'], 'codes' => [1, null], 'base' => 1]]); } catch (\UnexpectedValueException) {} // the fake keeps the missing row; only the call matters
         self::assertSame(['levels' => ['b', 'a'], 'codes' => [0, null], 'ordered' => false], $GLOBALS['model_matrix_call'][1]['g'], "1-based codes become 0-based, and missing codes are left for Phit\model_matrix()");
-        try { StanData::fromFormula('y ~ x + (1 | g)', self::frame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', null], 'notes' => [null, 'x']], ['g' => 'factor'], ['g' => ['b', 'a']])); } catch (\UnexpectedValueException) {} // the fake keeps the missing row; only the call matters
+        try { StanData::fromFormula('y ~ x + (1 | g)', self::dataFrame(['y' => [1.0, 2.5], 'x' => [3.0, 4.0], 'g' => ['b', null], 'notes' => [null, 'x']], ['g' => 'factor'], ['g' => ['b', 'a']])); } catch (\UnexpectedValueException) {} // the fake keeps the missing row; only the call matters
         self::assertSame([0, null], $GLOBALS['model_matrix_call'][1]['g']['codes'], 'missing labels in toColumns() factors do not throw');
         self::assertSame([null, 'x'], $GLOBALS['model_matrix_call'][1]['notes']);
     }
@@ -221,7 +221,7 @@ final class StanDataTest extends TestCase
     {
         self::requireModelMatrix();
         $columns = self::SCHOOLS; $columns['y'][3] = 6.0; $columns['g'][3] = null;
-        $df = self::frame($columns, ['f' => 'factor', 'r' => 'factor'], ['f' => ['lo', 'mid', 'hi'], 'r' => ['yes', 'no']]);
+        $df = self::dataFrame($columns, ['f' => 'factor', 'r' => 'factor'], ['f' => ['lo', 'mid', 'hi'], 'r' => ['yes', 'no']]);
         $warnings = []; set_error_handler(function (int $no, string $message) use (&$warnings) { $warnings[] = $message; return true; }, E_WARNING);
         try { $data = StanData::fromFormula('r ~ f + (1 | g)', $df); } finally { restore_error_handler(); }
         self::assertCount(1, $warnings); self::assertSame(5, $data->data['N'], 'the row with a missing group label is dropped');
