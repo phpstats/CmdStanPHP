@@ -32,7 +32,10 @@
   "scripts": {
     "test": "phpunit --exclude-group integration --exclude-group compatibility",
     "test:integration": "phpunit --group integration",
-    "lint": "php scripts/lint.php",
+    "lint": [
+      "php scripts/lint.php",
+      "phpcs"
+    ],
     "test:compatibility": "phpunit --group compatibility"
   }
 }
