@@ -34,8 +34,10 @@
     "test:integration": "phpunit --group integration",
     "lint": [
       "php scripts/lint.php",
-      "phpcs"
+      "phpcs",
+      "@test:sniffs"
     ],
+    "test:sniffs": "php tools/phpcs/selftest/run.php",
     "test:compatibility": "phpunit --group compatibility"
   }
 }
