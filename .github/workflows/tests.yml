@@ -52,12 +52,16 @@ jobs:
       - name: Install matching PHP headers and clang
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang libclang-dev
+          # One LLVM for bindgen: its libclang must match the clang headers it parses (the runner image also carries a newer LLVM).
+          sudo apt-get install -y clang-18 libclang-18-dev
           test "$(php-config --version | cut -d. -f1,2)" = "$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
           {
             echo "PHP_CONFIG=$(command -v php-config)"
             echo "PHP=$(command -v php)"
-            echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so"
+            echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib"
+            echo "CLANG_PATH=/usr/bin/clang-18"
+            echo "BINDGEN_EXTRA_CLANG_ARGS=-resource-dir=$(clang-18 -print-resource-dir)"
+            echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so""
           } >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - name: Build and verify phit
