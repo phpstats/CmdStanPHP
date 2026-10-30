@@ -61,7 +61,7 @@ jobs:
             echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib"
             echo "CLANG_PATH=/usr/bin/clang-18"
             echo "BINDGEN_EXTRA_CLANG_ARGS=-resource-dir=$(clang-18 -print-resource-dir)"
-            echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so""
+            echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so"
           } >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
       - name: Build and verify phit
