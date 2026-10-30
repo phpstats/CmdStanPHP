@@ -25,7 +25,7 @@ final class Tables
     /** A Phibble\DataFrame from columns; throws with installation advice when phibble is not installed. */
     public static function dataFrame(array $columns, string $method = 'drawsTable()'): object
     {
-        if (!class_exists(self::DATAFRAME_CLASS)) { throw new \RuntimeException($method.' needs the phibble data frame package (composer require phpstats/phibble; it requires PHP 8.5). Without it, use the column arrays directly.'); }
+        if (!class_exists(self::DATAFRAME_CLASS)) { throw new \RuntimeException($method.' needs the phibble data frame package (composer require phpstats/phibble; it requires PHP 8.3 or later). Without it, use the column arrays directly.'); }
         $class = self::DATAFRAME_CLASS;
         return $class::fromColumns($columns);
     }

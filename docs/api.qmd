@@ -210,7 +210,7 @@ data {
 
 - `drawsColumns(variables: null, incWarmup: false)` returns draws as columns, like posterior's `as_draws_df()`: one list per variable element (such as `beta[2]`), then one-based `.chain`, `.iteration`, and `.draw` columns.
 - `summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])` returns `summary()` as columns: `variable` and one column per measure.
-- `drawsTable()` and `summaryTable()` take the same arguments and return a `Phibble\DataFrame` built with `DataFrame::fromColumns()`. They need `phpstats/phibble`, which requires PHP 8.5, and throw a `RuntimeException` explaining this when it is not installed.
+- `drawsTable()` and `summaryTable()` take the same arguments and return a `Phibble\DataFrame` built with `DataFrame::fromColumns()`. They need `phpstats/phibble`, which requires PHP 8.3 or later, and throw a `RuntimeException` explaining this when it is not installed.
 - `CmdStan\Tables::fromRows($rows)` converts any list of associative rows, such as `loo()['pointwise']`, to columns.
 
 The column arrays need no other package and suit any data frame library that accepts name-to-values columns.
