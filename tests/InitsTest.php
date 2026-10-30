@@ -38,7 +38,7 @@ final class InitsTest extends TestCase
         $rows = []; for ($i = 0; $i < 20; ++$i) { $rows[] = '0,'.(-($i % 2)).',0,'.($i % 2); }
         $fit = CmdStanFit::fromCsv([$this->file('laplace.csv', "# method = laplace\nlp__,log_p__,log_q__,theta\n".implode("\n", $rows)."\n")]);
         $result = Inits::fromFit($fit, 2, seed: 1); self::assertEqualsCanonicalizing([0.0, 1.0], array_column($result['inits'], 'theta'));
-        $this->expectExceptionMessage('Not enough distinct draws (3) in CmdStanLaplace fit to create inits.'); Inits::fromFit($fit, 3);
+        $this->expectExceptionMessage('Not enough distinct draws (3) in Laplace fit to create inits.'); Inits::fromFit($fit, 3);
     }
     public function testPathfinderWithoutLpUsesUniformWeights(): void
     {
@@ -46,7 +46,22 @@ final class InitsTest extends TestCase
         $fit = CmdStanFit::fromCsv([$this->file('pf.csv', "# method = pathfinder\n# calculate_lp = false\nlp_approx__,lp__,theta\n".implode("\n", $rows)."\n")]);
         self::assertCount(10, array_unique(array_column(Inits::fromFit($fit, 10, seed: 2)['inits'], 'theta')));
         $fit = CmdStanFit::fromCsv([$this->file('pf2.csv', "# method = pathfinder\nlp_approx__,lp__,theta\n".implode("\n", $rows)."\n")]);
-        $this->expectExceptionMessage('Not enough distinct draws (2) in Pathfinder fit to create inits. Try running Pathfinder with psis_resample=FALSE.'); Inits::fromFit($fit, 2);
+        $this->expectExceptionMessage('Every draw in the Pathfinder fit has a non-finite log importance weight'); Inits::fromFit($fit, 2);
+    }
+    public function testRepeatedDrawsKeepTheirMassAndResampledPathfinderIsUniform(): void
+    {
+        // theta = 1, 1, 2, 3 with equal log weights: three candidates, and theta = 1 carries twice the weight.
+        $rows = ['0,0,1', '0,0,1', '0,0,2', '0,0,3'];
+        $fit = CmdStanFit::fromCsv([$this->file('lap.csv', "# method = laplace\nlp__,log_p__,log_q__,theta\n".implode("\n", array_map(fn($r) => '0,'.$r, $rows))."\n")]);
+        $counts = [1 => 0, 2 => 0, 3 => 0];
+        for ($seed = 1; $seed <= 400; ++$seed) { ++$counts[(int)Inits::fromFit($fit, 1, seed: $seed)['inits'][0]['theta']]; }
+        self::assertGreaterThan($counts[2] * 1.5, $counts[1]); self::assertGreaterThan($counts[3] * 1.5, $counts[1]);
+        self::assertEqualsCanonicalizing([1.0, 2.0, 3.0], array_column(Inits::fromFit($fit, 3, seed: 1)['inits'], 'theta'));
+        // Several PSIS-resampled paths: equal weights even though the log weights differ.
+        $pf = []; for ($i = 1; $i <= 20; ++$i) { $pf[] = (-$i).','.(-2 * $i).','.$i; }
+        $fit = CmdStanFit::fromCsv([$this->file('pf3.csv', "# method = pathfinder\n# num_paths = 4\n# psis_resample = true\n# calculate_lp = true\nlp_approx__,lp__,theta\n".implode("\n", $pf)."\n")]);
+        $seen = []; for ($seed = 1; $seed <= 200; ++$seed) { $seen[(int)Inits::fromFit($fit, 1, seed: $seed)['inits'][0]['theta']] = true; }
+        self::assertGreaterThan(15, count($seen), 'uniform weights reach nearly every draw');
     }
     public function testDrawsAreRecycledAndNonFiniteValuesRejected(): void
     {

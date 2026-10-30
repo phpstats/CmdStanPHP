@@ -52,11 +52,15 @@ jobs:
       - name: Install matching PHP headers and clang
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang libclang-dev
+          # One LLVM for bindgen: its libclang must match the clang headers it parses (the runner image also carries a newer LLVM).
+          sudo apt-get install -y clang-18 libclang-18-dev
           test "$(php-config --version | cut -d. -f1,2)" = "$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
           {
             echo "PHP_CONFIG=$(command -v php-config)"
             echo "PHP=$(command -v php)"
+            echo "LIBCLANG_PATH=/usr/lib/llvm-18/lib"
+            echo "CLANG_PATH=/usr/bin/clang-18"
+            echo "BINDGEN_EXTRA_CLANG_ARGS=-resource-dir=$(clang-18 -print-resource-dir)"
             echo "PHIT_LIBRARY=$PWD/.context/phit/target/release/libphit.so"
           } >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
@@ -88,7 +92,12 @@ jobs:
           use-public-rspm: true
       - name: Install reference R packages
         if: matrix.cmdstan == '2.40.0'
-        run: Rscript -e 'install.packages(c("cmdstanr", "posterior", "loo", "bayesplot", "jsonlite", "Rcpp", "RcppEigen"), repos = c("https://stan-dev.r-universe.dev", "https://cloud.r-project.org"))'
+        # CmdStanR 1.0 (release candidate) from its v1.0 branch, pinned; its dependencies come from r-universe and CRAN.
+        run: |
+          Rscript -e 'install.packages(c("cmdstanr", "posterior", "loo", "bayesplot", "jsonlite", "Rcpp", "RcppEigen", "data.table"), repos = c("https://stan-dev.r-universe.dev", "https://cloud.r-project.org"))'
+          curl --fail --location --retry 3 --proto =https --output .context/cmdstanr.tar.gz https://github.com/stan-dev/cmdstanr/archive/0a541236d0a5ada0ecc544ecb6aa1715e808de78.tar.gz
+          R CMD INSTALL .context/cmdstanr.tar.gz
+          Rscript -e 'stopifnot(packageVersion("cmdstanr") >= "0.99.0", packageVersion("data.table") >= "1.18.0")'
       - name: Compare with CmdStanR
         if: matrix.cmdstan == '2.40.0'
         run: php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --group compatibility --fail-on-skipped

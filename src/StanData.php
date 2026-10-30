@@ -10,9 +10,10 @@ namespace CmdStan;
  * - Factor columns become 1-based integer indices, in level order, and add J_<name> (the number of levels). Levels come
  *   from a toModelData() factor descriptor ['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool], whose
  *   codes are 0-based as phibble's DataFrame::toModelData() returns them (phibble 93858fa and later) (a 'base' => 1 entry marks 1-based codes), or
- *   from the table's levels(name) when toColumns() is used and types() reports a factor. String columns are
- *   treated as factors with sorted unique levels (strcmp order, as phibble's and R's factor() defaults). The labels
- *   are kept in $levels; they are not written to the Stan JSON, which holds numbers only.
+ *   from the table's levels(name) when toColumns() is used and types() reports a factor. The labels are kept in
+ *   $levels; they are not written to the Stan JSON, which holds numbers only.
+ * - String columns are an error, as in CmdStanR 1.0, rather than silently becoming codes in alphabetical order: make
+ *   them factors so their levels set the codes. fromColumns() and fromFormula() still number string grouping columns.
  * - N, the row count, is added unless the table has a column named N. J_<name> is added unless that name is taken.
  * - Missing values (null), dates, and other objects are rejected, since Stan has no missing values.
  *
@@ -41,11 +42,15 @@ final class StanData
         if (self::isTable($data)) { return self::fromTable($data)->data; }
         return $data;
     }
+    /** A table's columns: factors as 1-based indices with their levels, other columns as they are. */
+    public static function columnsOf(object $table): array { return self::tableColumns($table, null, false); }
     /** Converts a table to Stan data; see the class description for the conventions. */
     public static function fromTable(object $table, bool $addN = true): self
     {
-        $data = []; $levels = []; $n = null;
-        foreach (self::tableColumns($table) as $name => $column) {
+        $data = []; $levels = []; $n = null; $columns = self::tableColumns($table, null, false);
+        $strings = array_keys(array_filter($columns, fn($c) => $c['levels'] === null && array_filter($c['values'], 'is_string') !== []));
+        if ($strings !== []) { throw new \InvalidArgumentException('The table has columns of invalid type: '.implode(', ', $strings).'. Stan data is numeric: make string columns factors (their levels set the codes), or convert them to numbers.'); }
+        foreach ($columns as $name => $column) {
             if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/D', $name)) { throw new \InvalidArgumentException("Column '".$name."' is not a valid Stan variable name; rename it first."); }
             $values = $column['values'];
             if ($n !== null && count($values) !== $n) { throw new \InvalidArgumentException('Table columns must have equal lengths.'); }
@@ -242,9 +247,10 @@ final class StanData
     }
     /**
      * @param ?list<string> $only convert just these columns (others, and their missing values, are ignored)
+     * @param bool $strings treat string columns as factors over their sorted labels (fromColumns() groups); else keep them
      * @return array<string, array{values: list<mixed>, levels: ?list<string>}> factors hold 1-based indices
      */
-    private static function tableColumns(object $table, ?array $only = null): array
+    private static function tableColumns(object $table, ?array $only = null, bool $strings = true): array
     {
         [$raw, $types] = self::rawColumns($table);
         if ($only !== null) { $raw = array_intersect_key($raw, array_flip($only)); }
@@ -269,7 +275,7 @@ final class StanData
                 $labels = array_values(array_map('strval', $table->levels($name))); $positions = array_flip($labels); $index = [];
                 foreach ($values as $row => $label) { $index[] = $label === null ? throw new \InvalidArgumentException("Factor '".$name."' is missing at row ".($row + 1).'; Stan data cannot hold missing values.') : ($positions[(string)$label] ?? throw new \UnexpectedValueException("Factor '".$name."' has an unknown level at row ".($row + 1).'.')) + 1; }
                 $out[$name] = ['values' => $index, 'levels' => $labels];
-            } elseif ($values !== [] && array_filter($values, 'is_string') !== []) {
+            } elseif ($strings && $values !== [] && array_filter($values, 'is_string') !== []) {
                 $factor = self::factor($values, $name); $out[$name] = ['values' => $factor['index'], 'levels' => $factor['levels']];
             } else { $out[$name] = ['values' => $values, 'levels' => null]; }
         }

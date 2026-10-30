@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan\Tests;
 use CmdStan\{Csv, CmdStanFit, CmdStanMCMC, CmdStanVB};
-use function CmdStan\{options, read_cmdstan_csv_list};
+use function CmdStan\{as_cmdstan_fit, options, read_cmdstan_csv_list};
 final class CsvTest extends TestCase
 {
     public function testWarmupMetadataAdaptationAndTiming(): void
@@ -75,7 +75,7 @@ final class CsvTest extends TestCase
     }
     public function testSaveRefusesOverwrite(): void
     {
-        $fit = CmdStanFit::fromCsv([$this->csv()]); mkdir($this->dir.'/saved'); file_put_contents($this->dir.'/saved/chain-1.csv', 'sentinel');
+        $fit = CmdStanFit::fromCsv([$this->csv()]); mkdir($this->dir.'/saved'); file_put_contents($this->dir.'/saved/chain-01.csv', 'sentinel');
         $this->expectException(\RuntimeException::class); $fit->saveOutputFiles($this->dir.'/saved', 'chain', timestamp: false, random: false);
     }
     public function testCmdStanRMetadataStructure(): void
@@ -96,9 +96,9 @@ final class CsvTest extends TestCase
         $file = $this->dir.'/laplace.csv'; file_put_contents($file, "# method = laplace\n# num_threads = 2\nlog_p__,log_q__,theta\n-1,-2,0.5\n-3,-4,0.6\n");
         $fit = CmdStanFit::fromCsv([$file]); $meta = $fit->metadata();
         self::assertSame(['lp__', 'lp_approx__', 'theta'], $meta['variables']); self::assertSame([], $meta['sampler_diagnostics']); self::assertSame(2, $meta['threads']);
-        self::assertSame([[-2.0], [-4.0]], $fit->lpApprox()); self::assertSame(['lp__' => -1.0, 'theta' => 0.5], $fit->draws(format: 'draws_matrix')[0]);
+        self::assertSame([-2.0, -4.0], $fit->lpApprox(), "CmdStanR 1.0 returns lp_approx() as a vector"); self::assertSame(['lp__' => -1.0, 'theta' => 0.5], $fit->draws(format: 'draws_matrix')[0]);
         $vb = $this->dir.'/vb.csv'; file_put_contents($vb, "# method = variational\nlp__,log_p__,log_g__,theta\n0,0,0,0.5\n0,-3,-2,0.2\n");
-        $fit = CmdStanFit::fromCsv([$vb]); self::assertInstanceOf(CmdStanVB::class, $fit); self::assertSame(['lp__', 'lp_approx__', 'theta'], $fit->metadata()['variables']); self::assertSame([[-2.0]], $fit->lpApprox());
+        $fit = CmdStanFit::fromCsv([$vb]); self::assertInstanceOf(CmdStanVB::class, $fit); self::assertSame(['lp__', 'lp_approx__', 'theta'], $fit->metadata()['variables']); self::assertSame([-2.0], $fit->lpApprox());
     }
     public function testDrawsFormatDefaultsAndOption(): void
     {
@@ -117,7 +117,7 @@ final class CsvTest extends TestCase
         self::assertSame([[3.0, 4.0]], $fit->invMetric(false)); self::assertSame([[[3.0, 0.0], [0.0, 4.0]]], $fit->invMetric());
         self::assertSame('diag_e', $fit->metric()[0]['metric_type']); self::assertSame('demo_model', $fit->cmdstanConfig()[0]['model_name']);
         $meta = $fit->metadata(); self::assertSame('2', $meta['stan_major_version']); self::assertSame(1, $meta['num_chains']); self::assertFalse($meta['mpi_enabled']); self::assertSame('sample', $meta['method']); self::assertSame(0.9, $meta['delta']);
-        $saved = $fit->saveMetricFiles($this->dir.'/saved', 'demo', random: false); self::assertMatchesRegularExpression('~/demo-metric-\d{12}-1\.json$~', $saved[0]);
+        $saved = $fit->saveMetricFiles($this->dir.'/saved', 'demo', random: false); self::assertMatchesRegularExpression('~/demo-metric-\d{12}-01\.json$~', $saved[0]);
         self::assertFileExists($this->dir.'/run-1_metric.json'); self::assertSame($saved, $fit->metricFiles());
     }
     public function testDenseMetricFromCsv(): void
@@ -144,8 +144,8 @@ final class CsvTest extends TestCase
     {
         $fit = CmdStanFit::fromCsv([$this->csv()]); $original = $fit->outputFiles()[0];
         $saved = $fit->saveOutputFiles($this->dir.'/saved', 'demo');
-        self::assertMatchesRegularExpression('~/saved/demo-\d{12}-1-[0-9a-f]{6}\.csv$~', $saved[0]); self::assertFileExists($original); self::assertSame($saved, $fit->outputFiles());
-        self::assertMatchesRegularExpression('~/model-1\.csv$~', $fit->saveOutputFiles($this->dir.'/again', timestamp: false, random: false)[0]);
+        self::assertMatchesRegularExpression('~/saved/demo-\d{12}-01-[0-9a-f]{6}\.csv$~', $saved[0]); self::assertFileExists($original); self::assertSame($saved, $fit->outputFiles());
+        self::assertMatchesRegularExpression('~/model-01\.csv$~', $fit->saveOutputFiles($this->dir.'/again', timestamp: false, random: false)[0]);
     }
     public function testMissingAuxiliaryFilesThrowLikeCmdStanR(): void
     {
@@ -160,5 +160,50 @@ final class CsvTest extends TestCase
         $previous = options(['cmdstanr_max_rows' => 1]); ob_start();
         try { $fit->print('x'); } finally { $out = ob_get_clean(); options($previous); }
         self::assertStringContainsString('showing 1 of 2 rows', $out);
+    }
+    public function testAsCmdStanFitReadsOnlyTheRequestedVariables(): void
+    {
+        $fit = as_cmdstan_fit($this->csv(), variables: 'x', format: 'draws_matrix');
+        self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->variables()); self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->metadata()['variables']);
+        self::assertSame(['theta' => [1], 'x' => [2]], array_diff_key($fit->metadata()['stan_variable_sizes'], ['lp__' => 1]), 'sizes still describe the whole file');
+        self::assertArrayHasKey('divergent__', $fit->samplerDiagnostics()[0]); self::assertCount(2, $fit->draws('x'), 'the format argument sets the default draws format');
+        self::assertArrayNotHasKey('divergent__', as_cmdstan_fit($this->csv('b.csv'), variables: ['theta'], checkDiagnostics: false)->samplerDiagnostics('draws_matrix')[0] ?? []);
+        $this->expectExceptionMessage("Can't find the following variable(s) in the output: nope"); as_cmdstan_fit($this->csv('c.csv'), variables: ['theta', 'nope']);
+    }
+    public function testCompressedCsvFilesAreRead(): void
+    {
+        $plain = $this->csv(); $gz = $this->dir.'/chain.csv.gz'; file_put_contents($gz, gzencode((string)file_get_contents($plain)));
+        self::assertSame(CmdStanFit::fromCsv([$plain])->draws(format: 'draws_matrix'), as_cmdstan_fit($gz)->draws(format: 'draws_matrix'));
+        if (function_exists('bzcompress') || \CmdStan\CmdStan::which('bzip2') !== null) {
+            $bz = $this->dir.'/chain.csv.bz2';
+            if (function_exists('bzcompress')) { file_put_contents($bz, bzcompress((string)file_get_contents($plain))); } else { \CmdStan\Process::run(['sh', '-c', 'bzip2 -c "$0" > "$1"', $plain, $bz]); }
+            self::assertSame(CmdStanFit::fromCsv([$plain])->draws(format: 'draws_matrix'), as_cmdstan_fit($bz)->draws(format: 'draws_matrix'));
+        }
+        file_put_contents($this->dir.'/broken.csv.gz', substr((string)file_get_contents($gz), 0, 40));
+        $this->expectExceptionMessage("Compressed CSV 'broken.csv.gz' is truncated or corrupt."); as_cmdstan_fit($this->dir.'/broken.csv.gz');
+    }
+    public function testTupleAndComplexColumnsUseCmdStanRNames(): void
+    {
+        $file = $this->dir.'/tc.csv';
+        file_put_contents($file, "# method = sample\nlp__,z.real,z.imag,t:1,t:2.1,t:2.2,ap.1:1,ap.1:2,ap.2:1,ap.2:2\n-1,1,2,3,4,5,6,7,8,9\n");
+        $fit = CmdStanFit::fromCsv([$file]); $meta = $fit->metadata();
+        self::assertSame(['lp__', 'z[real]', 'z[imag]', 't:1', 't:2[1]', 't:2[2]', 'ap[1]:1', 'ap[1]:2', 'ap[2]:1', 'ap[2]:2'], $meta['variables']);
+        self::assertSame(['lp__' => [1], 'z' => [2], 't' => [1], 'ap' => [2]], $meta['stan_variable_sizes']);
+        self::assertSame(['ap[1]:1', 'ap[1]:2'], array_keys($fit->draws('ap[1]', 'draws_matrix')[0]));
+        self::assertSame(['z' => [1.0, 2.0], 't' => [3.0, [4.0, 5.0]], 'ap' => [[6.0, 7.0], [8.0, 9.0]]], array_diff_key(Csv::unflatten($fit->draws(null, 'draws_matrix')[0]), ['lp__' => 1]));
+    }
+    public function testReviewRegressions(): void
+    {
+        $fit = as_cmdstan_fit($this->csv(), variables: 'x');
+        $fit->saveOutputFiles($this->dir.'/kept', 'kept', timestamp: false, random: false);
+        self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->variables(), 'saving keeps the variable filter');
+        $gz = $this->dir.'/kept2/kept-01.csv.gz'; mkdir(dirname($gz)); file_put_contents($gz, 'sentinel');
+        try { CmdStanFit::fromCsv([$this->csv('d.csv')])->saveOutputFiles($this->dir.'/kept2', 'kept', timestamp: false, random: false, compress: 'gzip'); self::fail('An existing .csv.gz must not be overwritten.'); }
+        catch (\RuntimeException $e) { self::assertStringContainsString('Destination exists', $e->getMessage()); }
+        self::assertSame('sentinel', file_get_contents($gz));
+        $laplace = $this->dir.'/lap.csv'; file_put_contents($laplace, "# method = laplace\nlp__,log_p__,log_g__,theta\n0,-1,-2,0.5\n0,-3,-4,0.6\n");
+        $fit = as_cmdstan_fit($laplace, variables: ['theta'], checkDiagnostics: false);
+        self::assertSame([-2.0, -4.0], $fit->lpApprox()); self::assertSame(-1.0, $fit->draws(null, 'draws_matrix')[0]['lp__']);
+        $this->expectExceptionMessage("Can't find initial values files."); CmdStanFit::fromCsv([$this->csv('e.csv')])->init();
     }
 }

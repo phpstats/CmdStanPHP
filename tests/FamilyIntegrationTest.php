@@ -32,7 +32,7 @@ STAN;
     {
         try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
         $dir = sys_get_temp_dir().'/cmdstanphp-family-models'; if (!is_dir($dir)) { mkdir($dir, 0700, true); }
-        $model = new CmdStanModel(write_stan_file($code, $dir.'/'.$name.'.stan')); $model->compile(); return $model;
+        $model = new CmdStanModel(write_stan_file($code, $dir.'/'.$name.'.stan')); return $model;
     }
     public function testHierarchicalRegressionFromColumnsAndDrawsColumns(): void
     {
@@ -88,9 +88,9 @@ STAN;
     public function testTableDataRunsBernoulli(): void
     {
         $table = new class { public function toColumns(): array { return ['y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]]; } };
-        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan');
         try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
-        $fit = $model->compile()->optimize(data: $table, seed: 1, show_messages: false, output_dir: $this->dir);
+        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan');
+        $fit = $model->optimize(data: $table, seed: 1, show_messages: false, output_dir: $this->dir);
         self::assertEqualsWithDelta(0.2, $fit->mle()['theta'], 1e-3);
     }
 }

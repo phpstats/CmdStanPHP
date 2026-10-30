@@ -1,13 +1,33 @@
 <?php
 declare(strict_types=1);
 namespace CmdStan;
-/** forceRecompile defaults to the cmdstanr_force_recompile option. */
-function cmdstan_model(string $stanFile, bool $compile = true, ?string $exeFile = null, array $stancOptions = [], array $cppOptions = [], ?bool $forceRecompile = null): CmdStanModel
+/**
+ * CmdStanR 1.0's cmdstan_model(): compiles the Stan program, or reuses an up-to-date executable, and returns a ready model.
+ * Pass exeFile alone to use an existing executable without a Stan file. See CmdStanModel::__construct().
+ */
+function cmdstan_model(?string $stanFile = null, ?string $exeFile = null, bool $quiet = true, ?string $dir = null, bool $pedantic = false, ?array $includePaths = null, ?string $userHeader = null, ?array $cppOptions = null, ?array $stancOptions = null, ?bool $forceRecompile = null): CmdStanModel
 {
-    $model = new CmdStanModel($stanFile, $exeFile);
-    if ($compile) { $model->compile(forceRecompile: $forceRecompile, stancOptions: $stancOptions, cppOptions: $cppOptions); }
-    return $model;
+    return new CmdStanModel($stanFile, $exeFile, $quiet, $dir, $pedantic, $includePaths, $userHeader, $cppOptions, $stancOptions, $forceRecompile);
 }
+/** Compiles a Stan file (or reuses its up-to-date executable) without creating a model object; returns the executable path. */
+function compile_stan_file(string $stanFile, bool $quiet = true, ?string $dir = null, bool $pedantic = false, ?array $includePaths = null, ?string $userHeader = null, ?array $cppOptions = null, ?array $stancOptions = null, ?bool $forceRecompile = null): string
+{
+    return (new CmdStanModel($stanFile, null, $quiet, $dir, $pedantic, $includePaths, $userHeader, $cppOptions, $stancOptions, $forceRecompile))->exeFile();
+}
+/** Checks a Stan file's syntax with stanc, without compiling; throws on a syntax error. */
+function check_syntax_stan_file(string $stanFile, ?array $includePaths = null, bool $pedantic = false, array $stancOptions = [], bool $quiet = false): bool { return Stanc::checkSyntax($stanFile, $includePaths, $pedantic, $stancOptions, $quiet); }
+/** Formats a Stan file with stanc and returns the result; overwriteFile rewrites it (keeping a backup unless backup is false). */
+function format_stan_file(string $stanFile, ?array $includePaths = null, bool $overwriteFile = false, bool|array $canonicalize = false, bool $backup = true, ?int $maxLineLength = null, bool $quiet = false): string { return Stanc::format($stanFile, $includePaths, $overwriteFile, $canonicalize, $backup, $maxLineLength, $quiet); }
+/** A Stan file's variables (data, parameters, transformed_parameters, generated_quantities) from stanc, without compiling. */
+function variables_stan_file(string $stanFile, ?array $includePaths = null): array { return Stanc::variables($stanFile, $includePaths); }
+/** CmdStanR's print_stan_file(): prints a Stan file, with line numbers when lineNumbers (default: the cmdstanr_print_line_numbers option). */
+function print_stan_file(string $stanFile, ?bool $lineNumbers = null): void
+{
+    if (!is_file($stanFile)) { throw new \InvalidArgumentException('Stan file not found: '.$stanFile); }
+    Stanc::print((string)file_get_contents($stanFile), $lineNumbers);
+}
+/** How an executable was built (from its build record) and what it reports about itself; see CmdStanModel::stanBuildInfo(). */
+function stan_build_info(string $exeFile): array { return CmdStanModel::stanBuildInfo($exeFile); }
 function set_cmdstan_path(string $path): void { CmdStan::setPath($path); }
 function cmdstan_path(): string { return CmdStan::path(); }
 function cmdstan_version(): string { return CmdStan::version(); }
@@ -16,14 +36,21 @@ function check_cmdstan_toolchain(): array { return CmdStan::checkToolchain(); }
 /**
  * Session options, like R's options(). Supported: cmdstanr_output_dir, cmdstanr_write_stan_file_dir, cmdstanr_force_recompile,
  * cmdstanr_draws_format, cmdstanr_warn_inits, cmdstanr_verbose, cmdstanr_no_ver_check (accepted; this port never checks for
- * updates), cmdstanr_max_rows, mc.cores, cmdstanr_print_line_numbers, and the PHP-specific cmdstanphp_example_dir.
+ * updates), cmdstanr_max_rows, mc.cores, cmdstanr_print_line_numbers, cmdstanr_compress ('none', 'gzip' or 'bzip2'; the fitting methods' default compress),
+ * cmdstanr_progress_bar (sample()'s default show_progress_bar), cmdstanr_save_metric (sample()'s default save_metric),
+ * cmdstanr_save_config (the default save_cmdstan_config), cmdstanr_spinner (accepted; no spinner is shown), and the
+ * PHP-specific cmdstanphp_example_dir.
  * With $set, returns the previous values so they can be restored with options($previous); null unsets an option.
  */
 function options(array $set = []): array { return CmdStan::setOptions($set); }
 /** Reads one option, like R's getOption(name, default). */
 function cmdstan_option(string $name, mixed $default = null): mixed { return CmdStan::option($name, $default); }
-/** $data may also be a StanData or a table such as a phibble DataFrame; see StanData. */
-function write_stan_json(array|object $data, string $file): string { return StanJson::write($data, $file); }
+/**
+ * $data may also be a StanData or a table such as a phibble DataFrame; see StanData. With variables (stanc --info
+ * declarations, such as $model->variables()['data']) int variables are written as integers and tuples as Stan's
+ * {"1": ..., "2": ...} objects; see StanJson.
+ */
+function write_stan_json(array|object $data, string $file, bool $alwaysDecimal = false, ?array $variables = null): string { return StanJson::write($data, $file, $alwaysDecimal, $variables); }
 /**
  * Writes Stan code (a string or list of lines) to $file, or to dir/basename where dir defaults to the cmdstanr_write_stan_file_dir
  * option or the system temporary directory and basename to model_<hash>.stan. An identical existing file is left untouched
@@ -43,22 +70,18 @@ function write_stan_file(string|array $code, ?string $file = null, ?string $dir 
     if (file_put_contents($file, $code, LOCK_EX) === false) { throw new \RuntimeException('Cannot write Stan file.'); }
     return realpath($file) ?: $file;
 }
-/** @deprecated Use write_stan_file(). */
-function write_stan_tempfile(string|array $code, ?string $dir = null): string
-{
-    trigger_error('write_stan_tempfile() is deprecated. Please use write_stan_file() instead.', E_USER_DEPRECATED);
-    return write_stan_file($code, dir: $dir ?? sys_get_temp_dir());
-}
 function read_cmdstan_csv(array|string $files): CmdStanFit { return CmdStanFit::fromCsv((array)$files); }
 /** CmdStanR's read_cmdstan_csv() list shape; see CmdStanFit::readCmdStanCsv(). */
 function read_cmdstan_csv_list(array|string $files, array|string|null $variables = null, array|string|null $samplerDiagnostics = null, ?string $format = null): array { return CmdStanFit::readCmdStanCsv((array)$files, $variables, $samplerDiagnostics, $format); }
-/** @deprecated Use read_cmdstan_csv(). */
-function read_sample_csv(array|string $files): CmdStanFit
+/**
+ * CmdStanR 1.0's as_cmdstan_fit(): a fit from CmdStan CSV files (.csv, .csv.gz or .csv.bz2). With variables, only those
+ * variables are read and listed in metadata()['variables'] and draws(); checkDiagnostics: false also skips the sampler
+ * diagnostics; format sets the fit's default draws format.
+ */
+function as_cmdstan_fit(array|string $files, array|string|null $variables = null, bool $checkDiagnostics = true, ?string $format = null): CmdStanFit
 {
-    trigger_error('read_sample_csv() is deprecated. Please use read_cmdstan_csv().', E_USER_DEPRECATED);
-    return read_cmdstan_csv($files);
+    return CmdStanFit::fromCsv((array)$files, $variables === null ? null : (array)$variables, $checkDiagnostics, $format);
 }
-function as_cmdstan_fit(array|string $files): CmdStanFit { return read_cmdstan_csv($files); }
 /** @deprecated Use the fit's metadata(). Returns STAN_NUM_THREADS, or null when unset. */
 function num_threads(): ?int
 {
@@ -67,9 +90,9 @@ function num_threads(): ?int
     return $threads !== false && is_numeric($threads) ? (int)$threads : null;
 }
 /** Version first for compatibility with earlier releases; see Installer::install(). cores defaults to the mc.cores option, else 1. */
-function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true): string
+function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true, ?bool $copyMakeLocal = null): string
 {
-    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $releaseUrl, $releaseFile, $cppOptions, $checkToolchain);
+    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $releaseUrl, $releaseFile, $cppOptions, $checkToolchain, $copyMakeLocal);
 }
 function rebuild_cmdstan(?int $cores = null, ?float $timeout = null): void { Installer::rebuild($cores, $timeout); }
 /**

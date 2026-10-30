@@ -69,8 +69,10 @@ final class InstallerTest extends TestCase
     {
         mkdir($this->dir.'/cmdstan/make', 0700, true); $dir = $this->dir.'/cmdstan';
         self::assertSame([], cmdstan_make_local($dir));
-        self::assertSame(['STAN_THREADS=true', 'STAN_OPENCL=false'], cmdstan_make_local($dir, ['stan_threads' => true, 'STAN_OPENCL' => false]));
-        self::assertSame(['STAN_THREADS=true', 'STAN_OPENCL=false', 'CXX=clang++', 'CXXFLAGS += -O3'], cmdstan_make_local($dir, ['cxx' => 'clang++', 'CXXFLAGS += -O3']));
+        self::assertSame(['STAN_THREADS=true', 'STAN_OPENCL='], cmdstan_make_local($dir, ['stan_threads' => true, 'STAN_OPENCL' => false]), 'false turns an option off');
+        self::assertSame(['STAN_THREADS=true', 'STAN_OPENCL=', 'CXX=clang++', 'CXXFLAGS += -O3'], cmdstan_make_local($dir, ['cxx' => 'clang++', 'CXXFLAGS += -O3']));
+        self::assertSame(['STAN_THREADS=true', 'STAN_OPENCL=', 'CXX=clang++', 'CXXFLAGS += -O3', 'CXXFLAGS += -march=native'], cmdstan_make_local($dir, ['stan_threads' => true, 'CXXFLAGS += -O3', 'CXXFLAGS += -march=native', 'CXX=clang++']), 'lines that already apply are not appended again');
+        self::assertSame('CXX=g++', cmdstan_make_local($dir, ['cxx' => 'g++'])[5], 'a different value is a new assignment');
         self::assertSame(['TBB_CXX_TYPE=gcc'], cmdstan_make_local($dir, ['TBB_CXX_TYPE' => 'gcc'], append: false));
         self::assertSame([], cmdstan_make_local($dir, append: false));
         $this->expectException(\InvalidArgumentException::class); cmdstan_make_local($this->dir, ['A' => 1]);

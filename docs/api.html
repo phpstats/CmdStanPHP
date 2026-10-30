@@ -267,84 +267,101 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>cmdstan_model(stanFile, compile: true, exeFile: null, stancOptions: [], cppOptions: [], forceRecompile: null)</code></td>
-<td>Construct and optionally compile a model</td>
+<td><code>cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)</code></td>
+<td>Compile a model, or reuse its up-to-date executable, and return it ready to run</td>
 </tr>
 <tr class="even">
+<td><code>compile_stan_file(stanFile, ...)</code></td>
+<td>Compile a Stan file, or reuse its up-to-date executable, without a model object; returns the executable path. Takes <code>cmdstan_model()</code>’s build arguments</td>
+</tr>
+<tr class="odd">
+<td><code>check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)</code></td>
+<td>Check a Stan file’s syntax with stanc; throws on an error</td>
+</tr>
+<tr class="even">
+<td><code>format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code></td>
+<td>Return the formatted program; <code>overwriteFile</code> rewrites the file and keeps a <code>.bak-YYYYMMDDHHMMSS</code> copy unless <code>backup: false</code></td>
+</tr>
+<tr class="odd">
+<td><code>variables_stan_file(stanFile, includePaths: null)</code> / <code>print_stan_file(stanFile, lineNumbers: null)</code></td>
+<td>Read a Stan file’s declarations, or print it, without compiling</td>
+</tr>
+<tr class="even">
+<td><code>stan_build_info(exeFile)</code></td>
+<td>How an executable was built, from its build record, and what it reports about itself</td>
+</tr>
+<tr class="odd">
 <td><code>set_cmdstan_path(path)</code> / <code>cmdstan_path()</code></td>
 <td>Select/read CmdStan installation</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cmdstan_version()</code></td>
 <td>Read installed release version</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>check_cmdstan_toolchain()</code></td>
 <td>Return paths and versions of make, CmdStan’s C++ compiler, and stanc; throws when make or the compiler is missing. It does not prove a compilation will succeed</td>
 </tr>
-<tr class="odd">
-<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true)</code></td>
+<tr class="even">
+<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)</code></td>
 <td>Download or unpack and build a release (see the installation guide)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>cmdstan_make_local(dir: null, cppOptions: [], append: true)</code></td>
 <td>Read or write CmdStan’s <code>make/local</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>rebuild_cmdstan(cores: null, timeout: null)</code></td>
 <td>Clean and rebuild selected CmdStan</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>options(set: [])</code> / <code>cmdstan_option(name, default: null)</code></td>
 <td>Set global options, returning previous values, or read one option</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')</code></td>
 <td>Write Stan source to <code>model_&lt;hash&gt;.stan</code>, reusing identical files</td>
 </tr>
+<tr class="odd">
+<td><code>write_stan_json(data, file, alwaysDecimal: false, variables: null)</code></td>
+<td>Write data, initialization, or metric JSON; <code>data</code> may also be a <code>StanData</code> or a table. With <code>variables</code> (stanc’s declarations, such as <code>$model-&gt;variables()['data']</code>), <code>int</code> variables are written as integers and tuples as Stan’s <code>{"1": ..., "2": ...}</code> objects</td>
+</tr>
 <tr class="even">
-<td><code>write_stan_json(data, file)</code></td>
-<td>Write numeric data/initialization/metric JSON; <code>data</code> may also be a <code>StanData</code> or a table</td>
+<td><code>read_cmdstan_csv(files)</code> / <code>as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)</code></td>
+<td>Import one or more CmdStan CSV files (<code>.csv</code>, <code>.csv.gz</code>, or <code>.csv.bz2</code>) into a typed fit. <code>variables</code> reads only those variables, and <code>format</code> sets the fit’s default draws format</td>
 </tr>
 <tr class="odd">
-<td><code>read_cmdstan_csv(files)</code> / <code>as_cmdstan_fit(files)</code></td>
-<td>Import one or more CmdStan CSV files into a typed fit</td>
-</tr>
-<tr class="even">
 <td><code>read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)</code></td>
 <td>Return CmdStanR’s <code>read_cmdstan_csv()</code> list shape</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>draws_to_csv(chains, dir)</code></td>
 <td>Export <code>[chain][iteration][variable]</code> associative draw rows to separate CSV files</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>mcmc_trace</code>, <code>mcmc_hist</code>, <code>mcmc_dens</code>, <code>mcmc_dens_overlay</code>, <code>mcmc_intervals</code>, <code>mcmc_rank_hist</code>, <code>mcmc_scatter</code>, <code>mcmc_acf</code>, <code>pareto_k_plot</code></td>
 <td>Return a <code>Figure</code> named after its bayesplot or loo counterpart; see the inference guide</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cmdstanr_example(example: 'logistic', method: 'sample', ...options)</code> / <code>print_example_program(example)</code></td>
 <td>Run or print the <code>logistic</code>, <code>schools</code>, or <code>schools_ncp</code> example</td>
 </tr>
 </tbody>
 </table>
-<p><code>read_sample_csv()</code>, <code>write_stan_tempfile()</code>, and <code>num_threads()</code> remain as deprecated CmdStanR names.</p>
+<p><code>num_threads()</code> remains as a deprecated CmdStanR name. CmdStanR 1.0 removed <code>read_sample_csv()</code> and <code>write_stan_tempfile()</code>, and this package no longer has them.</p>
 <section id="global-options" class="level3">
 <h3 class="anchored" data-anchor-id="global-options">Global options</h3>
-<p><code>options()</code> accepts <code>cmdstanr_output_dir</code>, <code>cmdstanr_write_stan_file_dir</code>, <code>cmdstanr_force_recompile</code>, <code>cmdstanr_draws_format</code>, <code>cmdstanr_warn_inits</code>, <code>cmdstanr_verbose</code>, <code>cmdstanr_no_ver_check</code>, <code>cmdstanr_max_rows</code>, <code>cmdstanr_print_line_numbers</code>, <code>mc.cores</code>, and <code>cmdstanphp_example_dir</code>. A <code>null</code> value unsets an option. Unknown names and values of the wrong type throw. <code>mc.cores</code> sets the default <code>parallel_chains</code> and installer core count.</p>
-<p>Data arrays use named PHP arrays at the top level and zero-indexed lists for Stan arrays, vectors, and matrices. Boolean values become 0/1. Matrices are rows of rows, with no R column-major conversion. Empty top-level data becomes <code>{}</code>. Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected.</p>
+<p><code>options()</code> accepts <code>cmdstanr_output_dir</code>, <code>cmdstanr_write_stan_file_dir</code>, <code>cmdstanr_force_recompile</code>, <code>cmdstanr_draws_format</code>, <code>cmdstanr_warn_inits</code>, <code>cmdstanr_verbose</code>, <code>cmdstanr_no_ver_check</code>, <code>cmdstanr_max_rows</code>, <code>cmdstanr_print_line_numbers</code>, <code>cmdstanr_compress</code>, <code>cmdstanr_progress_bar</code>, <code>cmdstanr_save_metric</code>, <code>cmdstanr_save_config</code>, <code>cmdstanr_spinner</code>, <code>mc.cores</code>, and <code>cmdstanphp_example_dir</code>. A <code>null</code> value unsets an option. Unknown names and values of the wrong type throw. <code>mc.cores</code> sets the default <code>parallel_chains</code> and installer core count. <code>cmdstanr_compress</code> (<code>'none'</code>, <code>'gzip'</code>, or <code>'bzip2'</code>) is the fitting methods’ default <code>compress</code>, <code>cmdstanr_progress_bar</code> is <code>sample()</code>’s default <code>show_progress_bar</code>, <code>cmdstanr_save_metric</code> is <code>sample()</code>’s default <code>save_metric</code>, and <code>cmdstanr_save_config</code> is the default <code>save_cmdstan_config</code>. <code>cmdstanr_spinner</code> is accepted and has no effect.</p>
+<p>Data arrays use named PHP arrays at the top level and zero-indexed lists for Stan arrays, vectors, and matrices. Boolean values become 0/1. Matrices are rows of rows, with no R column-major conversion. Empty top-level data becomes <code>{}</code>. Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected. The fitting methods write data with the model’s declarations, so every declared data variable is required, <code>int</code> variables are written as integers (a non-integer is truncated with a warning), a single value for a one-dimensional array becomes a one-element array, and a tuple is passed as a list of its elements. Complex numbers are <code>[re, im]</code> pairs. Errors name the variable.</p>
 </section>
 </section>
 <section id="model-methods" class="level2">
 <h2 class="anchored" data-anchor-id="model-methods">Model methods</h2>
-<p><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code>, and <code>code()</code> return paths or source text. <code>exposeFunctions(timeout: null)</code> compiles the model’s user-defined functions and returns a <code>StanFunctions</code> object; <code>functions()</code> returns it afterwards. <code>modelName()</code>, <code>hasStanFile()</code>, <code>cppOptions()</code>, and <code>includePaths()</code> expose model identity and recorded compiler settings. <code>print(lineNumbers: false)</code> writes source to stdout. <code>saveHppFile(dir)</code> copies the generated header. <code>variables()</code> returns stanc’s JSON information for source-level declarations and dimensions. <code>format(overwriteFile: false, stancOptions: [])</code> returns formatted Stan and optionally overwrites the source. <code>checkSyntax(stancOptions: [])</code> throws on invalid Stan and returns true on success.</p>
-<p><code>compile(forceRecompile: null, stancOptions: [], cppOptions: [], cores: 1, timeout: null)</code> compiles via CmdStan’s makefile and returns the model. Compiler options use associative arrays, e.g.&nbsp;<code>['warn-pedantic' =&gt; true]</code> or <code>['STAN_THREADS' =&gt; true]</code>. Make values containing command expansions or shell metacharacters are rejected. stanc option values with whitespace are not supported. Changing options removes stale model artifacts before rebuilding.</p>
+<p><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> take the same arguments. They compile the model, or reuse an up-to-date executable, before they return. Give <code>stanFile</code>, whose executable goes beside it or in <code>dir</code>, or <code>exeFile</code> alone to use an existing executable. The two cannot be combined, and a model from <code>exeFile</code> alone refuses the build arguments, because there is nothing to build. A hidden build record beside the executable, <code>.&lt;exe&gt;.cmdstanphp.json</code>, records the Stan program and its <code>#include</code> files, the user header, <code>cppOptions</code>, <code>stancOptions</code>, <code>make/local</code>, and the CmdStan that built the executable. The model is rebuilt exactly when one of these changed. <code>quiet: false</code> (or the <code>cmdstanr_verbose</code> option) reports whether and why it compiles, and <code>forceRecompile: true</code> rebuilds anyway. The installation guide describes <a href="./installation.html#compile-a-model">builds and build records</a>.</p>
+<p><code>cppOptions</code> are named make variables, such as <code>['STAN_THREADS' =&gt; true]</code>. Names are uppercased, <code>true</code> becomes <code>true</code>, and <code>false</code> turns an option off even when <code>make/local</code> turns it on. Unnamed entries are rejected; use <code>cmdstan_make_local()</code> for other make lines. <code>stancOptions</code> take flags and values, such as <code>['O1', 'canonicalize' =&gt; 'deprecations', 'max-line-length' =&gt; 78]</code>, and values may contain spaces or quotes. Flags that have their own argument are rejected: use <code>includePaths</code>, <code>pedantic</code>, <code>userHeader</code>, or <code>cppOptions: ['STAN_OPENCL' =&gt; true]</code> instead. Make values containing command expansions or shell metacharacters are rejected.</p>
+<p><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code>, and <code>code()</code> return paths or source text. <code>code()</code> is the program as it was when the model was created, and <code>hppFile()</code> writes the generated C++ to a temporary file on first use; both are null for a model from <code>exeFile</code> alone. <code>exposeFunctions(timeout: null, quiet: false)</code> compiles the model’s user-defined functions and returns a <code>StanFunctions</code> object; <code>functions()</code> returns it afterwards. <code>modelName()</code>, <code>hasStanFile()</code>, <code>cppOptions()</code>, <code>stancOptions()</code>, <code>includePaths()</code>, and <code>userHeader()</code> expose model identity and the recorded build settings. <code>cppOptions()</code> returns make variables and values, so <code>['stan_threads' =&gt; true]</code> comes back as <code>['STAN_THREADS' =&gt; 'true']</code>. <code>cmdstanVersion()</code> is the version of CmdStan that built the executable, and <code>reportedFeatures()</code> is what the executable reports about its build (<code>stan_threads</code>, <code>stan_mpi</code>, <code>stan_opencl</code>, <code>stan_no_range_checks</code>, and <code>stan_version</code>). <code>buildInfo()</code> combines the record and the reported features, as <code>stan_build_info()</code> does. <code>isCurrent()</code> returns false when the executable is out of date. <code>print(lineNumbers: null)</code> writes source to stdout. <code>saveHppFile(dir)</code> copies the generated header. <code>variables()</code> returns the program’s <code>data</code>, <code>parameters</code>, <code>transformed_parameters</code>, and <code>generated_quantities</code> declarations from stanc. <code>format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code> returns the formatted program and optionally rewrites the source; create the model again to pick up the rewritten file. <code>checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)</code> throws on invalid Stan and returns true on success. <code>cmdstanDefaults(method: 'sample')</code> returns CmdStan’s default argument values for <code>sample</code>, <code>optimize</code>, <code>variational</code>, <code>pathfinder</code>, or <code>laplace</code>, read from <code>&lt;exe&gt; &lt;method&gt; help-all</code> and named as this package’s options.</p>
+<p>Every run first checks that the executable is still the one the model built, from the current program. A changed Stan file, include, user header, <code>make/local</code>, or CmdStan throws <code>StaleExecutableException</code> with the reasons; call <code>cmdstan_model()</code> again to rebuild. The Stan file must therefore exist whenever the model runs. When none of the files’ status has changed, the check skips hashing and stanc.</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Method</th>
@@ -356,61 +373,61 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td><code>sample()</code> / <code>sampleMpi()</code></td>
 <td><code>CmdStanMCMC</code></td>
-<td>2.31+ supported baseline</td>
+<td>2.37+</td>
 </tr>
 <tr class="even">
 <td><code>optimize()</code></td>
 <td><code>CmdStanMLE</code></td>
-<td>2.31+</td>
+<td>2.37+</td>
 </tr>
 <tr class="odd">
 <td><code>variational()</code></td>
 <td><code>CmdStanVB</code></td>
-<td>2.31+</td>
+<td>2.37+</td>
 </tr>
 <tr class="even">
 <td><code>pathfinder()</code></td>
 <td><code>CmdStanPathfinder</code></td>
-<td>2.33+</td>
+<td>2.37+</td>
 </tr>
 <tr class="odd">
 <td><code>laplace()</code></td>
 <td><code>CmdStanLaplace</code></td>
-<td>2.32+</td>
+<td>2.37+</td>
 </tr>
 <tr class="even">
 <td><code>generateQuantities(fittedParams, ...)</code></td>
 <td><code>CmdStanGQ</code></td>
-<td>2.31+</td>
+<td>2.37+</td>
 </tr>
 <tr class="odd">
 <td><code>diagnose()</code></td>
 <td><code>CmdStanDiagnose</code></td>
-<td>2.31+</td>
+<td>2.37+</td>
 </tr>
 <tr class="even">
 <td><code>logProb()</code></td>
 <td><code>CmdStanFit</code></td>
-<td>2.31+</td>
+<td>2.37+</td>
 </tr>
 </tbody>
 </table>
-<p>The CI version targets are 2.37 and 2.40. Availability of individual options remains determined by the selected CmdStan; options added in newer releases can fail on older releases with CmdStan’s error message.</p>
+<p>CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. <code>set_cmdstan_path()</code> refuses an older installation, discovery skips one, and <code>install_cmdstan()</code> rejects older versions. The CI version targets are 2.37 and 2.40. Availability of individual options remains determined by the selected CmdStan; options added in newer releases can fail on older releases with CmdStan’s error message.</p>
 <section id="shared-options" class="level3">
 <h3 class="anchored" data-anchor-id="shared-options">Shared options</h3>
-<p><code>data</code>, <code>seed</code>, <code>refresh</code>, <code>init</code>, <code>output_dir</code>, <code>output_basename</code>, <code>sig_figs</code>, <code>threads</code>, <code>threads_per_chain</code>, <code>num_threads</code>, <code>opencl_ids</code>, <code>show_messages</code>, <code>show_exceptions</code>, <code>save_latent_dynamics</code>, <code>save_cmdstan_config</code>, <code>timeout</code>.</p>
-<p><code>init</code> additionally accepts a fit object (see the inference guide). Deprecated CmdStanR names are mapped with an <code>E_USER_DEPRECATED</code> notice: on <code>sample()</code>, <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>; on <code>optimize()</code>, <code>laplace()</code>, and <code>logProb()</code>, <code>jacobian_adjustment</code>.</p>
-<p>Thread options are aliases, with precedence <code>threads_per_chain</code>, <code>threads</code>, then <code>num_threads</code>. Prefer the argument appropriate to the method. <code>sig_figs</code> is 1–18. <code>opencl_ids</code> contains platform/device IDs and requires an OpenCL build. <code>output_basename</code> contains only letters, numbers, dots, underscores, and hyphens. <code>save_latent_dynamics</code> creates auxiliary diagnostic CSVs; these may be empty for some algorithms. <code>save_cmdstan_config</code> requests CmdStan configuration JSON beside the CSVs.</p>
+<p><code>data</code>, <code>seed</code>, <code>refresh</code>, <code>init</code>, <code>output_dir</code>, <code>output_basename</code>, <code>sig_figs</code>, <code>opencl_ids</code>, <code>show_messages</code>, <code>show_exceptions</code>, <code>save_cmdstan_config</code>, <code>timeout</code>. Every method except <code>diagnose()</code> and <code>logProb()</code> also takes <code>compress</code>.</p>
+<p><code>init</code> additionally accepts a fit object (see the inference guide). The CmdStanR names that CmdStanR 1.0 removed are unknown options here too: <code>sample()</code>’s <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>, and the <code>jacobian_adjustment</code> argument.</p>
+<p>The thread option depends on the method: <code>threads_per_chain</code> for <code>sample()</code> and <code>generateQuantities()</code>, and <code>threads</code> for <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, and <code>laplace()</code>. <code>pathfinder()</code> still accepts <code>num_threads</code> with an <code>E_USER_DEPRECATED</code> notice. Asking for more than one thread from an executable built without threading is an error. <code>compress</code> (<code>'none'</code>, <code>'gzip'</code>, or <code>'bzip2'</code>; default: the <code>cmdstanr_compress</code> option) compresses the output and latent-dynamics CSVs after the run. <code>sig_figs</code> is 1–18. <code>opencl_ids</code> contains platform/device IDs and requires an OpenCL build. <code>output_basename</code> contains only letters, numbers, dots, underscores, and hyphens. <code>save_latent_dynamics</code>, a <code>sample()</code> and <code>variational()</code> option, creates auxiliary diagnostic CSVs. <code>save_cmdstan_config</code> requests CmdStan configuration JSON beside the CSVs.</p>
 </section>
 <section id="method-specific-options" class="level3">
 <h3 class="anchored" data-anchor-id="method-specific-options">Method-specific options</h3>
 <ul>
-<li><strong>sample:</strong> <code>chains</code> (default 4), <code>parallel_chains</code> (default 1), <code>chain_ids</code>, <code>iter_warmup</code>, <code>iter_sampling</code>, <code>save_warmup</code>, <code>thin</code>, <code>max_treedepth</code>, <code>adapt_engaged</code>, <code>adapt_delta</code>, <code>step_size</code>, <code>metric</code>, <code>metric_file</code>, <code>inv_metric</code>, <code>init_buffer</code>, <code>term_buffer</code>, <code>window</code>, <code>fixed_param</code>, <code>save_metric</code>, <code>diagnostics</code>.</li>
-<li><strong>optimize:</strong> <code>algorithm</code>, <code>jacobian</code>, <code>init_alpha</code>, <code>iter</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>save_iterations</code>.</li>
-<li><strong>variational:</strong> <code>algorithm</code>, <code>iter</code>, <code>grad_samples</code>, <code>elbo_samples</code>, <code>eta</code>, <code>adapt_engaged</code>, <code>adapt_iter</code>, <code>tol_rel_obj</code>, <code>eval_elbo</code>, <code>output_samples</code>, <code>draws</code> (alias for <code>output_samples</code>).</li>
-<li><strong>pathfinder:</strong> <code>init_alpha</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>single_path_draws</code>, <code>draws</code>, <code>num_paths</code>, <code>max_lbfgs_iters</code>, <code>num_elbo_draws</code>, <code>save_single_paths</code>, <code>psis_resample</code>, <code>calculate_lp</code>.</li>
-<li><strong>laplace:</strong> <code>mode</code>, <code>opt_args</code>, <code>jacobian</code> (default true), <code>draws</code>, <code>calculate_lp</code>.</li>
-<li><strong>generate_quantities:</strong> required <code>fittedParams</code> is a fit, filename, or filename list; <code>parallel_chains</code> controls concurrency.</li>
+<li><strong>sample:</strong> <code>threads_per_chain</code>, <code>save_latent_dynamics</code>, <code>show_progress_bar</code>, <code>chains</code> (default 4), <code>parallel_chains</code> (default 1), <code>chain_ids</code>, <code>iter_warmup</code>, <code>iter_sampling</code>, <code>save_warmup</code>, <code>thin</code>, <code>max_treedepth</code>, <code>adapt_engaged</code>, <code>adapt_delta</code>, <code>step_size</code>, <code>metric</code>, <code>metric_file</code>, <code>inv_metric</code>, <code>init_buffer</code>, <code>term_buffer</code>, <code>window</code>, <code>fixed_param</code>, <code>save_metric</code>, <code>diagnostics</code>.</li>
+<li><strong>optimize:</strong> <code>threads</code>, <code>algorithm</code>, <code>jacobian</code>, <code>init_alpha</code>, <code>iter</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>save_iterations</code>.</li>
+<li><strong>variational:</strong> <code>threads</code>, <code>save_latent_dynamics</code>, <code>algorithm</code>, <code>iter</code>, <code>grad_samples</code>, <code>elbo_samples</code>, <code>eta</code>, <code>adapt_engaged</code>, <code>adapt_iter</code>, <code>tol_rel_obj</code>, <code>eval_elbo</code>, <code>draws</code> (CmdStan’s <code>output_samples</code>).</li>
+<li><strong>pathfinder:</strong> <code>threads</code>, <code>init_alpha</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>single_path_draws</code>, <code>draws</code>, <code>num_paths</code>, <code>max_lbfgs_iters</code>, <code>num_elbo_draws</code>, <code>save_single_paths</code>, <code>psis_resample</code>, <code>calculate_lp</code>.</li>
+<li><strong>laplace:</strong> <code>threads</code>, <code>mode</code>, <code>opt_args</code>, <code>jacobian</code> (default true), <code>draws</code>, <code>calculate_lp</code>.</li>
+<li><strong>generate_quantities:</strong> required <code>fittedParams</code> is a fit, filename, or filename list; <code>threads_per_chain</code>; <code>parallel_chains</code> controls concurrency.</li>
 <li><strong>diagnose:</strong> <code>epsilon</code>, <code>error</code> for finite-difference gradient checks.</li>
 <li><strong>log_prob:</strong> exactly one of <code>unconstrained_params</code>, <code>constrained_params</code>, and optional <code>jacobian</code>.</li>
 </ul>
@@ -429,34 +446,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>metadata()</code>, <code>chainMetadata()</code>, <code>variables()</code>, <code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>: inspect parsed CSV.</li>
 <li><code>stepSize()</code>, <code>invMetric(matrix: true)</code>: adaptation results, one entry per chain.</li>
 <li><code>time()</code>: per-chain warmup, sampling, and total time when available.</li>
-<li><code>output()</code>, <code>returnCodes()</code>: captured console output and process status. Imported fits have no process logs or status codes.</li>
+<li><code>output()</code>, <code>returnCodes()</code>, <code>command()</code>: captured console output, process status, and the shell-quoted command line of each process. <code>command()</code> leaves out <code>STAN_NUM_THREADS</code> and an MPI launcher. Imported fits have none of these.</li>
+<li><code>init()</code>: the initial values each process used, read from the init files. <code>materialize()</code> reads the draws, initial values, and profiles into memory, so the fit no longer needs its files.</li>
 <li><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code>, <code>profiles()</code>: output paths and parsed profiling data. The file accessors accept <code>includeFailed</code> for CmdStanR compatibility; fits only contain successful runs. Latent-dynamics and profile accessors throw when no such files exist.</li>
 <li><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code>, <code>cmdstanConfig()</code>, <code>metric()</code>: data and auxiliary JSON paths and their decoded contents. Imported fits use the data file recorded in the CSV when it still exists.</li>
 <li><code>code()</code>, <code>numProcs()</code>, <code>lp()</code>, <code>cmdstanSummary()</code>: stored source, number of processes, log-density matrix, and native text summary. Imported CSV fits do not include source code.</li>
-<li><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code>: each takes <code>dir: '.', basename: null, timestamp: true, random: true</code> and names files <code>basename-YYYYmmddHHMM-id-xxxxxx.ext</code> as CmdStanR does. Files created by the run are moved; imported and user-supplied files are copied. Existing destinations are never overwritten.</li>
-<li><code>saveObject(file)</code>: serialize parsed fit data (and native MCMC summary statistics) to a PHP object file.</li>
+<li><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code>: each takes <code>dir: '.', basename: null, timestamp: true, random: true</code> and names files <code>basename-YYYYmmddHHMM-id-xxxxxx.ext</code> as CmdStanR does, with ids padded to at least two digits. <code>saveOutputFiles()</code> and <code>saveLatentDynamicsFiles()</code> also take <code>compress</code> (null keeps the current compression). Files created by the run are moved. Imported files and the data file are copied. Existing destinations are never overwritten.</li>
+<li><code>saveObject(file)</code>: materialize the fit, then serialize it (with native MCMC summary statistics) to a PHP object file.</li>
 <li><code>print(variables: null, maxRows: null)</code>: emit summary JSON to stdout, limited to <code>cmdstanr_max_rows</code> (default 10) variables.</li>
 <li><code>drawsColumns()</code>, <code>summaryColumns()</code>, <code>drawsTable()</code>, <code>summaryTable()</code>: column-oriented draws and summaries for data frames; see <a href="#data-frames-and-the-phpstats-family">data frames</a>.</li>
 </ul>
 <section id="model-methods-1" class="level3">
 <h3 class="anchored" data-anchor-id="model-methods-1">Model methods</h3>
-<p>These methods need PHP FFI. The first call compiles a shared library for the fit’s model and data; <code>initModelMethods(seed: 1, verbose: false, hessian: false, model: null)</code> does this explicitly. Imported CSV fits must pass <code>model:</code>.</p>
+<p>These methods need PHP FFI. The first call compiles a shared library for the fit’s model and data; <code>initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)</code> does this explicitly. <code>data</code> binds other data, such as the data of a fit reloaded after its data file is gone, and <code>dataFile()</code> then points to it. Imported CSV fits must pass <code>model:</code>. A model from <code>exeFile</code> alone has no Stan program to build them from.</p>
 <ul>
 <li><code>logProb(unconstrainedVariables, jacobian: true)</code>: log density with constants dropped.</li>
 <li><code>gradLogProb(...)</code>: <code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code>.</li>
 <li><code>hessian(...)</code>: <code>['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]</code>.</li>
-<li><code>unconstrainVariables(variables)</code>: a flat unconstrained list from parameter values keyed by name.</li>
+<li><code>unconstrainVariables(variables)</code>: a flat unconstrained list from parameter values keyed by name, structured as <code>constrainVariables()</code> returns them.</li>
 <li><code>unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)</code>: the fit’s draws, another set of CSV files, or <code>draws_df</code> rows, in unconstrained space.</li>
-<li><code>constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)</code>: variables keyed by name as nested arrays.</li>
-<li><code>variableSkeleton(transformedParameters: true, generatedQuantities: true)</code>: variable name to dimension list.</li>
+<li><code>constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)</code>: variables keyed by name as nested arrays, with tuples as lists of their elements and complex values as <code>[re, im]</code>.</li>
 <li><code>exposeFunctions(timeout: null)</code> / <code>functions()</code>: the model’s user-defined functions.</li>
 </ul>
-<p><code>jacobianAdjustment</code> is accepted as a deprecated alias of <code>jacobian</code>. <code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
+<p><code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
 </section>
 <section id="method-specific-fit-methods" class="level3">
 <h3 class="anchored" data-anchor-id="method-specific-fit-methods">Method-specific fit methods</h3>
-<p><code>CmdStanMCMC</code> adds <code>loo(variables: 'log_lik', rEff: true, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. Both return <code>estimates</code> (each with <code>Estimate</code> and <code>SE</code>), <code>pointwise</code> rows, and flat keys such as <code>elpd_loo</code> and <code>se_elpd_loo</code>; LOO also returns <code>diagnostics</code> with Pareto k values. <code>momentMatch: true</code> needs model methods and the <code>phit</code> posterior-draw kernels, and adds a <code>moment_match</code> key; see the inference guide.</p>
-<p><code>CmdStanMLE</code> adds <code>mle()</code>/<code>optimizedParams()</code> (final optimizer row) and <code>lp()</code>; its <code>summary()</code> returns <code>variable</code>/<code>estimate</code> rows, matching CmdStanR’s optimization summary. <code>CmdStanVB</code> adds <code>variationalMean()</code> and <code>lpApprox()</code>. Pathfinder and Laplace also expose <code>lpApprox()</code>; Laplace exposes <code>mode()</code>, and generated quantities fits expose <code>fittedParamsFiles()</code>. <code>CmdStanPathfinder</code> adds <code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, and <code>singlePathDiagnostics()</code> for runs with <code>save_single_paths: true</code>. <code>CmdStanDiagnose</code> adds <code>gradients()</code> (gradient-check console output).</p>
+<p><code>CmdStanMCMC</code> adds <code>loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. Both return <code>estimates</code> (each with <code>Estimate</code> and <code>SE</code>), <code>pointwise</code> rows, and flat keys such as <code>elpd_loo</code> and <code>se_elpd_loo</code>. <code>rEff: false</code>, CmdStanR 1.0’s default, skips the relative efficiencies; <code>rEff: true</code> computes them. LOO also returns <code>diagnostics</code> with Pareto k values. <code>momentMatch: true</code> needs model methods and the <code>phit</code> posterior-draw kernels, and adds a <code>moment_match</code> key; see the inference guide.</p>
+<p><code>CmdStanMLE</code> adds <code>mle()</code>/<code>optimizedParams()</code> (the estimates by variable, without <code>lp__</code>) and <code>lp()</code>; its <code>summary()</code> returns <code>variable</code>/<code>estimate</code> rows, matching CmdStanR’s optimization summary. <code>CmdStanVB</code> adds <code>variationalMean()</code> and <code>lpApprox()</code>, the approximation’s log density at each draw as one list in draw order. Pathfinder and Laplace also expose <code>lpApprox()</code>; Laplace exposes <code>mode()</code>, and generated quantities fits expose <code>fittedParamsFiles()</code>. <code>CmdStanPathfinder</code> adds <code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, and <code>singlePathDiagnostics()</code> for runs with <code>save_single_paths: true</code>, and lists <code>lp_approx__</code> and <code>path__</code> among its variables. <code>CmdStanDiagnose</code> adds <code>gradients()</code> (gradient-check console output).</p>
 </section>
 <section id="statistics-helpers" class="level3">
 <h3 class="anchored" data-anchor-id="statistics-helpers">Statistics helpers</h3>
@@ -499,7 +516,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>string</td>
-<td>A factor with sorted unique levels (<code>strcmp</code> order, as phibble’s and R’s <code>factor()</code> defaults)</td>
+<td>Rejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes</td>
 </tr>
 <tr class="even">
 <td>null, dates, other objects</td>
@@ -645,7 +662,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="errors" class="level2">
 <h2 class="anchored" data-anchor-id="errors">Errors</h2>
-<p>Invalid PHP data or options throw <code>InvalidArgumentException</code>. Missing files/toolchain, timeouts, and malformed CSV throw runtime errors. A nonzero command exit throws <code>ProcessException</code>, whose public readonly properties are <code>command</code>, <code>exitCode</code>, <code>stdout</code>, and <code>stderr</code>. A failing chain terminates other active chains; partial output files remain available for investigation. Partial outputs are not returned as a successful fit.</p>
+<p>Invalid PHP data or options throw <code>InvalidArgumentException</code>. Missing files/toolchain, timeouts, and malformed CSV throw runtime errors. Running an out-of-date executable throws <code>StaleExecutableException</code>. A nonzero command exit throws <code>ProcessException</code>, whose public readonly properties are <code>command</code>, <code>exitCode</code>, <code>stdout</code>, and <code>stderr</code>. A failing chain terminates other active chains; partial output files remain available for investigation. CmdStan processes still running when PHP shuts down are terminated. Partial outputs are not returned as a successful fit.</p>
 
 
 </section>

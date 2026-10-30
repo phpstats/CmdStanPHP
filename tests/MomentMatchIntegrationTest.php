@@ -34,7 +34,7 @@ final class MomentMatchIntegrationTest extends TestCase
         if (self::$fit !== null) { return self::$fit; }
         $dir = self::$fitDir = sys_get_temp_dir().'/cmdstanphp-mm-'.bin2hex(random_bytes(6)); mkdir($dir);
         file_put_contents($dir.'/regression.stan', self::MODEL);
-        $fit = (new CmdStanModel($dir.'/regression.stan'))->compile()->sample(data: self::DATA, chains: 4, iter_warmup: 500, iter_sampling: 1000, seed: 20261012, show_messages: false, refresh: 0, output_dir: $dir);
+        $fit = (new CmdStanModel($dir.'/regression.stan'))->sample(data: self::DATA, chains: 4, iter_warmup: 500, iter_sampling: 1000, seed: 20261012, show_messages: false, refresh: 0, output_dir: $dir);
         self::assertInstanceOf(CmdStanMCMC::class, $fit);
         return self::$fit = $fit;
     }
@@ -61,7 +61,7 @@ final class MomentMatchIntegrationTest extends TestCase
         foreach ($plain['pointwise'] as $j => $row) { if (!isset($matched[$j])) { self::assertSame($row, $mm['pointwise'][$j]); } }
         // The same run through the generic API with the fit's own callbacks gives an identical result.
         $logLik = $fit->draws('log_lik', 'draws_array'); $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
-        $generic = MomentMatch::loo(Loo::loo($logLik), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
+        $generic = MomentMatch::loo(Loo::loo($logLik, rEff: false), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
         self::assertSame($mm, $generic);
         // A matrix-shaped log-likelihood maps "log_lik_matrix[i,1]" to the same values.
         $matrix = $fit->loo('log_lik_matrix', momentMatch: true);
@@ -98,16 +98,19 @@ final class MomentMatchIntegrationTest extends TestCase
         // loo computes r_eff from exp(log_lik) unshifted; when every value is tiny, posterior's absolute constant check
         // returns NA. ESS is scale invariant, so CmdStanPHP shifts by the maximum and reports a finite value instead.
         $close = function (mixed $v, float $actual, string $label) { if ($v === 'NA') { self::assertTrue(is_finite($actual), $label); return; } self::assertEqualsWithDelta($v, $actual, 1e-8 * max(1.0, abs($v)), $label); };
-        $compare = function (array $reference, array $actual, array $columns, string $label) use ($close) {
-            foreach ($columns as $column) { foreach ($reference['pointwise'][$column] as $i => $v) { $close($v, $actual['pointwise'][$i][$column], "$label $column [$i]"); } }
-            foreach ($reference['pareto_k'] as $i => $v) { self::assertEqualsWithDelta($v, $actual['diagnostics']['pareto_k'][$i], 1e-8, "$label pareto_k [$i]"); }
+        $compare = function (array $reference, array $actual, array $columns, string $label, array $skip = []) use ($close) {
+            foreach ($columns as $column) { foreach ($reference['pointwise'][$column] as $i => $v) { if (!isset($skip[$i])) { $close($v, $actual['pointwise'][$i][$column], "$label $column [$i]"); } } }
+            foreach ($reference['pareto_k'] as $i => $v) { if (!isset($skip[$i])) { self::assertEqualsWithDelta($v, $actual['diagnostics']['pareto_k'][$i], 1e-8, "$label pareto_k [$i]"); } }
         };
-        $compare($ref['unsplit'], $unsplit = $fit->loo(momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
+        $compare($ref['unsplit'], $unsplit = $fit->loo(rEff: true, momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
         foreach ($ref['unsplit']['n_eff'] as $i => $v) { $close($v, $unsplit['diagnostics']['n_eff'][$i], "unsplit n_eff [$i]"); }
         // With shifts only, the exact and loo split inverses coincide; mcse and n_eff use the two-half r_eff.
-        $split = $fit->loo(momentMatch: true);
-        foreach ($split['moment_match']['observations'] as $o) { self::assertSame([], array_diff($o['transforms'], ['shift'])); }
-        $compare($ref['split'], $split, ['elpd_loo', 'p_loo', 'looic'], 'split');
+        $split = $fit->loo(rEff: true, momentMatch: true);
+        // An observation that also needed scale or covariance steps uses the exact split inverse, where loo 2.10.1 and
+        // earlier differ (see the compatibility contract), so only shift-only observations are compared with loo.
+        $scaled = [];
+        foreach ($split['moment_match']['observations'] as $o) { if (array_diff($o['transforms'], ['shift']) !== []) { $scaled[$o['index']] = true; } }
+        $compare($ref['split'], $split, ['elpd_loo', 'p_loo', 'looic'], 'split', $scaled);
     }
     public function testMomentMatchOptions(): void
     {

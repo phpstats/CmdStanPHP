@@ -4,9 +4,11 @@ args <- commandArgs(trailingOnly = TRUE)
 suppressPackageStartupMessages(library(cmdstanr))
 set_cmdstan_path(Sys.getenv('CMDSTAN'))
 input <- jsonlite::fromJSON(args[[3]], simplifyVector = TRUE)
-model <- cmdstan_model(args[[1]], compile_model_methods = TRUE, compile_standalone = TRUE, force_recompile = TRUE, quiet = TRUE)
-fit <- model$sample(data = args[[2]], chains = 1, iter_warmup = 100, iter_sampling = 5, seed = 1, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
-fit$init_model_methods(seed = input$seed)
+model <- cmdstan_model(args[[1]], force_recompile = TRUE, quiet = TRUE)
+model$expose_functions(quiet = TRUE)
+# Full precision, so unconstraining the simplex draws stays within Stan's tolerance.
+fit <- model$sample(data = args[[2]], chains = 1, iter_warmup = 100, iter_sampling = 5, seed = 1, sig_figs = 18, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
+fit$init_model_methods(seed = input$seed, quiet = TRUE)
 u <- input$unconstrained
 grad <- function(jacobian) { g <- fit$grad_log_prob(u, jacobian = jacobian); list(log_prob = attr(g, 'log_prob'), gradient = as.numeric(g)) }
 hess <- fit$hessian(u)
@@ -21,7 +23,7 @@ out <- list(
   hessian = list(log_prob = hess$log_prob, grad_log_prob = as.numeric(hess$grad_log_prob), hessian = unname(hess$hessian)),
   unconstrain_variables = as.numeric(fit$unconstrain_variables(input$variables)),
   constrain_variables = lapply(fit$constrain_variables(u, generated_quantities = FALSE), function(x) if (length(dim(x)) == 2) unname(x) else as.numeric(x)),
-  skeleton = lapply(fit$variable_skeleton(), function(x) as.integer(dim(x))),
+  skeleton = lapply(fit$metadata()$stan_variable_sizes, as.integer),
   draws = draws[, setdiff(names(draws), c('.chain', '.iteration', '.draw'))],
   unconstrained_draws = unname(matrix(as.numeric(unconstrained_draws), nrow = nrow(unconstrained_draws))),
   unconstrained_names = colnames(unconstrained_draws),

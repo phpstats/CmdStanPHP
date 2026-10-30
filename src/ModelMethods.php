@@ -89,23 +89,39 @@ final class ModelMethods
         for ($i = 0; $i < $n; ++$i) { for ($j = 0; $j < $n; ++$j) { $rows[$i][$j] = $flat[$i + $j * $n]; } }
         return ['log_prob' => $lp->cdata, 'grad_log_prob' => self::read($grad, $n), 'hessian' => $rows];
     }
-    /** @param array<string, mixed> $variables Parameter name => value; extra entries are ignored. */
+    /**
+     * @param array<string, mixed> $variables Parameter name => value, structured as constrainVariables() returns it
+     *     (tuples as lists of their elements, complex values as [re, im]); tuple elements may also be given as name.k
+     *     entries. Extra entries are ignored.
+     */
     public function unconstrainVariables(array $variables): array
     {
+        $skeleton = array_filter($this->variableSkeleton(false, false), fn($dims) => array_product($dims) !== 0);
+        $legacy = array_diff_key($skeleton, $variables) === [];
         $missing = [];
-        foreach ($this->variableSkeleton(false, false) as $name => $dims) {
-            if (array_product($dims) === 0) { continue; }
-            if (!array_key_exists($name, $variables)) { $missing[] = $name; continue; }
-            if (self::shape($variables[$name], $name) !== $dims) { throw new \InvalidArgumentException('Parameter '.$name.' must have dimensions ['.implode(',', $dims).'].'); }
-        }
+        foreach (array_keys($skeleton) as $name) { $base = explode('.', $name, 2)[0]; if (!array_key_exists($legacy ? $name : $base, $variables)) { $missing[$base] = $base; } }
         if ($missing !== []) { throw new \InvalidArgumentException('Model parameter(s): '.implode(',', $missing).' not provided!'); }
+        if ($legacy) { foreach ($skeleton as $name => $dims) { if (self::shape($variables[$name], $name) !== $dims) { throw new \InvalidArgumentException('Parameter '.$name.' must have dimensions ['.implode(',', $dims).'].'); } } }
         $flat = [];
-        foreach ($this->select('paths', false, false) as [$name, $indices]) {
-            $value = $variables[$name];
-            foreach ($indices as $i) { $value = $value[$i]; }
+        foreach ($this->select($legacy ? 'paths' : 'constrained', false, false) as $entry) {
+            if ($legacy) { [$name, $indices] = $entry; $value = $variables[$name]; foreach ($indices as $i) { $value = $value[$i]; } }
+            else { $value = self::walk($variables, (string)$entry); }
             $flat[] = $value;
         }
         return $this->unconstrain($flat);
+    }
+    /** The value a CmdStan flat name ("at.1:2.3", "z.imag") points to in structured variables: at[0][1][2], z[1]. */
+    private static function walk(array $variables, string $name): float|int
+    {
+        $length = strcspn($name, '.:'); $value = $variables[substr($name, 0, $length)];
+        preg_match_all('/([.:])([^.:]+)/', substr($name, $length), $matches, PREG_SET_ORDER);
+        foreach ($matches as [, , $token]) {
+            $i = match ($token) { 'real' => 0, 'imag' => 1, default => (int)$token - 1 };
+            if (!is_array($value) || !array_key_exists($i, $value)) { throw new \InvalidArgumentException('Parameter '.substr($name, 0, $length).' is missing elements.'); }
+            $value = $value[$i];
+        }
+        if (!is_int($value) && !is_float($value)) { throw new \InvalidArgumentException('Parameter '.substr($name, 0, $length).' has a non-numeric value.'); }
+        return $value;
     }
     /** @param list<array<string, float>> $draws Rows keyed by draws names such as "theta" or "x[1,2]". @return list<list<float>> */
     public function unconstrainDraws(array $draws): array
@@ -119,18 +135,17 @@ final class ModelMethods
         }
         return $out;
     }
-    /** @return array<string, mixed> Variable name => float or nested list, shaped by variableSkeleton(). */
+    /** @return array<string, mixed> Variable name => number or nested list, structured as Csv::unflatten() describes. */
     public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array
     {
         $theta = $this->unconstrained($unconstrainedVariables); $size = $this->size($transformedParameters, $generatedQuantities);
         $values = $this->ffi->new('double['.max(1, $size).']'); $err = $this->ffi->new('char*');
         $this->check($this->ffi->cmdstanphp_param_constrain($this->handle, $theta, (int)$transformedParameters, (int)$generatedQuantities, $values, $size, \FFI::addr($err)), $err);
-        $out = array_map(self::zeros(...), $this->variableSkeleton($transformedParameters, $generatedQuantities));
-        foreach ($this->select('paths', $transformedParameters, $generatedQuantities) as $k => [$name, $indices]) {
-            $ref = &$out[$name];
-            foreach ($indices as $i) { $ref = &$ref[$i]; }
-            $ref = $values[$k]; unset($ref);
-        }
+        $flat = [];
+        foreach ($this->constrainedParamNames($transformedParameters, $generatedQuantities) as $k => $name) { $flat[$name] = $values[$k]; }
+        $values = Csv::unflatten($flat); $out = [];
+        // Zero-size variables have no columns; they come back as empty lists, in declaration order.
+        foreach (array_keys($this->variableSkeleton($transformedParameters, $generatedQuantities)) as $key) { $base = explode('.', (string)$key, 2)[0]; $out[$base] = $values[$base] ?? []; }
         return $out;
     }
     /** Reseed the RNG used for generated quantities by constrainVariables(). */
@@ -210,7 +225,6 @@ final class ModelMethods
         }
         return [$key, $indices];
     }
-    private static function zeros(array $dims): mixed { return $dims === [] ? 0.0 : array_fill(0, $dims[0], self::zeros(array_slice($dims, 1))); }
     private static function shape(mixed $value, string $name): array
     {
         if (is_int($value) || is_float($value)) { return []; }

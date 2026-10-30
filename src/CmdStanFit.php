@@ -19,12 +19,12 @@ class CmdStanFit
     {
         return match ($method) { 'sample' => CmdStanMCMC::class, 'optimize' => CmdStanMLE::class, 'variational' => CmdStanVB::class, 'pathfinder' => CmdStanPathfinder::class, 'laplace' => CmdStanLaplace::class, 'generate_quantities' => CmdStanGQ::class, 'diagnose' => CmdStanDiagnose::class, default => self::class };
     }
-    public static function fromCsv(array $files): self
+    public static function fromCsv(array $files, ?array $variables = null, bool $checkDiagnostics = true, ?string $format = null): self
     {
         if ($files === []) { throw new \InvalidArgumentException('At least one CSV is required.'); }
-        $parsed = array_map(Csv::read(...), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
+        $parsed = array_map(fn($file) => Csv::read($file, $variables, $checkDiagnostics), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
         foreach ($parsed as $csv) { if (($csv['metadata']['method'] ?? 'sample') !== $method || $csv['variables'] !== $parsed[0]['variables']) { throw new \InvalidArgumentException('CSV files must share method and columns.'); } }
-        $class = self::classForMethod($method); $fit = new $class($files, $method); $fit->csv = $parsed;
+        $class = self::classForMethod($method); $fit = new $class($files, $method, context: $format === null ? [] : ['draws_format' => $format]); $fit->csv = $parsed;
         return $fit;
     }
     protected function parsed(): array
@@ -50,7 +50,7 @@ class CmdStanFit
     public function metricFiles(bool $includeFailed = false): array { return $this->context['metric_files'] ??= $this->relatedFiles('_metric.json'); }
     private function relatedFiles(string $suffix): array
     {
-        return array_values(array_filter(array_map(fn($file) => substr($file, 0, -4).$suffix, $this->files), 'is_file'));
+        return array_values(array_filter(array_map(fn($file) => preg_replace('/\.csv(\.gz|\.bz2)?$/i', '', $file).$suffix, $this->files), 'is_file'));
     }
     /** Decoded save_cmdstan_config JSON (CmdStan 2.34+), one array per process. */
     public function cmdstanConfig(): array { return array_map(fn($file) => json_decode((string)file_get_contents($file), true, flags: JSON_THROW_ON_ERROR), $this->configFiles()); }
@@ -60,19 +60,22 @@ class CmdStanFit
     {
         return array_map(fn($iteration) => array_map(fn($chain) => $chain['lp__'], $iteration), $this->draws('lp__', 'draws_array'));
     }
-    protected function approximateLp(string $column): array
+    /** One column's post-warmup values for every chain, in draw order (chain by chain). */
+    protected function column(string $column): array
     {
-        $out = []; $chains = $this->parsed();
-        $lengths = array_map(fn($chain) => count($chain['draws']), $chains);
-        if (count(array_unique($lengths)) > 1) { throw new \RuntimeException('Log-density matrix requires equal chain lengths.'); }
-        for ($i = 0; $i < ($lengths[0] ?? 0); ++$i) {
-            $out[] = array_map(fn($chain) => $chain['draws'][$i][$column] ?? NAN, $chains);
-        }
+        $out = [];
+        foreach ($this->parsed() as $csv) { foreach ($csv['draws'] as $row) { $out[] = (float)($row[$column] ?? NAN); } }
         return $out;
     }
     public function cmdstanSummary(): string
     {
-        return Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix()], $this->files))['stdout'];
+        return $this->withPlainFiles(fn(array $files) => Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix()], $files))['stdout']);
+    }
+    /** Runs $use with uncompressed copies of the output files (CmdStan's tools cannot read .csv.gz or .csv.bz2). */
+    protected function withPlainFiles(callable $use): mixed
+    {
+        $copies = array_map(fn($f) => Csv::isCompressed($f) ? Csv::decompress($f) : $f, $this->files);
+        try { return $use($copies); } finally { foreach ($copies as $i => $copy) { if ($copy !== $this->files[$i]) { @unlink($copy); } } }
     }
     public function outputFiles(bool $includeFailed = false): array { return $this->files; }
     public function latentDynamicsFiles(bool $includeFailed = false): array
@@ -86,6 +89,32 @@ class CmdStanFit
         return $files !== [] ? $files : throw new \RuntimeException('No profile files found. The model that produced the fit did not use any profiling.');
     }
     public function returnCodes(): array { return array_column($this->results, 'exit_code'); }
+    /**
+     * CmdStanR 1.0's command(): the command line run for each CmdStan process, shell-quoted. STAN_NUM_THREADS (set in
+     * the environment) and an MPI launcher are not included.
+     */
+    public function command(): array
+    {
+        $commands = $this->context['commands'] ?? throw new \RuntimeException('This method is not available for objects created using as_cmdstan_fit().');
+        return array_map(fn(array $argv) => implode(' ', array_map(escapeshellarg(...), $argv)), $commands);
+    }
+    /** CmdStanR's init(): the initial values each process used, read from the init files in the metadata. */
+    public function init(): array
+    {
+        if (isset($this->context['init_values'])) { return $this->context['init_values']; }
+        $files = $this->context['init_files'] ?? array_merge([], ...array_map(fn($v) => is_string($v) ? explode(',', $v) : [], (array)($this->metadata()['init'] ?? [])));
+        $files = array_values(array_filter($files, fn($f) => is_string($f) && !is_numeric($f)));
+        if ($files === [] || array_filter($files, fn($f) => !is_file($f)) !== []) { throw new \RuntimeException("Can't find initial values files."); }
+        return $this->context['init_values'] = array_map(fn($f) => json_decode((string)file_get_contents($f), true, flags: JSON_THROW_ON_ERROR), $files);
+    }
+    /** CmdStanR 1.0's materialize(): reads the draws, initial values and profiles into memory now, so the fit no longer needs its files. */
+    public function materialize(): static
+    {
+        $this->parsed();
+        try { $this->init(); } catch (\Throwable) {}
+        try { $this->profiles(); } catch (\Throwable) {}
+        return $this;
+    }
     public function output(): array { return array_map(fn($r) => $r['stdout'].$r['stderr'], $this->results); }
     /** Per-chain CSV metadata (CmdStanR read_csv_metadata() keys plus CmdStan's raw argument keys). */
     public function chainMetadata(): array { return array_column($this->parsed(), 'metadata'); }
@@ -101,6 +130,7 @@ class CmdStanFit
             if ($values !== []) { $meta[$key] = $values; }
         }
         $meta['id'] = $this->procIds();
+        if (($meta['method'] ?? 'sample') === 'sample') { $meta['num_chains'] = count($chains); }
         if (isset($meta['seed']) && count(array_unique($meta['seed'], SORT_REGULAR)) === 1) { $meta['seed'] = $meta['seed'][0]; }
         $meta['time'] = array_values(array_filter(array_column($chains, 'time')));
         $config = $this->configFiles() === [] ? [] : self::flattenConfig($this->cmdstanConfig()[0]);
@@ -127,7 +157,7 @@ class CmdStanFit
         if ($variables === null) { return $available; }
         $selected = [];
         foreach ((array)$variables as $v) {
-            $match = array_values(array_filter($available, fn($name) => $name === $v || str_starts_with($name, $v.'[')));
+            $match = array_values(array_filter($available, fn($name) => Csv::matches($name, $v)));
             if ($match === []) { throw new \InvalidArgumentException('Unknown variable: '.$v); }
             array_push($selected, ...$match);
         }
@@ -145,7 +175,7 @@ class CmdStanFit
     {
         return $this->extract($this->select(null, true), $format ?? $this->defaultFormat(), $incWarmup);
     }
-    private function defaultFormat(): string { return CmdStan::option('cmdstanr_draws_format') ?? ($this instanceof CmdStanMCMC || $this instanceof CmdStanGQ ? 'draws_array' : 'draws_matrix'); }
+    private function defaultFormat(): string { return $this->context['draws_format'] ?? CmdStan::option('cmdstanr_draws_format') ?? ($this instanceof CmdStanMCMC || $this instanceof CmdStanGQ ? 'draws_array' : 'draws_matrix'); }
     /** $part selects post-warmup 'draws', 'warmup', 'both', or the optimizer 'estimate'. */
     private function extract(array $variables, string $format, bool $incWarmup, ?string $part = null): array
     {
@@ -235,7 +265,7 @@ class CmdStanFit
         if ($this->nativeStatistics !== null) { return $this->nativeStatistics; }
         $file = sys_get_temp_dir().'/cmdstanphp-summary-'.bin2hex(random_bytes(8)).'.csv';
         try {
-            Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix(), '--csv_filename='.$file, '--sig_figs=18'], $this->files));
+            $this->withPlainFiles(fn(array $files) => Process::run(array_merge([CmdStan::path().'/bin/stansummary'.CmdStan::suffix(), '--csv_filename='.$file, '--sig_figs=18'], $files)));
             $handle = fopen($file, 'rb'); $header = null; $out = [];
             try {
                 while (($line = fgets($handle)) !== false) {
@@ -281,6 +311,7 @@ class CmdStanFit
     public function diagnosticWarnings(): array { return $this->diagnosticWarnings; }
     public function profiles(): array
     {
+        if (isset($this->context['profiles'])) { return $this->context['profiles']; }
         $profiles = [];
         foreach ($this->profileFiles() as $file) {
             $handle = fopen($file, 'rb'); $rows = [];
@@ -293,11 +324,11 @@ class CmdStanFit
             } finally { fclose($handle); }
             $profiles[] = $rows;
         }
-        return $profiles;
+        return $this->context['profiles'] = $profiles;
     }
     public function cmdstanDiagnose(): string
     {
-        $r = Process::run(array_merge([CmdStan::path().'/bin/diagnose'.CmdStan::suffix()], $this->files));
+        $r = $this->withPlainFiles(fn(array $files) => Process::run(array_merge([CmdStan::path().'/bin/diagnose'.CmdStan::suffix()], $files)));
         return $r['stdout'].$r['stderr'];
     }
     /**
@@ -334,7 +365,8 @@ class CmdStanFit
         if (!is_dir($dir) && !mkdir($dir, 0700, true)) { throw new \RuntimeException('Cannot create destination directory.'); }
         $files = array_values($files); $ids = $ids !== null && count($ids) === count($files) ? $ids : ($ids === null ? null : range(1, count($files)));
         $name = realpath($dir).'/'.$basename.($timestamp ? '-'.date('YmdHi') : ''); $suffix = ($random ? '-'.bin2hex(random_bytes(3)) : '').$ext;
-        $targets = array_map(fn($i) => $name.($ids === null ? '' : '-'.$ids[$i]).$suffix, array_keys($files));
+        $width = $ids === null ? 0 : max(2, strlen((string)max($ids)));
+        $targets = array_map(fn($i) => $name.($ids === null ? '' : '-'.str_pad((string)$ids[$i], $width, '0', STR_PAD_LEFT)).$suffix, array_keys($files));
         if (count(array_unique($targets)) !== count($targets)) { throw new \RuntimeException('Destination file names are not unique.'); }
         foreach ($targets as $i => $target) { if ($target !== $files[$i] && file_exists($target)) { throw new \RuntimeException('Destination exists: '.$target); } }
         foreach ($targets as $i => $target) { if ($target !== $files[$i] && !copy($files[$i], $target)) { throw new \RuntimeException('Cannot save output.'); } }
@@ -342,28 +374,51 @@ class CmdStanFit
         return $targets;
     }
     private function saveArgs(?string $basename, string $suffix = ''): string { return ($basename ?? $this->modelName()).$suffix; }
-    public function saveOutputFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    /**
+     * CSV files saved under new names; compress (null keeps the current compression, else 'none', 'gzip' or 'bzip2')
+     * recompresses them on the way.
+     */
+    private function saveCsvFiles(array $files, string $dir, string $basename, bool $timestamp, bool $random, ?string $compress): array
+    {
+        $current = preg_match('/\.csv\.gz$/i', $files[0] ?? '') ? 'gzip' : (preg_match('/\.csv\.bz2$/i', $files[0] ?? '') ? 'bzip2' : 'none');
+        $move = $this->context['owned'] ?? false;
+        if ($compress === null || $compress === $current) { return $this->saveFiles($files, $dir, $basename, $this->procIds(), '.csv'.['none' => '', 'gzip' => '.gz', 'bzip2' => '.bz2'][$current], $timestamp, $random, $move); }
+        Csv::assertCompress($compress);
+        $ext = ['none' => '', 'gzip' => '.gz', 'bzip2' => '.bz2'][$compress];
+        if ($ext !== '' && !$timestamp && !$random) {
+            $ids = $this->procIds(); $width = max(2, strlen((string)max($ids)));
+            foreach ($ids as $id) { $target = $dir.'/'.$basename.'-'.str_pad((string)$id, $width, '0', STR_PAD_LEFT).'.csv'.$ext; if (file_exists($target)) { throw new \RuntimeException('Destination exists: '.$target); } }
+        }
+        $plain = array_map(fn($f) => $current === 'none' ? $f : Csv::decompress($f), $files);
+        try { $saved = $this->saveFiles($plain, $dir, $basename, $this->procIds(), '.csv', $timestamp, $random, false); }
+        finally { if ($current !== 'none') { foreach ($plain as $f) { @unlink($f); } } }
+        $saved = Csv::compress($saved, $compress);
+        if ($move) { foreach ($files as $f) { if (!in_array($f, $saved, true) && is_file($f)) { unlink($f); } } }
+        return $saved;
+    }
+    public function saveOutputFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true, ?string $compress = null): array
     {
         $this->configFiles(); $this->metricFiles(); $this->pinFiles();
-        return $this->files = $this->saveFiles($this->files, $dir, $this->saveArgs($basename), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
+        $this->parsed();
+        return $this->files = $this->saveCsvFiles($this->files, $dir, $this->saveArgs($basename), $timestamp, $random, $compress);
     }
     /** Hook for subclasses to resolve paths derived from output file names before those files move. */
     protected function pinFiles(): void {}
-    public function saveLatentDynamicsFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
+    public function saveLatentDynamicsFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true, ?string $compress = null): array
     {
-        return $this->diagnosticFiles = $this->saveFiles($this->latentDynamicsFiles(true), $dir, $this->saveArgs($basename, '-diagnostic'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
+        return $this->diagnosticFiles = $this->saveCsvFiles($this->latentDynamicsFiles(true), $dir, $this->saveArgs($basename, '-diagnostic'), $timestamp, $random, $compress);
     }
     public function saveProfileFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
         return $this->profileFiles = $this->saveFiles($this->profileFiles(true), $dir, $this->saveArgs($basename, '-profile'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
     }
-    /** Data written from a PHP array is moved; a user-supplied data file is copied and left in place. */
+    /** Copies the data file (the original stays in place, as in CmdStanR 1.0) and points the fit at the copy. */
     public function saveDataFile(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): ?string
     {
         $file = $this->dataFile();
         if ($file === null) { return null; }
         $ext = pathinfo($file, PATHINFO_EXTENSION);
-        return $this->context['data_file'] = $this->saveFiles([$file], $dir, $this->saveArgs($basename), null, $ext === '' ? '' : '.'.$ext, $timestamp, $random, ($this->context['owned'] ?? false) && ($this->context['data_owned'] ?? false))[0];
+        return $this->context['data_file'] = $this->saveFiles([$file], $dir, $this->saveArgs($basename), null, $ext === '' ? '' : '.'.$ext, $timestamp, $random, false)[0];
     }
     public function saveConfigFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
@@ -374,31 +429,39 @@ class CmdStanFit
         return $this->context['metric_files'] = $this->saveFiles($this->metricFiles(true), $dir, $this->saveArgs($basename, '-metric'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
     }
     /**
-     * Compiles (or reuses) the in-process model-methods library via PHP FFI and binds it to the fit's data. Imported CSV
-     * fits must pass the model. Hessians are always available, so $hessian and $verbose are accepted only for CmdStanR parity.
+     * CmdStanR 1.0's init_model_methods(data, seed, verbose, quiet): compiles (or reuses) the in-process model-methods
+     * library via PHP FFI and binds it to data, by default the data the fit was run with. Pass data (an array, StanData,
+     * table or JSON file) for a fit reloaded after its data file is gone; the fit's dataFile() then points to it.
+     * Imported CSV fits must pass the model. The Hessian is always available.
      */
-    public function initModelMethods(int $seed = 1, bool $verbose = false, bool $hessian = false, ?CmdStanModel $model = null): void
+    public function initModelMethods(array|object|string|null $data = null, int $seed = 1, bool $verbose = false, bool $quiet = false, ?CmdStanModel $model = null): void
     {
-        if ($model !== null) { $this->context['stan_file'] = $model->stanFile(); unset($this->context['model_methods']); }
-        if (isset($this->context['model_methods'])) { return; }
+        if ($model !== null) {
+            $this->context['stan_file'] = $model->stanFile() ?? throw new \RuntimeException('Model methods cannot be used with a model created from an executable alone. There is no Stan program to compile them from.');
+            $this->context['stanc_options'] = $model->nativeStancOptions(); $this->context['variables'] = $model->variables(); unset($this->context['model_methods']);
+        }
+        if ($data === null && isset($this->context['model_methods'])) { return; }
         $stan = $this->context['stan_file'] ?? throw new \RuntimeException('Model methods need the Stan model; pass model: to initModelMethods() for imported CSVs.');
-        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $this->dataFile(), $seed);
+        if ($data !== null && !is_string($data)) {
+            $file = sys_get_temp_dir().'/standata-'.bin2hex(random_bytes(8)).'.json';
+            $data = StanJson::write($data, $file, isset($this->context['variables']), $this->context['variables']['data'] ?? null);
+        }
+        $file = $data ?? $this->dataFile();
+        if ($file !== null && !is_file($file)) {
+            throw new \RuntimeException("Can't find data file '".$file."', so the model methods can't be initialized.".($data === null ? ' Pass the data the fit was run with to initModelMethods() as data, or call saveDataFile() before saving a fit for a later session.' : ''));
+        }
+        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $file, $seed);
+        if ($data !== null) { $this->context['data_file'] = realpath($file) ?: $file; }
     }
     private function methods(): ModelMethods { $this->initModelMethods(); return $this->context['model_methods']; }
-    private static function jacobian(bool $jacobian, ?bool $adjustment): bool
-    {
-        if ($adjustment === null) { return $jacobian; }
-        trigger_error("'jacobianAdjustment' is deprecated. Please use 'jacobian' instead.", E_USER_DEPRECATED);
-        return $adjustment;
-    }
-    public function logProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): float { return $this->methods()->logProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function logProb(array $unconstrainedVariables, bool $jacobian = true): float { return $this->methods()->logProb($unconstrainedVariables, $jacobian); }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->gradLogProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true): array { return $this->methods()->gradLogProb($unconstrainedVariables, $jacobian); }
     /** @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
-    public function hessian(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->hessian($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function hessian(array $unconstrainedVariables, bool $jacobian = true): array { return $this->methods()->hessian($unconstrainedVariables, $jacobian); }
     public function unconstrainVariables(array $variables): array { return $this->methods()->unconstrainVariables($variables); }
+    /** Constrained values by variable, structured as Csv::unflatten() describes (tuples as lists, complex as [re, im]). */
     public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->constrainVariables($unconstrainedVariables, $transformedParameters, $generatedQuantities); }
-    public function variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->variableSkeleton($transformedParameters, $generatedQuantities); }
     /** Unconstrains this fit's draws, the draws in other CmdStan CSV files, or draws_df/draws_matrix rows, returned in a draws format. */
     public function unconstrainDraws(?array $files = null, ?array $draws = null, ?string $format = null, bool $incWarmup = false): array
     {
@@ -417,7 +480,7 @@ class CmdStanFit
     public function functions(): StanFunctions { return $this->context['functions'] ?? throw new \RuntimeException('Functions have not been exposed; call exposeFunctions() first.'); }
     public function saveObject(string $file): string
     {
-        $this->parsed();
+        $this->materialize();
         if ($this instanceof CmdStanMCMC && $this->numDrawsSampling() >= 4) { $this->nativeSummary(); }
         if (file_put_contents($file, serialize($this), LOCK_EX) === false) { throw new \RuntimeException('Cannot save fit object.'); }
         return $file;
@@ -445,7 +508,7 @@ class CmdStanFit
             if ($wanted === null) { return $available; }
             $out = [];
             foreach (array_filter((array)$wanted, fn($v) => $v !== '') as $v) {
-                $match = array_values(array_filter($available, fn($name) => $name === $v || str_starts_with($name, $v.'[')));
+                $match = array_values(array_filter($available, fn($name) => Csv::matches($name, $v)));
                 if ($match === []) { throw new \InvalidArgumentException("Can't find the following variable(s) in the output: ".$v); }
                 array_push($out, ...$match);
             }

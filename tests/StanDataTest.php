@@ -40,11 +40,12 @@ final class StanDataTest extends TestCase
         $enum = StanData::fromTable(self::dataFrame(['g' => ['x', 'y']], ['g' => FactorType::Factor], ['g' => ['y', 'x']]));
         self::assertSame([2, 1], $enum->data['g'], 'backed enum types such as Phibble\Type::Factor are recognized');
     }
-    public function testStringColumnsBecomeFactorsWithSortedLevels(): void
+    public function testStringColumnsAreRefusedAndFactorsKeepJ(): void
     {
-        $data = StanData::fromTable(self::dataFrame(['school' => ['b', 'a', 'b', 'c'], 'J_school' => [9, 9, 9, 9]]));
+        $data = StanData::fromTable(self::dataFrame(['school' => ['b', 'a', 'b', 'c'], 'J_school' => [9, 9, 9, 9]], ['school' => 'factor'], ['school' => ['a', 'b', 'c']]));
         self::assertSame([2, 1, 2, 3], $data->data['school']); self::assertSame(['a', 'b', 'c'], $data->levels['school']);
         self::assertSame([9, 9, 9, 9], $data->data['J_school'], 'J_<name> never replaces a column');
+        $this->expectExceptionMessage('The table has columns of invalid type: school, name.'); StanData::fromTable(self::dataFrame(['school' => ['b', 'a'], 'x' => [1, 2], 'name' => ['p', 'q']]));
     }
     public function testModelDataFactorDescriptorsArePreferred(): void
     {
@@ -56,7 +57,7 @@ final class StanDataTest extends TestCase
     {
         return [
             'missing number' => [['y' => [1, null]], 'missing at row 2'],
-            'missing label' => [['g' => ['a', null]], 'missing at row 2'],
+            'string column' => [['g' => ['a', null]], 'columns of invalid type: g'],
             'bad name' => [['my col' => [1]], 'not a valid Stan variable name'],
             'ragged' => [['a' => [1, 2], 'b' => [1]], 'equal lengths'],
             'date' => [['d' => [new \DateTimeImmutable('2024-01-01')]], 'non-numeric value at row 1'],
@@ -75,7 +76,7 @@ final class StanDataTest extends TestCase
     {
         self::assertNull(StanData::normalize(null)); self::assertSame(['N' => 1], StanData::normalize(['N' => 1]));
         self::assertSame(['a' => 1], StanData::normalize(new StanData(['a' => 1], ['a' => ['x']])));
-        $file = write_stan_json(self::dataFrame(['g' => ['b', 'a']]), $this->dir.'/table.json');
+        $file = write_stan_json(self::dataFrame(['g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['a', 'b']]), $this->dir.'/table.json');
         self::assertSame(['N' => 2, 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($file), true));
         $file = write_stan_json(StanData::fromColumns(['y' => [1.0], 'x' => [2]], 'y', 'x'), $this->dir.'/columns.json');
         self::assertSame(['N' => 1, 'K' => 1, 'X' => [[2.0]], 'y' => [1.0]], json_decode(file_get_contents($file), true));
@@ -83,8 +84,8 @@ final class StanDataTest extends TestCase
     }
     public function testModelMethodsWriteTableData(): void
     {
-        $model = new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'), __DIR__.'/fixtures/model.php');
-        $fit = $model->sample(data: self::dataFrame(['y' => [0, 1], 'g' => ['b', 'a']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
+        $model = new CmdStanModel(exeFile: __DIR__.'/fixtures/model.php');
+        $fit = $model->sample(data: self::dataFrame(['y' => [0, 1], 'g' => ['b', 'a']], ['g' => 'factor'], ['g' => ['a', 'b']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
         self::assertSame(['N' => 2, 'y' => [0, 1], 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($fit->dataFile()), true));
         $fit = $model->optimize(data: StanData::fromColumns(['y' => [3], 'x' => [1.5]], 'y', ['x'])->with(['scale' => 2]), output_dir: $this->dir, show_messages: false);
         self::assertSame(['N' => 1, 'K' => 1, 'X' => [[1.5]], 'y' => [3], 'scale' => 2], json_decode(file_get_contents($fit->dataFile()), true));

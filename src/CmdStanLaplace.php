@@ -3,7 +3,8 @@ declare(strict_types=1);
 namespace CmdStan;
 final class CmdStanLaplace extends CmdStanFit
 {
-    public function lpApprox(): array { return $this->approximateLp('lp_approx__'); }
+    /** CmdStanR 1.0's lp_approx(): the approximation's log density at each draw, as one list in draw order. */
+    public function lpApprox(): array { return $this->column('lp_approx__'); }
     public function mode(): array
     {
         $mode = $this->context['mode'] ?? null;

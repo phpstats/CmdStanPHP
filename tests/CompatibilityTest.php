@@ -18,7 +18,7 @@ final class CompatibilityTest extends TestCase
     #[DataProvider('algorithms')]
     public function testSameSeedDrawsAndDescriptiveSummariesAsCmdStanR(string $method, int $iterations = 100): void
     {
-        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan'); $model->compile();
+        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan');
         $options = ['data' => ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]], 'seed' => 123, 'refresh' => 0, 'show_messages' => false, 'show_exceptions' => false, 'sig_figs' => 18];
         if ($method === 'sample') { $options += ['chains' => 2, 'parallel_chains' => 2, 'iter_warmup' => 200, 'iter_sampling' => $iterations, 'save_metric' => false, 'save_cmdstan_config' => false]; }
         if ($method === 'optimize') { $options += ['jacobian' => true]; }
@@ -46,9 +46,7 @@ final class CompatibilityTest extends TestCase
         if (in_array($method, ['variational', 'pathfinder', 'laplace'], true)) {
             $approx = $phpFit->lpApprox();
             self::assertCount(count($reference['approx_lp']), $approx);
-            foreach ($reference['approx_lp'] as $i => $row) {
-                foreach ((array)$row as $j => $value) { self::assertEqualsWithDelta($value, $approx[$i][$j], 1e-13, $method.' approximate lp'); }
-            }
+            foreach ($reference['approx_lp'] as $i => $value) { self::assertEqualsWithDelta($value, $approx[$i], 1e-13, $method.' approximate lp'); }
         }
         $summary = array_column($phpFit->summary('theta'), null, 'variable')['theta'];
         $refSummary = array_column($reference['summary'], null, 'variable')['theta'];
@@ -60,7 +58,7 @@ final class CompatibilityTest extends TestCase
     #[DataProvider('metadataMethods')]
     public function testMetadataStructureMatchesCmdStanR(string $method): void
     {
-        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan'); $model->compile();
+        $model = new CmdStanModel(__DIR__.'/../examples/bernoulli.stan');
         $options = ['data' => ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]], 'seed' => 123, 'show_messages' => false, 'output_dir' => $this->dir] + ($method === 'sample' ? ['chains' => 2, 'iter_warmup' => 50, 'iter_sampling' => 20, 'save_warmup' => true] : []);
         $fit = $model->$method($options);
         $script = 'm <- cmdstanr::read_cmdstan_csv(commandArgs(TRUE)[-1])$metadata; m$time <- NULL; m$stan_variable_sizes <- lapply(m$stan_variable_sizes, as.list); jsonlite::write_json(list(names = names(m), metadata = m[!names(m) %in% c("init", "fitted_params", "profile_file", "file", "data_file", "diagnostic_file", "start_datetime")]), commandArgs(TRUE)[1], digits = NA, auto_unbox = TRUE)';

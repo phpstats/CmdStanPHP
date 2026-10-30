@@ -3,6 +3,8 @@ declare(strict_types=1);
 namespace CmdStan;
 final class CmdStan
 {
+    /** The oldest CmdStan this package supports, as CmdStanR 1.0. */
+    public const MIN_VERSION = '2.37.0';
     private static ?string $path = null;
     public static function setPath(string $path): void
     {
@@ -10,8 +12,12 @@ final class CmdStan
         if ($real === false || !is_file($real.'/makefile') || !is_file($real.'/bin/stanc'.self::suffix())) {
             throw new \InvalidArgumentException('Not a CmdStan installation: '.$path);
         }
+        $version = self::makefileVersion($real);
+        if (!self::isSupported($version)) { throw new \InvalidArgumentException('CmdStan v'.$version.' is no longer supported. CmdStanPHP requires CmdStan v'.self::MIN_VERSION.' or newer.'); }
         self::$path = $real;
     }
+    /** True for CmdStan versions this package supports; a release-candidate suffix is ignored. */
+    public static function isSupported(string $version): bool { return version_compare((string)preg_replace('/^cmdstan-|-rc\d+$/', '', $version), self::MIN_VERSION, '>='); }
     public static function path(): string
     {
         if (self::$path !== null) { return self::$path; }
@@ -26,9 +32,10 @@ final class CmdStan
         throw new \RuntimeException('CmdStan not found. Set CMDSTAN or call set_cmdstan_path().');
     }
     public static function suffix(): string { return PHP_OS_FAMILY === 'Windows' ? '.exe' : ''; }
-    public static function version(): string
+    public static function version(): string { return self::makefileVersion(self::path()); }
+    private static function makefileVersion(string $path): string
     {
-        $makefile = file_get_contents(self::path().'/makefile');
+        $makefile = (string)file_get_contents($path.'/makefile');
         if (!preg_match('/^CMDSTAN_VERSION\s*:?=\s*(\d+\.\d+\.\d+)/m', $makefile, $matches)) { throw new \RuntimeException('Cannot determine CmdStan version from makefile.'); }
         return $matches[1];
     }
@@ -64,7 +71,7 @@ final class CmdStan
         }
         return null;
     }
-    private const OPTIONS = ['cmdstanr_output_dir' => 'dir', 'cmdstanr_write_stan_file_dir' => 'dir', 'cmdstanr_force_recompile' => 'bool', 'cmdstanr_draws_format' => 'format', 'cmdstanr_warn_inits' => 'bool', 'cmdstanr_verbose' => 'bool', 'cmdstanr_no_ver_check' => 'bool', 'cmdstanr_max_rows' => 'int', 'mc.cores' => 'int', 'cmdstanr_print_line_numbers' => 'bool', 'cmdstanphp_example_dir' => 'dir'];
+    private const OPTIONS = ['cmdstanr_output_dir' => 'dir', 'cmdstanr_write_stan_file_dir' => 'dir', 'cmdstanr_force_recompile' => 'bool', 'cmdstanr_draws_format' => 'format', 'cmdstanr_warn_inits' => 'bool', 'cmdstanr_verbose' => 'bool', 'cmdstanr_no_ver_check' => 'bool', 'cmdstanr_max_rows' => 'int', 'mc.cores' => 'int', 'cmdstanr_print_line_numbers' => 'bool', 'cmdstanphp_example_dir' => 'dir', 'cmdstanr_compress' => 'compress', 'cmdstanr_progress_bar' => 'bool', 'cmdstanr_save_metric' => 'bool', 'cmdstanr_save_config' => 'bool', 'cmdstanr_spinner' => 'bool'];
     private static array $options = [];
     /**
      * Session options mirroring R's options(): returns the previous values of the options being set (so they can be restored),
@@ -75,7 +82,7 @@ final class CmdStan
         $previous = [];
         foreach ($set as $name => $value) {
             $type = self::OPTIONS[$name] ?? throw new \InvalidArgumentException('Unknown option: '.$name);
-            $valid = $value === null || match ($type) { 'bool' => is_bool($value), 'int' => is_int($value) && $value > 0, 'dir' => is_string($value) && $value !== '', 'format' => in_array($value, ['draws_array', 'draws_matrix', 'draws_df', 'draws_list'], true) };
+            $valid = $value === null || match ($type) { 'bool' => is_bool($value), 'int' => is_int($value) && $value > 0, 'dir' => is_string($value) && $value !== '', 'format' => in_array($value, ['draws_array', 'draws_matrix', 'draws_df', 'draws_list'], true), 'compress' => in_array($value, ['none', 'gzip', 'bzip2'], true) };
             if (!$valid) { throw new \InvalidArgumentException('Invalid value for option '.$name.'.'); }
         }
         foreach ($set as $name => $value) {

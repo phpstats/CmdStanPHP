@@ -66,7 +66,7 @@ final class ModelMethodsTest extends TestCase
         self::assertSame(['mu', 'a', 'm', 's', 'S', 'L', 'o', 'v', 'r', 'z', 't.1', 't.2'], array_keys($model->variableSkeleton(false, true)));
         self::assertSame(1 + 6 + 6 + 2 + 3 + 3 + 2 + 4, $model->numUnconstrained());
         $names = $model->constrainedParamNames();
-        self::assertSame(['a[1,1]', 'a[2,1]', 'a[1,2]'], array_slice($names, 1, 3)); self::assertSame(['z.real', 'z.imag', 't:1', 't:2[1]', 't:2[2]'], array_slice($names, -5));
+        self::assertSame(['a[1,1]', 'a[2,1]', 'a[1,2]'], array_slice($names, 1, 3)); self::assertSame(['z[real]', 'z[imag]', 't:1', 't:2[1]', 't:2[2]'], array_slice($names, -5));
         $L = [[1.0, 0.0, 0.0], [0.6, 0.8, 0.0], [0.0, 0.6, 0.8]];
         $variables = ['mu' => 0.25, 'a' => [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], 'm' => [[1.5, 2.5, 3.5], [4.5, 5.5, 6.5]], 's' => [0.2, 0.3, 0.5], 'S' => [[2.0, 0.5], [0.5, 1.0]], 'L' => $L, 'o' => [-1.0, 2.0], 'v' => [[0.5, 1.5], [2.5, 3.5]], 'ignored' => 1];
         $u = $model->unconstrainVariables($variables);
@@ -75,10 +75,10 @@ final class ModelMethodsTest extends TestCase
         $c = $model->constrainVariables($u);
         foreach (array_diff_key($variables, ['ignored' => 1]) as $name => $value) { self::assertEqualsWithDelta($value, $c[$name], 1e-12, $name); }
         self::assertEqualsWithDelta(exp(0.25), $c['e'], 1e-12); self::assertEqualsWithDelta([[0.2, 0.3, 0.5], [0.4, 0.6, 1.0]], $c['tv'], 1e-12);
-        self::assertSame([0.25, 2.0], $c['z']); self::assertSame(0.25, $c['t.1']); self::assertSame([1.0, 2.0], $c['t.2']); self::assertIsFloat($c['r']);
+        self::assertSame([0.25, 2.0], $c['z']); self::assertSame([0.25, [1.0, 2.0]], $c['t'], 'a tuple is a list of its elements'); self::assertIsFloat($c['r']);
         self::assertSame(['mu', 'a', 'm', 's', 'S', 'L', 'o', 'v'], array_keys($model->constrainVariables($u, false, false)));
         $gq = $model->constrainVariables($u, false, true);
-        self::assertSame(['mu', 'a', 'm', 's', 'S', 'L', 'o', 'v', 'r', 'z', 't.1', 't.2'], array_keys($gq)); self::assertSame([0.25, 2.0], $gq['z']); self::assertSame([1.0, 2.0], $gq['t.2']);
+        self::assertSame(['mu', 'a', 'm', 's', 'S', 'L', 'o', 'v', 'r', 'z', 't'], array_keys($gq)); self::assertSame([0.25, 2.0], $gq['z']); self::assertSame([1.0, 2.0], $gq['t'][1]);
         self::assertCount(35 + 1 + 2 + 1 + 2, $model->constrainedParamNames(false, true));
         $random = array_map(fn($i) => sin($i + 1.0), range(0, $model->numUnconstrained() - 1));
         self::assertEqualsWithDelta($random, $model->unconstrainVariables($model->constrainVariables($random)), 1e-10);
@@ -88,7 +88,7 @@ final class ModelMethodsTest extends TestCase
         $this->library(self::NORMAL);
         $source = \CmdStan\write_stan_file(self::NORMAL, $this->dir.'/normal.stan');
         $data = ['N' => 3, 'y' => [0.5, 1.5, -1.0]];
-        $fit = (new CmdStanModel($source))->compile()->sample(data: $data, chains: 1, iter_warmup: 100, iter_sampling: 20, seed: 3, sig_figs: 18, show_messages: false, output_dir: $this->dir);
+        $fit = (new CmdStanModel($source))->sample(data: $data, chains: 1, iter_warmup: 100, iter_sampling: 20, seed: 3, sig_figs: 18, show_messages: false, output_dir: $this->dir);
         $model = ModelMethods::compile($source, $data);
         $draws = $fit->draws(format: 'draws_df'); $unconstrained = $model->unconstrainDraws($draws);
         self::assertCount(20, $unconstrained);

@@ -25,7 +25,7 @@ print_r(CmdStan\check_cmdstan_toolchain());
 
 `check_cmdstan_toolchain()` returns the path and version of make, the C++ compiler CmdStan will use, and stanc. It throws when make or the compiler is missing. It does not install missing tools.
 
-Without an explicit path the library first checks `CMDSTAN`, then chooses the highest version under `~/.cmdstan/cmdstan-*`. CmdStan's version is read from its makefile, independently of the stanc compiler version. The path must contain the CmdStan makefile and stanc executable. Run inference with absolute paths when deploying under a service account.
+CmdStan 2.37 or newer is required, as in CmdStanR 1.0, and `set_cmdstan_path()` refuses an older installation. Without an explicit path the library first checks `CMDSTAN`, then chooses the highest supported version under `~/.cmdstan/cmdstan-*`. CmdStan's version is read from its makefile, independently of the stanc compiler version. The path must contain the CmdStan makefile and stanc executable. Run inference with absolute paths when deploying under a service account.
 
 To install an official release:
 
@@ -33,7 +33,7 @@ To install an official release:
 $path = CmdStan\install_cmdstan('2.37.0', cores: 2, timeout: 1800);
 ```
 
-The installer downloads the specified release from GitHub over HTTPS, checks archive entry paths and links, extracts in a private staging directory, builds at the final location to preserve runtime library paths, and selects the resulting installation. Without a version it installs the latest release.
+The installer downloads the specified release from GitHub over HTTPS, checks archive entry paths and links, extracts in a private staging directory, builds at the final location to preserve runtime library paths, and selects the resulting installation. Without a version it installs the latest release. Versions before 2.37 are rejected.
 
 ```php
 CmdStan\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz', cppOptions: ['STAN_THREADS' => true]);
@@ -41,16 +41,21 @@ CmdStan\install_cmdstan('2.40.0', overwrite: true, cores: 4);
 print_r(CmdStan\cmdstan_make_local(cppOptions: ['CXXFLAGS' => '-O3']));
 ```
 
-`releaseUrl` accepts an HTTPS `.tar.gz` URL and `releaseFile` a local tarball. The version is then read from the archive's top-level `cmdstan-*` directory. `cppOptions` are written to `make/local` before building. The installer refuses to replace an existing version unless `overwrite: true`; the old installation is moved aside and deleted only after the new build succeeds, and a failed build restores it. `cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`. curl, tar, make, internet access, disk space, and sufficient memory are needed. Versions are explicit so an application does not unexpectedly change its statistical backend. `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on the selected installation; only call it when you intend to rebuild that toolchain.
+`releaseUrl` accepts an HTTPS `.tar.gz` URL and `releaseFile` a local tarball. The version is then read from the archive's top-level `cmdstan-*` directory. `cppOptions` are written to `make/local` before building. `copyMakeLocal: true` first copies the `make/local` of the CmdStan in use into the new installation, so it is built the same way; `null`, the default, asks in an interactive terminal and otherwise does not copy. The installer refuses to replace an existing version unless `overwrite: true`; the old installation is moved aside and deleted only after the new build succeeds, and a failed build restores it. `cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`. It skips lines that already apply and writes `NAME=` for a `false` option. curl, tar, make, internet access, disk space, and sufficient memory are needed. Versions are explicit so an application does not unexpectedly change its statistical backend. `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on the selected installation; only call it when you intend to rebuild that toolchain.
 
 ## Compile a model
 
 ```php
-$model = CmdStan\cmdstan_model('model.stan', cppOptions: ['STAN_THREADS' => true]);
-$model->checkSyntax(stancOptions: ['warn-pedantic' => true]);
-$model->compile(forceRecompile: true, cores: 2);
+CmdStan\check_syntax_stan_file('model.stan', pedantic: true);
+$model = CmdStan\cmdstan_model('model.stan', cppOptions: ['STAN_THREADS' => true], quiet: false);
 ```
 
-Executables and generated headers live beside the Stan source. Use a source directory without whitespace or make metacharacters. Data and output paths can contain spaces. Source changes trigger compilation; changes in included Stan files should use `forceRecompile: true`. Changes in the selected CmdStan installation or stanc/C++ options force a model rebuild; a fingerprint receipt beside the executable tracks those settings. Switching shared CmdStan settings may require `rebuild_cmdstan()`.
+`cmdstan_model()` compiles the model, or reuses an up-to-date executable, before it returns. There is no separate `compile()` step. The executable goes beside the Stan source, or in `dir`. Compiling also writes a hidden build record beside the executable, such as `.bernoulli.cmdstanphp.json` beside `bernoulli`. The record holds the hashes of the Stan program and its `#include` files, the user header, and `make/local`, the `cppOptions` and `stancOptions`, and the CmdStan installation that built the executable. The next `cmdstan_model()` call rebuilds exactly when one of these changed, and `quiet: false` says why. A missing or unreadable record also causes a rebuild. Builds run on a temporary copy of the program and are installed by rename, so a failed build leaves the previous executable and its record in place.
 
-If you already have an executable, supply `exeFile` and `compile: false` along with its Stan source. `compile()` requires an executable with the source's basename.
+Some changes cannot be detected, such as a new C++ compiler, a makefile included from `make/local`, or a header included from the user header. Compiling prints a note about the last two. Use `forceRecompile: true` after such a change. Switching shared CmdStan settings may require `rebuild_cmdstan()`.
+
+Running a model whose executable is out of date, for example after the Stan file was edited, throws `StaleExecutableException`. `$model->isCurrent()` checks first, and `$model->buildInfo()` shows how the executable was built.
+
+If your `.gitignore` ignores model executables, add `.*.cmdstanphp.json` too. The record uses CmdStanR's format under a different name, so CmdStanR's `.<exe>.cmdstanr.json` and this package's record never overwrite each other.
+
+To use an executable without its Stan program, pass `exeFile` alone, as in `cmdstan_model(exeFile: 'bin/bernoulli')`. Nothing is built, and the build arguments are refused. `stanFile` and `exeFile` cannot be combined. `compile_stan_file('model.stan')` builds an executable without creating a model object and returns its path.

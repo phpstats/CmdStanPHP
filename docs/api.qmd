@@ -8,65 +8,74 @@ All classes and functions are in the `CmdStan` namespace. Standalone functions k
 
 | Function | Purpose |
 | --- | --- |
-| `cmdstan_model(stanFile, compile: true, exeFile: null, stancOptions: [], cppOptions: [], forceRecompile: null)` | Construct and optionally compile a model |
+| `cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)` | Compile a model, or reuse its up-to-date executable, and return it ready to run |
+| `compile_stan_file(stanFile, ...)` | Compile a Stan file, or reuse its up-to-date executable, without a model object; returns the executable path. Takes `cmdstan_model()`'s build arguments |
+| `check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)` | Check a Stan file's syntax with stanc; throws on an error |
+| `format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` | Return the formatted program; `overwriteFile` rewrites the file and keeps a `.bak-YYYYMMDDHHMMSS` copy unless `backup: false` |
+| `variables_stan_file(stanFile, includePaths: null)` / `print_stan_file(stanFile, lineNumbers: null)` | Read a Stan file's declarations, or print it, without compiling |
+| `stan_build_info(exeFile)` | How an executable was built, from its build record, and what it reports about itself |
 | `set_cmdstan_path(path)` / `cmdstan_path()` | Select/read CmdStan installation |
 | `cmdstan_version()` | Read installed release version |
 | `check_cmdstan_toolchain()` | Return paths and versions of make, CmdStan's C++ compiler, and stanc; throws when make or the compiler is missing. It does not prove a compilation will succeed |
-| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true)` | Download or unpack and build a release (see the installation guide) |
+| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)` | Download or unpack and build a release (see the installation guide) |
 | `cmdstan_make_local(dir: null, cppOptions: [], append: true)` | Read or write CmdStan's `make/local` |
 | `rebuild_cmdstan(cores: null, timeout: null)` | Clean and rebuild selected CmdStan |
 | `options(set: [])` / `cmdstan_option(name, default: null)` | Set global options, returning previous values, or read one option |
 | `write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')` | Write Stan source to `model_<hash>.stan`, reusing identical files |
-| `write_stan_json(data, file)` | Write numeric data/initialization/metric JSON; `data` may also be a `StanData` or a table |
-| `read_cmdstan_csv(files)` / `as_cmdstan_fit(files)` | Import one or more CmdStan CSV files into a typed fit |
+| `write_stan_json(data, file, alwaysDecimal: false, variables: null)` | Write data, initialization, or metric JSON; `data` may also be a `StanData` or a table. With `variables` (stanc's declarations, such as `$model->variables()['data']`), `int` variables are written as integers and tuples as Stan's `{"1": ..., "2": ...}` objects |
+| `read_cmdstan_csv(files)` / `as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)` | Import one or more CmdStan CSV files (`.csv`, `.csv.gz`, or `.csv.bz2`) into a typed fit. `variables` reads only those variables, and `format` sets the fit's default draws format |
 | `read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)` | Return CmdStanR's `read_cmdstan_csv()` list shape |
 | `draws_to_csv(chains, dir)` | Export `[chain][iteration][variable]` associative draw rows to separate CSV files |
 | `mcmc_trace`, `mcmc_hist`, `mcmc_dens`, `mcmc_dens_overlay`, `mcmc_intervals`, `mcmc_rank_hist`, `mcmc_scatter`, `mcmc_acf`, `pareto_k_plot` | Return a `Figure` named after its bayesplot or loo counterpart; see the inference guide |
 | `cmdstanr_example(example: 'logistic', method: 'sample', ...options)` / `print_example_program(example)` | Run or print the `logistic`, `schools`, or `schools_ncp` example |
 
-`read_sample_csv()`, `write_stan_tempfile()`, and `num_threads()` remain as deprecated CmdStanR names.
+`num_threads()` remains as a deprecated CmdStanR name. CmdStanR 1.0 removed `read_sample_csv()` and `write_stan_tempfile()`, and this package no longer has them.
 
 ### Global options
 
-`options()` accepts `cmdstanr_output_dir`, `cmdstanr_write_stan_file_dir`, `cmdstanr_force_recompile`, `cmdstanr_draws_format`, `cmdstanr_warn_inits`, `cmdstanr_verbose`, `cmdstanr_no_ver_check`, `cmdstanr_max_rows`, `cmdstanr_print_line_numbers`, `mc.cores`, and `cmdstanphp_example_dir`. A `null` value unsets an option. Unknown names and values of the wrong type throw. `mc.cores` sets the default `parallel_chains` and installer core count.
+`options()` accepts `cmdstanr_output_dir`, `cmdstanr_write_stan_file_dir`, `cmdstanr_force_recompile`, `cmdstanr_draws_format`, `cmdstanr_warn_inits`, `cmdstanr_verbose`, `cmdstanr_no_ver_check`, `cmdstanr_max_rows`, `cmdstanr_print_line_numbers`, `cmdstanr_compress`, `cmdstanr_progress_bar`, `cmdstanr_save_metric`, `cmdstanr_save_config`, `cmdstanr_spinner`, `mc.cores`, and `cmdstanphp_example_dir`. A `null` value unsets an option. Unknown names and values of the wrong type throw. `mc.cores` sets the default `parallel_chains` and installer core count. `cmdstanr_compress` (`'none'`, `'gzip'`, or `'bzip2'`) is the fitting methods' default `compress`, `cmdstanr_progress_bar` is `sample()`'s default `show_progress_bar`, `cmdstanr_save_metric` is `sample()`'s default `save_metric`, and `cmdstanr_save_config` is the default `save_cmdstan_config`. `cmdstanr_spinner` is accepted and has no effect.
 
-Data arrays use named PHP arrays at the top level and zero-indexed lists for Stan arrays, vectors, and matrices. Boolean values become 0/1. Matrices are rows of rows, with no R column-major conversion. Empty top-level data becomes `{}`. Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected.
+Data arrays use named PHP arrays at the top level and zero-indexed lists for Stan arrays, vectors, and matrices. Boolean values become 0/1. Matrices are rows of rows, with no R column-major conversion. Empty top-level data becomes `{}`. Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected. The fitting methods write data with the model's declarations, so every declared data variable is required, `int` variables are written as integers (a non-integer is truncated with a warning), a single value for a one-dimensional array becomes a one-element array, and a tuple is passed as a list of its elements. Complex numbers are `[re, im]` pairs. Errors name the variable.
 
 ## Model methods
 
-`stanFile()`, `exeFile()`, `hppFile()`, and `code()` return paths or source text. `exposeFunctions(timeout: null)` compiles the model's user-defined functions and returns a `StanFunctions` object; `functions()` returns it afterwards. `modelName()`, `hasStanFile()`, `cppOptions()`, and `includePaths()` expose model identity and recorded compiler settings. `print(lineNumbers: false)` writes source to stdout. `saveHppFile(dir)` copies the generated header. `variables()` returns stanc's JSON information for source-level declarations and dimensions. `format(overwriteFile: false, stancOptions: [])` returns formatted Stan and optionally overwrites the source. `checkSyntax(stancOptions: [])` throws on invalid Stan and returns true on success.
+`cmdstan_model()` and `new CmdStanModel()` take the same arguments. They compile the model, or reuse an up-to-date executable, before they return. Give `stanFile`, whose executable goes beside it or in `dir`, or `exeFile` alone to use an existing executable. The two cannot be combined, and a model from `exeFile` alone refuses the build arguments, because there is nothing to build. A hidden build record beside the executable, `.<exe>.cmdstanphp.json`, records the Stan program and its `#include` files, the user header, `cppOptions`, `stancOptions`, `make/local`, and the CmdStan that built the executable. The model is rebuilt exactly when one of these changed. `quiet: false` (or the `cmdstanr_verbose` option) reports whether and why it compiles, and `forceRecompile: true` rebuilds anyway. The installation guide describes [builds and build records](installation.qmd#compile-a-model).
 
-`compile(forceRecompile: null, stancOptions: [], cppOptions: [], cores: 1, timeout: null)` compiles via CmdStan's makefile and returns the model. Compiler options use associative arrays, e.g. `['warn-pedantic' => true]` or `['STAN_THREADS' => true]`. Make values containing command expansions or shell metacharacters are rejected. stanc option values with whitespace are not supported. Changing options removes stale model artifacts before rebuilding.
+`cppOptions` are named make variables, such as `['STAN_THREADS' => true]`. Names are uppercased, `true` becomes `true`, and `false` turns an option off even when `make/local` turns it on. Unnamed entries are rejected; use `cmdstan_make_local()` for other make lines. `stancOptions` take flags and values, such as `['O1', 'canonicalize' => 'deprecations', 'max-line-length' => 78]`, and values may contain spaces or quotes. Flags that have their own argument are rejected: use `includePaths`, `pedantic`, `userHeader`, or `cppOptions: ['STAN_OPENCL' => true]` instead. Make values containing command expansions or shell metacharacters are rejected.
+
+`stanFile()`, `exeFile()`, `hppFile()`, and `code()` return paths or source text. `code()` is the program as it was when the model was created, and `hppFile()` writes the generated C++ to a temporary file on first use; both are null for a model from `exeFile` alone. `exposeFunctions(timeout: null, quiet: false)` compiles the model's user-defined functions and returns a `StanFunctions` object; `functions()` returns it afterwards. `modelName()`, `hasStanFile()`, `cppOptions()`, `stancOptions()`, `includePaths()`, and `userHeader()` expose model identity and the recorded build settings. `cppOptions()` returns make variables and values, so `['stan_threads' => true]` comes back as `['STAN_THREADS' => 'true']`. `cmdstanVersion()` is the version of CmdStan that built the executable, and `reportedFeatures()` is what the executable reports about its build (`stan_threads`, `stan_mpi`, `stan_opencl`, `stan_no_range_checks`, and `stan_version`). `buildInfo()` combines the record and the reported features, as `stan_build_info()` does. `isCurrent()` returns false when the executable is out of date. `print(lineNumbers: null)` writes source to stdout. `saveHppFile(dir)` copies the generated header. `variables()` returns the program's `data`, `parameters`, `transformed_parameters`, and `generated_quantities` declarations from stanc. `format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` returns the formatted program and optionally rewrites the source; create the model again to pick up the rewritten file. `checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)` throws on invalid Stan and returns true on success. `cmdstanDefaults(method: 'sample')` returns CmdStan's default argument values for `sample`, `optimize`, `variational`, `pathfinder`, or `laplace`, read from `<exe> <method> help-all` and named as this package's options.
+
+Every run first checks that the executable is still the one the model built, from the current program. A changed Stan file, include, user header, `make/local`, or CmdStan throws `StaleExecutableException` with the reasons; call `cmdstan_model()` again to rebuild. The Stan file must therefore exist whenever the model runs. When none of the files' status has changed, the check skips hashing and stanc.
 
 | Method | Fit type | Required CmdStan |
 | --- | --- | --- |
-| `sample()` / `sampleMpi()` | `CmdStanMCMC` | 2.31+ supported baseline |
-| `optimize()` | `CmdStanMLE` | 2.31+ |
-| `variational()` | `CmdStanVB` | 2.31+ |
-| `pathfinder()` | `CmdStanPathfinder` | 2.33+ |
-| `laplace()` | `CmdStanLaplace` | 2.32+ |
-| `generateQuantities(fittedParams, ...)` | `CmdStanGQ` | 2.31+ |
-| `diagnose()` | `CmdStanDiagnose` | 2.31+ |
-| `logProb()` | `CmdStanFit` | 2.31+ |
+| `sample()` / `sampleMpi()` | `CmdStanMCMC` | 2.37+ |
+| `optimize()` | `CmdStanMLE` | 2.37+ |
+| `variational()` | `CmdStanVB` | 2.37+ |
+| `pathfinder()` | `CmdStanPathfinder` | 2.37+ |
+| `laplace()` | `CmdStanLaplace` | 2.37+ |
+| `generateQuantities(fittedParams, ...)` | `CmdStanGQ` | 2.37+ |
+| `diagnose()` | `CmdStanDiagnose` | 2.37+ |
+| `logProb()` | `CmdStanFit` | 2.37+ |
 
-The CI version targets are 2.37 and 2.40. Availability of individual options remains determined by the selected CmdStan; options added in newer releases can fail on older releases with CmdStan's error message.
+CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. `set_cmdstan_path()` refuses an older installation, discovery skips one, and `install_cmdstan()` rejects older versions. The CI version targets are 2.37 and 2.40. Availability of individual options remains determined by the selected CmdStan; options added in newer releases can fail on older releases with CmdStan's error message.
 
 ### Shared options
 
-`data`, `seed`, `refresh`, `init`, `output_dir`, `output_basename`, `sig_figs`, `threads`, `threads_per_chain`, `num_threads`, `opencl_ids`, `show_messages`, `show_exceptions`, `save_latent_dynamics`, `save_cmdstan_config`, `timeout`.
+`data`, `seed`, `refresh`, `init`, `output_dir`, `output_basename`, `sig_figs`, `opencl_ids`, `show_messages`, `show_exceptions`, `save_cmdstan_config`, `timeout`. Every method except `diagnose()` and `logProb()` also takes `compress`.
 
-`init` additionally accepts a fit object (see the inference guide). Deprecated CmdStanR names are mapped with an `E_USER_DEPRECATED` notice: on `sample()`, `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`; on `optimize()`, `laplace()`, and `logProb()`, `jacobian_adjustment`.
+`init` additionally accepts a fit object (see the inference guide). The CmdStanR names that CmdStanR 1.0 removed are unknown options here too: `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, and the `jacobian_adjustment` argument.
 
-Thread options are aliases, with precedence `threads_per_chain`, `threads`, then `num_threads`. Prefer the argument appropriate to the method. `sig_figs` is 1–18. `opencl_ids` contains platform/device IDs and requires an OpenCL build. `output_basename` contains only letters, numbers, dots, underscores, and hyphens. `save_latent_dynamics` creates auxiliary diagnostic CSVs; these may be empty for some algorithms. `save_cmdstan_config` requests CmdStan configuration JSON beside the CSVs.
+The thread option depends on the method: `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for `optimize()`, `variational()`, `pathfinder()`, and `laplace()`. `pathfinder()` still accepts `num_threads` with an `E_USER_DEPRECATED` notice. Asking for more than one thread from an executable built without threading is an error. `compress` (`'none'`, `'gzip'`, or `'bzip2'`; default: the `cmdstanr_compress` option) compresses the output and latent-dynamics CSVs after the run. `sig_figs` is 1–18. `opencl_ids` contains platform/device IDs and requires an OpenCL build. `output_basename` contains only letters, numbers, dots, underscores, and hyphens. `save_latent_dynamics`, a `sample()` and `variational()` option, creates auxiliary diagnostic CSVs. `save_cmdstan_config` requests CmdStan configuration JSON beside the CSVs.
 
 ### Method-specific options
 
-- **sample:** `chains` (default 4), `parallel_chains` (default 1), `chain_ids`, `iter_warmup`, `iter_sampling`, `save_warmup`, `thin`, `max_treedepth`, `adapt_engaged`, `adapt_delta`, `step_size`, `metric`, `metric_file`, `inv_metric`, `init_buffer`, `term_buffer`, `window`, `fixed_param`, `save_metric`, `diagnostics`.
-- **optimize:** `algorithm`, `jacobian`, `init_alpha`, `iter`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `save_iterations`.
-- **variational:** `algorithm`, `iter`, `grad_samples`, `elbo_samples`, `eta`, `adapt_engaged`, `adapt_iter`, `tol_rel_obj`, `eval_elbo`, `output_samples`, `draws` (alias for `output_samples`).
-- **pathfinder:** `init_alpha`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `single_path_draws`, `draws`, `num_paths`, `max_lbfgs_iters`, `num_elbo_draws`, `save_single_paths`, `psis_resample`, `calculate_lp`.
-- **laplace:** `mode`, `opt_args`, `jacobian` (default true), `draws`, `calculate_lp`.
-- **generate_quantities:** required `fittedParams` is a fit, filename, or filename list; `parallel_chains` controls concurrency.
+- **sample:** `threads_per_chain`, `save_latent_dynamics`, `show_progress_bar`, `chains` (default 4), `parallel_chains` (default 1), `chain_ids`, `iter_warmup`, `iter_sampling`, `save_warmup`, `thin`, `max_treedepth`, `adapt_engaged`, `adapt_delta`, `step_size`, `metric`, `metric_file`, `inv_metric`, `init_buffer`, `term_buffer`, `window`, `fixed_param`, `save_metric`, `diagnostics`.
+- **optimize:** `threads`, `algorithm`, `jacobian`, `init_alpha`, `iter`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `save_iterations`.
+- **variational:** `threads`, `save_latent_dynamics`, `algorithm`, `iter`, `grad_samples`, `elbo_samples`, `eta`, `adapt_engaged`, `adapt_iter`, `tol_rel_obj`, `eval_elbo`, `draws` (CmdStan's `output_samples`).
+- **pathfinder:** `threads`, `init_alpha`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `single_path_draws`, `draws`, `num_paths`, `max_lbfgs_iters`, `num_elbo_draws`, `save_single_paths`, `psis_resample`, `calculate_lp`.
+- **laplace:** `threads`, `mode`, `opt_args`, `jacobian` (default true), `draws`, `calculate_lp`.
+- **generate_quantities:** required `fittedParams` is a fit, filename, or filename list; `threads_per_chain`; `parallel_chains` controls concurrency.
 - **diagnose:** `epsilon`, `error` for finite-difference gradient checks.
 - **log_prob:** exactly one of `unconstrained_params`, `constrained_params`, and optional `jacobian`.
 
@@ -83,35 +92,35 @@ Thread options are aliases, with precedence `threads_per_chain`, `threads`, then
 - `metadata()`, `chainMetadata()`, `variables()`, `numChains()`, `numDrawsSampling()`, `numDrawsWarmup()`: inspect parsed CSV.
 - `stepSize()`, `invMetric(matrix: true)`: adaptation results, one entry per chain.
 - `time()`: per-chain warmup, sampling, and total time when available.
-- `output()`, `returnCodes()`: captured console output and process status. Imported fits have no process logs or status codes.
+- `output()`, `returnCodes()`, `command()`: captured console output, process status, and the shell-quoted command line of each process. `command()` leaves out `STAN_NUM_THREADS` and an MPI launcher. Imported fits have none of these.
+- `init()`: the initial values each process used, read from the init files. `materialize()` reads the draws, initial values, and profiles into memory, so the fit no longer needs its files.
 - `outputFiles()`, `latentDynamicsFiles()`, `profileFiles()`, `profiles()`: output paths and parsed profiling data. The file accessors accept `includeFailed` for CmdStanR compatibility; fits only contain successful runs. Latent-dynamics and profile accessors throw when no such files exist.
 - `dataFile()`, `configFiles()`, `metricFiles()`, `cmdstanConfig()`, `metric()`: data and auxiliary JSON paths and their decoded contents. Imported fits use the data file recorded in the CSV when it still exists.
 - `code()`, `numProcs()`, `lp()`, `cmdstanSummary()`: stored source, number of processes, log-density matrix, and native text summary. Imported CSV fits do not include source code.
-- `saveOutputFiles()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveDataFile()`, `saveConfigFiles()`, `saveMetricFiles()`: each takes `dir: '.', basename: null, timestamp: true, random: true` and names files `basename-YYYYmmddHHMM-id-xxxxxx.ext` as CmdStanR does. Files created by the run are moved; imported and user-supplied files are copied. Existing destinations are never overwritten.
-- `saveObject(file)`: serialize parsed fit data (and native MCMC summary statistics) to a PHP object file.
+- `saveOutputFiles()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveDataFile()`, `saveConfigFiles()`, `saveMetricFiles()`: each takes `dir: '.', basename: null, timestamp: true, random: true` and names files `basename-YYYYmmddHHMM-id-xxxxxx.ext` as CmdStanR does, with ids padded to at least two digits. `saveOutputFiles()` and `saveLatentDynamicsFiles()` also take `compress` (null keeps the current compression). Files created by the run are moved. Imported files and the data file are copied. Existing destinations are never overwritten.
+- `saveObject(file)`: materialize the fit, then serialize it (with native MCMC summary statistics) to a PHP object file.
 - `print(variables: null, maxRows: null)`: emit summary JSON to stdout, limited to `cmdstanr_max_rows` (default 10) variables.
 - `drawsColumns()`, `summaryColumns()`, `drawsTable()`, `summaryTable()`: column-oriented draws and summaries for data frames; see [data frames](#data-frames-and-the-phpstats-family).
 
 ### Model methods
 
-These methods need PHP FFI. The first call compiles a shared library for the fit's model and data; `initModelMethods(seed: 1, verbose: false, hessian: false, model: null)` does this explicitly. Imported CSV fits must pass `model:`.
+These methods need PHP FFI. The first call compiles a shared library for the fit's model and data; `initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)` does this explicitly. `data` binds other data, such as the data of a fit reloaded after its data file is gone, and `dataFile()` then points to it. Imported CSV fits must pass `model:`. A model from `exeFile` alone has no Stan program to build them from.
 
 - `logProb(unconstrainedVariables, jacobian: true)`: log density with constants dropped.
 - `gradLogProb(...)`: `['log_prob' => float, 'gradient' => list]`.
 - `hessian(...)`: `['log_prob' => float, 'grad_log_prob' => list, 'hessian' => rows]`.
-- `unconstrainVariables(variables)`: a flat unconstrained list from parameter values keyed by name.
+- `unconstrainVariables(variables)`: a flat unconstrained list from parameter values keyed by name, structured as `constrainVariables()` returns them.
 - `unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)`: the fit's draws, another set of CSV files, or `draws_df` rows, in unconstrained space.
-- `constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)`: variables keyed by name as nested arrays.
-- `variableSkeleton(transformedParameters: true, generatedQuantities: true)`: variable name to dimension list.
+- `constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)`: variables keyed by name as nested arrays, with tuples as lists of their elements and complex values as `[re, im]`.
 - `exposeFunctions(timeout: null)` / `functions()`: the model's user-defined functions.
 
-`jacobianAdjustment` is accepted as a deprecated alias of `jacobian`. `CmdStan\ModelMethods` and `CmdStan\StanFunctions` can also be used directly with a Stan file.
+`CmdStan\ModelMethods` and `CmdStan\StanFunctions` can also be used directly with a Stan file.
 
 ### Method-specific fit methods
 
-`CmdStanMCMC` adds `loo(variables: 'log_lik', rEff: true, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`; LOO also returns `diagnostics` with Pareto k values. `momentMatch: true` needs model methods and the `phit` posterior-draw kernels, and adds a `moment_match` key; see the inference guide.
+`CmdStanMCMC` adds `loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`. `rEff: false`, CmdStanR 1.0's default, skips the relative efficiencies; `rEff: true` computes them. LOO also returns `diagnostics` with Pareto k values. `momentMatch: true` needs model methods and the `phit` posterior-draw kernels, and adds a `moment_match` key; see the inference guide.
 
-`CmdStanMLE` adds `mle()`/`optimizedParams()` (final optimizer row) and `lp()`; its `summary()` returns `variable`/`estimate` rows, matching CmdStanR's optimization summary. `CmdStanVB` adds `variationalMean()` and `lpApprox()`. Pathfinder and Laplace also expose `lpApprox()`; Laplace exposes `mode()`, and generated quantities fits expose `fittedParamsFiles()`. `CmdStanPathfinder` adds `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, and `singlePathDiagnostics()` for runs with `save_single_paths: true`. `CmdStanDiagnose` adds `gradients()` (gradient-check console output).
+`CmdStanMLE` adds `mle()`/`optimizedParams()` (the estimates by variable, without `lp__`) and `lp()`; its `summary()` returns `variable`/`estimate` rows, matching CmdStanR's optimization summary. `CmdStanVB` adds `variationalMean()` and `lpApprox()`, the approximation's log density at each draw as one list in draw order. Pathfinder and Laplace also expose `lpApprox()`; Laplace exposes `mode()`, and generated quantities fits expose `fittedParamsFiles()`. `CmdStanPathfinder` adds `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, and `singlePathDiagnostics()` for runs with `save_single_paths: true`, and lists `lp_approx__` and `path__` among its variables. `CmdStanDiagnose` adds `gradients()` (gradient-check console output).
 
 ### Statistics helpers
 
@@ -131,7 +140,7 @@ Every `data` argument (`sample()`, `sampleMpi()`, `optimize()`, `variational()`,
 | bool | 0/1 integers |
 | list cells | Nested arrays, which must be rectangular |
 | factor | 1-based integer indices in level order, plus `J_<name>`, the number of levels |
-| string | A factor with sorted unique levels (`strcmp` order, as phibble's and R's `factor()` defaults) |
+| string | Rejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes |
 | null, dates, other objects | Rejected with the column name and row, because Stan data has no missing values |
 
 Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them since phibble [93858fa](https://github.com/phpstats/phibble/commit/93858fa); add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
@@ -219,4 +228,4 @@ The family packages target PHP 8.5. CmdStanPHP keeps PHP 8.2 support and require
 
 ## Errors
 
-Invalid PHP data or options throw `InvalidArgumentException`. Missing files/toolchain, timeouts, and malformed CSV throw runtime errors. A nonzero command exit throws `ProcessException`, whose public readonly properties are `command`, `exitCode`, `stdout`, and `stderr`. A failing chain terminates other active chains; partial output files remain available for investigation. Partial outputs are not returned as a successful fit.
+Invalid PHP data or options throw `InvalidArgumentException`. Missing files/toolchain, timeouts, and malformed CSV throw runtime errors. Running an out-of-date executable throws `StaleExecutableException`. A nonzero command exit throws `ProcessException`, whose public readonly properties are `command`, `exitCode`, `stdout`, and `stderr`. A failing chain terminates other active chains; partial output files remain available for investigation. CmdStan processes still running when PHP shuts down are terminated. Partial outputs are not returned as a successful fit.
