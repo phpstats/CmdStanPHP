@@ -42,8 +42,12 @@ function check_cmdstan_toolchain(): array { return CmdStan::checkToolchain(); }
 function options(array $set = []): array { return CmdStan::setOptions($set); }
 /** Reads one option, like R's getOption(name, default). */
 function cmdstan_option(string $name, mixed $default = null): mixed { return CmdStan::option($name, $default); }
-/** $data may also be a StanData or a table such as a phibble DataFrame; see StanData. */
-function write_stan_json(array|object $data, string $file): string { return StanJson::write($data, $file); }
+/**
+ * $data may also be a StanData or a table such as a phibble DataFrame; see StanData. With variables (stanc --info
+ * declarations, such as $model->variables()['data']) int variables are written as integers and tuples as Stan's
+ * {"1": ..., "2": ...} objects; see StanJson.
+ */
+function write_stan_json(array|object $data, string $file, bool $alwaysDecimal = false, ?array $variables = null): string { return StanJson::write($data, $file, $alwaysDecimal, $variables); }
 /**
  * Writes Stan code (a string or list of lines) to $file, or to dir/basename where dir defaults to the cmdstanr_write_stan_file_dir
  * option or the system temporary directory and basename to model_<hash>.stan. An identical existing file is left untouched
@@ -66,7 +70,15 @@ function write_stan_file(string|array $code, ?string $file = null, ?string $dir 
 function read_cmdstan_csv(array|string $files): CmdStanFit { return CmdStanFit::fromCsv((array)$files); }
 /** CmdStanR's read_cmdstan_csv() list shape; see CmdStanFit::readCmdStanCsv(). */
 function read_cmdstan_csv_list(array|string $files, array|string|null $variables = null, array|string|null $samplerDiagnostics = null, ?string $format = null): array { return CmdStanFit::readCmdStanCsv((array)$files, $variables, $samplerDiagnostics, $format); }
-function as_cmdstan_fit(array|string $files): CmdStanFit { return read_cmdstan_csv($files); }
+/**
+ * CmdStanR 1.0's as_cmdstan_fit(): a fit from CmdStan CSV files (.csv, .csv.gz or .csv.bz2). With variables, only those
+ * variables are read and listed in metadata()['variables'] and draws(); checkDiagnostics: false also skips the sampler
+ * diagnostics; format sets the fit's default draws format.
+ */
+function as_cmdstan_fit(array|string $files, array|string|null $variables = null, bool $checkDiagnostics = true, ?string $format = null): CmdStanFit
+{
+    return CmdStanFit::fromCsv((array)$files, $variables === null ? null : (array)$variables, $checkDiagnostics, $format);
+}
 /** @deprecated Use the fit's metadata(). Returns STAN_NUM_THREADS, or null when unset. */
 function num_threads(): ?int
 {

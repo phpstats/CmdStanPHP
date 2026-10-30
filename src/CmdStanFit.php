@@ -19,12 +19,12 @@ class CmdStanFit
     {
         return match ($method) { 'sample' => CmdStanMCMC::class, 'optimize' => CmdStanMLE::class, 'variational' => CmdStanVB::class, 'pathfinder' => CmdStanPathfinder::class, 'laplace' => CmdStanLaplace::class, 'generate_quantities' => CmdStanGQ::class, 'diagnose' => CmdStanDiagnose::class, default => self::class };
     }
-    public static function fromCsv(array $files): self
+    public static function fromCsv(array $files, ?array $variables = null, bool $checkDiagnostics = true, ?string $format = null): self
     {
         if ($files === []) { throw new \InvalidArgumentException('At least one CSV is required.'); }
-        $parsed = array_map(Csv::read(...), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
+        $parsed = array_map(fn($file) => Csv::read($file, $variables, $checkDiagnostics), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
         foreach ($parsed as $csv) { if (($csv['metadata']['method'] ?? 'sample') !== $method || $csv['variables'] !== $parsed[0]['variables']) { throw new \InvalidArgumentException('CSV files must share method and columns.'); } }
-        $class = self::classForMethod($method); $fit = new $class($files, $method); $fit->csv = $parsed;
+        $class = self::classForMethod($method); $fit = new $class($files, $method, context: $format === null ? [] : ['draws_format' => $format]); $fit->csv = $parsed;
         return $fit;
     }
     protected function parsed(): array
@@ -101,6 +101,7 @@ class CmdStanFit
             if ($values !== []) { $meta[$key] = $values; }
         }
         $meta['id'] = $this->procIds();
+        if (($meta['method'] ?? 'sample') === 'sample') { $meta['num_chains'] = count($chains); }
         if (isset($meta['seed']) && count(array_unique($meta['seed'], SORT_REGULAR)) === 1) { $meta['seed'] = $meta['seed'][0]; }
         $meta['time'] = array_values(array_filter(array_column($chains, 'time')));
         $config = $this->configFiles() === [] ? [] : self::flattenConfig($this->cmdstanConfig()[0]);
@@ -127,7 +128,7 @@ class CmdStanFit
         if ($variables === null) { return $available; }
         $selected = [];
         foreach ((array)$variables as $v) {
-            $match = array_values(array_filter($available, fn($name) => $name === $v || str_starts_with($name, $v.'[')));
+            $match = array_values(array_filter($available, fn($name) => Csv::matches($name, $v)));
             if ($match === []) { throw new \InvalidArgumentException('Unknown variable: '.$v); }
             array_push($selected, ...$match);
         }
@@ -145,7 +146,7 @@ class CmdStanFit
     {
         return $this->extract($this->select(null, true), $format ?? $this->defaultFormat(), $incWarmup);
     }
-    private function defaultFormat(): string { return CmdStan::option('cmdstanr_draws_format') ?? ($this instanceof CmdStanMCMC || $this instanceof CmdStanGQ ? 'draws_array' : 'draws_matrix'); }
+    private function defaultFormat(): string { return $this->context['draws_format'] ?? CmdStan::option('cmdstanr_draws_format') ?? ($this instanceof CmdStanMCMC || $this instanceof CmdStanGQ ? 'draws_array' : 'draws_matrix'); }
     /** $part selects post-warmup 'draws', 'warmup', 'both', or the optimizer 'estimate'. */
     private function extract(array $variables, string $format, bool $incWarmup, ?string $part = null): array
     {
@@ -357,13 +358,13 @@ class CmdStanFit
     {
         return $this->profileFiles = $this->saveFiles($this->profileFiles(true), $dir, $this->saveArgs($basename, '-profile'), $this->procIds(), '.csv', $timestamp, $random, $this->context['owned'] ?? false);
     }
-    /** Data written from a PHP array is moved; a user-supplied data file is copied and left in place. */
+    /** Copies the data file (the original stays in place, as in CmdStanR 1.0) and points the fit at the copy. */
     public function saveDataFile(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): ?string
     {
         $file = $this->dataFile();
         if ($file === null) { return null; }
         $ext = pathinfo($file, PATHINFO_EXTENSION);
-        return $this->context['data_file'] = $this->saveFiles([$file], $dir, $this->saveArgs($basename), null, $ext === '' ? '' : '.'.$ext, $timestamp, $random, ($this->context['owned'] ?? false) && ($this->context['data_owned'] ?? false))[0];
+        return $this->context['data_file'] = $this->saveFiles([$file], $dir, $this->saveArgs($basename), null, $ext === '' ? '' : '.'.$ext, $timestamp, $random, false)[0];
     }
     public function saveConfigFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true): array
     {
@@ -374,15 +375,29 @@ class CmdStanFit
         return $this->context['metric_files'] = $this->saveFiles($this->metricFiles(true), $dir, $this->saveArgs($basename, '-metric'), $this->procIds(), '.json', $timestamp, $random, $this->context['owned'] ?? false);
     }
     /**
-     * Compiles (or reuses) the in-process model-methods library via PHP FFI and binds it to the fit's data. Imported CSV
-     * fits must pass the model. Hessians are always available, so $hessian and $verbose are accepted only for CmdStanR parity.
+     * CmdStanR 1.0's init_model_methods(data, seed, verbose, quiet): compiles (or reuses) the in-process model-methods
+     * library via PHP FFI and binds it to data, by default the data the fit was run with. Pass data (an array, StanData,
+     * table or JSON file) for a fit reloaded after its data file is gone; the fit's dataFile() then points to it.
+     * Imported CSV fits must pass the model. The Hessian is always available.
      */
-    public function initModelMethods(int $seed = 1, bool $verbose = false, bool $hessian = false, ?CmdStanModel $model = null): void
+    public function initModelMethods(array|object|string|null $data = null, int $seed = 1, bool $verbose = false, bool $quiet = false, ?CmdStanModel $model = null): void
     {
-        if ($model !== null) { $this->context['stan_file'] = $model->stanFile(); unset($this->context['model_methods']); }
-        if (isset($this->context['model_methods'])) { return; }
+        if ($model !== null) {
+            $this->context['stan_file'] = $model->stanFile() ?? throw new \RuntimeException('Model methods cannot be used with a model created from an executable alone. There is no Stan program to compile them from.');
+            $this->context['stanc_options'] = $model->nativeStancOptions(); $this->context['variables'] = $model->variables(); unset($this->context['model_methods']);
+        }
+        if ($data === null && isset($this->context['model_methods'])) { return; }
         $stan = $this->context['stan_file'] ?? throw new \RuntimeException('Model methods need the Stan model; pass model: to initModelMethods() for imported CSVs.');
-        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $this->dataFile(), $seed);
+        if ($data !== null && !is_string($data)) {
+            $file = sys_get_temp_dir().'/standata-'.bin2hex(random_bytes(8)).'.json';
+            $data = StanJson::write($data, $file, isset($this->context['variables']), $this->context['variables']['data'] ?? null);
+        }
+        $file = $data ?? $this->dataFile();
+        if ($file !== null && !is_file($file)) {
+            throw new \RuntimeException("Can't find data file '".$file."', so the model methods can't be initialized.".($data === null ? ' Pass the data the fit was run with to initModelMethods() as data, or call saveDataFile() before saving a fit for a later session.' : ''));
+        }
+        $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $file, $seed);
+        if ($data !== null) { $this->context['data_file'] = realpath($file) ?: $file; }
     }
     private function methods(): ModelMethods { $this->initModelMethods(); return $this->context['model_methods']; }
     public function logProb(array $unconstrainedVariables, bool $jacobian = true): float { return $this->methods()->logProb($unconstrainedVariables, $jacobian); }
@@ -391,8 +406,8 @@ class CmdStanFit
     /** @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
     public function hessian(array $unconstrainedVariables, bool $jacobian = true): array { return $this->methods()->hessian($unconstrainedVariables, $jacobian); }
     public function unconstrainVariables(array $variables): array { return $this->methods()->unconstrainVariables($variables); }
+    /** Constrained values by variable, structured as Csv::unflatten() describes (tuples as lists, complex as [re, im]). */
     public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->constrainVariables($unconstrainedVariables, $transformedParameters, $generatedQuantities); }
-    public function variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->variableSkeleton($transformedParameters, $generatedQuantities); }
     /** Unconstrains this fit's draws, the draws in other CmdStan CSV files, or draws_df/draws_matrix rows, returned in a draws format. */
     public function unconstrainDraws(?array $files = null, ?array $draws = null, ?string $format = null, bool $incWarmup = false): array
     {
@@ -439,7 +454,7 @@ class CmdStanFit
             if ($wanted === null) { return $available; }
             $out = [];
             foreach (array_filter((array)$wanted, fn($v) => $v !== '') as $v) {
-                $match = array_values(array_filter($available, fn($name) => $name === $v || str_starts_with($name, $v.'[')));
+                $match = array_values(array_filter($available, fn($name) => Csv::matches($name, $v)));
                 if ($match === []) { throw new \InvalidArgumentException("Can't find the following variable(s) in the output: ".$v); }
                 array_push($out, ...$match);
             }

@@ -182,7 +182,7 @@ final class CmdStanModel
     /** What the executable reports about its build: stan_threads, stan_mpi, stan_opencl, stan_no_range_checks, stan_version. */
     public function reportedFeatures(): array { return Build::featureSummary($this->features); }
     /** Stan options for the in-process builds (exposed functions and model methods), in NativeBuild's form. */
-    private function nativeStancOptions(): array
+    public function nativeStancOptions(): array
     {
         $out = [];
         foreach ($this->configuration['stanc_options'] as $arg) { $parts = explode('=', substr($arg, 2), 2); $out[$parts[0]] = $parts[1] ?? true; }
@@ -361,14 +361,43 @@ final class CmdStanModel
         if (CmdStan::option('cmdstanr_warn_inits', true)) { foreach ($result['warnings'] as $warning) { fwrite(defined('STDERR') ? STDERR : fopen('php://stderr', 'w'), $warning['message']."\n"); } }
         return $result['inits'];
     }
+    /**
+     * Initial values as one CLI value per chain (or per Pathfinder path): a radius, init files, or JSON written from
+     * arrays, a callable (called exactly once per chain or path, with its id), or a fit. Null when init is unset.
+     */
+    private function initFiles(mixed $init, int $count, array $ids, string $dir, string $basename, ?array $parameters, ?int $seed): ?array
+    {
+        if ($init === null) { return null; }
+        if ($init instanceof CmdStanFit) { $init = $this->initsFromFit($init, $count, $seed); }
+        if (is_int($init) || is_float($init)) {
+            if (!is_finite((float)$init) || $init < 0) { throw new \InvalidArgumentException('init must be nonnegative, an input file, an array or callable.'); }
+            return [Options::scalar($init)];
+        }
+        if (is_string($init)) { return [$this->inputFile($init, $dir, 'init')]; }
+        if (is_callable($init)) {
+            $values = [];
+            foreach ($ids as $id) { $value = $init($id); if (!is_array($value) || array_is_list($value) && $value !== []) { throw new \InvalidArgumentException('If init is a function it must return a single array of initial values.'); } $values[] = $value; }
+            $init = $values;
+        }
+        if (!is_array($init)) { throw new \InvalidArgumentException('init must be nonnegative, an input file, an array or callable.'); }
+        if (!array_is_list($init)) { $init = array_fill(0, $count, $init); }
+        if ($init !== [] && count(array_filter($init, 'is_string')) === count($init)) {
+            if (count($init) !== 1 && count($init) !== $count) { throw new \InvalidArgumentException('If init is a list of files, its length must be 1 or equal to the number of chains or Pathfinder paths.'); }
+            return array_map(fn($file) => $this->inputFile($file, $dir, 'init'), $init);
+        }
+        if (count($init) !== $count) { throw new \InvalidArgumentException('init has the wrong length: give one set of initial values per '.($count === count($ids) && $ids === range(1, $count) ? 'chain or Pathfinder path' : 'chain').'.'); }
+        foreach ($init as $values) { if (!is_array($values) || $values === []) { throw new \InvalidArgumentException('init contains empty lists.'); } }
+        if (CmdStan::option('cmdstanr_warn_inits', true)) { $this->warnPartialInits(array_combine(range(1, $count), $init)); }
+        return array_map(fn($values, $id) => $this->inputFile($values, $dir, $basename.'-init-'.$id, $parameters), $init, $ids);
+    }
     private static function temporaryFile(string $suffix): string { return sys_get_temp_dir().'/cmdstanphp-'.bin2hex(random_bytes(8)).$suffix; }
-    private function inputFile(mixed $input, string $dir, string $name): ?string
+    private function inputFile(mixed $input, string $dir, string $name, ?array $variables = null, bool $alwaysDecimal = false): ?string
     {
         if ($input === null) { return null; }
         if (is_array($input)) {
             $file = $dir.'/'.$name.'.json';
             if (file_exists($file)) { throw new \RuntimeException('Input artifact already exists: '.$file); }
-            return StanJson::write($input, $file);
+            return StanJson::write($input, $file, $alwaysDecimal, $variables);
         }
         if (!is_string($input) || !is_file($input)) { throw new \InvalidArgumentException('Expected a data array, StanData, a table with toColumns(), or an existing input file.'); }
         return realpath($input);
@@ -394,10 +423,18 @@ final class CmdStanModel
         foreach ($ids as $id) {
             if (file_exists($dir.'/'.$basename.'-'.$id.'.csv')) { throw new \RuntimeException('Output already exists: '.$dir.'/'.$basename.'-'.$id.'.csv'); }
         }
+        $declarations = $this->stanFile === null ? null : $this->variables();
         $o['data'] = StanData::normalize($o['data'] ?? null);
-        $data = $this->inputFile($o['data'], $dir, $basename.'-data');
-        if (($o['init'] ?? null) instanceof CmdStanFit) { $o['init'] = $this->initsFromFit($o['init'], $chains, is_array($o['seed'] ?? null) ? $o['seed'][0] : ($o['seed'] ?? null)); }
-        $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = []; $initArrays = [];
+        if (is_array($o['data']) && $declarations !== null) {
+            $missing = array_diff(array_keys($declarations['data']), array_keys($o['data']));
+            if ($missing !== []) { throw new \InvalidArgumentException('Missing input data for the following data variables: '.implode(', ', $missing).'.'); }
+        }
+        $data = $this->inputFile($o['data'], $dir, $basename.'-data', $declarations['data'] ?? null, $declarations !== null);
+        // Pathfinder takes one initialization per path, the other methods one per chain.
+        $numInits = $method === 'pathfinder' ? ($o['num_paths'] ?? 4) : $chains;
+        $initIds = $method === 'pathfinder' ? range(1, $numInits) : $ids;
+        $initFiles = $this->initFiles($o['init'] ?? null, $numInits, $initIds, $dir, $basename, $declarations['parameters'] ?? null, is_array($o['seed'] ?? null) ? $o['seed'][0] : ($o['seed'] ?? null));
+        $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = [];
         foreach ($ids as $i => $id) {
             $local = $o; $file = $dir.'/'.$basename.'-'.$id.'.csv';
             if (file_exists($file)) { throw new \RuntimeException('Output already exists: '.$file); }
@@ -410,15 +447,7 @@ final class CmdStanModel
             $cmd = array_merge([$this->exeFile], Options::methodArgs($method, $local), ['id='.$id]);
             if ($data !== null) { array_push($cmd, 'data', 'file='.$data); }
             if (isset($o['seed'])) { array_push($cmd, 'random', 'seed='.(is_array($o['seed']) ? $o['seed'][$i] : $o['seed'])); }
-            if (isset($o['init'])) {
-                $init = $o['init'];
-                if (is_callable($init)) { $init = $init($id); }
-                elseif (is_array($init) && array_is_list($init) && $init !== []) { $init = $init[$i] ?? throw new \InvalidArgumentException('One init required per chain.'); }
-                if (is_array($init)) { $initArrays[$i + 1] = $init; $init = $this->inputFile($init, $dir, $basename.'-init-'.$id); }
-                elseif (is_string($init)) { $init = $this->inputFile($init, $dir, 'init'); }
-                elseif ((!is_int($init) && !is_float($init)) || !is_finite((float)$init) || $init < 0) { throw new \InvalidArgumentException('init must be nonnegative, an input file, an array or callable.'); }
-                $cmd[] = 'init='.Options::scalar($init);
-            }
+            if ($initFiles !== null) { $cmd[] = 'init='.($method === 'pathfinder' ? implode(',', $initFiles) : ($initFiles[$i] ?? $initFiles[0])); }
             if ($threads !== null) { $cmd[] = 'num_threads='.$threads; }
             if (isset($o['opencl_ids'])) { $cmd[] = 'opencl_platform_id='.$o['opencl_ids'][0]; $cmd[] = 'opencl_device_id='.$o['opencl_ids'][1]; }
             array_push($cmd, 'output', 'file='.$file);
@@ -427,7 +456,6 @@ final class CmdStanModel
             $profileFiles[] = $dir.'/'.$basename.'-'.$id.'-profile.csv'; $cmd[] = 'profile_file='.end($profileFiles);
             $jobs[] = ['command' => array_merge($launcher, $cmd), 'env' => $threads === null ? [] : ['STAN_NUM_THREADS' => (string)$threads]];
         }
-        if ($initArrays !== [] && CmdStan::option('cmdstanr_warn_inits', true)) { $this->warnPartialInits($initArrays); }
         if (CmdStan::option('cmdstanr_verbose', false)) { foreach ($jobs as $job) { echo implode(' ', $job['command'])."\n"; } }
         $results = Process::pool($jobs, min($chains, $o['parallel_chains'] ?? CmdStan::option('mc.cores', 1)), $o['timeout'] ?? null);
         foreach ($results as $r) {
@@ -435,7 +463,7 @@ final class CmdStanModel
             if ($o['show_exceptions'] ?? ($o['show_messages'] ?? true)) { echo $r['stderr']; }
         }
         $class = CmdStanFit::classForMethod($method);
-        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['code' => $this->code, 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->modelName(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->nativeStancOptions(), 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
+        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['code' => $this->code, 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->modelName(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->nativeStancOptions(), 'variables' => $declarations, 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
         $checks = array_key_exists('diagnostics', $o) ? ($o['diagnostics'] ?? []) : ['divergences', 'treedepth', 'ebfmi'];
         if ($method === 'sample' && !($o['fixed_param'] ?? false) && $checks !== []) { $fit->checkDiagnostics($checks); }
         return $fit;

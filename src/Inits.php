@@ -21,7 +21,7 @@ final class Inits
         if ($fit instanceof CmdStanMLE) { $rows = array_fill(0, $numProcs, $fit->mle()); $warnings = []; }
         elseif ($fit instanceof CmdStanMCMC) { $rows = $fit->draws(format: 'draws_df'); $rows = self::pick($rows, self::sampleNoReplace(array_fill(0, count($rows), 1.0), $numProcs, $rng)); $warnings = []; }
         elseif ($fit instanceof CmdStanPathfinder && !self::truthy(self::metadata($fit)['calculate_lp'] ?? true)) { $rows = $fit->draws(format: 'draws_df'); $rows = self::pick($rows, self::sampleNoReplace(array_fill(0, count($rows), 1.0), $numProcs, $rng)); $warnings = []; }
-        elseif ($fit instanceof CmdStanVB || $fit instanceof CmdStanLaplace || $fit instanceof CmdStanPathfinder) { [$rows, $warnings] = self::approximate($fit, $numProcs, $rng); }
+        elseif ($fit instanceof CmdStanVB || $fit instanceof CmdStanLaplace || $fit instanceof CmdStanPathfinder) { [$rows, $warnings] = self::approximate($fit, $numProcs, $rng, $parameters); }
         else { throw new \InvalidArgumentException('Initial values can only be created from MCMC, optimization, variational, Laplace or Pathfinder fits.'); }
         $result = self::fromDraws($rows, $numProcs, $parameters, $seed, $warnPartial);
         $result['warnings'] = array_merge($warnings, $result['warnings']);
@@ -50,18 +50,19 @@ final class Inits
     {
         $columns = [];
         foreach ($row as $name => $value) {
-            if (str_starts_with((string)$name, '.')) { continue; }
-            [$base] = Rvars::parseName((string)$name);
-            if ($parameters === null ? str_contains((string)$name, '__') : !isset($parameters[$base])) { continue; }
+            $name = (string)$name;
+            if (str_starts_with($name, '.')) { continue; }
+            $base = (string)preg_replace('/(\[|:).*$/s', '', $name);
+            if ($parameters === null ? str_ends_with($base, '__') : !isset($parameters[$base])) { continue; }
             $columns[$name] = (float)$value;
         }
-        $rvars = Rvars::fromDrawsDf([$columns]); $names = $parameters === null ? array_keys($rvars) : array_values(array_filter(array_keys($parameters), fn($p) => isset($rvars[$p])));
+        $values = Csv::unflatten($columns); $names = $parameters === null ? array_keys($values) : array_values(array_filter(array_keys($parameters), fn($p) => array_key_exists($p, $values)));
         $init = []; $bad = [];
         foreach ($names as $name) {
-            $value = Rvars::draw($rvars[$name], 0); $flat = is_array($value) ? self::flatten($value) : [$value];
-            if (count(array_filter($flat, 'is_finite')) !== count($flat)) { $bad[] = $name; }
-            $dimensions = $parameters === null ? count($rvars[$name]['dims']) : (int)($parameters[$name]['dimensions'] ?? 0);
-            if ($dimensions === 0 && is_array($value)) { $value = count($flat) === 1 ? $flat[0] : $flat; }
+            $value = $values[$name]; $flat = is_array($value) ? self::flatten($value) : [$value];
+            if (count(array_filter($flat, fn($x) => is_float($x) && is_finite($x))) !== count($flat)) { $bad[] = $name; }
+            $type = $parameters[$name]['type'] ?? null;
+            if ($parameters !== null && (int)($parameters[$name]['dimensions'] ?? 0) === 0 && is_array($value) && is_string($type) && !str_starts_with($type, 'complex') && $type !== 'vector' && $type !== 'row_vector' && $type !== 'matrix' && !str_contains($type, '_')) { $value = count($flat) === 1 ? $flat[0] : $flat; }
             $init[$name] = $value;
         }
         if ($bad !== []) { throw new \InvalidArgumentException((count($bad) > 1 ? 'Variables: ' : 'Variable: ').implode(', ', $bad).' contains NA or Inf values!'); }
@@ -111,29 +112,46 @@ final class Inits
         }
         return $out;
     }
-    /** cmdstanr:::process_init_approx: importance resampling with lw = lp__ - lp_approx__. Returns [rows, warnings]. */
-    private static function approximate(CmdStanFit $fit, int $numProcs, \Random\Randomizer $rng): array
+    /**
+     * CmdStanR 1.0's process_init_approx: importance resampling with lw = lp__ - lp_approx__ over distinct parameter
+     * vectors. Draws Pathfinder already resampled with PSIS (several paths, psis_resample and calculate_lp) are not
+     * reweighted; with fewer than 95% distinct log weights the raw weights are used, otherwise Pareto-smoothed ones.
+     * Repeated draws are merged with their weights summed, so a draw resampled k times keeps k times the mass.
+     * Returns [rows, warnings].
+     */
+    private static function approximate(CmdStanFit $fit, int $numProcs, \Random\Randomizer $rng, ?array $parameters = null): array
     {
-        $rows = $fit->draws(format: 'draws_df'); $approx = $fit->lpApprox(); $lw = []; $warnings = [];
+        $rows = array_values($fit->draws(format: 'draws_df')); $approx = $fit->lpApprox(); $lw = []; $warnings = [];
+        $columns = array_values(array_filter(array_keys($rows[0] ?? []), function ($name) use ($parameters) {
+            $base = (string)preg_replace('/(\[|:).*$/s', '', (string)$name);
+            return !str_starts_with((string)$name, '.') && !str_ends_with($base, '__') && ($parameters === null || isset($parameters[$base]));
+        }));
+        $candidate = []; $ids = [];
         foreach ($rows as $i => $row) {
             $value = ($row['lp__'] ?? NAN) - ($approx[$row['.iteration'] - 1][$row['.chain'] - 1] ?? NAN);
             $lw[$i] = is_finite($value) ? $value : -INF;
+            $key = pack('E*', ...array_map(fn($c) => (float)$row[$c] == 0.0 ? 0.0 : (float)$row[$c], $columns));
+            $ids[$i] = $candidate[$key] ??= count($candidate);
         }
-        $first = [];
-        foreach ($lw as $i => $value) { $first[pack('E', $value == 0.0 ? 0.0 : $value)] ??= $i; }
-        if ($numProcs > count($first)) {
-            [$name, $extra] = match (true) { $fit instanceof CmdStanPathfinder => [' Pathfinder ', ' Try running Pathfinder with psis_resample=FALSE.'], $fit instanceof CmdStanVB => [' CmdStanVB ', ''], default => [' CmdStanLaplace ', ''] };
-            throw new \RuntimeException('Not enough distinct draws ('.$numProcs.') in'.$name.'fit to create inits.'.$extra);
+        [$name, $extra] = match (true) { $fit instanceof CmdStanPathfinder => ['Pathfinder', ' Try running Pathfinder with psis_resample=FALSE.'], $fit instanceof CmdStanVB => ['VB', ''], default => ['Laplace', ''] };
+        if ($numProcs > count($candidate)) {
+            throw new \RuntimeException('Not enough distinct draws ('.$numProcs.') in '.$name.' fit to create inits.'.$extra);
         }
+        $meta = self::metadata($fit);
+        $resampled = $fit instanceof CmdStanPathfinder && (int)($meta['num_paths'] ?? 1) > 1 && self::truthy($meta['psis_resample'] ?? true) && self::truthy($meta['calculate_lp'] ?? true);
         $max = max($lw);
-        if (count($first) < 0.95 * count($rows)) {
-            // CmdStanR intends to keep one draw per distinct lw (its merge() keeps duplicates); PHP removes them.
-            $keep = array_values($first); sort($keep); $rows = self::pick($rows, $keep);
-            $weights = array_map(fn($i) => exp($lw[$i] - $max), $keep);
-        } else {
+        if (!$resampled && $max === -INF) { throw new \RuntimeException('Every draw in the '.$name.' fit has a non-finite log importance weight (lp__ - lp_approx__), so none can be used to create inits.'.$extra); }
+        if ($resampled) { $weights = array_fill(0, count($rows), 1.0); }
+        elseif (count(array_unique(array_map(fn($v) => pack('E', $v == 0.0 ? 0.0 : $v), $lw))) < 0.95 * count($rows)) { $weights = array_map(fn($v) => exp($v - $max), $lw); }
+        else {
             $smoothed = Psis::paretoSmooth(array_map(fn($v) => exp($v - $max), $lw), 'right', 1.0);
-            $weights = $smoothed['x'];
+            $weights = array_map(fn($w) => max($w, 0.0), $smoothed['x']);
             foreach ($smoothed['warnings'] as $message) { $warnings[] = ['chain' => null, 'type' => 'pareto_smooth', 'parameters' => [], 'message' => $message]; }
+        }
+        if (count($candidate) < count($rows)) {
+            $merged = array_fill(0, count($candidate), 0.0); $first = [];
+            foreach ($ids as $i => $id) { $merged[$id] += $weights[$i]; $first[$id] ??= $i; }
+            $rows = self::pick($rows, $first); $weights = $merged;
         }
         return [self::pick($rows, self::sampleNoReplace($weights, $numProcs, $rng)), $warnings];
     }
@@ -142,7 +160,7 @@ final class Inits
         $codes = $fit->returnCodes();
         if ($codes !== [] && count(array_filter($codes, fn($c) => $c !== 0)) === count($codes)) { throw new \RuntimeException('We are unable to create initial values from a model with no samples. Please check the results of the model used for inits before continuing.'); }
         if ($parameters !== null) {
-            $available = array_map(fn($name) => Rvars::parseName($name)[0], $fit->variables());
+            $available = array_map(fn($name) => (string)preg_replace('/(\[|:).*$/s', '', $name), $fit->variables());
             if (array_intersect(array_map('strval', array_keys($parameters)), $available) === []) { throw new \InvalidArgumentException('None of the names of the parameters for the model used for initial values match the names of parameters from the model currently running.'); }
         }
     }

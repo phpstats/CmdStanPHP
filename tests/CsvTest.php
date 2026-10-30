@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan\Tests;
 use CmdStan\{Csv, CmdStanFit, CmdStanMCMC, CmdStanVB};
-use function CmdStan\{options, read_cmdstan_csv_list};
+use function CmdStan\{as_cmdstan_fit, options, read_cmdstan_csv_list};
 final class CsvTest extends TestCase
 {
     public function testWarmupMetadataAdaptationAndTiming(): void
@@ -160,5 +160,36 @@ final class CsvTest extends TestCase
         $previous = options(['cmdstanr_max_rows' => 1]); ob_start();
         try { $fit->print('x'); } finally { $out = ob_get_clean(); options($previous); }
         self::assertStringContainsString('showing 1 of 2 rows', $out);
+    }
+    public function testAsCmdStanFitReadsOnlyTheRequestedVariables(): void
+    {
+        $fit = as_cmdstan_fit($this->csv(), variables: 'x', format: 'draws_matrix');
+        self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->variables()); self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->metadata()['variables']);
+        self::assertSame(['theta' => [1], 'x' => [2]], array_diff_key($fit->metadata()['stan_variable_sizes'], ['lp__' => 1]), 'sizes still describe the whole file');
+        self::assertArrayHasKey('divergent__', $fit->samplerDiagnostics()[0]); self::assertCount(2, $fit->draws('x'), 'the format argument sets the default draws format');
+        self::assertArrayNotHasKey('divergent__', as_cmdstan_fit($this->csv('b.csv'), variables: ['theta'], checkDiagnostics: false)->samplerDiagnostics('draws_matrix')[0] ?? []);
+        $this->expectExceptionMessage("Can't find the following variable(s) in the output: nope"); as_cmdstan_fit($this->csv('c.csv'), variables: ['theta', 'nope']);
+    }
+    public function testCompressedCsvFilesAreRead(): void
+    {
+        $plain = $this->csv(); $gz = $this->dir.'/chain.csv.gz'; file_put_contents($gz, gzencode((string)file_get_contents($plain)));
+        self::assertSame(CmdStanFit::fromCsv([$plain])->draws(format: 'draws_matrix'), as_cmdstan_fit($gz)->draws(format: 'draws_matrix'));
+        if (function_exists('bzcompress') || \CmdStan\CmdStan::which('bzip2') !== null) {
+            $bz = $this->dir.'/chain.csv.bz2';
+            if (function_exists('bzcompress')) { file_put_contents($bz, bzcompress((string)file_get_contents($plain))); } else { \CmdStan\Process::run(['sh', '-c', 'bzip2 -c "$0" > "$1"', $plain, $bz]); }
+            self::assertSame(CmdStanFit::fromCsv([$plain])->draws(format: 'draws_matrix'), as_cmdstan_fit($bz)->draws(format: 'draws_matrix'));
+        }
+        file_put_contents($this->dir.'/broken.csv.gz', substr((string)file_get_contents($gz), 0, 40));
+        $this->expectExceptionMessage("Compressed CSV 'broken.csv.gz' is truncated or corrupt."); as_cmdstan_fit($this->dir.'/broken.csv.gz');
+    }
+    public function testTupleAndComplexColumnsUseCmdStanRNames(): void
+    {
+        $file = $this->dir.'/tc.csv';
+        file_put_contents($file, "# method = sample\nlp__,z.real,z.imag,t:1,t:2.1,t:2.2,ap.1:1,ap.1:2,ap.2:1,ap.2:2\n-1,1,2,3,4,5,6,7,8,9\n");
+        $fit = CmdStanFit::fromCsv([$file]); $meta = $fit->metadata();
+        self::assertSame(['lp__', 'z[real]', 'z[imag]', 't:1', 't:2[1]', 't:2[2]', 'ap[1]:1', 'ap[1]:2', 'ap[2]:1', 'ap[2]:2'], $meta['variables']);
+        self::assertSame(['lp__' => [1], 'z' => [2], 't' => [1], 'ap' => [2]], $meta['stan_variable_sizes']);
+        self::assertSame(['ap[1]:1', 'ap[1]:2'], array_keys($fit->draws('ap[1]', 'draws_matrix')[0]));
+        self::assertSame(['z' => [1.0, 2.0], 't' => [3.0, [4.0, 5.0]], 'ap' => [[6.0, 7.0], [8.0, 9.0]]], array_diff_key(Csv::unflatten($fit->draws(null, 'draws_matrix')[0]), ['lp__' => 1]));
     }
 }

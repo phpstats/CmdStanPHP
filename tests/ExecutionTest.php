@@ -85,7 +85,7 @@ final class ExecutionTest extends TestCase
         foreach ($original as $file) { self::assertFileDoesNotExist($file); }
         self::assertSame($saved, $fit->outputFiles()); self::assertSame(2, $fit->numChains());
         $newData = $fit->saveDataFile($this->dir.'/saved', 'input', timestamp: false, random: false);
-        self::assertSame(realpath($this->dir.'/saved').'/input.json', $newData); self::assertFileDoesNotExist($data); self::assertSame($newData, $fit->dataFile());
+        self::assertSame(realpath($this->dir.'/saved').'/input.json', $newData); self::assertFileExists($data, 'CmdStanR 1.0 leaves the original data file in place'); self::assertSame($newData, $fit->dataFile());
         $user = $this->dir.'/user.json'; file_put_contents($user, '{"N": 1}');
         $fit = $this->model()->sample(data: $user, chains: 1, show_messages: false, output_dir: $this->dir.'/run2');
         $fit->saveDataFile($this->dir.'/saved2'); self::assertFileExists($user);

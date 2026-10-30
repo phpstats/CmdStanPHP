@@ -32,7 +32,7 @@ final class FitIntegrationTest extends TestCase
         $u = $fit->unconstrainVariables(['mu' => 0.5, 'sigma' => 2.0, 'z' => [0.1, -0.2]]);
         self::assertEqualsWithDelta([0.5, log(2.0), 0.1, -0.2], $u, 1e-12);
         $constrained = $fit->constrainVariables($u, generatedQuantities: false); self::assertEqualsWithDelta(2.0, $constrained['sigma'], 1e-12);
-        self::assertSame(['mu' => [], 'sigma' => [], 'z' => [2]], $fit->variableSkeleton(false, false));
+        self::assertFalse(method_exists($fit, 'variableSkeleton'), 'CmdStanR 1.0 removed variable_skeleton()');
         $grad = $fit->gradLogProb($u); self::assertEqualsWithDelta($fit->logProb($u), $grad['log_prob'], 1e-12); self::assertCount(4, $grad['gradient']);
         self::assertCount(4, $fit->hessian($u)['hessian']);
         $unconstrained = $fit->unconstrainDraws(format: 'draws_matrix'); self::assertCount(200, $unconstrained);
