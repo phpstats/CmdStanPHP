@@ -63,21 +63,9 @@ function write_stan_file(string|array $code, ?string $file = null, ?string $dir 
     if (file_put_contents($file, $code, LOCK_EX) === false) { throw new \RuntimeException('Cannot write Stan file.'); }
     return realpath($file) ?: $file;
 }
-/** @deprecated Use write_stan_file(). */
-function write_stan_tempfile(string|array $code, ?string $dir = null): string
-{
-    trigger_error('write_stan_tempfile() is deprecated. Please use write_stan_file() instead.', E_USER_DEPRECATED);
-    return write_stan_file($code, dir: $dir ?? sys_get_temp_dir());
-}
 function read_cmdstan_csv(array|string $files): CmdStanFit { return CmdStanFit::fromCsv((array)$files); }
 /** CmdStanR's read_cmdstan_csv() list shape; see CmdStanFit::readCmdStanCsv(). */
 function read_cmdstan_csv_list(array|string $files, array|string|null $variables = null, array|string|null $samplerDiagnostics = null, ?string $format = null): array { return CmdStanFit::readCmdStanCsv((array)$files, $variables, $samplerDiagnostics, $format); }
-/** @deprecated Use read_cmdstan_csv(). */
-function read_sample_csv(array|string $files): CmdStanFit
-{
-    trigger_error('read_sample_csv() is deprecated. Please use read_cmdstan_csv().', E_USER_DEPRECATED);
-    return read_cmdstan_csv($files);
-}
 function as_cmdstan_fit(array|string $files): CmdStanFit { return read_cmdstan_csv($files); }
 /** @deprecated Use the fit's metadata(). Returns STAN_NUM_THREADS, or null when unset. */
 function num_threads(): ?int

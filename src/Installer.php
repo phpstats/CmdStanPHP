@@ -15,6 +15,7 @@ final class Installer
         if ($cores < 1) { throw new \InvalidArgumentException('cores must be positive.'); }
         if (count(array_filter([$version, $releaseUrl, $releaseFile], fn($x) => $x !== null)) > 1) { throw new \InvalidArgumentException('Specify only one of version, releaseUrl and releaseFile.'); }
         if ($version !== null && !preg_match('/^2\.\d+\.\d+$/D', $version)) { throw new \InvalidArgumentException('Provide a stable CmdStan 2.x version.'); }
+        if ($version !== null) { self::assertSupported('version', $version); }
         if ($releaseUrl !== null && (!str_starts_with($releaseUrl, 'https://') || !str_ends_with($releaseUrl, '.tar.gz') || preg_match('/[\s\x00-\x1f]/', $releaseUrl))) { throw new \InvalidArgumentException('releaseUrl must be an https URL of a .tar.gz archive.'); }
         if ($releaseFile !== null && (!is_file($releaseFile) || !str_ends_with($releaseFile, '.tar.gz'))) { throw new \InvalidArgumentException('releaseFile must be an existing .tar.gz archive.'); }
         foreach ($cppOptions as $name => $value) { self::makeLocalLine($name, $value); }
@@ -31,11 +32,12 @@ final class Installer
             if ($releaseFile !== null) {
                 if (!copy($releaseFile, $archive)) { throw new \RuntimeException('Cannot copy releaseFile.'); }
             } else {
-                if ($releaseUrl === null) { $version ??= self::latestVersion($timeout); }
+                if ($releaseUrl === null && $version === null) { $version = self::latestVersion($timeout); self::assertSupported('latest release', $version); }
                 $url = $releaseUrl ?? 'https://github.com/stan-dev/cmdstan/releases/download/v'.$version.'/cmdstan-'.$version.'.tar.gz';
                 Process::run(['curl', '--fail', '--location', '--retry', '3', '--proto', '=https', '--proto-redir', '=https', '--output', $archive, $url], timeout: $timeout);
             }
             $top = self::archiveRoot($archive, $timeout);
+            if (preg_match('/^cmdstan-(\d+\.\d+\.\d+)/', $top, $m)) { self::assertSupported($releaseFile !== null || $releaseUrl !== null ? 'releaseUrl/releaseFile' : 'archive', $m[1]); }
             if ($version !== null && $releaseUrl === null && $top !== 'cmdstan-'.$version) { throw new \RuntimeException('Release archive does not contain cmdstan-'.$version.'.'); }
             $target = $dir.'/'.$top;
             if (file_exists($target) && !$overwrite) { throw new \RuntimeException('Installation already exists: '.$target.'. Use overwrite: true to replace it.'); }
@@ -62,6 +64,10 @@ final class Installer
         } finally {
             self::removeDirectory($staging);
         }
+    }
+    private static function assertSupported(string $source, string $version): void
+    {
+        if (!CmdStan::isSupported($version)) { throw new \InvalidArgumentException('Requested CmdStan '.$source.' ('.$version.') is unsupported. CmdStanPHP requires CmdStan v'.CmdStan::MIN_VERSION.' or newer.'); }
     }
     /** Lists the archive and returns its single top-level directory, rejecting absolute paths, '..' and links escaping it. */
     public static function archiveRoot(string $archive, ?float $timeout = null): string

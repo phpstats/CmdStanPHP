@@ -385,17 +385,11 @@ class CmdStanFit
         $this->context['model_methods'] = new ModelMethods(ModelMethods::build($stan, $this->context['stanc_options'] ?? []), $this->dataFile(), $seed);
     }
     private function methods(): ModelMethods { $this->initModelMethods(); return $this->context['model_methods']; }
-    private static function jacobian(bool $jacobian, ?bool $adjustment): bool
-    {
-        if ($adjustment === null) { return $jacobian; }
-        trigger_error("'jacobianAdjustment' is deprecated. Please use 'jacobian' instead.", E_USER_DEPRECATED);
-        return $adjustment;
-    }
-    public function logProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): float { return $this->methods()->logProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function logProb(array $unconstrainedVariables, bool $jacobian = true): float { return $this->methods()->logProb($unconstrainedVariables, $jacobian); }
     /** @return array{log_prob: float, gradient: list<float>} */
-    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->gradLogProb($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function gradLogProb(array $unconstrainedVariables, bool $jacobian = true): array { return $this->methods()->gradLogProb($unconstrainedVariables, $jacobian); }
     /** @return array{log_prob: float, grad_log_prob: list<float>, hessian: list<list<float>>} */
-    public function hessian(array $unconstrainedVariables, bool $jacobian = true, ?bool $jacobianAdjustment = null): array { return $this->methods()->hessian($unconstrainedVariables, self::jacobian($jacobian, $jacobianAdjustment)); }
+    public function hessian(array $unconstrainedVariables, bool $jacobian = true): array { return $this->methods()->hessian($unconstrainedVariables, $jacobian); }
     public function unconstrainVariables(array $variables): array { return $this->methods()->unconstrainVariables($variables); }
     public function constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->constrainVariables($unconstrainedVariables, $transformedParameters, $generatedQuantities); }
     public function variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array { return $this->methods()->variableSkeleton($transformedParameters, $generatedQuantities); }

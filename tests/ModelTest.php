@@ -63,6 +63,10 @@ final class ModelTest extends TestCase
         $files = draws_to_csv($chains, $this->dir); $fit = CmdStanFit::fromCsv($files);
         self::assertSame($chains[0], $fit->draws(format: 'draws_matrix'));
     }
-    public function testInstallerRejectsInvalidVersionBeforeDownload(): void { $this->expectException(\InvalidArgumentException::class); Installer::install('../../bad', $this->dir); }
+    public function testInstallerRejectsInvalidVersionBeforeDownload(): void
+    {
+        try { Installer::install('2.36.0', $this->dir); self::fail('2.36.0 should be refused.'); } catch (\InvalidArgumentException $e) { self::assertStringContainsString('requires CmdStan v2.37.0 or newer', $e->getMessage()); }
+        $this->expectException(\InvalidArgumentException::class); Installer::install('../../bad', $this->dir);
+    }
     public function testInstallerRefusesExistingInstall(): void { mkdir($this->dir.'/cmdstan-2.37.0'); $this->expectException(\RuntimeException::class); Installer::install('2.37.0', $this->dir); }
 }

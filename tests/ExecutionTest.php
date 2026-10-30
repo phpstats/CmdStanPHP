@@ -57,21 +57,24 @@ final class ExecutionTest extends TestCase
         try { $callback(); } finally { restore_error_handler(); }
         return $messages;
     }
-    public function testDeprecatedSampleArgumentsAreMapped(): void
+    public function testArgumentsRemovedInCmdStanR1AreRefused(): void
+    {
+        foreach (['cores' => 2, 'num_cores' => 2, 'num_chains' => 2, 'num_warmup' => 3, 'num_samples' => 7, 'max_depth' => 5, 'stepsize' => 0.5, 'save_extra_diagnostics' => true, 'validate_csv' => false] as $name => $value) {
+            try { $this->model()->sample(...[$name => $value, 'show_messages' => false, 'output_dir' => $this->dir]); self::fail($name.' should be refused.'); }
+            catch (\InvalidArgumentException $e) { self::assertSame('Unknown sample option: '.$name, $e->getMessage()); }
+        }
+        foreach ([['optimize', 'jacobian_adjustment'], ['variational', 'output_samples'], ['optimize', 'save_latent_dynamics'], ['pathfinder', 'save_latent_dynamics'], ['sample', 'threads'], ['optimize', 'threads_per_chain']] as [$method, $name]) {
+            try { $this->model()->$method(...[$name => true, 'show_messages' => false, 'output_dir' => $this->dir]); self::fail($method.' '.$name.' should be refused.'); }
+            catch (\InvalidArgumentException $e) { self::assertSame('Unknown '.$method.' option: '.$name, $e->getMessage()); }
+        }
+    }
+    public function testPathfinderNumThreadsIsDeprecated(): void
     {
         $fit = null;
-        $messages = $this->deprecations(function () use (&$fit) { $fit = $this->model()->sample(num_chains: 2, cores: 2, num_samples: 7, num_warmup: 3, max_depth: 5, stepsize: 0.5, save_extra_diagnostics: true, validate_csv: false, num_cores: null, show_messages: false, output_dir: $this->dir); });
-        self::assertSame(["'cores' is deprecated. Please use 'parallel_chains' instead.", "'num_chains' is deprecated. Please use 'chains' instead.", "'num_warmup' is deprecated. Please use 'iter_warmup' instead.", "'num_samples' is deprecated. Please use 'iter_sampling' instead.", "'max_depth' is deprecated. Please use 'max_treedepth' instead.", "'stepsize' is deprecated. Please use 'step_size' instead.", "'save_extra_diagnostics' is deprecated. Please use 'save_latent_dynamics' instead.", "'validate_csv' is deprecated. Please use 'diagnostics' instead."], $messages);
-        $args = json_decode($fit->output()[1], true); self::assertSame(2, $fit->numChains());
-        foreach (['num_samples=7', 'num_warmup=3', 'max_depth=5', 'stepsize=0.5'] as $arg) { self::assertContains($arg, $args); }
-        self::assertNotEmpty(array_filter($args, fn($a) => str_starts_with($a, 'diagnostic_file='))); self::assertSame([], $fit->diagnosticWarnings());
-        $messages = $this->deprecations(function () use (&$fit) { $fit = $this->model()->optimize(jacobian_adjustment: true, show_messages: false, output_dir: $this->dir); });
-        self::assertSame(["'jacobian_adjustment' is deprecated. Please use 'jacobian' instead."], $messages); self::assertContains('jacobian=1', json_decode($fit->output()[0], true));
-    }
-    public function testConflictingDeprecatedArgumentsFail(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->deprecations(fn() => $this->model()->sample(chains: 1, iter_sampling: 5, num_samples: 7, show_messages: false, output_dir: $this->dir));
+        $messages = $this->deprecations(function () use (&$fit) { $fit = $this->model()->pathfinder(num_threads: 1, show_messages: false, output_dir: $this->dir); });
+        self::assertSame(['`num_threads` is deprecated as of CmdStanR 1.0.0 and will be removed in a future release. Please use `threads` instead.'], $messages);
+        self::assertContains('num_threads=1', json_decode($fit->output()[0], true));
+        $this->expectException(\InvalidArgumentException::class); $this->model()->pathfinder(num_threads: 1, threads: 1, show_messages: false, output_dir: $this->dir);
     }
     public function testRunOutputsAreMovedWhenSaved(): void
     {

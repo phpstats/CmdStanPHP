@@ -222,6 +222,52 @@ final class CmdStanModel
         $this->info ??= Build::info($this->stanFile, $this->configuration['include_paths']);
         return Build::variables($this->info);
     }
+    private const DEFAULTS = [
+        'sample' => ['iter_sampling' => 'sample.num_samples', 'iter_warmup' => 'sample.num_warmup', 'save_warmup' => 'sample.save_warmup', 'thin' => 'sample.thin', 'adapt_engaged' => 'sample.adapt.engaged', 'adapt_delta' => 'sample.adapt.delta', 'init_buffer' => 'sample.adapt.init_buffer', 'term_buffer' => 'sample.adapt.term_buffer', 'window' => 'sample.adapt.window', 'save_metric' => 'sample.adapt.save_metric', 'max_treedepth' => 'sample.hmc.nuts.max_depth', 'metric' => 'sample.hmc.metric', 'metric_file' => 'sample.hmc.metric_file', 'step_size' => 'sample.hmc.stepsize'],
+        'optimize' => ['algorithm' => 'optimize.algorithm', 'jacobian' => 'optimize.jacobian', 'iter' => 'optimize.iter', 'init_alpha' => 'optimize.lbfgs.init_alpha', 'tol_obj' => 'optimize.lbfgs.tol_obj', 'tol_rel_obj' => 'optimize.lbfgs.tol_rel_obj', 'tol_grad' => 'optimize.lbfgs.tol_grad', 'tol_rel_grad' => 'optimize.lbfgs.tol_rel_grad', 'tol_param' => 'optimize.lbfgs.tol_param', 'history_size' => 'optimize.lbfgs.history_size'],
+        'variational' => ['algorithm' => 'variational.algorithm', 'iter' => 'variational.iter', 'grad_samples' => 'variational.grad_samples', 'elbo_samples' => 'variational.elbo_samples', 'eta' => 'variational.eta', 'adapt_engaged' => 'variational.adapt.engaged', 'adapt_iter' => 'variational.adapt.iter', 'tol_rel_obj' => 'variational.tol_rel_obj', 'eval_elbo' => 'variational.eval_elbo', 'draws' => 'variational.output_samples'],
+        'pathfinder' => ['init_alpha' => 'pathfinder.init_alpha', 'tol_obj' => 'pathfinder.tol_obj', 'tol_rel_obj' => 'pathfinder.tol_rel_obj', 'tol_grad' => 'pathfinder.tol_grad', 'tol_rel_grad' => 'pathfinder.tol_rel_grad', 'tol_param' => 'pathfinder.tol_param', 'history_size' => 'pathfinder.history_size', 'single_path_draws' => 'pathfinder.num_draws', 'draws' => 'pathfinder.num_psis_draws', 'num_paths' => 'pathfinder.num_paths', 'save_single_paths' => 'pathfinder.save_single_paths', 'psis_resample' => 'pathfinder.psis_resample', 'calculate_lp' => 'pathfinder.calculate_lp', 'max_lbfgs_iters' => 'pathfinder.max_lbfgs_iters', 'num_elbo_draws' => 'pathfinder.num_elbo_draws'],
+        'laplace' => ['jacobian' => 'laplace.jacobian', 'draws' => 'laplace.draws'],
+    ];
+    /**
+     * CmdStanR's cmdstan_defaults(): CmdStan's default argument values for a method, read from `<exe> <method> help-all`
+     * and named as this package's options (iter_sampling, adapt_delta, ...), in help order.
+     */
+    public function cmdstanDefaults(string $method = 'sample'): array
+    {
+        $map = self::DEFAULTS[$method] ?? throw new \InvalidArgumentException("method must be one of 'sample', 'optimize', 'variational', 'pathfinder', 'laplace'.");
+        $this->assertCurrent();
+        try { $result = Process::run([$this->exeFile, $method, 'help-all'], timeout: 60); }
+        catch (ProcessException $e) { $result = ['stdout' => $e->stdout, 'stderr' => $e->stderr]; }
+        catch (\RuntimeException $e) { throw $this->cannotRun($e->getMessage()); }
+        $lines = preg_split('/\r?\n/', $result['stdout']."\n".$result['stderr']) ?: []; $byKey = array_flip($map);
+        $stack = []; $out = [];
+        foreach ($lines as $i => $line) {
+            if (trim($line) === '') { continue; }
+            $indent = strlen($line) - strlen(ltrim($line)); $text = trim($line);
+            while ($stack !== [] && end($stack)[1] >= $indent) { array_pop($stack); }
+            if (preg_match('/^([a-z_][a-z0-9_]*)$/D', $text, $m)) { $stack[] = [$m[1], $indent]; continue; }
+            if (!preg_match('/^([a-z_][a-z0-9_]*)=/', $text, $m)) { continue; }
+            $key = implode('.', array_merge(array_column($stack, 0), [$m[1]]));
+            if (!isset($byKey[$key])) { continue; }
+            for ($j = $i + 1; $j <= min($i + 5, count($lines) - 1); ++$j) {
+                $next = trim($lines[$j]);
+                if (preg_match('/^[a-z_][a-z0-9_]*=/', $next)) { break; }
+                if (preg_match('/^Defaults to\s?(.*)$/D', $next, $d)) {
+                    $value = trim($d[1]);
+                    $out[$byKey[$key]] = match (true) { $value === 'true' => true, $value === 'false' => false, (bool)preg_match('/^-?[0-9]+$/D', $value) => (int)$value, (bool)preg_match('/^-?[0-9]*\.?[0-9]+([eE][+-]?[0-9]+)?$/D', $value) => (float)$value, default => $value };
+                    break;
+                }
+            }
+        }
+        return $out;
+    }
+    /** CmdStanR's error for an executable that cannot be started. */
+    private function cannotRun(string $reason): \RuntimeException
+    {
+        $remedy = $this->stanFile === null ? 'There is no Stan file to rebuild it from.' : 'Run cmdstan_model() with forceRecompile: true to rebuild it.';
+        return new \RuntimeException("The executable at '".$this->exeFile."' could not be run: ".$reason."\n".$remedy);
+    }
     public function saveHppFile(string $dir): string
     {
         $hpp = $this->hppFile() ?? throw new \RuntimeException('There is no generated C++ for a model created from an executable alone.');
@@ -234,10 +280,10 @@ final class CmdStanModel
      * Use named arguments (sample(chains: 4)) or a single options array. Every method's data may be an array, a JSON
      * file, a StanData, or a table such as a phibble DataFrame (any object with toModelData() or toColumns(); see StanData).
      */
-    public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::deprecated(self::options($options), ['cores', 'num_cores', 'num_chains', 'num_warmup', 'num_samples', 'max_depth', 'stepsize', 'save_extra_diagnostics', 'validate_csv'])); }
+    public function sample(mixed ...$options): CmdStanMCMC { return $this->run('sample', self::options($options)); }
     public function sampleMpi(string $mpiCmd = 'mpiexec', array $mpiArgs = [], mixed ...$options): CmdStanMCMC
     {
-        $o = self::deprecated(self::options($options), ['validate_csv']); $o['chains'] ??= 1; $o['parallel_chains'] = 1;
+        $o = self::options($options); $o['chains'] ??= 1; $o['parallel_chains'] = 1;
         if ($mpiCmd === '') { throw new \InvalidArgumentException('mpiCmd must identify a launcher.'); }
         $launcher = [$mpiCmd];
         foreach ($mpiArgs as $name => $value) {
@@ -250,12 +296,21 @@ final class CmdStanModel
         }
         return $this->run('sample', $o, $launcher);
     }
-    public function optimize(mixed ...$options): CmdStanMLE { return $this->run('optimize', self::deprecated(self::options($options), ['jacobian_adjustment'])); }
+    public function optimize(mixed ...$options): CmdStanMLE { return $this->run('optimize', self::options($options)); }
     public function variational(mixed ...$options): CmdStanVB { return $this->run('variational', self::options($options)); }
-    public function pathfinder(mixed ...$options): CmdStanPathfinder { CmdStan::requireVersion('2.33.0'); return $this->run('pathfinder', self::options($options)); }
+    public function pathfinder(mixed ...$options): CmdStanPathfinder
+    {
+        $o = self::options($options);
+        if (array_key_exists('num_threads', $o)) {
+            if (isset($o['threads'])) { throw new \InvalidArgumentException('Cannot specify both `threads` and deprecated `num_threads`.'); }
+            trigger_error('`num_threads` is deprecated as of CmdStanR 1.0.0 and will be removed in a future release. Please use `threads` instead.', E_USER_DEPRECATED);
+            $o['threads'] = $o['num_threads']; unset($o['num_threads']);
+        }
+        return $this->run('pathfinder', $o);
+    }
     public function laplace(mixed ...$options): CmdStanLaplace
     {
-        CmdStan::requireVersion('2.32.0'); $o = self::deprecated(self::options($options), ['jacobian_adjustment']); Options::validate('laplace', $o);
+        $o = self::options($options); Options::validate('laplace', $o);
         if (!isset($o['mode'])) {
             $o['data'] = StanData::normalize($o['data'] ?? null); $opt = $o['opt_args'] ?? [];
             $opt['data'] = $o['data'] ?? null; $opt['jacobian'] = $o['jacobian'] ?? true;
@@ -278,7 +333,7 @@ final class CmdStanModel
     public function diagnose(mixed ...$options): CmdStanDiagnose { return $this->run('diagnose', self::options($options)); }
     public function logProb(mixed ...$options): CmdStanFit
     {
-        CmdStan::requireVersion('2.31.0'); $o = self::deprecated(self::options($options), ['jacobian_adjustment']);
+        $o = self::options($options);
         if (isset($o['unconstrained_params']) === isset($o['constrained_params'])) { throw new \InvalidArgumentException('Specify exactly one parameter file.'); }
         return $this->run('log_prob', $o);
     }
@@ -306,24 +361,6 @@ final class CmdStanModel
         if (CmdStan::option('cmdstanr_warn_inits', true)) { foreach ($result['warnings'] as $warning) { fwrite(defined('STDERR') ? STDERR : fopen('php://stderr', 'w'), $warning['message']."\n"); } }
         return $result['inits'];
     }
-    private const DEPRECATED = ['cores' => 'parallel_chains', 'num_cores' => 'parallel_chains', 'num_chains' => 'chains', 'num_warmup' => 'iter_warmup', 'num_samples' => 'iter_sampling', 'max_depth' => 'max_treedepth', 'stepsize' => 'step_size', 'save_extra_diagnostics' => 'save_latent_dynamics', 'validate_csv' => 'diagnostics', 'jacobian_adjustment' => 'jacobian'];
-    /** Maps CmdStanR's deprecated argument names with an E_USER_DEPRECATED notice; conflicting old/new values throw. */
-    private static function deprecated(array $o, array $names): array
-    {
-        foreach ($names as $old) {
-            if (!array_key_exists($old, $o)) { continue; }
-            $new = self::DEPRECATED[$old]; $value = $o[$old]; unset($o[$old]);
-            if ($value === null) { continue; }
-            trigger_error("'".$old."' is deprecated. Please use '".$new."' instead.", E_USER_DEPRECATED);
-            if ($old === 'validate_csv') {
-                if (!is_bool($value)) { throw new \InvalidArgumentException('validate_csv must be boolean.'); }
-                $value = $value ? ['divergences', 'treedepth', 'ebfmi'] : null;
-                if (array_key_exists('diagnostics', $o) && $o['diagnostics'] !== $value) { throw new \InvalidArgumentException("Specify 'diagnostics' or 'validate_csv', not both."); }
-            } elseif (isset($o[$new]) && $o[$new] !== $value) { throw new \InvalidArgumentException("Specify '".$new."' or the deprecated '".$old."', not both."); }
-            $o[$new] = $value;
-        }
-        return $o;
-    }
     private static function temporaryFile(string $suffix): string { return sys_get_temp_dir().'/cmdstanphp-'.bin2hex(random_bytes(8)).$suffix; }
     private function inputFile(mixed $input, string $dir, string $name): ?string
     {
@@ -340,7 +377,7 @@ final class CmdStanModel
     {
         Options::validate($method, $o);
         $this->assertCurrent();
-        $threads = $o['threads_per_chain'] ?? $o['threads'] ?? $o['num_threads'] ?? null;
+        $threads = $o['threads_per_chain'] ?? $o['threads'] ?? null;
         if ($threads !== null && $threads > 1 && ($this->features['stan_threads'] ?? null) !== true) { throw new \InvalidArgumentException('`'.(in_array($method, ['sample', 'generate_quantities'], true) ? 'threads_per_chain' : 'threads')."` is set but the executable does not report threading as enabled.\nRecompile the model with `cppOptions: ['stan_threads' => true]`."); }
         if (isset($o['opencl_ids']) && ($this->features['stan_opencl'] ?? null) !== true) { throw new \InvalidArgumentException("`opencl_ids` is set but the executable does not report OpenCL as enabled.\nRecompile the model with `cppOptions: ['stan_opencl' => true]`."); }
         $chains = $method === 'sample' ? ($o['chains'] ?? 4) : ($method === 'generate_quantities' ? count($o['fitted_params']) : 1);

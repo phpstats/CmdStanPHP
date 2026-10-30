@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan\Tests;
 use CmdStan\{CmdStan, CmdStanModel, CmdStanMCMC};
-use function CmdStan\{cmdstan_model, cmdstan_option, cmdstanr_example, print_stan_file, stan_build_info, num_threads, options, print_example_program, read_sample_csv, write_stan_file, write_stan_tempfile};
+use function CmdStan\{cmdstan_model, cmdstan_option, cmdstanr_example, print_stan_file, stan_build_info, num_threads, options, print_example_program, write_stan_file};
 final class SessionOptionsTest extends TestCase
 {
     protected function tearDown(): void { options(array_fill_keys(array_keys(options()), null)); parent::tearDown(); }
@@ -49,11 +49,16 @@ final class SessionOptionsTest extends TestCase
     }
     public function testDeprecatedFunctions(): void
     {
-        $file = null; $fit = null; $threads = 0;
-        $messages = $this->deprecations(function () use (&$file, &$fit, &$threads) { $file = write_stan_tempfile('model {}', $this->dir); $fit = read_sample_csv($this->csv()); $threads = num_threads(); });
-        self::assertCount(3, $messages); self::assertStringContainsString('write_stan_file()', $messages[0]); self::assertStringContainsString('read_cmdstan_csv()', $messages[1]);
-        self::assertStringStartsWith(realpath($this->dir).'/model_', $file); self::assertInstanceOf(CmdStanMCMC::class, $fit);
-        self::assertSame(getenv('STAN_NUM_THREADS') === false ? null : (int)getenv('STAN_NUM_THREADS'), $threads);
+        $threads = 0;
+        $messages = $this->deprecations(function () use (&$threads) { $threads = num_threads(); });
+        self::assertCount(1, $messages); self::assertSame(getenv('STAN_NUM_THREADS') === false ? null : (int)getenv('STAN_NUM_THREADS'), $threads);
+        self::assertFalse(function_exists('CmdStan\\write_stan_tempfile')); self::assertFalse(function_exists('CmdStan\\read_sample_csv'));
+    }
+    public function testOldCmdStanIsUnsupported(): void
+    {
+        self::assertTrue(CmdStan::isSupported('2.37.0')); self::assertTrue(CmdStan::isSupported('2.40.0-rc1')); self::assertFalse(CmdStan::isSupported('2.36.0'));
+        $root = $this->fakeCmdStan(); file_put_contents($root.'/makefile', "CMDSTAN_VERSION := 2.36.0\n");
+        $this->expectException(\InvalidArgumentException::class); $this->expectExceptionMessage('CmdStan v2.36.0 is no longer supported.'); CmdStan::setPath($root);
     }
     public function testExampleProgramsAreBundled(): void
     {
