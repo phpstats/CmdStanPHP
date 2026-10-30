@@ -5,7 +5,7 @@ use CmdStan\{CmdStanModel, CmdStanFit, Options};
 use function CmdStan\{options, write_stan_file};
 final class ExecutionTest extends TestCase
 {
-    private function model(): CmdStanModel { return new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'), __DIR__.'/fixtures/model.php'); }
+    private function model(): CmdStanModel { return new CmdStanModel(exeFile: __DIR__.'/fixtures/model.php'); }
     public function testRunInputsAndLiteralPathsWithSpaces(): void
     {
         $out = $this->dir.'/output with spaces';

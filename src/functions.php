@@ -1,13 +1,33 @@
 <?php
 declare(strict_types=1);
 namespace CmdStan;
-/** forceRecompile defaults to the cmdstanr_force_recompile option. */
-function cmdstan_model(string $stanFile, bool $compile = true, ?string $exeFile = null, array $stancOptions = [], array $cppOptions = [], ?bool $forceRecompile = null): CmdStanModel
+/**
+ * CmdStanR 1.0's cmdstan_model(): compiles the Stan program, or reuses an up-to-date executable, and returns a ready model.
+ * Pass exeFile alone to use an existing executable without a Stan file. See CmdStanModel::__construct().
+ */
+function cmdstan_model(?string $stanFile = null, ?string $exeFile = null, bool $quiet = true, ?string $dir = null, bool $pedantic = false, ?array $includePaths = null, ?string $userHeader = null, ?array $cppOptions = null, ?array $stancOptions = null, ?bool $forceRecompile = null): CmdStanModel
 {
-    $model = new CmdStanModel($stanFile, $exeFile);
-    if ($compile) { $model->compile(forceRecompile: $forceRecompile, stancOptions: $stancOptions, cppOptions: $cppOptions); }
-    return $model;
+    return new CmdStanModel($stanFile, $exeFile, $quiet, $dir, $pedantic, $includePaths, $userHeader, $cppOptions, $stancOptions, $forceRecompile);
 }
+/** Compiles a Stan file (or reuses its up-to-date executable) without creating a model object; returns the executable path. */
+function compile_stan_file(string $stanFile, bool $quiet = true, ?string $dir = null, bool $pedantic = false, ?array $includePaths = null, ?string $userHeader = null, ?array $cppOptions = null, ?array $stancOptions = null, ?bool $forceRecompile = null): string
+{
+    return (new CmdStanModel($stanFile, null, $quiet, $dir, $pedantic, $includePaths, $userHeader, $cppOptions, $stancOptions, $forceRecompile))->exeFile();
+}
+/** Checks a Stan file's syntax with stanc, without compiling; throws on a syntax error. */
+function check_syntax_stan_file(string $stanFile, ?array $includePaths = null, bool $pedantic = false, array $stancOptions = [], bool $quiet = false): bool { return Stanc::checkSyntax($stanFile, $includePaths, $pedantic, $stancOptions, $quiet); }
+/** Formats a Stan file with stanc and returns the result; overwriteFile rewrites it (keeping a backup unless backup is false). */
+function format_stan_file(string $stanFile, ?array $includePaths = null, bool $overwriteFile = false, bool|array $canonicalize = false, bool $backup = true, ?int $maxLineLength = null, bool $quiet = false): string { return Stanc::format($stanFile, $includePaths, $overwriteFile, $canonicalize, $backup, $maxLineLength, $quiet); }
+/** A Stan file's variables (data, parameters, transformed_parameters, generated_quantities) from stanc, without compiling. */
+function variables_stan_file(string $stanFile, ?array $includePaths = null): array { return Stanc::variables($stanFile, $includePaths); }
+/** CmdStanR's print_stan_file(): prints a Stan file, with line numbers when lineNumbers (default: the cmdstanr_print_line_numbers option). */
+function print_stan_file(string $stanFile, ?bool $lineNumbers = null): void
+{
+    if (!is_file($stanFile)) { throw new \InvalidArgumentException('Stan file not found: '.$stanFile); }
+    Stanc::print((string)file_get_contents($stanFile), $lineNumbers);
+}
+/** How an executable was built (from its build record) and what it reports about itself; see CmdStanModel::stanBuildInfo(). */
+function stan_build_info(string $exeFile): array { return CmdStanModel::stanBuildInfo($exeFile); }
 function set_cmdstan_path(string $path): void { CmdStan::setPath($path); }
 function cmdstan_path(): string { return CmdStan::path(); }
 function cmdstan_version(): string { return CmdStan::version(); }

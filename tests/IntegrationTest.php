@@ -9,7 +9,7 @@ final class IntegrationTest extends TestCase
     private function model(string $name = 'bernoulli'): CmdStanModel
     {
         try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
-        $model = new CmdStanModel(__DIR__.'/../examples/'.$name.'.stan'); $model->compile(); return $model;
+        $model = new CmdStanModel(__DIR__.'/../examples/'.$name.'.stan'); return $model;
     }
     private function data(): array { return ['N' => 10, 'y' => [0,1,0,0,0,0,0,0,0,1]]; }
     public function testCompilationSyntaxMetadataAndFormat(): void
@@ -87,7 +87,7 @@ final class IntegrationTest extends TestCase
     {
         $this->model('normal'); // Verify availability before compiling a new model.
         $source = \CmdStan\write_stan_file('parameters { real mu; } model { profile("density") { mu ~ normal(0, 1); } }', $this->dir.'/threaded.stan');
-        $model = new CmdStanModel($source); $model->compile(cppOptions: ['STAN_THREADS' => true]);
+        $model = new CmdStanModel($source, cppOptions: ['STAN_THREADS' => true]);
         $fit = $model->sample(chains: 2, parallel_chains: 2, threads_per_chain: 2, iter_warmup: 100, iter_sampling: 10, seed: 123, save_latent_dynamics: true, save_metric: true, save_cmdstan_config: true, show_messages: false, output_dir: $this->dir);
         self::assertCount(2, $fit->latentDynamicsFiles()); self::assertCount(2, $fit->profileFiles()); self::assertNotEmpty($fit->profiles()[0]);
         self::assertSame(2, $fit->metadata()['num_threads']); self::assertSame(2, $fit->metadata()['threads_per_chain']);

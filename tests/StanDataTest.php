@@ -83,7 +83,7 @@ final class StanDataTest extends TestCase
     }
     public function testModelMethodsWriteTableData(): void
     {
-        $model = new CmdStanModel(write_stan_file('model {}', $this->dir.'/model.stan'), __DIR__.'/fixtures/model.php');
+        $model = new CmdStanModel(exeFile: __DIR__.'/fixtures/model.php');
         $fit = $model->sample(data: self::dataFrame(['y' => [0, 1], 'g' => ['b', 'a']]), chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
         self::assertSame(['N' => 2, 'y' => [0, 1], 'g' => [2, 1], 'J_g' => 2], json_decode(file_get_contents($fit->dataFile()), true));
         $fit = $model->optimize(data: StanData::fromColumns(['y' => [3], 'x' => [1.5]], 'y', ['x'])->with(['scale' => 2]), output_dir: $this->dir, show_messages: false);

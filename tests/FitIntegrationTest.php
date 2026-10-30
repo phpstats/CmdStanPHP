@@ -18,7 +18,7 @@ final class FitIntegrationTest extends TestCase
     {
         try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
         file_put_contents($this->dir.'/wired.stan', self::MODEL);
-        return (new CmdStanModel($this->dir.'/wired.stan'))->compile();
+        return (new CmdStanModel($this->dir.'/wired.stan'));
     }
     private function data(): array { return ['N' => 6, 'y' => [0.3, -1.2, 0.8, 1.9, 0.1, -0.4]]; }
     private function sample(CmdStanModel $model, mixed ...$options): CmdStanFit

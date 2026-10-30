@@ -34,7 +34,7 @@ final class MomentMatchIntegrationTest extends TestCase
         if (self::$fit !== null) { return self::$fit; }
         $dir = self::$fitDir = sys_get_temp_dir().'/cmdstanphp-mm-'.bin2hex(random_bytes(6)); mkdir($dir);
         file_put_contents($dir.'/regression.stan', self::MODEL);
-        $fit = (new CmdStanModel($dir.'/regression.stan'))->compile()->sample(data: self::DATA, chains: 4, iter_warmup: 500, iter_sampling: 1000, seed: 20261012, show_messages: false, refresh: 0, output_dir: $dir);
+        $fit = (new CmdStanModel($dir.'/regression.stan'))->sample(data: self::DATA, chains: 4, iter_warmup: 500, iter_sampling: 1000, seed: 20261012, show_messages: false, refresh: 0, output_dir: $dir);
         self::assertInstanceOf(CmdStanMCMC::class, $fit);
         return self::$fit = $fit;
     }

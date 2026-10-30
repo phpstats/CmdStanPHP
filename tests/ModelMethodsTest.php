@@ -88,7 +88,7 @@ final class ModelMethodsTest extends TestCase
         $this->library(self::NORMAL);
         $source = \CmdStan\write_stan_file(self::NORMAL, $this->dir.'/normal.stan');
         $data = ['N' => 3, 'y' => [0.5, 1.5, -1.0]];
-        $fit = (new CmdStanModel($source))->compile()->sample(data: $data, chains: 1, iter_warmup: 100, iter_sampling: 20, seed: 3, sig_figs: 18, show_messages: false, output_dir: $this->dir);
+        $fit = (new CmdStanModel($source))->sample(data: $data, chains: 1, iter_warmup: 100, iter_sampling: 20, seed: 3, sig_figs: 18, show_messages: false, output_dir: $this->dir);
         $model = ModelMethods::compile($source, $data);
         $draws = $fit->draws(format: 'draws_df'); $unconstrained = $model->unconstrainDraws($draws);
         self::assertCount(20, $unconstrained);
