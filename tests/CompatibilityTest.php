@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace CmdStan\Tests;
-use CmdStan\{CmdStan, CmdStanModel, Process};
+use CmdStan\{CmdStan, CmdStanModel, Process, Summary};
 use PHPUnit\Framework\Attributes\{Group, DataProvider};
 #[Group('compatibility')]
 final class CompatibilityTest extends TestCase
@@ -81,6 +81,45 @@ final class CompatibilityTest extends TestCase
             ob_start(); \CmdStan\print_example_program($example); self::assertSame($r, ob_get_clean(), $example);
             $data = Process::run(['Rscript', '-e', 'cat(readLines(system.file("'.$example.'.data.json", package = "cmdstanr")), sep = "\n")'])['stdout'];
             self::assertSame(json_decode($data, true), json_decode(file_get_contents(__DIR__.'/../resources/examples/'.$example.'.data.json'), true), $example);
+        }
+    }
+    /**
+     * An indexed parameter, a fixed quantile set, and both summary paths (stansummary by default, the posterior port with
+     * measures) against posterior::summarise_draws() on the same doubles, and diagnosticSummary() against CmdStanR's
+     * diagnostic_summary() on the same CSV files. See posterior_fit.R for why R gets the doubles rather than the CSVs.
+     */
+    public function testIndexedParameterSummariesMatchPosteriorOnTheSameDraws(): void
+    {
+        copy(__DIR__.'/fixtures/latent.stan', $this->dir.'/latent.stan'); $model = new CmdStanModel($this->dir.'/latent.stan');
+        $rng = new \Random\Randomizer(new \Random\Engine\Mt19937(20260831)); $shoe = []; $y = [];
+        for ($i = 0; $i < 60; ++$i) { $shoe[] = $i % 12 + 1; $y[] = 0.1 * ($i % 12) + $rng->getInt(-1000, 1000) / 1000; }
+        $fit = $model->sample(['data' => ['N' => 60, 'L' => 12, 'shoe' => $shoe, 'y' => $y], 'seed' => 20260831, 'chains' => 4, 'parallel_chains' => 4, 'iter_warmup' => 1000, 'iter_sampling' => 1000, 'adapt_delta' => 0.95, 'sig_figs' => 18, 'refresh' => 0, 'show_messages' => false, 'output_dir' => $this->dir]);
+        $probs = [0.05, 0.25, 0.5, 0.75, 0.95]; $variables = ['mu', 'tau', 'shoe_latent'];
+        $columns = $fit->draws($variables, 'draws_list'); $binary = '';
+        foreach (array_keys($columns[0]) as $name) { foreach ($columns as $chain) { $binary .= pack('E*', ...$chain[$name]); } }
+        file_put_contents($this->dir.'/draws.bin', $binary);
+        file_put_contents($this->dir.'/input.json', json_encode(['files' => $fit->outputFiles(), 'binary' => $this->dir.'/draws.bin', 'variables' => array_keys($columns[0]), 'iterations' => 1000, 'chains' => 4, 'probs' => $probs], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
+        Process::run(['Rscript', __DIR__.'/fixtures/posterior_fit.R', $this->dir.'/input.json', $this->dir.'/output.json'], env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
+        $reference = json_decode(file_get_contents($this->dir.'/output.json'), true, flags: JSON_THROW_ON_ERROR);
+        $matrix = $fit->draws('shoe_latent', 'draws_matrix');
+        self::assertSame(array_map(fn($i) => 'shoe_latent['.$i.']', range(1, 12)), array_keys($matrix[0]));
+        $all = $fit->draws($variables, 'draws_matrix'); self::assertSame($reference['columns'], array_keys($all[0])); self::assertCount(count($reference['matrix']), $all);
+        foreach ($reference['matrix'] as $i => $row) { foreach (array_values($all[$i]) as $j => $value) { self::assertEqualsWithDelta($row[$j], $value, 1e-13 * max(1.0, abs($value)), 'draw '.$i); } }
+        $quantiles = array_map(fn($p) => 'q'.Summary::percent($p), $probs);
+        $posterior = array_column($fit->summary($variables, $probs, ['mean', 'median', 'sd', 'mad', 'quantile2', 'rhat', 'ess_bulk', 'ess_tail']), null, 'variable');
+        $default = array_column($fit->summary($variables, $probs), null, 'variable');
+        self::assertCount(14, $reference['summary']);
+        foreach ($reference['summary'] as $row) {
+            foreach (array_merge(['mean', 'median', 'sd', 'mad', 'rhat', 'ess_bulk', 'ess_tail'], $quantiles) as $name) {
+                $tolerance = 1e-8 * max(1.0, abs($row[$name]));
+                self::assertEqualsWithDelta($row[$name], $posterior[$row['variable']][$name], $tolerance, 'measures '.$row['variable'].' '.$name);
+                self::assertEqualsWithDelta($row[$name], $default[$row['variable']][$name], $tolerance, 'default '.$row['variable'].' '.$name);
+            }
+        }
+        $diagnostics = $fit->diagnosticSummary();
+        foreach (['num_divergent', 'num_max_treedepth', 'ebfmi'] as $name) {
+            self::assertCount(4, $reference['diagnostics'][$name]);
+            foreach ($reference['diagnostics'][$name] as $i => $value) { self::assertEqualsWithDelta($value, $diagnostics[$name][$i], 1e-12, $name.' chain '.($i + 1)); }
         }
     }
 }
