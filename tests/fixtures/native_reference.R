@@ -6,7 +6,8 @@ set_cmdstan_path(Sys.getenv('CMDSTAN'))
 input <- jsonlite::fromJSON(args[[3]], simplifyVector = TRUE)
 model <- cmdstan_model(args[[1]], force_recompile = TRUE, quiet = TRUE)
 model$expose_functions(quiet = TRUE)
-fit <- model$sample(data = args[[2]], chains = 1, iter_warmup = 100, iter_sampling = 5, seed = 1, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
+# Full precision, so unconstraining the simplex draws stays within Stan's tolerance.
+fit <- model$sample(data = args[[2]], chains = 1, iter_warmup = 100, iter_sampling = 5, seed = 1, sig_figs = 18, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
 fit$init_model_methods(seed = input$seed, quiet = TRUE)
 u <- input$unconstrained
 grad <- function(jacobian) { g <- fit$grad_log_prob(u, jacobian = jacobian); list(log_prob = attr(g, 'log_prob'), gradient = as.numeric(g)) }

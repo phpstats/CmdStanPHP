@@ -102,10 +102,10 @@ final class MomentMatchIntegrationTest extends TestCase
             foreach ($columns as $column) { foreach ($reference['pointwise'][$column] as $i => $v) { $close($v, $actual['pointwise'][$i][$column], "$label $column [$i]"); } }
             foreach ($reference['pareto_k'] as $i => $v) { self::assertEqualsWithDelta($v, $actual['diagnostics']['pareto_k'][$i], 1e-8, "$label pareto_k [$i]"); }
         };
-        $compare($ref['unsplit'], $unsplit = $fit->loo(momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
+        $compare($ref['unsplit'], $unsplit = $fit->loo(rEff: true, momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
         foreach ($ref['unsplit']['n_eff'] as $i => $v) { $close($v, $unsplit['diagnostics']['n_eff'][$i], "unsplit n_eff [$i]"); }
         // With shifts only, the exact and loo split inverses coincide; mcse and n_eff use the two-half r_eff.
-        $split = $fit->loo(momentMatch: true);
+        $split = $fit->loo(rEff: true, momentMatch: true);
         foreach ($split['moment_match']['observations'] as $o) { self::assertSame([], array_diff($o['transforms'], ['shift'])); }
         $compare($ref['split'], $split, ['elpd_loo', 'p_loo', 'looic'], 'split');
     }
