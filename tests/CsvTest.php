@@ -75,7 +75,7 @@ final class CsvTest extends TestCase
     }
     public function testSaveRefusesOverwrite(): void
     {
-        $fit = CmdStanFit::fromCsv([$this->csv()]); mkdir($this->dir.'/saved'); file_put_contents($this->dir.'/saved/chain-1.csv', 'sentinel');
+        $fit = CmdStanFit::fromCsv([$this->csv()]); mkdir($this->dir.'/saved'); file_put_contents($this->dir.'/saved/chain-01.csv', 'sentinel');
         $this->expectException(\RuntimeException::class); $fit->saveOutputFiles($this->dir.'/saved', 'chain', timestamp: false, random: false);
     }
     public function testCmdStanRMetadataStructure(): void
@@ -96,9 +96,9 @@ final class CsvTest extends TestCase
         $file = $this->dir.'/laplace.csv'; file_put_contents($file, "# method = laplace\n# num_threads = 2\nlog_p__,log_q__,theta\n-1,-2,0.5\n-3,-4,0.6\n");
         $fit = CmdStanFit::fromCsv([$file]); $meta = $fit->metadata();
         self::assertSame(['lp__', 'lp_approx__', 'theta'], $meta['variables']); self::assertSame([], $meta['sampler_diagnostics']); self::assertSame(2, $meta['threads']);
-        self::assertSame([[-2.0], [-4.0]], $fit->lpApprox()); self::assertSame(['lp__' => -1.0, 'theta' => 0.5], $fit->draws(format: 'draws_matrix')[0]);
+        self::assertSame([-2.0, -4.0], $fit->lpApprox(), "CmdStanR 1.0 returns lp_approx() as a vector"); self::assertSame(['lp__' => -1.0, 'theta' => 0.5], $fit->draws(format: 'draws_matrix')[0]);
         $vb = $this->dir.'/vb.csv'; file_put_contents($vb, "# method = variational\nlp__,log_p__,log_g__,theta\n0,0,0,0.5\n0,-3,-2,0.2\n");
-        $fit = CmdStanFit::fromCsv([$vb]); self::assertInstanceOf(CmdStanVB::class, $fit); self::assertSame(['lp__', 'lp_approx__', 'theta'], $fit->metadata()['variables']); self::assertSame([[-2.0]], $fit->lpApprox());
+        $fit = CmdStanFit::fromCsv([$vb]); self::assertInstanceOf(CmdStanVB::class, $fit); self::assertSame(['lp__', 'lp_approx__', 'theta'], $fit->metadata()['variables']); self::assertSame([-2.0], $fit->lpApprox());
     }
     public function testDrawsFormatDefaultsAndOption(): void
     {
@@ -117,7 +117,7 @@ final class CsvTest extends TestCase
         self::assertSame([[3.0, 4.0]], $fit->invMetric(false)); self::assertSame([[[3.0, 0.0], [0.0, 4.0]]], $fit->invMetric());
         self::assertSame('diag_e', $fit->metric()[0]['metric_type']); self::assertSame('demo_model', $fit->cmdstanConfig()[0]['model_name']);
         $meta = $fit->metadata(); self::assertSame('2', $meta['stan_major_version']); self::assertSame(1, $meta['num_chains']); self::assertFalse($meta['mpi_enabled']); self::assertSame('sample', $meta['method']); self::assertSame(0.9, $meta['delta']);
-        $saved = $fit->saveMetricFiles($this->dir.'/saved', 'demo', random: false); self::assertMatchesRegularExpression('~/demo-metric-\d{12}-1\.json$~', $saved[0]);
+        $saved = $fit->saveMetricFiles($this->dir.'/saved', 'demo', random: false); self::assertMatchesRegularExpression('~/demo-metric-\d{12}-01\.json$~', $saved[0]);
         self::assertFileExists($this->dir.'/run-1_metric.json'); self::assertSame($saved, $fit->metricFiles());
     }
     public function testDenseMetricFromCsv(): void
@@ -144,8 +144,8 @@ final class CsvTest extends TestCase
     {
         $fit = CmdStanFit::fromCsv([$this->csv()]); $original = $fit->outputFiles()[0];
         $saved = $fit->saveOutputFiles($this->dir.'/saved', 'demo');
-        self::assertMatchesRegularExpression('~/saved/demo-\d{12}-1-[0-9a-f]{6}\.csv$~', $saved[0]); self::assertFileExists($original); self::assertSame($saved, $fit->outputFiles());
-        self::assertMatchesRegularExpression('~/model-1\.csv$~', $fit->saveOutputFiles($this->dir.'/again', timestamp: false, random: false)[0]);
+        self::assertMatchesRegularExpression('~/saved/demo-\d{12}-01-[0-9a-f]{6}\.csv$~', $saved[0]); self::assertFileExists($original); self::assertSame($saved, $fit->outputFiles());
+        self::assertMatchesRegularExpression('~/model-01\.csv$~', $fit->saveOutputFiles($this->dir.'/again', timestamp: false, random: false)[0]);
     }
     public function testMissingAuxiliaryFilesThrowLikeCmdStanR(): void
     {

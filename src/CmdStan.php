@@ -71,7 +71,7 @@ final class CmdStan
         }
         return null;
     }
-    private const OPTIONS = ['cmdstanr_output_dir' => 'dir', 'cmdstanr_write_stan_file_dir' => 'dir', 'cmdstanr_force_recompile' => 'bool', 'cmdstanr_draws_format' => 'format', 'cmdstanr_warn_inits' => 'bool', 'cmdstanr_verbose' => 'bool', 'cmdstanr_no_ver_check' => 'bool', 'cmdstanr_max_rows' => 'int', 'mc.cores' => 'int', 'cmdstanr_print_line_numbers' => 'bool', 'cmdstanphp_example_dir' => 'dir'];
+    private const OPTIONS = ['cmdstanr_output_dir' => 'dir', 'cmdstanr_write_stan_file_dir' => 'dir', 'cmdstanr_force_recompile' => 'bool', 'cmdstanr_draws_format' => 'format', 'cmdstanr_warn_inits' => 'bool', 'cmdstanr_verbose' => 'bool', 'cmdstanr_no_ver_check' => 'bool', 'cmdstanr_max_rows' => 'int', 'mc.cores' => 'int', 'cmdstanr_print_line_numbers' => 'bool', 'cmdstanphp_example_dir' => 'dir', 'cmdstanr_compress' => 'compress', 'cmdstanr_progress_bar' => 'bool', 'cmdstanr_save_metric' => 'bool', 'cmdstanr_save_config' => 'bool', 'cmdstanr_spinner' => 'bool'];
     private static array $options = [];
     /**
      * Session options mirroring R's options(): returns the previous values of the options being set (so they can be restored),
@@ -82,7 +82,7 @@ final class CmdStan
         $previous = [];
         foreach ($set as $name => $value) {
             $type = self::OPTIONS[$name] ?? throw new \InvalidArgumentException('Unknown option: '.$name);
-            $valid = $value === null || match ($type) { 'bool' => is_bool($value), 'int' => is_int($value) && $value > 0, 'dir' => is_string($value) && $value !== '', 'format' => in_array($value, ['draws_array', 'draws_matrix', 'draws_df', 'draws_list'], true) };
+            $valid = $value === null || match ($type) { 'bool' => is_bool($value), 'int' => is_int($value) && $value > 0, 'dir' => is_string($value) && $value !== '', 'format' => in_array($value, ['draws_array', 'draws_matrix', 'draws_df', 'draws_list'], true), 'compress' => in_array($value, ['none', 'gzip', 'bzip2'], true) };
             if (!$valid) { throw new \InvalidArgumentException('Invalid value for option '.$name.'.'); }
         }
         foreach ($set as $name => $value) {

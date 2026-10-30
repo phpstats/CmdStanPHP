@@ -314,7 +314,8 @@ final class CmdStanModel
         if (!isset($o['mode'])) {
             $o['data'] = StanData::normalize($o['data'] ?? null); $opt = $o['opt_args'] ?? [];
             $opt['data'] = $o['data'] ?? null; $opt['jacobian'] = $o['jacobian'] ?? true;
-            foreach (['seed', 'init', 'show_messages', 'show_exceptions', 'sig_figs', 'timeout'] as $name) { if (isset($o[$name])) { $opt[$name] = $o[$name]; } }
+            foreach (['seed', 'init', 'show_messages', 'show_exceptions', 'sig_figs', 'timeout', 'output_dir', 'threads'] as $name) { if (isset($o[$name])) { $opt[$name] = $o[$name]; } }
+            if (isset($o['output_basename'])) { $opt['output_basename'] = $o['output_basename'].'-mode'; }
             $o['mode'] = $this->optimize($opt);
         }
         if ($o['mode'] instanceof CmdStanMLE) {
@@ -325,9 +326,24 @@ final class CmdStanModel
         unset($o['opt_args']);
         return $this->run('laplace', $o);
     }
+    /**
+     * Standalone generated quantities. fittedParams is an MCMC fit, an optimization, Laplace, variational or Pathfinder
+     * fit (its draws are written as one sample-style CSV, as in CmdStanR 1.0), or a list of CmdStan CSV files.
+     */
     public function generateQuantities(CmdStanFit|array|string $fittedParams, mixed ...$options): CmdStanGQ
     {
-        $o = self::options($options); $o['fitted_params'] = $fittedParams instanceof CmdStanFit ? $fittedParams->outputFiles() : (array)$fittedParams;
+        $o = self::options($options); $dir = sys_get_temp_dir().'/cmdstanphp-fitted-'.bin2hex(random_bytes(6));
+        if ($fittedParams instanceof CmdStanMCMC || !$fittedParams instanceof CmdStanFit) { $files = $fittedParams instanceof CmdStanFit ? $fittedParams->outputFiles() : (array)$fittedParams; }
+        elseif ($fittedParams instanceof CmdStanMLE || $fittedParams instanceof CmdStanLaplace || $fittedParams instanceof CmdStanVB || $fittedParams instanceof CmdStanPathfinder) {
+            $rows = $fittedParams instanceof CmdStanMLE ? [$fittedParams->mle() + ['lp__' => $fittedParams->lp()]] : $fittedParams->draws(null, 'draws_matrix');
+            if (!is_dir($dir)) { mkdir($dir, 0700); }
+            $files = [Csv::writeFittedParams($rows, $dir.'/fittedParams-01.csv')];
+        } else { throw new \InvalidArgumentException('fittedParams must be CmdStan CSV files or an MCMC, optimization, Laplace, variational or Pathfinder fit.'); }
+        $o['fitted_params'] = array_map(function ($file) use ($dir) {
+            if (!is_string($file) || !Csv::isCompressed($file)) { return $file; }
+            if (!is_dir($dir)) { mkdir($dir, 0700); }
+            $copy = Csv::decompress($file); $target = $dir.'/'.preg_replace('/\.(gz|bz2)$/i', '', basename($file)); rename($copy, $target); return $target;
+        }, $files);
         return $this->run('generate_quantities', $o);
     }
     public function diagnose(mixed ...$options): CmdStanDiagnose { return $this->run('diagnose', self::options($options)); }
@@ -365,7 +381,7 @@ final class CmdStanModel
      * Initial values as one CLI value per chain (or per Pathfinder path): a radius, init files, or JSON written from
      * arrays, a callable (called exactly once per chain or path, with its id), or a fit. Null when init is unset.
      */
-    private function initFiles(mixed $init, int $count, array $ids, string $dir, string $basename, ?array $parameters, ?int $seed): ?array
+    private function initFiles(mixed $init, int $count, array $ids, string $dir, \Closure $name, ?array $parameters, ?int $seed): ?array
     {
         if ($init === null) { return null; }
         if ($init instanceof CmdStanFit) { $init = $this->initsFromFit($init, $count, $seed); }
@@ -388,7 +404,7 @@ final class CmdStanModel
         if (count($init) !== $count) { throw new \InvalidArgumentException('init has the wrong length: give one set of initial values per '.($count === count($ids) && $ids === range(1, $count) ? 'chain or Pathfinder path' : 'chain').'.'); }
         foreach ($init as $values) { if (!is_array($values) || $values === []) { throw new \InvalidArgumentException('init contains empty lists.'); } }
         if (CmdStan::option('cmdstanr_warn_inits', true)) { $this->warnPartialInits(array_combine(range(1, $count), $init)); }
-        return array_map(fn($values, $id) => $this->inputFile($values, $dir, $basename.'-init-'.$id, $parameters), $init, $ids);
+        return array_map(fn($values, $id) => $this->inputFile($values, $dir, $name($id), $parameters), $init, $ids);
     }
     private static function temporaryFile(string $suffix): string { return sys_get_temp_dir().'/cmdstanphp-'.bin2hex(random_bytes(8)).$suffix; }
     private function inputFile(mixed $input, string $dir, string $name, ?array $variables = null, bool $alwaysDecimal = false): ?string
@@ -418,31 +434,38 @@ final class CmdStanModel
         $dir = $o['output_dir'] ?? CmdStan::option('cmdstanr_output_dir') ?? self::temporaryFile('');
         if (!is_string($dir) || (!is_dir($dir) && !mkdir($dir, 0700, true))) { throw new \RuntimeException('Cannot create output directory.'); }
         $dir = realpath($dir);
-        $basename = $o['output_basename'] ?? $this->modelName().'-'.bin2hex(random_bytes(6));
+        $named = isset($o['output_basename']); $basename = $o['output_basename'] ?? $this->modelName();
         if (!is_string($basename) || in_array($basename, ['.', '..'], true) || !preg_match('/^[A-Za-z0-9_.-]+$/D', $basename)) { throw new \InvalidArgumentException('output_basename must be a simple filename containing letters, digits, dots, underscores and hyphens.'); }
+        // CmdStanR 1.0's names: <model>[-<kind>]-<YYYYmmddHHMM>-<id>-<random>, or <basename>[-<kind>]-<id>; ids have at least two digits.
+        $stamp = date('YmdHi'); $random = bin2hex(random_bytes(3)); $width = max(2, strlen((string)max($ids)));
+        $name = fn(string $kind = '', ?int $id = null) => $basename.($kind === '' ? '' : '-'.$kind).($named ? '' : '-'.$stamp).($id === null ? '' : '-'.str_pad((string)$id, $width, '0', STR_PAD_LEFT)).($named ? '' : '-'.$random);
         foreach ($ids as $id) {
-            if (file_exists($dir.'/'.$basename.'-'.$id.'.csv')) { throw new \RuntimeException('Output already exists: '.$dir.'/'.$basename.'-'.$id.'.csv'); }
+            if (file_exists($dir.'/'.$name('', $id).'.csv')) { throw new \RuntimeException('Output already exists: '.$dir.'/'.$name('', $id).'.csv'); }
         }
+        $compress = $o['compress'] ?? CmdStan::option('cmdstanr_compress', 'none');
+        if ($compress !== 'none') { Csv::assertCompress($compress); }
+        if ($method === 'sample' && !array_key_exists('save_metric', $o) && CmdStan::option('cmdstanr_save_metric') !== null) { $o['save_metric'] = CmdStan::option('cmdstanr_save_metric'); }
+        if (in_array($method, ['sample', 'optimize', 'laplace', 'variational', 'pathfinder'], true) && !array_key_exists('save_cmdstan_config', $o) && CmdStan::option('cmdstanr_save_config') !== null) { $o['save_cmdstan_config'] = CmdStan::option('cmdstanr_save_config'); }
         $declarations = $this->stanFile === null ? null : $this->variables();
         $o['data'] = StanData::normalize($o['data'] ?? null);
         if (is_array($o['data']) && $declarations !== null) {
             $missing = array_diff(array_keys($declarations['data']), array_keys($o['data']));
             if ($missing !== []) { throw new \InvalidArgumentException('Missing input data for the following data variables: '.implode(', ', $missing).'.'); }
         }
-        $data = $this->inputFile($o['data'], $dir, $basename.'-data', $declarations['data'] ?? null, $declarations !== null);
+        $data = $this->inputFile($o['data'], $dir, $name('data'), $declarations['data'] ?? null, $declarations !== null);
         // Pathfinder takes one initialization per path, the other methods one per chain.
         $numInits = $method === 'pathfinder' ? ($o['num_paths'] ?? 4) : $chains;
         $initIds = $method === 'pathfinder' ? range(1, $numInits) : $ids;
-        $initFiles = $this->initFiles($o['init'] ?? null, $numInits, $initIds, $dir, $basename, $declarations['parameters'] ?? null, is_array($o['seed'] ?? null) ? $o['seed'][0] : ($o['seed'] ?? null));
-        $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = [];
+        $initFiles = $this->initFiles($o['init'] ?? null, $numInits, $initIds, $dir, fn(int $id) => $name('init', $id), $declarations['parameters'] ?? null, is_array($o['seed'] ?? null) ? $o['seed'][0] : ($o['seed'] ?? null));
+        $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = []; $commands = [];
         foreach ($ids as $i => $id) {
-            $local = $o; $file = $dir.'/'.$basename.'-'.$id.'.csv';
+            $local = $o; $file = $dir.'/'.$name('', $id).'.csv';
             if (file_exists($file)) { throw new \RuntimeException('Output already exists: '.$file); }
             $files[] = $file;
-            if ($method === 'generate_quantities') { $local['fitted_params'] = $this->inputFile($o['fitted_params'][$i], $dir, $basename.'-fitted-'.$id); }
-            if ($method === 'laplace') { $local['mode'] = $this->inputFile($o['mode'], $dir, $basename.'-mode'); }
-            foreach (['constrained_params', 'unconstrained_params'] as $key) { if (isset($o[$key])) { $local[$key] = $this->inputFile($o[$key], $dir, $basename.'-'.$key); } }
-            if (isset($o['inv_metric'])) { $local['metric_file'] = StanJson::write(['inv_metric' => $o['inv_metric']], $dir.'/'.$basename.'-metric-'.$id.'.json'); }
+            if ($method === 'generate_quantities') { $local['fitted_params'] = $this->inputFile($o['fitted_params'][$i], $dir, $name('fitted', $id)); }
+            if ($method === 'laplace') { $local['mode'] = $this->inputFile($o['mode'], $dir, $name('mode')); }
+            foreach (['constrained_params', 'unconstrained_params'] as $key) { if (isset($o[$key])) { $local[$key] = $this->inputFile($o[$key], $dir, $name($key)); } }
+            if (isset($o['inv_metric'])) { $local['metric_file'] = StanJson::write(['inv_metric' => $o['inv_metric']], $dir.'/'.$name('inv_metric', $id).'.json'); }
             elseif (isset($o['metric_file'])) { $local['metric_file'] = $this->inputFile(is_array($o['metric_file']) ? ($o['metric_file'][$i] ?? throw new \InvalidArgumentException('One metric file required per chain.')) : $o['metric_file'], $dir, 'metric'); }
             $cmd = array_merge([$this->exeFile], Options::methodArgs($method, $local), ['id='.$id]);
             if ($data !== null) { array_push($cmd, 'data', 'file='.$data); }
@@ -452,18 +475,24 @@ final class CmdStanModel
             if (isset($o['opencl_ids'])) { $cmd[] = 'opencl_platform_id='.$o['opencl_ids'][0]; $cmd[] = 'opencl_device_id='.$o['opencl_ids'][1]; }
             array_push($cmd, 'output', 'file='.$file);
             foreach (['refresh', 'sig_figs', 'save_cmdstan_config'] as $key) { if (isset($o[$key])) { $cmd[] = $key.'='.Options::scalar($o[$key]); } }
-            if ($o['save_latent_dynamics'] ?? false) { $diagnosticFiles[] = $dir.'/'.$basename.'-'.$id.'-diagnostic.csv'; $cmd[] = 'diagnostic_file='.end($diagnosticFiles); }
-            $profileFiles[] = $dir.'/'.$basename.'-'.$id.'-profile.csv'; $cmd[] = 'profile_file='.end($profileFiles);
+            if ($o['save_latent_dynamics'] ?? false) { $diagnosticFiles[] = $dir.'/'.$name('diagnostic', $id).'.csv'; $cmd[] = 'diagnostic_file='.end($diagnosticFiles); }
+            $profileFiles[] = $dir.'/'.$name('profile', $id).'.csv'; $cmd[] = 'profile_file='.end($profileFiles);
+            $commands[] = $cmd;
             $jobs[] = ['command' => array_merge($launcher, $cmd), 'env' => $threads === null ? [] : ['STAN_NUM_THREADS' => (string)$threads]];
         }
         if (CmdStan::option('cmdstanr_verbose', false)) { foreach ($jobs as $job) { echo implode(' ', $job['command'])."\n"; } }
-        $results = Process::pool($jobs, min($chains, $o['parallel_chains'] ?? CmdStan::option('mc.cores', 1)), $o['timeout'] ?? null);
+        $bar = $method === 'sample' && ($o['show_progress_bar'] ?? CmdStan::option('cmdstanr_progress_bar', false)) ? new ProgressBar(count($jobs)) : null;
+        try {
+            if (!is_executable($this->exeFile)) { throw $this->cannotRun('Permission denied'); }
+            $results = Process::pool($jobs, min($chains, $o['parallel_chains'] ?? CmdStan::option('mc.cores', 1)), $o['timeout'] ?? null, $bar === null ? null : $bar->update(...));
+        } finally { $bar?->finish(); }
         foreach ($results as $r) {
-            if ($o['show_messages'] ?? true) { echo $r['stdout']; }
+            if ($o['show_messages'] ?? true) { echo $bar === null ? $r['stdout'] : ProgressBar::withoutIterations($r['stdout']); }
             if ($o['show_exceptions'] ?? ($o['show_messages'] ?? true)) { echo $r['stderr']; }
         }
+        if ($compress !== 'none') { $files = Csv::compress($files, $compress); $diagnosticFiles = Csv::compress($diagnosticFiles, $compress); }
         $class = CmdStanFit::classForMethod($method);
-        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['code' => $this->code, 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->modelName(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->nativeStancOptions(), 'variables' => $declarations, 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
+        $fit = new $class($files, $method, $results, $diagnosticFiles, $profileFiles, ['commands' => $commands, 'init_files' => $initFiles === null || is_numeric($initFiles[0]) ? null : $initFiles, 'exe_file' => $this->exeFile, 'code' => $this->code, 'data_file' => $data, 'fitted_params_files' => $o['fitted_params'] ?? [], 'mode' => $o['mode'] ?? null, 'model_name' => $this->modelName(), 'stan_file' => $this->stanFile, 'stanc_options' => $this->nativeStancOptions(), 'variables' => $declarations, 'ids' => $ids, 'owned' => true, 'data_owned' => is_array($o['data'] ?? null)]);
         $checks = array_key_exists('diagnostics', $o) ? ($o['diagnostics'] ?? []) : ['divergences', 'treedepth', 'ebfmi'];
         if ($method === 'sample' && !($o['fixed_param'] ?? false) && $checks !== []) { $fit->checkDiagnostics($checks); }
         return $fit;

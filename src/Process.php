@@ -9,12 +9,19 @@ final class Process
         return self::pool([['command' => $command, 'cwd' => $cwd, 'env' => $env]], 1, $timeout)[0];
     }
 
-    public static function pool(array $jobs, int $parallel = 1, ?float $timeout = null): array
+    /**
+     * Runs the jobs with at most $parallel at a time. $onOutput(int $index, string $stdout) receives stdout as it
+     * arrives (for progress reporting). Child processes still running when PHP shuts down, for example after exit() or
+     * a fatal error, are terminated, as CmdStanR 1.0 stops CmdStan when R dies.
+     */
+    public static function pool(array $jobs, int $parallel = 1, ?float $timeout = null, ?callable $onOutput = null): array
     {
         if ($parallel < 1 || ($timeout !== null && $timeout <= 0)) {
             throw new \InvalidArgumentException('Concurrency and timeout must be positive.');
         }
         $running = []; $results = []; $next = 0;
+        $stopped = false;
+        register_shutdown_function(function () use (&$running, &$stopped): void { if (!$stopped) { self::terminate($running); } });
         try {
             while ($next < count($jobs) || $running !== []) {
                 while ($next < count($jobs) && count($running) < $parallel) {
@@ -26,7 +33,8 @@ final class Process
                     ++$next;
                 }
                 foreach ($running as $index => &$state) {
-                    $state['stdout'] .= stream_get_contents($state['pipes'][1]);
+                    $chunk = (string)stream_get_contents($state['pipes'][1]); $state['stdout'] .= $chunk;
+                    if ($onOutput !== null && $chunk !== '') { $onOutput($index, $chunk); }
                     $state['stderr'] .= stream_get_contents($state['pipes'][2]);
                     $status = proc_get_status($state['process']);
                     if ($timeout !== null && microtime(true) - $state['start'] > $timeout && $status['running']) {
@@ -34,7 +42,9 @@ final class Process
                     }
                     if (!$status['running']) {
                         foreach ([1, 2] as $pipe) {
-                            $state[$pipe === 1 ? 'stdout' : 'stderr'] .= stream_get_contents($state['pipes'][$pipe]);
+                            $rest = (string)stream_get_contents($state['pipes'][$pipe]);
+                            $state[$pipe === 1 ? 'stdout' : 'stderr'] .= $rest;
+                            if ($pipe === 1 && $onOutput !== null && $rest !== '') { $onOutput($index, $rest); }
                             fclose($state['pipes'][$pipe]);
                         }
                         $exit = $status['signaled'] ? 128 + $status['termsig'] : $status['exitcode']; $closed = proc_close($state['process']);
@@ -48,14 +58,20 @@ final class Process
                 if ($running !== []) { usleep(10000); }
             }
         } finally {
-            foreach ($running as $state) {
-                proc_terminate($state['process']);
-                usleep(10000);
-                if (proc_get_status($state['process'])['running']) { proc_terminate($state['process'], 9); }
-                foreach ([1, 2] as $pipe) { fclose($state['pipes'][$pipe]); }
-                proc_close($state['process']);
-            }
+            self::terminate($running); $stopped = true;
         }
         ksort($results); return array_values($results);
+    }
+    private static function terminate(array &$running): void
+    {
+        foreach ($running as $state) {
+            if (!is_resource($state['process'])) { continue; }
+            proc_terminate($state['process']);
+            usleep(10000);
+            if (proc_get_status($state['process'])['running']) { proc_terminate($state['process'], 9); }
+            foreach ([1, 2] as $pipe) { if (is_resource($state['pipes'][$pipe])) { fclose($state['pipes'][$pipe]); } }
+            proc_close($state['process']);
+        }
+        $running = [];
     }
 }

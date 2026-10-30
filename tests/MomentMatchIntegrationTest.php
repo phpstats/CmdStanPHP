@@ -61,7 +61,7 @@ final class MomentMatchIntegrationTest extends TestCase
         foreach ($plain['pointwise'] as $j => $row) { if (!isset($matched[$j])) { self::assertSame($row, $mm['pointwise'][$j]); } }
         // The same run through the generic API with the fit's own callbacks gives an identical result.
         $logLik = $fit->draws('log_lik', 'draws_array'); $upars = array_map('array_values', $fit->unconstrainDraws(format: 'draws_matrix'));
-        $generic = MomentMatch::loo(Loo::loo($logLik), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
+        $generic = MomentMatch::loo(Loo::loo($logLik, rEff: false), $upars, $logLik, fn($rows) => array_map(fn($r) => $fit->logProb($r), $rows), fn($rows, $i) => array_map(fn($r) => $fit->constrainVariables($r)['log_lik'][$i], $rows));
         self::assertSame($mm, $generic);
         // A matrix-shaped log-likelihood maps "log_lik_matrix[i,1]" to the same values.
         $matrix = $fit->loo('log_lik_matrix', momentMatch: true);

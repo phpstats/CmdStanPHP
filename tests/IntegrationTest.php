@@ -97,9 +97,9 @@ final class IntegrationTest extends TestCase
         $csvMetric = array_map(fn($file) => \CmdStan\Csv::read($file)['inv_metric'], $fit->outputFiles());
         foreach ($fit->invMetric(false) as $i => $metric) { self::assertEqualsWithDelta($csvMetric[$i], $metric, 1e-6); self::assertEquals($fit->metric()[$i]['inv_metric'], $metric); }
         $meta = $fit->metadata(); self::assertSame([1, 2], $meta['id']); self::assertSame(123, $meta['seed']); self::assertSame('2', $meta['stan_major_version']); self::assertSame(['lp__', 'mu'], $meta['stan_variables']);
-        self::assertSame(2, $fit->cmdstanConfig()[1]['id']); self::assertMatchesRegularExpression('~/saved/threaded-metric-\d{12}-2-[0-9a-f]{6}\.json$~', $fit->metricFiles()[1]);
+        self::assertSame(2, $fit->cmdstanConfig()[1]['id']); self::assertMatchesRegularExpression('~/saved/threaded-metric-\d{12}-02-[0-9a-f]{6}\.json$~', $fit->metricFiles()[1]);
         $outputs = $fit->outputFiles(); $saved = $fit->saveOutputFiles($this->dir.'/kept', 'run', timestamp: false, random: false);
-        self::assertSame([realpath($this->dir.'/kept').'/run-1.csv', realpath($this->dir.'/kept').'/run-2.csv'], $saved); self::assertFileDoesNotExist($outputs[0]); self::assertCount(20, $fit->draws('mu', 'draws_matrix'));
+        self::assertSame([realpath($this->dir.'/kept').'/run-01.csv', realpath($this->dir.'/kept').'/run-02.csv'], $saved); self::assertFileDoesNotExist($outputs[0]); self::assertCount(20, $fit->draws('mu', 'draws_matrix'));
     }
     public function testPathfinderSinglePathFits(): void
     {

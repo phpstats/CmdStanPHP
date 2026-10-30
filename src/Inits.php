@@ -128,7 +128,7 @@ final class Inits
         }));
         $candidate = []; $ids = [];
         foreach ($rows as $i => $row) {
-            $value = ($row['lp__'] ?? NAN) - ($approx[$row['.iteration'] - 1][$row['.chain'] - 1] ?? NAN);
+            $value = ($row['lp__'] ?? NAN) - ($approx[$i] ?? NAN);
             $lw[$i] = is_finite($value) ? $value : -INF;
             $key = pack('E*', ...array_map(fn($c) => (float)$row[$c] == 0.0 ? 0.0 : (float)$row[$c], $columns));
             $ids[$i] = $candidate[$key] ??= count($candidate);

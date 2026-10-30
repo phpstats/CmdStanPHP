@@ -46,9 +46,7 @@ final class CompatibilityTest extends TestCase
         if (in_array($method, ['variational', 'pathfinder', 'laplace'], true)) {
             $approx = $phpFit->lpApprox();
             self::assertCount(count($reference['approx_lp']), $approx);
-            foreach ($reference['approx_lp'] as $i => $row) {
-                foreach ((array)$row as $j => $value) { self::assertEqualsWithDelta($value, $approx[$i][$j], 1e-13, $method.' approximate lp'); }
-            }
+            foreach ($reference['approx_lp'] as $i => $value) { self::assertEqualsWithDelta($value, $approx[$i], 1e-13, $method.' approximate lp'); }
         }
         $summary = array_column($phpFit->summary('theta'), null, 'variable')['theta'];
         $refSummary = array_column($reference['summary'], null, 'variable')['theta'];

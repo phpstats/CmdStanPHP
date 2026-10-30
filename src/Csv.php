@@ -84,6 +84,48 @@ final class Csv
         for ($i = 0; $value !== [] && $i <= max(array_keys($value)); ++$i) { $out[] = is_array($value[$i] ?? null) ? self::lists($value[$i]) : ($value[$i] ?? null); }
         return $out;
     }
+    /** Throws when a compress method ('gzip' or 'bzip2') has neither its PHP extension nor its program available. */
+    public static function assertCompress(string $method): void
+    {
+        $ok = match ($method) { 'gzip' => function_exists('gzencode') || CmdStan::which('gzip') !== null, 'bzip2' => function_exists('bzcompress') || CmdStan::which('bzip2') !== null, 'none' => true, default => throw new \InvalidArgumentException("compress must be 'none', 'gzip' or 'bzip2'.") };
+        if (!$ok) { throw new \RuntimeException("compress: '".$method."' needs PHP's ".($method === 'gzip' ? 'zlib' : 'bz2').' extension or the '.$method.' program, and neither was found.'); }
+    }
+    /** Compresses CSV files in place, as gzip -f and bzip2 -f do, and returns the new paths; missing files are left out. */
+    public static function compress(array $files, string $method): array
+    {
+        if ($method === 'none') { return $files; }
+        self::assertCompress($method); $out = [];
+        foreach ($files as $file) {
+            if (!is_file($file)) { continue; }
+            $target = $file.($method === 'gzip' ? '.gz' : '.bz2');
+            if ($method === 'gzip' && function_exists('gzencode')) { $data = gzencode((string)file_get_contents($file), 6); }
+            elseif ($method === 'bzip2' && function_exists('bzcompress')) { $data = bzcompress((string)file_get_contents($file), 9); $data = is_string($data) ? $data : false; }
+            else { Process::run([$method, '-f', $file]); $out[] = $target; continue; }
+            if ($data === false || file_put_contents($target, $data, LOCK_EX) === false) { throw new \RuntimeException('Cannot compress '.$file); }
+            unlink($file); $out[] = $target;
+        }
+        return $out;
+    }
+    /** A CmdStanR column name in CmdStan's spelling: x[1,2] is x.1.2, z[real] is z.real, and t:2[1] is t:2.1. */
+    public static function cmdstanName(string $name): string { return str_replace(['[', ',', ']'], ['.', '.', ''], $name); }
+    /**
+     * Draws rows written as a sample-style CSV that standalone generated quantities accepts: lp__ and zeroed sampler
+     * diagnostics first, then the other variables (lp_approx__ is left out), as CmdStanR's draws_to_csv().
+     */
+    public static function writeFittedParams(array $rows, string $file): string
+    {
+        $rows = array_values($rows);
+        if ($rows === []) { throw new \InvalidArgumentException('There are no draws to write.'); }
+        $sampler = ['lp__', 'accept_stat__', 'stepsize__', 'treedepth__', 'n_leapfrog__', 'divergent__', 'energy__'];
+        $variables = array_values(array_filter(array_keys($rows[0]), fn($name) => !in_array($name, $sampler, true) && $name !== 'lp_approx__' && !str_starts_with((string)$name, '.')));
+        $handle = fopen($file, 'xb') ?: throw new \RuntimeException('Cannot create '.$file);
+        try {
+            fwrite($handle, "# method = sample\n# num_samples = ".count($rows)."\n# num_warmup = 0\n# save_warmup = 0\n# thin = 1\n");
+            fputcsv($handle, array_merge($sampler, array_map(self::cmdstanName(...), $variables)), ',', '"', '');
+            foreach ($rows as $row) { fputcsv($handle, array_map(fn($name) => sprintf('%.17g', (float)($row[$name] ?? 0.0)), array_merge($sampler, $variables)), ',', '"', ''); }
+        } finally { fclose($handle); }
+        return $file;
+    }
     /** True for CmdStan CSV files compressed by the compress option: .csv.gz and .csv.bz2. */
     public static function isCompressed(string $file): bool { return (bool)preg_match('/\.csv\.(gz|bz2)$/i', $file); }
     /** A compressed CSV decompressed to a temporary .csv file, which the caller removes. */
@@ -203,7 +245,7 @@ final class Csv
         foreach (['model' => 'model_name', 'engaged' => 'adapt_engaged', 'delta' => 'adapt_delta', 'max_depth' => 'max_treedepth', 'stepsize' => 'step_size', 'num_warmup' => 'iter_warmup', 'num_samples' => 'iter_sampling'] as $from => $to) {
             if (array_key_exists($from, $raw)) { $out[$to] = $raw[$from]; }
         }
-        if (array_key_exists('num_threads', $raw)) { $out[in_array($method, ['variational', 'optimize', 'laplace'], true) ? 'threads' : 'threads_per_chain'] = $raw['num_threads']; }
+        if (array_key_exists('num_threads', $raw)) { $out[in_array($method, ['variational', 'optimize', 'laplace', 'pathfinder'], true) ? 'threads' : 'threads_per_chain'] = $raw['num_threads']; }
         if ($stepSize !== null) { $out['step_size_adaptation'] = $stepSize; }
         if ($lp !== null) { $out['lp'] = $lp; }
         if (($raw['algorithm'] ?? null) === 'fixed_param') { $diagnostics = []; $variables = array_values(array_filter($columns, fn($v) => !str_ends_with($v, '__'))); }
@@ -213,7 +255,13 @@ final class Csv
         }
         if ($method === 'variational') { $variables = array_values(array_filter($variables, fn($v) => $v !== 'lp__')); }
         $variables = array_map(fn($v) => ['log_p__' => 'lp__', 'log_g__' => 'lp_approx__', 'log_q__' => 'lp_approx__'][$v] ?? $v, $variables);
-        if ($method === 'pathfinder') { $variables = array_values(array_unique(array_merge($diagnostics, $variables))); }
+        if ($method === 'pathfinder') {
+            // CmdStanR 1.0: lp_approx__ and path__ are variables, listed after lp__, not sampler diagnostics.
+            $all = array_values(array_unique(array_merge($diagnostics, $variables)));
+            $first = array_values(array_intersect(['lp__', 'lp_approx__', 'path__'], $all));
+            $variables = array_merge($first, array_values(array_diff($all, $first)));
+            $diagnostics = array_values(array_diff($diagnostics, ['lp_approx__', 'path__']));
+        }
         $sizes = self::variableSizes($variables);
         $out += ['sampler_diagnostics' => $diagnostics, 'variables' => $variables, 'stan_variables' => array_keys($sizes), 'stan_variable_sizes' => $sizes, 'model_params' => $variables];
         if ($method === 'sample') { $out['time'] = ['chain_id' => $raw['id'] ?? 1] + $time; }

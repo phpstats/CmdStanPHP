@@ -3,7 +3,8 @@ declare(strict_types=1);
 namespace CmdStan;
 final class CmdStanPathfinder extends CmdStanFit
 {
-    public function lpApprox(): array { return $this->approximateLp('lp_approx__'); }
+    /** CmdStanR 1.0's lp_approx(): the approximation's log density at each draw, as one list in draw order. */
+    public function lpApprox(): array { return $this->column('lp_approx__'); }
     /** Per-path draws CmdStan writes as <output>_path_<n>.csv when save_single_paths is true, in path order. */
     public function singlePathFiles(): array { return $this->context['single_path_files'] ??= $this->pathFiles('csv'); }
     /** Per-path L-BFGS/ELBO diagnostics CmdStan writes as <output>_path_<n>.json when save_single_paths is true. */
@@ -22,7 +23,7 @@ final class CmdStanPathfinder extends CmdStanFit
     /** With num_paths = 1 CmdStan writes no _path_ files: the output CSV is the single path and its diagnostics are <output>.json. */
     private function pathFiles(string $extension): array
     {
-        $stem = basename($this->files[0], '.csv'); $dir = dirname($this->files[0]); $found = [];
+        $stem = (string)preg_replace('/\.csv(\.gz|\.bz2)?$/i', '', basename($this->files[0])); $dir = dirname($this->files[0]); $found = [];
         $meta = $this->chainMetadata()[0];
         if (($meta['num_paths'] ?? null) === 1 && ($meta['save_single_paths'] ?? false) === true) { return array_values(array_filter([$dir.'/'.$stem.'.'.$extension], 'is_file')); }
         foreach (scandir($dir) ?: [] as $entry) {

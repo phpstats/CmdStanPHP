@@ -36,7 +36,10 @@ function check_cmdstan_toolchain(): array { return CmdStan::checkToolchain(); }
 /**
  * Session options, like R's options(). Supported: cmdstanr_output_dir, cmdstanr_write_stan_file_dir, cmdstanr_force_recompile,
  * cmdstanr_draws_format, cmdstanr_warn_inits, cmdstanr_verbose, cmdstanr_no_ver_check (accepted; this port never checks for
- * updates), cmdstanr_max_rows, mc.cores, cmdstanr_print_line_numbers, and the PHP-specific cmdstanphp_example_dir.
+ * updates), cmdstanr_max_rows, mc.cores, cmdstanr_print_line_numbers, cmdstanr_compress ('none', 'gzip' or 'bzip2'; the fitting methods' default compress),
+ * cmdstanr_progress_bar (sample()'s default show_progress_bar), cmdstanr_save_metric (sample()'s default save_metric),
+ * cmdstanr_save_config (the default save_cmdstan_config), cmdstanr_spinner (accepted; no spinner is shown), and the
+ * PHP-specific cmdstanphp_example_dir.
  * With $set, returns the previous values so they can be restored with options($previous); null unsets an option.
  */
 function options(array $set = []): array { return CmdStan::setOptions($set); }
@@ -87,9 +90,9 @@ function num_threads(): ?int
     return $threads !== false && is_numeric($threads) ? (int)$threads : null;
 }
 /** Version first for compatibility with earlier releases; see Installer::install(). cores defaults to the mc.cores option, else 1. */
-function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true): string
+function install_cmdstan(?string $version = null, ?string $dir = null, ?int $cores = null, ?float $timeout = null, bool $overwrite = false, ?string $releaseUrl = null, ?string $releaseFile = null, array $cppOptions = [], bool $checkToolchain = true, ?bool $copyMakeLocal = null): string
 {
-    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $releaseUrl, $releaseFile, $cppOptions, $checkToolchain);
+    return Installer::install($version, $dir, $cores, $timeout, $overwrite, $releaseUrl, $releaseFile, $cppOptions, $checkToolchain, $copyMakeLocal);
 }
 function rebuild_cmdstan(?int $cores = null, ?float $timeout = null): void { Installer::rebuild($cores, $timeout); }
 /**
