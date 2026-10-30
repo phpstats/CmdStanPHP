@@ -643,7 +643,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><code>drawsColumns(variables: null, incWarmup: false)</code> returns draws as columns, like posterior’s <code>as_draws_df()</code>: one list per variable element (such as <code>beta[2]</code>), then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns.</li>
 <li><code>summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])</code> returns <code>summary()</code> as columns: <code>variable</code> and one column per measure.</li>
-<li><code>drawsTable()</code> and <code>summaryTable()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.5, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
+<li><code>drawsTable()</code> and <code>summaryTable()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.3 or later, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
 <li><code>CmdStan\Tables::fromRows($rows)</code> converts any list of associative rows, such as <code>loo()['pointwise']</code>, to columns.</li>
 </ul>
 <p>The column arrays need no other package and suit any data frame library that accepts name-to-values columns.</p>
