@@ -19,9 +19,8 @@ final class Process
         if ($parallel < 1 || ($timeout !== null && $timeout <= 0)) {
             throw new \InvalidArgumentException('Concurrency and timeout must be positive.');
         }
-        $running = []; $results = []; $next = 0;
-        $stopped = false;
-        register_shutdown_function(function () use (&$running, &$stopped): void { if (!$stopped) { self::terminate($running); } });
+        $running = []; $results = []; $next = 0; $pool = ++self::$pools;
+        if (!self::$hooked) { register_shutdown_function(self::shutdown(...)); self::$hooked = true; }
         try {
             while ($next < count($jobs) || $running !== []) {
                 while ($next < count($jobs) && count($running) < $parallel) {
@@ -29,6 +28,7 @@ final class Process
                     $process = proc_open($job['command'], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $job['cwd'] ?? null, empty($job['env']) ? null : array_merge(getenv(), $job['env']));
                     if (!is_resource($process)) { throw new \RuntimeException('Unable to start process.'); }
                     fclose($pipes[0]); stream_set_blocking($pipes[1], false); stream_set_blocking($pipes[2], false);
+                    self::$live[$pool.':'.$next] = $process;
                     $running[$next] = ['process' => $process, 'pipes' => $pipes, 'stdout' => '', 'stderr' => '', 'start' => microtime(true)];
                     ++$next;
                 }
@@ -50,7 +50,7 @@ final class Process
                         $exit = $status['signaled'] ? 128 + $status['termsig'] : $status['exitcode']; $closed = proc_close($state['process']);
                         if ($exit < 0) { $exit = $closed; }
                         $results[$index] = ['stdout' => $state['stdout'], 'stderr' => $state['stderr'], 'exit_code' => $exit, 'duration' => microtime(true) - $state['start'], 'command' => $jobs[$index]['command']];
-                        unset($running[$index]);
+                        unset($running[$index], self::$live[$pool.':'.$index]);
                         if ($exit !== 0) { throw new ProcessException($jobs[$index]['command'], $exit, $state['stdout'], $state['stderr']); }
                     }
                 }
@@ -58,9 +58,20 @@ final class Process
                 if ($running !== []) { usleep(10000); }
             }
         } finally {
-            self::terminate($running); $stopped = true;
+            foreach (array_keys($running) as $index) { unset(self::$live[$pool.':'.$index]); }
+            self::terminate($running);
         }
         ksort($results); return array_values($results);
+    }
+    /** @var array<string, resource> processes started by pool() that are still running */
+    private static array $live = [];
+    private static int $pools = 0;
+    private static bool $hooked = false;
+    /** Stops CmdStan processes left running when PHP shuts down (after exit() or a fatal error). */
+    private static function shutdown(): void
+    {
+        $running = array_map(fn($process) => ['process' => $process, 'pipes' => []], self::$live); self::$live = [];
+        self::terminate($running);
     }
     private static function terminate(array &$running): void
     {
@@ -69,7 +80,7 @@ final class Process
             proc_terminate($state['process']);
             usleep(10000);
             if (proc_get_status($state['process'])['running']) { proc_terminate($state['process'], 9); }
-            foreach ([1, 2] as $pipe) { if (is_resource($state['pipes'][$pipe])) { fclose($state['pipes'][$pipe]); } }
+            foreach ([1, 2] as $pipe) { if (isset($state['pipes'][$pipe]) && is_resource($state['pipes'][$pipe])) { fclose($state['pipes'][$pipe]); } }
             proc_close($state['process']);
         }
         $running = [];

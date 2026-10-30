@@ -102,8 +102,8 @@ class CmdStanFit
     public function init(): array
     {
         if (isset($this->context['init_values'])) { return $this->context['init_values']; }
-        $files = $this->context['init_files'] ?? array_merge(...array_map(fn($v) => is_string($v) ? explode(',', $v) : [], (array)($this->metadata()['init'] ?? [])) ?: [[]]);
-        $files = array_values(array_filter($files, fn($f) => !is_numeric($f)));
+        $files = $this->context['init_files'] ?? array_merge([], ...array_map(fn($v) => is_string($v) ? explode(',', $v) : [], (array)($this->metadata()['init'] ?? [])));
+        $files = array_values(array_filter($files, fn($f) => is_string($f) && !is_numeric($f)));
         if ($files === [] || array_filter($files, fn($f) => !is_file($f)) !== []) { throw new \RuntimeException("Can't find initial values files."); }
         return $this->context['init_values'] = array_map(fn($f) => json_decode((string)file_get_contents($f), true, flags: JSON_THROW_ON_ERROR), $files);
     }
@@ -111,8 +111,8 @@ class CmdStanFit
     public function materialize(): static
     {
         $this->parsed();
-        foreach ([fn() => $this->init(), fn() => $this->profiles()] as $read) { try { $this->context['materialized'][] = $read(); } catch (\Throwable) {} }
-        unset($this->context['materialized']);
+        try { $this->init(); } catch (\Throwable) {}
+        try { $this->profiles(); } catch (\Throwable) {}
         return $this;
     }
     public function output(): array { return array_map(fn($r) => $r['stdout'].$r['stderr'], $this->results); }
@@ -384,6 +384,11 @@ class CmdStanFit
         $move = $this->context['owned'] ?? false;
         if ($compress === null || $compress === $current) { return $this->saveFiles($files, $dir, $basename, $this->procIds(), '.csv'.['none' => '', 'gzip' => '.gz', 'bzip2' => '.bz2'][$current], $timestamp, $random, $move); }
         Csv::assertCompress($compress);
+        $ext = ['none' => '', 'gzip' => '.gz', 'bzip2' => '.bz2'][$compress];
+        if ($ext !== '' && !$timestamp && !$random) {
+            $ids = $this->procIds(); $width = max(2, strlen((string)max($ids)));
+            foreach ($ids as $id) { $target = $dir.'/'.$basename.'-'.str_pad((string)$id, $width, '0', STR_PAD_LEFT).'.csv'.$ext; if (file_exists($target)) { throw new \RuntimeException('Destination exists: '.$target); } }
+        }
         $plain = array_map(fn($f) => $current === 'none' ? $f : Csv::decompress($f), $files);
         try { $saved = $this->saveFiles($plain, $dir, $basename, $this->procIds(), '.csv', $timestamp, $random, false); }
         finally { if ($current !== 'none') { foreach ($plain as $f) { @unlink($f); } } }
@@ -394,7 +399,7 @@ class CmdStanFit
     public function saveOutputFiles(string $dir = '.', ?string $basename = null, bool $timestamp = true, bool $random = true, ?string $compress = null): array
     {
         $this->configFiles(); $this->metricFiles(); $this->pinFiles();
-        $this->csv = null; $this->parsed();
+        $this->parsed();
         return $this->files = $this->saveCsvFiles($this->files, $dir, $this->saveArgs($basename), $timestamp, $random, $compress);
     }
     /** Hook for subclasses to resolve paths derived from output file names before those files move. */

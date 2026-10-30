@@ -192,4 +192,18 @@ final class CsvTest extends TestCase
         self::assertSame(['ap[1]:1', 'ap[1]:2'], array_keys($fit->draws('ap[1]', 'draws_matrix')[0]));
         self::assertSame(['z' => [1.0, 2.0], 't' => [3.0, [4.0, 5.0]], 'ap' => [[6.0, 7.0], [8.0, 9.0]]], array_diff_key(Csv::unflatten($fit->draws(null, 'draws_matrix')[0]), ['lp__' => 1]));
     }
+    public function testReviewRegressions(): void
+    {
+        $fit = as_cmdstan_fit($this->csv(), variables: 'x');
+        $fit->saveOutputFiles($this->dir.'/kept', 'kept', timestamp: false, random: false);
+        self::assertSame(['lp__', 'x[1]', 'x[2]'], $fit->variables(), 'saving keeps the variable filter');
+        $gz = $this->dir.'/kept2/kept-01.csv.gz'; mkdir(dirname($gz)); file_put_contents($gz, 'sentinel');
+        try { CmdStanFit::fromCsv([$this->csv('d.csv')])->saveOutputFiles($this->dir.'/kept2', 'kept', timestamp: false, random: false, compress: 'gzip'); self::fail('An existing .csv.gz must not be overwritten.'); }
+        catch (\RuntimeException $e) { self::assertStringContainsString('Destination exists', $e->getMessage()); }
+        self::assertSame('sentinel', file_get_contents($gz));
+        $laplace = $this->dir.'/lap.csv'; file_put_contents($laplace, "# method = laplace\nlp__,log_p__,log_g__,theta\n0,-1,-2,0.5\n0,-3,-4,0.6\n");
+        $fit = as_cmdstan_fit($laplace, variables: ['theta'], checkDiagnostics: false);
+        self::assertSame([-2.0, -4.0], $fit->lpApprox()); self::assertSame(-1.0, $fit->draws(null, 'draws_matrix')[0]['lp__']);
+        $this->expectExceptionMessage("Can't find initial values files."); CmdStanFit::fromCsv([$this->csv('e.csv')])->init();
+    }
 }

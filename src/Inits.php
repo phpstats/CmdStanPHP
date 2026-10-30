@@ -52,7 +52,7 @@ final class Inits
         foreach ($row as $name => $value) {
             $name = (string)$name;
             if (str_starts_with($name, '.')) { continue; }
-            $base = (string)preg_replace('/(\[|:).*$/s', '', $name);
+            $base = Csv::baseName($name);
             if ($parameters === null ? str_ends_with($base, '__') : !isset($parameters[$base])) { continue; }
             $columns[$name] = (float)$value;
         }
@@ -123,7 +123,7 @@ final class Inits
     {
         $rows = array_values($fit->draws(format: 'draws_df')); $approx = $fit->lpApprox(); $lw = []; $warnings = [];
         $columns = array_values(array_filter(array_keys($rows[0] ?? []), function ($name) use ($parameters) {
-            $base = (string)preg_replace('/(\[|:).*$/s', '', (string)$name);
+            $base = Csv::baseName((string)$name);
             return !str_starts_with((string)$name, '.') && !str_ends_with($base, '__') && ($parameters === null || isset($parameters[$base]));
         }));
         $candidate = []; $ids = [];
@@ -160,7 +160,7 @@ final class Inits
         $codes = $fit->returnCodes();
         if ($codes !== [] && count(array_filter($codes, fn($c) => $c !== 0)) === count($codes)) { throw new \RuntimeException('We are unable to create initial values from a model with no samples. Please check the results of the model used for inits before continuing.'); }
         if ($parameters !== null) {
-            $available = array_map(fn($name) => (string)preg_replace('/(\[|:).*$/s', '', $name), $fit->variables());
+            $available = array_map(fn($name) => Csv::baseName($name), $fit->variables());
             if (array_intersect(array_map('strval', array_keys($parameters)), $available) === []) { throw new \InvalidArgumentException('None of the names of the parameters for the model used for initial values match the names of parameters from the model currently running.'); }
         }
     }

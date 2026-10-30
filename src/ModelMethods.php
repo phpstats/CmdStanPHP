@@ -143,7 +143,10 @@ final class ModelMethods
         $this->check($this->ffi->cmdstanphp_param_constrain($this->handle, $theta, (int)$transformedParameters, (int)$generatedQuantities, $values, $size, \FFI::addr($err)), $err);
         $flat = [];
         foreach ($this->constrainedParamNames($transformedParameters, $generatedQuantities) as $k => $name) { $flat[$name] = $values[$k]; }
-        return Csv::unflatten($flat);
+        $values = Csv::unflatten($flat); $out = [];
+        // Zero-size variables have no columns; they come back as empty lists, in declaration order.
+        foreach (array_keys($this->variableSkeleton($transformedParameters, $generatedQuantities)) as $key) { $base = explode('.', (string)$key, 2)[0]; $out[$base] = $values[$base] ?? []; }
+        return $out;
     }
     /** Reseed the RNG used for generated quantities by constrainVariables(). */
     public function seedRng(int $seed): void

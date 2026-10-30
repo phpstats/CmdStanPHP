@@ -15,6 +15,8 @@ final class Csv
             return $at === false ? $piece : substr($piece, 0, $at).'['.str_replace('.', ',', substr($piece, $at + 1)).']';
         }, explode(':', $name)));
     }
+    /** The Stan variable a column belongs to: x for x[1,2], z for z[real], t for t:2[1]. */
+    public static function baseName(string $name): string { return (string)preg_replace('/(\[|:).*$/s', '', $name); }
     /** True when $name is $variable or one of its elements: an indexed element (x[1]) or a tuple component (t:1). */
     public static function matches(string $name, string $variable): bool { return $name === $variable || str_starts_with($name, $variable.'[') || str_starts_with($name, $variable.':'); }
     /**
@@ -24,7 +26,7 @@ final class Csv
     public static function variableSizes(array $columns): array
     {
         $last = [];
-        foreach ($columns as $column) { $last[(string)preg_replace('/(\[|:).*$/s', '', $column)] = $column; }
+        foreach ($columns as $column) { $last[self::baseName($column)] = $column; }
         $sizes = [];
         foreach ($last as $base => $column) {
             $outer = explode(':', $column, 2)[0];
@@ -42,7 +44,7 @@ final class Csv
     {
         $groups = [];
         foreach ($values as $name => $value) {
-            $base = (string)preg_replace('/(\[|:).*$/s', '', (string)$name);
+            $base = self::baseName((string)$name);
             $groups[$base][substr((string)$name, strlen($base))] = $value;
         }
         return array_map(self::leaves(...), $groups);
@@ -98,6 +100,7 @@ final class Csv
         foreach ($files as $file) {
             if (!is_file($file)) { continue; }
             $target = $file.($method === 'gzip' ? '.gz' : '.bz2');
+            if (file_exists($target)) { throw new \RuntimeException('Destination exists: '.$target); }
             if ($method === 'gzip' && function_exists('gzencode')) { $data = gzencode((string)file_get_contents($file), 6); }
             elseif ($method === 'bzip2' && function_exists('bzcompress')) { $data = bzcompress((string)file_get_contents($file), 9); $data = is_string($data) ? $data : false; }
             else { Process::run([$method, '-f', $file]); $out[] = $target; continue; }
@@ -191,7 +194,7 @@ final class Csv
                     if ($variables !== null) {
                         $missing = array_values(array_filter($variables, fn($v) => array_filter($header, fn($name) => self::matches($name, (string)$v)) === []));
                         if ($missing !== []) { throw new \InvalidArgumentException("Can't find the following variable(s) in the output: ".implode(', ', $missing)); }
-                        $keep = array_keys(array_filter($header, fn($name) => $name === 'lp__' || ($diagnostics && str_ends_with($name, '__')) || array_filter($variables, fn($v) => self::matches($name, (string)$v)) !== []));
+                        $keep = array_keys(array_filter($header, fn($name) => in_array($name, ['lp__', 'log_p__', 'log_g__', 'log_q__', 'lp_approx__'], true) || ($diagnostics && str_ends_with($name, '__')) || array_filter($variables, fn($v) => self::matches($name, (string)$v)) !== []));
                         $header = array_values(array_intersect_key($header, array_flip($keep)));
                     }
                     continue;
@@ -225,9 +228,9 @@ final class Csv
         $columns = $header;
         if (in_array($method, ['variational', 'laplace'], true) && in_array('log_p__', $header, true)) {
             // CmdStanR exposes log_p__ as lp__ and log_g__/log_q__ as lp_approx__; ADVI's original lp__ is a placeholder.
-            $keep = array_values(array_filter($header, fn($name) => $name !== 'lp__'));
-            $header = array_map(fn($name) => ['log_p__' => 'lp__', 'log_g__' => 'lp_approx__', 'log_q__' => 'lp_approx__'][$name] ?? $name, $keep);
-            $map = fn(?array $row) => $row === null ? null : array_combine($header, array_map(fn($name) => $row[$name], $keep));
+            $renamed = array_values(array_filter($header, fn($name) => $name !== 'lp__'));
+            $header = array_map(fn($name) => ['log_p__' => 'lp__', 'log_g__' => 'lp_approx__', 'log_q__' => 'lp_approx__'][$name] ?? $name, $renamed);
+            $map = fn(?array $row) => $row === null ? null : array_combine($header, array_map(fn($name) => $row[$name], $renamed));
             $draws = array_map($map, $draws); $estimate = $map($estimate);
         }
         if ($method === 'optimize' && $draws !== []) { $estimate = end($draws); }

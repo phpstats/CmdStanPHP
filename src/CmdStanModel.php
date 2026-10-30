@@ -34,8 +34,8 @@ final class CmdStanModel
             $real = realpath($exeFile);
             if ($real === false || !is_file($real)) { throw new \InvalidArgumentException('Executable not found: '.$exeFile); }
             $this->exeFile = $real; $read = Build::readRecord($real);
-            if ($read['status'] === 'available') { $this->adopt($read['record']); } else { $this->features = Build::reportedFeatures($real); }
-            $this->exeHash = Build::hash($real);
+            if ($read['status'] === 'available') { $this->adopt($read['record']); $this->exeHash = $read['record']['executable_hash']; }
+            else { $this->features = Build::reportedFeatures($real); $this->exeHash = Build::hash($real); }
             return;
         }
         $real = realpath((string)$stanFile);
@@ -58,7 +58,7 @@ final class CmdStanModel
         if (!$quiet || CmdStan::option('cmdstanr_verbose', false)) { echo Build::message($reasons, $read['status'] === 'no_executable')."\n"; }
         if ($reasons === []) {
             $record = $read['record'];
-            if ($pedantic) { $this->showPedanticWarnings($added); }
+            if ($pedantic) { $this->adopt($record); $this->showPedanticWarnings($added); }
         } else {
             $this->info ??= Build::info($real, $includes, $timeout); $dependencies ??= Build::dependencies($real, $this->info, $userHeader);
             $makeVars = array_merge(array_map(fn($name, $value) => $name.'='.$value, array_keys($cpp), $cpp), $userHeader === null ? [] : ['USER_HEADER='.$userHeader]);
@@ -75,6 +75,9 @@ final class CmdStanModel
         $this->exeHash = $record['executable_hash'];
         $this->stamps = $this->stamps();
     }
+    public function __destruct() { if ($this->hppFile !== null && is_file($this->hppFile)) { @unlink($this->hppFile); } }
+    public function __serialize(): array { $data = get_object_vars($this); $data['hppFile'] = null; $data['functions'] = null; return $data; }
+    public function __unserialize(array $data): void { foreach ($data as $key => $value) { $this->$key = $value; } }
     private function adopt(array $record): void
     {
         $this->configuration = $record['configuration'] + $this->configuration; $this->features = $record['reported_features'] ?? []; $this->cmdstan = $record['cmdstan'];
@@ -336,16 +339,16 @@ final class CmdStanModel
      */
     public function generateQuantities(CmdStanFit|array|string $fittedParams, mixed ...$options): CmdStanGQ
     {
-        $o = self::options($options); $dir = sys_get_temp_dir().'/cmdstanphp-fitted-'.bin2hex(random_bytes(6));
+        $o = self::options($options); $dir = (is_string($o['output_dir'] ?? null) ? $o['output_dir'] : sys_get_temp_dir()).'/fittedParams-'.bin2hex(random_bytes(6));
         if ($fittedParams instanceof CmdStanMCMC || !$fittedParams instanceof CmdStanFit) { $files = $fittedParams instanceof CmdStanFit ? $fittedParams->outputFiles() : (array)$fittedParams; }
         elseif ($fittedParams instanceof CmdStanMLE || $fittedParams instanceof CmdStanLaplace || $fittedParams instanceof CmdStanVB || $fittedParams instanceof CmdStanPathfinder) {
             $rows = $fittedParams instanceof CmdStanMLE ? [$fittedParams->mle() + ['lp__' => $fittedParams->lp()]] : $fittedParams->draws(null, 'draws_matrix');
-            if (!is_dir($dir)) { mkdir($dir, 0700); }
+            if (!is_dir($dir)) { mkdir($dir, 0700, true); }
             $files = [Csv::writeFittedParams($rows, $dir.'/fittedParams-01.csv')];
         } else { throw new \InvalidArgumentException('fittedParams must be CmdStan CSV files or an MCMC, optimization, Laplace, variational or Pathfinder fit.'); }
         $o['fitted_params'] = array_map(function ($file) use ($dir) {
             if (!is_string($file) || !Csv::isCompressed($file)) { return $file; }
-            if (!is_dir($dir)) { mkdir($dir, 0700); }
+            if (!is_dir($dir)) { mkdir($dir, 0700, true); }
             $copy = Csv::decompress($file); $target = $dir.'/'.preg_replace('/\.(gz|bz2)$/i', '', basename($file)); rename($copy, $target); return $target;
         }, $files);
         return $this->run('generate_quantities', $o);
@@ -464,7 +467,6 @@ final class CmdStanModel
         $jobs = []; $files = []; $diagnosticFiles = []; $profileFiles = []; $commands = [];
         foreach ($ids as $i => $id) {
             $local = $o; $file = $dir.'/'.$name('', $id).'.csv';
-            if (file_exists($file)) { throw new \RuntimeException('Output already exists: '.$file); }
             $files[] = $file;
             if ($method === 'generate_quantities') { $local['fitted_params'] = $this->inputFile($o['fitted_params'][$i], $dir, $name('fitted', $id)); }
             if ($method === 'laplace') { $local['mode'] = $this->inputFile($o['mode'], $dir, $name('mode')); }

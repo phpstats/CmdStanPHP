@@ -45,4 +45,12 @@ final class RuntimeIntegrationTest extends TestCase
         ob_start(); $model->sample(data: self::DATA, chains: 2, seed: 7, iter_warmup: 100, iter_sampling: 100, refresh: 50, show_progress_bar: true, output_dir: $this->dir); $out = ob_get_clean();
         self::assertStringNotContainsString('Iteration:', $out, 'the bar replaces the iteration lines');
     }
+    public function testPedanticReuseKeepsIncludePaths(): void
+    {
+        try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
+        file_put_contents($this->dir.'/part.stan', "real twice(real x) { return 2 * x; }\n");
+        $file = write_stan_file("functions {\n#include part.stan\n}\nparameters { real mu; } model { mu ~ normal(twice(0), 1); }", $this->dir.'/inc.stan');
+        new CmdStanModel($file); $model = new CmdStanModel($file, pedantic: true);
+        self::assertSame([realpath($this->dir)], $model->includePaths()); self::assertTrue($model->isCurrent());
+    }
 }
