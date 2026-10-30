@@ -102,6 +102,8 @@ final class SessionOptionsTest extends TestCase
             self::assertSame("Recompiling:\n  - the `cmdstanr_force_recompile` option is set\n", ob_get_clean());
             ob_start(); cmdstan_model($file, quiet: false, cppOptions: ['stan_threads' => true], forceRecompile: false); self::assertSame("Model executable is up to date!\n", ob_get_clean(), 'an explicit false overrides the option');
             options(['cmdstanr_force_recompile' => null]);
+            $same = cmdstan_model($file, cppOptions: ['stan_threads' => true]); file_put_contents($file, str_replace('real x', 'real y', (string)file_get_contents($file)));
+            self::assertFalse($same->isCurrent(), 'a same-size edit within the same second is still seen');
             file_put_contents($file, "\n// edited", FILE_APPEND);
             ob_start(); cmdstan_model($file, quiet: false, cppOptions: ['stan_threads' => true]); self::assertSame("Recompiling:\n  - the Stan program changed\n", ob_get_clean());
             file_put_contents($this->dir.'/.m.cmdstanphp.json', '{');

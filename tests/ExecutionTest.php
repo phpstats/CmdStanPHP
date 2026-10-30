@@ -37,6 +37,12 @@ final class ExecutionTest extends TestCase
         $fit = $this->model()->sample(chains: 1, output_dir: $this->dir, output_basename: 'model.v2', show_messages: false);
         self::assertStringEndsWith('model.v2-01.csv', $fit->outputFiles()[0], 'chain ids have at least two digits');
     }
+    public function testDefaultNamesReplaceUnsafeCharacters(): void
+    {
+        copy(__DIR__.'/fixtures/model.php', $this->dir.'/my model.php'); chmod($this->dir.'/my model.php', 0755);
+        $fit = (new CmdStanModel(exeFile: $this->dir.'/my model.php'))->sample(chains: 1, output_dir: $this->dir, show_messages: false, diagnostics: null);
+        self::assertMatchesRegularExpression('~/my_model-\d{12}-01-[0-9a-f]{6}\.csv$~', $fit->outputFiles()[0]);
+    }
     public function testUnsupportedOptionsFailEarly(): void { $this->expectException(\InvalidArgumentException::class); $this->model()->sample(silent_typo: true); }
     public function testProfileReader(): void
     {

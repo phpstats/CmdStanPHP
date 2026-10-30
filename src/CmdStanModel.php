@@ -92,15 +92,19 @@ final class CmdStanModel
         $paths ??= $this->configuration['include_paths'];
         return $paths === [] ? [] : ['--include-paths='.implode(',', $paths)];
     }
-    /** File status of everything the build depends on, so an unchanged build is confirmed without hashing or running stanc. */
+    /**
+     * A cheap fingerprint of everything the build depends on, so an unchanged build is confirmed without running stanc:
+     * content hashes of the program, its includes, the user header and make/local, and the executable's file status.
+     */
     private function stamps(): array
     {
-        $files = [$this->exeFile, (string)$this->stanFile, CmdStan::path().'/make/local', CmdStan::path().'/makefile'];
-        foreach ($this->info['included_files'] ?? [] as $file) { $files[] = $file; }
-        if ($this->userHeader !== null) { $files[] = $this->userHeader; }
         clearstatcache();
-        $out = [CmdStan::path()];
-        foreach ($files as $file) { $stat = @stat($file); $out[$file] = $stat === false ? null : [$stat['ino'], $stat['size'], $stat['mtime'], $stat['ctime']]; }
+        $sources = [(string)$this->stanFile, CmdStan::path().'/make/local', CmdStan::path().'/makefile', ...($this->info['included_files'] ?? [])];
+        if ($this->userHeader !== null) { $sources[] = $this->userHeader; }
+        $out = ['cmdstan' => CmdStan::path()];
+        foreach ($sources as $file) { $out[$file] = is_file($file) ? hash_file('xxh128', $file) : null; }
+        $stat = @stat($this->exeFile);
+        $out[$this->exeFile] = $stat === false ? null : [$stat['ino'], $stat['size'], $stat['mtime'], $stat['ctime']];
         return $out;
     }
     /** CmdStanR's check before every run: the executable must still be what this model built, from the current program. */
@@ -434,7 +438,7 @@ final class CmdStanModel
         $dir = $o['output_dir'] ?? CmdStan::option('cmdstanr_output_dir') ?? self::temporaryFile('');
         if (!is_string($dir) || (!is_dir($dir) && !mkdir($dir, 0700, true))) { throw new \RuntimeException('Cannot create output directory.'); }
         $dir = realpath($dir);
-        $named = isset($o['output_basename']); $basename = $o['output_basename'] ?? $this->modelName();
+        $named = isset($o['output_basename']); $basename = $o['output_basename'] ?? (string)preg_replace('/[^A-Za-z0-9_.-]/', '_', $this->modelName());
         if (!is_string($basename) || in_array($basename, ['.', '..'], true) || !preg_match('/^[A-Za-z0-9_.-]+$/D', $basename)) { throw new \InvalidArgumentException('output_basename must be a simple filename containing letters, digits, dots, underscores and hyphens.'); }
         // CmdStanR 1.0's names: <model>[-<kind>]-<YYYYmmddHHMM>-<id>-<random>, or <basename>[-<kind>]-<id>; ids have at least two digits.
         $stamp = date('YmdHi'); $random = bin2hex(random_bytes(3)); $width = max(2, strlen((string)max($ids)));
