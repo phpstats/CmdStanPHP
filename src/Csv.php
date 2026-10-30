@@ -150,18 +150,50 @@ final class Csv
     /**
      * Reads one CmdStan CSV file (.csv, .csv.gz or .csv.bz2). With $variables, only those variables (names, elements,
      * or tuples, as Csv::matches()) and the sampler diagnostics (unless $diagnostics is false) are kept, which saves
-     * memory for large fits; metadata still lists every Stan variable's size.
+     * memory for large fits; metadata still lists every Stan variable's size. Draws are rows keyed by variable.
      */
     public static function read(string $file, ?array $variables = null, bool $diagnostics = true): array
     {
+        $scan = self::scan($file, $variables, $diagnostics); $draws = []; $warmup = [];
+        foreach (['warmup' => &$warmup, 'draws' => &$draws] as $part => &$rows) {
+            $columns = array_map(fn($name) => self::unpack($scan, $name, $part), $scan['variables']);
+            for ($i = 0; $i < $scan['counts'][$part]; ++$i) { $rows[] = array_combine($scan['variables'], array_column($columns, $i)); }
+        }
+        unset($rows);
+        unset($scan['source'], $scan['packed'], $scan['counts'], $scan['starts']);
+        return ['variables' => $scan['variables'], 'draws' => $draws, 'warmup' => $warmup] + $scan;
+    }
+    /** One column of a scan() result as floats: a part's rows ('warmup', 'draws' or 'both'); [] when the column was not loaded. */
+    public static function unpack(array $scan, string $name, string $part = 'draws'): array
+    {
+        $packed = $scan['packed'][$scan['source'][$name] ?? $name] ?? null;
+        if ($packed === null) { return []; }
+        $start = $part === 'draws' ? $scan['starts']['draws'] : $scan['starts']['warmup'];
+        $count = $part === 'both' ? $scan['counts']['warmup'] + $scan['counts']['draws'] : $scan['counts'][$part];
+        if ($part === 'both' && $scan['starts']['draws'] !== $scan['counts']['warmup']) {
+            return array_merge(self::unpack($scan, $name, 'warmup'), self::unpack($scan, $name, 'draws'));
+        }
+        return $count === 0 ? [] : array_values(unpack('e*', substr($packed, 8 * $start, 8 * $count)));
+    }
+    /**
+     * read() without rows: every data row is checked, but only the columns in $load (CmdStan column names after
+     * variableName(); null loads every kept column) are stored, each as one string of little-endian doubles over all
+     * data rows. 'source' maps each name in 'variables' to its column, 'counts' gives the warmup and post-warmup row
+     * counts, and 'starts' their first row. 'estimate' is the optimizer's or ADVI's estimate row, with every kept column.
+     */
+    public static function scan(string $file, ?array $variables = null, bool $diagnostics = true, ?array $load = null): array
+    {
         if (self::isCompressed($file)) {
             $copy = self::decompress($file);
-            try { return self::read($copy, $variables, $diagnostics); } finally { @unlink($copy); }
+            try { return self::scan($copy, $variables, $diagnostics, $load); } finally { @unlink($copy); }
         }
         $handle = @fopen($file, 'rb');
         if ($handle === false) { throw new \InvalidArgumentException('Cannot read CSV: '.$file); }
-        $keep = null; $allColumns = null;
-        $metadata = []; $header = null; $rows = []; $comments = []; $warmupRows = null; $stepSize = null; $metric = []; $readingMetric = false; $lineNumber = 0; $lp = null; $gradients = []; $time = ['warmup' => 0.0, 'sampling' => 0.0, 'total' => 0.0];
+        $keep = null; $allColumns = null; $stored = []; $packed = []; $count = 0; $first = null; $last = null;
+        $metadata = []; $header = null; $comments = []; $warmupRows = null; $stepSize = null; $metric = []; $readingMetric = false; $lineNumber = 0; $lp = null; $gradients = []; $time = ['warmup' => 0.0, 'sampling' => 0.0, 'total' => 0.0];
+        $special = ['nan' => NAN, '+nan' => NAN, '-nan' => NAN, 'inf' => INF, '+inf' => INF, 'infinity' => INF, '+infinity' => INF, '-inf' => -INF, '-infinity' => -INF];
+        $number = fn(string $value) => is_numeric($value) ? (float)$value : $special[strtolower(trim($value))];
+        $row = fn(array $fields) => array_map($number, $keep === null ? $fields : array_values(array_intersect_key($fields, array_flip($keep))));
         try {
             while (($line = fgets($handle)) !== false) {
                 ++$lineNumber; $line = trim($line);
@@ -176,7 +208,7 @@ final class Csv
                             default => is_numeric($value) ? (str_contains($value, '.') || stripos($value, 'e') !== false ? (float)$value : (int)$value) : $value,
                         };
                     }
-                    if (str_starts_with($comment, 'Adaptation terminated')) { $warmupRows = count($rows); $readingMetric = false; }
+                    if (str_starts_with($comment, 'Adaptation terminated')) { $warmupRows = $count; $readingMetric = false; }
                     if (preg_match('/([0-9.eE+-]+) seconds \((Warm-up|Sampling|Total)\)/', $comment, $m)) { $time[match ($m[2]) { 'Warm-up' => 'warmup', 'Sampling' => 'sampling', default => 'total' }] = (float)$m[1]; }
                     if (preg_match('/^Log probability\s*=\s*(\S+)/', $comment, $m)) { $lp = (float)$m[1]; }
                     elseif ($lp !== null && preg_match('/^\s*-?\d+(\s+\S+){4}\s*$/D', $comment) && count($g = preg_split('/\s+/', trim($comment))) === 5 && count(array_filter($g, 'is_numeric')) === 5) { $gradients[] = array_combine(['param_idx', 'value', 'model', 'finite_diff', 'error'], array_map('floatval', $g)); }
@@ -186,8 +218,8 @@ final class Csv
                     elseif ($readingMetric) { $readingMetric = false; }
                     continue;
                 }
-                $fields = str_getcsv($line, ',', '"', '');
                 if ($header === null) {
+                    $fields = str_getcsv($line, ',', '"', '');
                     if ($fields === [] || count(array_unique($fields)) !== count($fields)) { throw new \RuntimeException('Invalid or duplicate CSV columns.'); }
                     foreach ($fields as $field) { if ($field === '' || is_numeric($field)) { throw new \RuntimeException('Invalid CSV header.'); } }
                     $header = array_map(self::variableName(...), $fields); $allColumns = $header;
@@ -197,21 +229,20 @@ final class Csv
                         $keep = array_keys(array_filter($header, fn($name) => in_array($name, ['lp__', 'log_p__', 'log_g__', 'log_q__', 'lp_approx__'], true) || ($diagnostics && str_ends_with($name, '__')) || array_filter($variables, fn($v) => self::matches($name, (string)$v)) !== []));
                         $header = array_values(array_intersect_key($header, array_flip($keep)));
                     }
+                    $kept = $keep === null ? $allColumns : array_intersect_key($allColumns, array_flip($keep));
+                    $stored = $load === null ? $kept : array_intersect($kept, $load);
+                    $packed = array_fill_keys($stored, '');
                     continue;
                 }
-                if (count($fields) !== count($allColumns ?? $header)) { throw new \RuntimeException('CSV row width mismatch at '.$file.':'.$lineNumber); }
-                if ($keep !== null) { $fields = array_values(array_intersect_key($fields, array_flip($keep))); }
-                $values = [];
-                foreach ($fields as $value) {
-                    $value = trim($value);
-                    $values[] = match (strtolower($value)) {
-                        'nan', '+nan', '-nan' => NAN,
-                        'inf', '+inf', 'infinity', '+infinity' => INF,
-                        '-inf', '-infinity' => -INF,
-                        default => is_numeric($value) ? (float)$value : throw new \RuntimeException('Invalid CSV number at '.$file.':'.$lineNumber),
-                    };
+                // CmdStan never quotes numbers, so a plain split is exact; quoted lines still go through str_getcsv.
+                $fields = str_contains($line, '"') ? str_getcsv($line, ',', '"', '') : explode(',', $line);
+                if (count($fields) !== count($allColumns)) { throw new \RuntimeException('CSV row width mismatch at '.$file.':'.$lineNumber); }
+                foreach ($fields as $i => $value) {
+                    if (!is_numeric($value) && !array_key_exists(strtolower(trim($value)), $special)) { throw new \RuntimeException('Invalid CSV number at '.$file.':'.$lineNumber); }
                 }
-                $rows[] = array_combine($header, $values);
+                foreach ($stored as $i => $name) { $packed[$name] .= pack('e', $number($fields[$i])); }
+                if ($count === 0) { $first = $fields; }
+                $last = $fields; ++$count;
             }
             if (!feof($handle)) { throw new \RuntimeException('CSV read failed.'); }
         } finally { fclose($handle); }
@@ -220,26 +251,26 @@ final class Csv
         $method = $metadata['method'] ?? 'sample';
         $warmupCount = 0;
         if ($method === 'sample' && ($metadata['save_warmup'] ?? 0)) {
-            $warmupCount = $warmupRows ?? (int)ceil(($metadata['num_warmup'] ?? 0) / max(1, $metadata['thin'] ?? 1));
+            $warmupCount = min($count, $warmupRows ?? (int)ceil(($metadata['num_warmup'] ?? 0) / max(1, $metadata['thin'] ?? 1)));
         }
-        $warmup = array_slice($rows, 0, $warmupCount); $draws = array_slice($rows, $warmupCount);
+        $counts = ['warmup' => $warmupCount, 'draws' => $count - $warmupCount]; $starts = ['warmup' => 0, 'draws' => $warmupCount];
         $estimate = null;
-        if ($method === 'variational' && $draws !== []) { $estimate = array_shift($draws); }
-        $columns = $header;
+        if ($method === 'variational' && $counts['draws'] > 0) { $estimate = array_combine($header, $row($first)); ++$starts['draws']; --$counts['draws']; }
+        $columns = $header; $source = array_combine($header, $header);
         if (in_array($method, ['variational', 'laplace'], true) && in_array('log_p__', $header, true)) {
             // CmdStanR exposes log_p__ as lp__ and log_g__/log_q__ as lp_approx__; ADVI's original lp__ is a placeholder.
             $renamed = array_values(array_filter($header, fn($name) => $name !== 'lp__'));
             $header = array_map(fn($name) => ['log_p__' => 'lp__', 'log_g__' => 'lp_approx__', 'log_q__' => 'lp_approx__'][$name] ?? $name, $renamed);
-            $map = fn(?array $row) => $row === null ? null : array_combine($header, array_map(fn($name) => $row[$name], $renamed));
-            $draws = array_map($map, $draws); $estimate = $map($estimate);
+            $source = array_combine($header, $renamed);
+            if ($estimate !== null) { $estimate = array_combine($header, array_map(fn($name) => $estimate[$name], $renamed)); }
         }
-        if ($method === 'optimize' && $draws !== []) { $estimate = end($draws); }
+        if ($method === 'optimize' && $counts['draws'] > 0) { $estimate = array_combine($columns, $row($last)); }
         $metadata += self::cmdstanrMetadata($metadata, $columns, $stepSize, $lp, $time);
         if ($keep !== null) {
             $full = self::cmdstanrMetadata($metadata, $allColumns ?? [], $stepSize, $lp, $time);
             $metadata['stan_variables'] = $full['stan_variables']; $metadata['stan_variable_sizes'] = $full['stan_variable_sizes'];
         }
-        return ['variables' => $header, 'draws' => $draws, 'warmup' => $warmup, 'metadata' => $metadata, 'comments' => $comments, 'step_size' => $stepSize, 'inv_metric' => count($metric) === 1 ? $metric[0] : $metric, 'estimate' => $estimate, 'gradients' => $gradients];
+        return ['variables' => $header, 'source' => $source, 'packed' => $packed, 'counts' => $counts, 'starts' => $starts, 'metadata' => $metadata, 'comments' => $comments, 'step_size' => $stepSize, 'inv_metric' => count($metric) === 1 ? $metric[0] : $metric, 'estimate' => $estimate, 'gradients' => $gradients];
     }
     /** Keys added by CmdStanR's read_csv_metadata()/read_cmdstan_csv(); CmdStan's raw argument keys are retained alongside them. */
     private static function cmdstanrMetadata(array $raw, array $columns, ?float $stepSize, ?float $lp, array $time): array

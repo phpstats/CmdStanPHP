@@ -22,18 +22,40 @@ class CmdStanFit
     public static function fromCsv(array $files, ?array $variables = null, bool $checkDiagnostics = true, ?string $format = null): self
     {
         if ($files === []) { throw new \InvalidArgumentException('At least one CSV is required.'); }
-        $parsed = array_map(fn($file) => Csv::read($file, $variables, $checkDiagnostics), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
+        $parsed = array_map(fn($file) => Csv::scan($file, $variables, $checkDiagnostics, []), $files); $method = $parsed[0]['metadata']['method'] ?? 'sample';
         foreach ($parsed as $csv) { if (($csv['metadata']['method'] ?? 'sample') !== $method || $csv['variables'] !== $parsed[0]['variables']) { throw new \InvalidArgumentException('CSV files must share method and columns.'); } }
-        $class = self::classForMethod($method); $fit = new $class($files, $method, context: $format === null ? [] : ['draws_format' => $format]); $fit->csv = $parsed;
+        $class = self::classForMethod($method); $fit = new $class($files, $method, context: ($format === null ? [] : ['draws_format' => $format]) + ['csv_filter' => [$variables, $checkDiagnostics]]); $fit->csv = $parsed;
         return $fit;
     }
+    /**
+     * Each chain's Csv::scan(). Draws are stored by column as packed doubles and read on first use (see load()), so a
+     * wide fit only holds the columns that were asked for.
+     */
     protected function parsed(): array
     {
         if ($this->csv === null) {
-            $this->csv = array_map(Csv::read(...), $this->files);
+            $this->csv = array_map(fn($file) => Csv::scan($file, load: []), $this->files);
             foreach ($this->csv as $csv) { if ($csv['variables'] !== $this->csv[0]['variables']) { throw new \RuntimeException('Chain CSV columns do not match.'); } }
         }
         return $this->csv;
+    }
+    /** Reads the named columns (names from variables()) from every chain's file, unless they are already in memory. */
+    private function load(array $names): void
+    {
+        foreach ($this->parsed() as $i => $csv) {
+            $missing = [];
+            foreach ($names as $name) { $column = $csv['source'][$name] ?? null; if ($column !== null && !isset($csv['packed'][$column])) { $missing[$column] = $column; } }
+            if ($missing === []) { continue; }
+            $missing = array_values($missing);
+            [$variables, $diagnostics] = $this->context['csv_filter'] ?? [null, true];
+            $this->csv[$i]['packed'] += Csv::scan($this->files[$i], $variables, $diagnostics, $missing)['packed'];
+        }
+    }
+    /** One column of every chain: a list per chain of the 'warmup', 'draws' or 'both' rows. */
+    private function chainColumns(string $name, string $part = 'draws'): array
+    {
+        $this->load([$name]);
+        return array_map(fn($csv) => Csv::unpack($csv, $name, $part), $this->parsed());
     }
     public function code(): string { return $this->context['code'] ?? throw new \RuntimeException('Stan source is unavailable for imported CSVs.'); }
     /** Imported fits fall back to the data file recorded in the CSV header when it still exists. */
@@ -63,9 +85,8 @@ class CmdStanFit
     /** One column's post-warmup values for every chain, in draw order (chain by chain). */
     protected function column(string $column): array
     {
-        $out = [];
-        foreach ($this->parsed() as $csv) { foreach ($csv['draws'] as $row) { $out[] = (float)($row[$column] ?? NAN); } }
-        return $out;
+        if (!in_array($column, $this->parsed()[0]['variables'], true)) { return array_fill(0, array_sum(array_map(fn($csv) => $csv['counts']['draws'], $this->parsed())), NAN); }
+        return array_merge(...$this->chainColumns($column));
     }
     public function cmdstanSummary(): string
     {
@@ -110,7 +131,7 @@ class CmdStanFit
     /** CmdStanR 1.0's materialize(): reads the draws, initial values and profiles into memory now, so the fit no longer needs its files. */
     public function materialize(): static
     {
-        $this->parsed();
+        $this->load($this->parsed()[0]['variables']);
         try { $this->init(); } catch (\Throwable) {}
         try { $this->profiles(); } catch (\Throwable) {}
         return $this;
@@ -148,8 +169,8 @@ class CmdStanFit
     private function procIds(): array { return $this->context['ids'] ?? array_map(fn($csv, $i) => (int)($csv['metadata']['id'] ?? $i + 1), $this->parsed(), array_keys($this->parsed())); }
     private function modelName(): string { return $this->context['model_name'] ?? preg_replace('/_model$/', '', (string)($this->parsed()[0]['metadata']['model_name'] ?? 'model')); }
     public function numChains(): int { return count($this->files); }
-    public function numDrawsSampling(): int { return count($this->parsed()[0]['draws']); }
-    public function numDrawsWarmup(): int { return count($this->parsed()[0]['warmup']); }
+    public function numDrawsSampling(): int { return $this->parsed()[0]['counts']['draws']; }
+    public function numDrawsWarmup(): int { return $this->parsed()[0]['counts']['warmup']; }
     public function variables(): array { return array_values(array_filter($this->parsed()[0]['variables'], fn($v) => !str_ends_with($v, '__') || $v === 'lp__')); }
     private function select(array|string|null $variables, bool $diagnostics = false): array
     {
@@ -181,11 +202,18 @@ class CmdStanFit
     {
         if (!in_array($format, ['draws_array', 'draws_matrix', 'draws_df', 'draws_list', 'draws_rvars'], true)) { throw new \InvalidArgumentException('Unsupported draws format: '.$format); }
         $chains = []; $part ??= $incWarmup ? 'both' : 'draws';
+        // Columns keep the CSV's order, whatever order the variables were asked for in.
+        $ordered = array_values(array_intersect($this->parsed()[0]['variables'], $variables));
+        if ($part !== 'estimate') { $this->load($ordered); }
         foreach ($this->parsed() as $csv) {
-            $rows = match ($part) { 'both' => array_merge($csv['warmup'], $csv['draws']), 'warmup' => $csv['warmup'], 'estimate' => $csv['estimate'] === null ? [] : [$csv['estimate']], default => $csv['draws'] };
-            $chains[] = array_map(fn($row) => array_intersect_key($row, array_flip($variables)), $rows);
+            if ($part === 'estimate') { $chains[] = $csv['estimate'] === null ? [] : [array_intersect_key($csv['estimate'], array_flip($variables))]; continue; }
+            $columns = array_map(fn($name) => Csv::unpack($csv, $name, $part), array_combine($ordered, $ordered)); $rows = [];
+            if ($format === 'draws_list') { $chains[] = array_map(fn($name) => $columns[$name] ?? [], array_combine($variables, $variables)); continue; }
+            $n = $part === 'both' ? $csv['counts']['warmup'] + $csv['counts']['draws'] : $csv['counts'][$part];
+            for ($i = 0; $i < $n; ++$i) { $row = []; foreach ($columns as $name => $values) { $row[$name] = $values[$i]; } $rows[] = $row; }
+            $chains[] = $rows;
         }
-        return self::shape($chains, $variables, $format);
+        return $format === 'draws_list' && $part !== 'estimate' ? $chains : self::shape($chains, $variables, $format);
     }
     /** Arranges per-chain associative rows in a draws format; draws_rvars nests variables by dimension (see Rvars). */
     private static function shape(array $chains, array $variables, string $format): array
@@ -243,10 +271,10 @@ class CmdStanFit
     {
         if ($measures !== []) { return Summary::summarise($this->draws($variables, 'draws_list'), $measures, $probs); }
         foreach ($probs as $p) { if (!is_numeric($p) || !is_finite((float)$p) || $p < 0 || $p > 1) { throw new \InvalidArgumentException('Quantile probabilities must be in [0,1].'); } }
-        $vars = $this->select($variables); $rows = $this->draws($vars, 'draws_matrix'); $out = [];
+        $vars = $this->select($variables); $this->load($vars); $out = [];
         $native = $this instanceof CmdStanMCMC && $this->numDrawsSampling() >= 4 ? $this->nativeSummary() : [];
         foreach ($vars as $v) {
-            $values = array_column($rows, $v); $n = count($values); $mean = $n ? array_sum($values) / $n : NAN;
+            $values = array_merge(...$this->chainColumns($v)); $n = count($values); $mean = $n ? array_sum($values) / $n : NAN;
             $sd = $n > 1 ? sqrt(array_sum(array_map(fn($x) => ($x - $mean) ** 2, $values)) / ($n - 1)) : NAN;
             $median = self::quantile($values, 0.5);
             $entry = ['variable' => $v, 'mean' => $mean, 'median' => $median, 'sd' => $sd, 'mad' => 1.4826 * self::quantile(array_map(fn($x) => abs($x - $median), $values), 0.5)];
@@ -258,7 +286,7 @@ class CmdStanFit
     }
     private function tailEss(string $variable): float
     {
-        return Diagnostics::essTail(array_map(fn($csv) => array_column($csv['draws'], $variable), $this->parsed()));
+        return Diagnostics::essTail($this->chainColumns($variable));
     }
     private function nativeSummary(): array
     {
@@ -283,11 +311,12 @@ class CmdStanFit
     public function diagnosticSummary(): array
     {
         $result = ['num_divergent' => [], 'num_max_treedepth' => [], 'ebfmi' => []];
-        foreach ($this->parsed() as $csv) {
-            $rows = $csv['draws']; $depth = $csv['metadata']['max_treedepth'] ?? 10;
-            $result['num_divergent'][] = array_sum(array_column($rows, 'divergent__'));
-            $result['num_max_treedepth'][] = count(array_filter(array_column($rows, 'treedepth__'), fn($x) => $x >= $depth));
-            $energy = array_column($rows, 'energy__'); $n = count($energy); $bfmi = NAN;
+        $divergent = $this->chainColumns('divergent__'); $treedepth = $this->chainColumns('treedepth__'); $energies = $this->chainColumns('energy__');
+        foreach ($this->parsed() as $c => $csv) {
+            $depth = $csv['metadata']['max_treedepth'] ?? 10;
+            $result['num_divergent'][] = array_sum($divergent[$c]);
+            $result['num_max_treedepth'][] = count(array_filter($treedepth[$c], fn($x) => $x >= $depth));
+            $energy = $energies[$c]; $n = count($energy); $bfmi = NAN;
             if ($n >= 3) {
                 $mean = array_sum($energy) / $n; $variance = array_sum(array_map(fn($x) => ($x - $mean) ** 2, $energy)) / ($n - 1); $diffs = 0.0;
                 for ($i = 1; $i < $n; ++$i) { $diffs += ($energy[$i] - $energy[$i - 1]) ** 2; }
@@ -515,7 +544,7 @@ class CmdStanFit
             return array_values(array_unique($out));
         };
         $vars = $pick($variables, $meta['variables']); $diag = $pick($samplerDiagnostics, $meta['sampler_diagnostics']);
-        $get = fn(array $columns, string $part) => $columns === [] || array_sum(array_map(fn($csv) => count($part === 'estimate' ? array_filter([$csv['estimate']]) : $csv[$part]), $fit->parsed())) === 0 ? null : $fit->extract($columns, $format, false, $part);
+        $get = fn(array $columns, string $part) => $columns === [] || array_sum(array_map(fn($csv) => ($part === 'estimate' ? count(array_filter([$csv['estimate']])) : $csv['counts'][$part]), $fit->parsed())) === 0 ? null : $fit->extract($columns, $format, false, $part);
         if ($method === 'sample') {
             $ids = $meta['id']; $metric = $fit->invMetric(false);
             return ['metadata' => $meta, 'time' => ['total' => null, 'chains' => $meta['time']], 'inv_metric' => array_filter(array_combine($ids, $metric), fn($m) => $m !== []), 'step_size' => array_filter(array_combine($ids, $fit->stepSize()), fn($x) => $x !== null), 'warmup_draws' => $get($vars, 'warmup'), 'post_warmup_draws' => $get($vars, 'draws'), 'warmup_sampler_diagnostics' => $get($diag, 'warmup'), 'post_warmup_sampler_diagnostics' => $get($diag, 'draws')];
