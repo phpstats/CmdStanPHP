@@ -1,1 +1,1 @@
-Sitemap: https://phpstats.github.io/CmdStanPHP/sitemap.xml
+Sitemap: https://cmdstanphp.phpstats.org/docs/sitemap.xml

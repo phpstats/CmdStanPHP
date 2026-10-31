@@ -2,9 +2,9 @@ name: Documentation
 on:
   push:
     branches: [main]
-    paths: ['docs/**', 'scripts/check-docs.py', '.github/workflows/pages.yml']
+    paths: ['docs/**', 'scripts/check-docs.py', 'scripts/pages-redirects.py', '.github/workflows/pages.yml']
   pull_request:
-    paths: ['docs/**', 'scripts/check-docs.py', '.github/workflows/pages.yml']
+    paths: ['docs/**', 'scripts/check-docs.py', 'scripts/pages-redirects.py', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,9 +42,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Write redirects to phpstats.org
+        run: python3 scripts/pages-redirects.py docs _pages
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: _pages
       - name: Deploy documentation
         id: deployment
         uses: actions/deploy-pages@v4

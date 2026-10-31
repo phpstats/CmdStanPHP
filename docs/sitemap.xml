@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/verification.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/verification.html</loc>
     <lastmod>2026-10-31T14:49:50.085Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/optimization.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/optimization.html</loc>
     <lastmod>2026-10-31T14:46:52.013Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/loo.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/loo.html</loc>
     <lastmod>2026-10-31T14:47:03.654Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/installation.html</loc>
-    <lastmod>2026-10-31T14:45:11.099Z</lastmod>
+    <loc>https://cmdstanphp.phpstats.org/docs/installation.html</loc>
+    <lastmod>2026-10-31T15:25:42.803Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/getting-started.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/getting-started.html</loc>
     <lastmod>2026-10-31T14:45:43.834Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/figures.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/figures.html</loc>
     <lastmod>2026-10-31T14:47:03.654Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/draws.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/draws.html</loc>
     <lastmod>2026-10-31T14:47:03.654Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/compiling.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/compiling.html</loc>
     <lastmod>2026-10-31T14:45:57.453Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/api.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/api.html</loc>
     <lastmod>2026-10-31T14:49:22.104Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/compatibility.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/compatibility.html</loc>
     <lastmod>2026-10-31T14:50:45.465Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/contributing.html</loc>
-    <lastmod>2026-10-31T14:49:41.609Z</lastmod>
+    <loc>https://cmdstanphp.phpstats.org/docs/contributing.html</loc>
+    <lastmod>2026-10-31T15:25:42.803Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/examples.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/examples.html</loc>
     <lastmod>2026-10-31T14:50:12.337Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/generated-quantities.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/generated-quantities.html</loc>
     <lastmod>2026-10-31T14:46:45.026Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/index.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/index.html</loc>
     <lastmod>2026-10-31T14:50:32.804Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/log-density.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/log-density.html</loc>
     <lastmod>2026-10-31T14:49:22.104Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/mcmc.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/mcmc.html</loc>
     <lastmod>2026-10-31T14:51:41.088Z</lastmod>
   </url>
   <url>
-    <loc>https://phpstats.github.io/CmdStanPHP/variational.html</loc>
+    <loc>https://cmdstanphp.phpstats.org/docs/variational.html</loc>
     <lastmod>2026-10-31T14:46:52.013Z</lastmod>
   </url>
 </urlset>

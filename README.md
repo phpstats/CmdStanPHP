@@ -2,7 +2,7 @@
 
 CmdStanPHP fits [Stan](https://mc-stan.org) models from PHP through [CmdStan](https://mc-stan.org/users/interfaces/cmdstan). It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and keeps CmdStanR's function and option names. It compiles Stan programs, runs MCMC, optimization, Laplace, ADVI, Pathfinder, and standalone generated quantities, and returns draws, summaries, diagnostics, PSIS-LOO, and WAIC as PHP arrays. No R installation is needed.
 
-Documentation: <https://phpstats.github.io/CmdStanPHP/>
+Documentation: <https://cmdstanphp.phpstats.org/docs>
 
 ## Installation
 
@@ -18,7 +18,7 @@ Requirements:
 - CmdStan 2.37 or later
 - make and a C++ compiler that CmdStan supports
 
-CmdStanPHP finds CmdStan through the `CMDSTAN` environment variable or under `~/.cmdstan`. `CmdStan\install_cmdstan('2.40.0', cores: 2)` downloads and builds an official release. The [installation guide](https://phpstats.github.io/CmdStanPHP/installation.html) covers the toolchain, the supported platforms, and the optional FFI extension, phit extension, phibble package, and vl-convert binary.
+CmdStanPHP finds CmdStan through the `CMDSTAN` environment variable or under `~/.cmdstan`. `CmdStan\install_cmdstan('2.40.0', cores: 2)` downloads and builds an official release. The [installation guide](https://cmdstanphp.phpstats.org/docs/installation) covers the toolchain, the supported platforms, and the optional FFI extension, phit extension, phibble package, and vl-convert binary.
 
 ## Example
 
@@ -60,11 +60,11 @@ print_r($fit->summary('theta'));
 print_r($fit->diagnosticSummary());
 ```
 
-[Getting started](https://phpstats.github.io/CmdStanPHP/getting-started.html) shows and explains the output.
+[Getting started](https://cmdstanphp.phpstats.org/docs/getting-started) shows and explains the output.
 
 ## Compatibility
 
-CmdStanPHP does not implement every CmdStanR feature. The [compatibility page](https://phpstats.github.io/CmdStanPHP/compatibility.html) maps CmdStanR's names to CmdStanPHP's and lists the differences and the missing features. [Verification](https://phpstats.github.io/CmdStanPHP/verification.html) describes the tests, including the comparisons with CmdStanR, posterior, loo, and bayesplot.
+CmdStanPHP does not implement every CmdStanR feature. The [compatibility page](https://cmdstanphp.phpstats.org/docs/compatibility) maps CmdStanR's names to CmdStanPHP's and lists the differences and the missing features. [Verification](https://cmdstanphp.phpstats.org/docs/verification) describes the tests, including the comparisons with CmdStanR, posterior, loo, and bayesplot.
 
 ## Development
 
@@ -76,7 +76,7 @@ composer test:compatibility   # compares with R; needs CmdStanR and R packages
 composer lint
 ```
 
-See [Contributing](https://phpstats.github.io/CmdStanPHP/contributing.html).
+See [Contributing](https://cmdstanphp.phpstats.org/docs/contributing).
 
 ## License
 

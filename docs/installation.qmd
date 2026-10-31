@@ -21,7 +21,7 @@ Optional:
 - [phibble](https://github.com/phpstats/phibble), for model data from a `Phibble\DataFrame` and for draws and summaries returned as data frames
 - [vl-convert](https://github.com/vega/vl-convert/releases), for figures saved as SVG or PNG
 
-composer.json requires PHP `^8.2`. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.
+composer.json allows PHP `>=8.2 <8.6`. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.
 
 `proc_open()` must be enabled, because every compilation and every run starts a CmdStan process. Hosts that list it in `disable_functions` cannot run models.
 

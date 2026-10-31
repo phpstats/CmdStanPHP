@@ -5,7 +5,7 @@ project:
     - "*.qmd"
 
 website:
-  site-url: "https://phpstats.github.io/CmdStanPHP/"
+  site-url: "https://cmdstanphp.phpstats.org/docs"
   title: "CmdStanPHP"
   repo-url: "https://github.com/phpstats/CmdStanPHP"
   sidebar:

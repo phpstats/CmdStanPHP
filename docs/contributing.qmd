@@ -54,5 +54,5 @@ Links between pages are written as relative `.qmd` targets, which Quarto renders
 
 `.github/workflows/pages.yml` checks the committed site's internal links with `scripts/check-docs.py` on pull requests and on main, so a broken link is caught before publication. A separate job publishes `docs/` from main or a manual dispatch on main. Deployment uses GitHub's Pages artifact and environment; no token beyond `GITHUB_TOKEN` is needed.
 
-The site is published at <https://phpstats.github.io/CmdStanPHP/> from the repository's GitHub Pages settings, with GitHub Actions as the source.
+phpstats.org imports the committed pages and publishes them at <https://cmdstanphp.phpstats.org/docs>. The deploy job in `.github/workflows/pages.yml` publishes only redirects to GitHub Pages, so links to the former site at phpstats.github.io/CmdStanPHP lead to the same page on phpstats.org. `scripts/pages-redirects.py` writes them.
 
