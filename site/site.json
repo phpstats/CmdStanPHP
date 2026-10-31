@@ -20,7 +20,8 @@
     ],
     "requires": [
         "JSON extension",
-        "proc_open() enabled"
+        "proc_open() enabled",
+        "CmdStan 2.37 or later"
     ],
     "optional": [
         {
@@ -41,7 +42,6 @@
         }
     ],
     "build": [
-        "CmdStan 2.37 or later",
         "make",
         "A C++ compiler supported by CmdStan"
     ],
