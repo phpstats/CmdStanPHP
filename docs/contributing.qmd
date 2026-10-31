@@ -1,0 +1,58 @@
+---
+title: "Contributing"
+---
+
+This page is for working on CmdStanPHP itself. [Installation](installation.qmd) covers using the package.
+
+## Set up
+
+```sh
+git clone https://github.com/phpstats/CmdStanPHP.git
+cd CmdStanPHP
+composer install
+```
+
+## Run the tests
+
+```sh
+composer install
+composer validate --strict
+composer lint
+composer test
+export CMDSTAN=/absolute/path/to/cmdstan-2.40.0
+composer test:integration
+composer test:compatibility   # additionally needs R + cmdstanr 1.0, posterior, loo, bayesplot, jsonlite, Rcpp, RcppEigen
+```
+
+- `composer test` runs the unit suite, which needs no CmdStan.
+- `composer test:integration` compiles and runs real models. It uses the CmdStan in `CMDSTAN` or under `~/.cmdstan`, and skips without one.
+- `composer test:compatibility` compares results with R and needs the R packages listed in the comment.
+- `composer lint` checks syntax and the family naming rules with PHP_CodeSniffer.
+
+Tests that need the phit extension load it into PHP, for example `php -d extension=/path/to/libphit.dylib vendor/bin/phpunit`. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it. [Verification](verification.qmd) describes what each suite covers.
+
+## Continuous integration
+
+`.github/workflows/tests.yml` runs unit tests on PHP 8.2, 8.3, 8.4, and 8.5. A separate integration matrix builds CmdStan 2.37 and 2.40 on Linux, runs the real-model suite, and caches each toolchain. The integration jobs enable PHP's FFI extension and render every figure kind to SVG, and one to PNG, with a downloaded vl-convert binary. The 2.40 job additionally installs the reference R packages and runs the compatibility suite. CmdStanR 1.0 is a release candidate, so CI installs it from a pinned commit of its v1.0 branch (`stan-dev/cmdstanr@0a54123`) and checks that its version is at least 0.99.0. Installation is performed using this package's installer to exercise its download/build path. Compilation on small CI machines is memory-intensive; integration uses two make jobs.
+
+The integration jobs build `phit` from the pinned [`phpstats/phit`](https://github.com/phpstats/phit) commit `b71e406ee58fc7a255687514b2818c3c615a517b`, which adds `Phit\model_matrix()` and `Phit\fit_lmer()` (the draw kernels and `Phit\dist_normal_rng()` are unchanged since `e7457cb`), using PHP 8.4 headers to match the runner. They require all three draw kernels, FFI, the seeded draw generator, `Phit\model_matrix()`, and `Phit\fit_lmer()` before running native unit tests (including `StanData::fromFormula()` against the real function), real-model tests, and (on CmdStan 2.40) R comparisons. These runs fail on skipped tests. The real-model run excludes the compatibility group until R is installed. The lightweight unit matrix still tests the optional-extension path without `phit`. Local native tests must likewise use a PHP executable matching the extension module ABI; a Homebrew PHP 8.5 extension cannot load into Herd PHP 8.4.
+
+## Documentation
+
+All site content is under `docs/`, written in Quarto. Each page is a `.qmd` source with its rendered `.html` committed beside it, which is also the layout the phpstats.org site reads when it imports a package's documentation. No page executes code, so rendering needs neither CmdStan nor a Stan toolchain.
+
+To render the site after editing a page:
+
+```sh
+quarto render docs
+rsync -a --exclude '.DS_Store' docs/_site/ docs/
+```
+
+Quarto writes the rendered site to the untracked `docs/_site`, and the second command publishes it beside the sources. Both commands are needed. The render step deletes the published pages and `site_libs/` from `docs/`, so running it without the `rsync` leaves the rendered site staged only under `docs/_site`. Commit the regenerated `.html` files along with `search.json`, `sitemap.xml`, `robots.txt`, and `site_libs/` whenever a source page changes. To preview while editing, run `quarto preview docs`.
+
+Links between pages are written as relative `.qmd` targets, which Quarto renders as relative `.html` links. The site therefore works at a domain root, at a repository subpath, and when phpstats.org imports the rendered pages.
+
+`.github/workflows/pages.yml` checks the committed site's internal links with `scripts/check-docs.py` on pull requests and on main, so a broken link is caught before publication. A separate job publishes `docs/` from main or a manual dispatch on main. Deployment uses GitHub's Pages artifact and environment; no token beyond `GITHUB_TOKEN` is needed.
+
+The site is published at <https://phpstats.github.io/CmdStanPHP/> from the repository's GitHub Pages settings, with GitHub Actions as the source.
+

@@ -2,60 +2,167 @@
 title: "Installation"
 ---
 
-## Package setup
+CmdStanPHP is a Composer package that runs [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. Installing it takes three steps: the Composer package, a C++ toolchain, and a CmdStan release.
 
-Until a package release is published, clone this repository and run `composer install`. For a consuming project, configure a Composer path or VCS repository and require `phpstats/cmdstanphp`; the package name is not a claim that it has been published on Packagist.
+## Requirements
 
-```json
-{
-  "repositories": [{"type": "path", "url": "../cmdstanphp"}],
-  "require": {"phpstats/cmdstanphp": "@dev"}
-}
+Required:
+
+- PHP 8.2, 8.3, 8.4, or 8.5
+- The JSON extension
+- PHP's `proc_open()` function
+- CmdStan 2.37 or later
+- make and a C++ compiler that CmdStan supports
+
+Optional:
+
+- The FFI extension, for in-process log densities, gradients, and transforms, and for calling a model's Stan functions from PHP
+- The [phit](https://github.com/phpstats/phit) extension, for moment matching in `loo()` and for `StanData::fromFormula()`
+- [phibble](https://github.com/phpstats/phibble), for model data from a `Phibble\DataFrame` and for draws and summaries returned as data frames
+- [vl-convert](https://github.com/vega/vl-convert/releases), for figures saved as SVG or PNG
+
+composer.json requires PHP `^8.2`. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.
+
+`proc_open()` must be enabled, because every compilation and every run starts a CmdStan process. Hosts that list it in `disable_functions` cannot run models.
+
+## Supported platforms
+
+CI runs every test on Linux (Ubuntu). The integration suite also passes on macOS on Apple silicon. Native Windows has not been tested. The code chooses Windows file suffixes and compiler names, but no Windows build or run has been checked. On Windows, run PHP inside WSL, which uses the tested Linux path.
+
+## Install the package
+
+```sh
+composer require phpstats/cmdstanphp
 ```
 
-PHP 8.2+ with JSON, Composer, and enabled `proc_open` are required. In-process model methods and `exposeFunctions()` also need the FFI extension (`ext-ffi`). It is enabled for the CLI by default; web SAPIs need `ffi.enable=true` or preloading. Moment matching in `loo()` additionally needs the `phit` extension (`ext-phit`) with its posterior-draw kernels. CmdStanPHP detects `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()` by name, because the extension's version metadata does not identify builds that include them. Rendering figures as SVG or PNG needs the [vl-convert](https://github.com/vega/vl-convert/releases) binary; ASCII, Vega-Lite, and HTML output need nothing extra. Compilation needs make and a C++ toolchain supported by [CmdStan](https://mc-stan.org/docs/cmdstan-guide/installation.html). On macOS install the Xcode command-line tools. On Linux install a C++ compiler and make. Windows requires CmdStan's supported Windows toolchain; native Windows has not been validated by this project's CI. WSL offers the tested Linux execution path.
+The package has no Composer dependencies of its own.
 
-## CmdStan selection
+## Install a C++ toolchain
+
+CmdStan compiles each Stan program to a C++ executable, so compiling needs make and a C++ compiler. The [CmdStan installation guide](https://mc-stan.org/docs/cmdstan-guide/installation.html) lists the supported compilers.
+
+- macOS: install the Xcode command-line tools with `xcode-select --install`. This provides `make` and `clang++`.
+- Debian and Ubuntu: `sudo apt-get install build-essential` provides `make` and `g++`.
+
+## Install CmdStan
+
+If CmdStan 2.37 or later is already installed, skip to [selecting CmdStan](#select-cmdstan).
+
+`install_cmdstan()` downloads an official release from GitHub, builds it, and selects it:
 
 ```php
-CmdStan\set_cmdstan_path('/absolute/path/to/cmdstan-2.40.0');
-echo CmdStan\cmdstan_version();
+require 'vendor/autoload.php';
+
+$path = CmdStan\install_cmdstan('2.40.0', cores: 2, timeout: 1800);
+echo $path, "\n";
+```
+
+The release goes into `~/.cmdstan/cmdstan-2.40.0`, or into the directory given as `dir`. Without a version, the installer takes the latest release. Versions before 2.37 are rejected. Installing needs `curl`, `tar`, make, the C++ compiler, internet access, and enough memory for compilation. The build takes several minutes. `cores` sets the number of parallel make jobs, and `timeout` is in seconds.
+
+The installer checks the archive's entry paths and links before extracting, extracts into a private staging directory, and builds at the final location. It refuses to replace an installed version unless `overwrite: true` is passed. With `overwrite: true` the old installation is kept until the new build succeeds and is restored if the build fails.
+
+Other ways to install:
+
+```php
+CmdStan\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz');
+CmdStan\install_cmdstan(releaseUrl: 'https://example.com/cmdstan-2.40.0.tar.gz');
+CmdStan\install_cmdstan('2.40.0', cppOptions: ['STAN_THREADS' => true]);
+```
+
+- `releaseFile` is a local `.tar.gz` and `releaseUrl` an HTTPS `.tar.gz` URL. The version is read from the archive's top-level `cmdstan-*` directory.
+- `cppOptions` are written to CmdStan's `make/local` before the build.
+- `copyMakeLocal: true` first copies the `make/local` of the CmdStan in use into the new installation. The default, `null`, asks in an interactive terminal and otherwise does not copy.
+
+`cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`, and `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on it.
+
+## Select CmdStan
+
+Without an explicit path, CmdStanPHP uses the directory in the `CMDSTAN` environment variable. If `CMDSTAN` is not set, it uses the highest supported version under `~/.cmdstan/cmdstan-*`. `install_cmdstan()` selects the release it installed for the rest of the PHP process.
+
+To choose an installation explicitly:
+
+```php
+CmdStan\set_cmdstan_path('/opt/cmdstan/cmdstan-2.40.0');
+```
+
+The path must contain CmdStan's makefile and the `stanc` compiler. `set_cmdstan_path()` refuses a version before 2.37. A web server or queue worker that runs under its own account does not see your home directory, so set `CMDSTAN` or call `set_cmdstan_path()` with an absolute path there.
+
+## Check the installation
+
+```php
+require 'vendor/autoload.php';
+
+echo CmdStan\cmdstan_path(), "\n";
+echo CmdStan\cmdstan_version(), "\n";
 print_r(CmdStan\check_cmdstan_toolchain());
 ```
 
-`check_cmdstan_toolchain()` returns the path and version of make, the C++ compiler CmdStan will use, and stanc. It throws when make or the compiler is missing. It does not install missing tools.
+On macOS with CmdStan 2.40.0 this prints:
 
-CmdStan 2.37 or newer is required, as in CmdStanR 1.0, and `set_cmdstan_path()` refuses an older installation. Without an explicit path the library first checks `CMDSTAN`, then chooses the highest supported version under `~/.cmdstan/cmdstan-*`. CmdStan's version is read from its makefile, independently of the stanc compiler version. The path must contain the CmdStan makefile and stanc executable. Run inference with absolute paths when deploying under a service account.
+```text
+/Users/you/.cmdstan/cmdstan-2.40.0
+2.40.0
+Array
+(
+    [make] => Array
+        (
+            [path] => /usr/bin/make
+            [version] => GNU Make 3.81
+        )
 
-To install an official release:
+    [cxx] => Array
+        (
+            [name] => clang++
+            [path] => /usr/bin/clang++
+            [version] => Apple clang version 21.0.0 (clang-2100.3.34.2)
+        )
 
-```php
-$path = CmdStan\install_cmdstan('2.37.0', cores: 2, timeout: 1800);
+    [stanc] => Array
+        (
+            [path] => /Users/you/.cmdstan/cmdstan-2.40.0/bin/stanc
+            [version] => stanc3 42d3cdf (Unix)
+        )
+
+)
 ```
 
-The installer downloads the specified release from GitHub over HTTPS, checks archive entry paths and links, extracts in a private staging directory, builds at the final location to preserve runtime library paths, and selects the resulting installation. Without a version it installs the latest release. Versions before 2.37 are rejected.
+`cmdstan_path()` throws when no CmdStan installation is found. `check_cmdstan_toolchain()` throws when make or the C++ compiler is missing. It does not install missing tools, and a successful check does not prove that a compilation will succeed.
 
-```php
-CmdStan\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz', cppOptions: ['STAN_THREADS' => true]);
-CmdStan\install_cmdstan('2.40.0', overwrite: true, cores: 4);
-print_r(CmdStan\cmdstan_make_local(cppOptions: ['CXXFLAGS' => '-O3']));
+## Compile a first model
+
+[Getting started](getting-started.qmd) compiles and samples the Bernoulli example. A model is compiled once, and later runs reuse its executable until the program or its build settings change.
+
+Compiling writes two hidden files beside the executable: a build record, `.<exe>.cmdstanphp.json`, and a lock file, `.<exe>.cmdstanphp.lock`. If your `.gitignore` ignores model executables, ignore these too:
+
+```text
+.*.cmdstanphp.json
+.*.cmdstanphp.lock
 ```
 
-`releaseUrl` accepts an HTTPS `.tar.gz` URL and `releaseFile` a local tarball. The version is then read from the archive's top-level `cmdstan-*` directory. `cppOptions` are written to `make/local` before building. `copyMakeLocal: true` first copies the `make/local` of the CmdStan in use into the new installation, so it is built the same way; `null`, the default, asks in an interactive terminal and otherwise does not copy. The installer refuses to replace an existing version unless `overwrite: true`; the old installation is moved aside and deleted only after the new build succeeds, and a failed build restores it. `cmdstan_make_local()` reads, appends to, or replaces the selected installation's `make/local`. It skips lines that already apply and writes `NAME=` for a `false` option. curl, tar, make, internet access, disk space, and sufficient memory are needed. Versions are explicit so an application does not unexpectedly change its statistical backend. `rebuild_cmdstan(cores: 2)` runs `clean-all` and `build` on the selected installation; only call it when you intend to rebuild that toolchain.
+## Optional extensions
 
-## Compile a model
+### FFI
 
-```php
-CmdStan\check_syntax_stan_file('model.stan', pedantic: true);
-$model = CmdStan\cmdstan_model('model.stan', cppOptions: ['STAN_THREADS' => true], quiet: false);
+In-process model methods (`logProb()`, `gradLogProb()`, `hessian()`, `constrainVariables()`, `unconstrainVariables()`) and `exposeFunctions()` load a compiled model library with PHP's FFI extension. FFI is enabled for the CLI by default (`ffi.enable=preload`). PHP-FPM and other web SAPIs need `ffi.enable=true` in `php.ini`, or a preloaded library. Without FFI these methods throw a `RuntimeException`, and everything else works.
+
+### phit
+
+`loo(momentMatch: true)` needs the posterior-draw kernels `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`. `StanData::fromFormula()` needs `Phit\model_matrix()`. Every phit release from 0.1.0 has these functions. Install phit with PIE as [phit's documentation](https://github.com/phpstats/phit) describes:
+
+```sh
+pie install phpstats/phit
 ```
 
-`cmdstan_model()` compiles the model, or reuses an up-to-date executable, before it returns. There is no separate `compile()` step. The executable goes beside the Stan source, or in `dir`. Compiling also writes a hidden build record beside the executable, such as `.bernoulli.cmdstanphp.json` beside `bernoulli`. The record holds the hashes of the Stan program and its `#include` files, the user header, and `make/local`, the `cppOptions` and `stancOptions`, and the CmdStan installation that built the executable. The next `cmdstan_model()` call rebuilds exactly when one of these changed, and `quiet: false` says why. A missing or unreadable record also causes a rebuild. Builds run on a temporary copy of the program and are installed by rename, so a failed build leaves the previous executable and its record in place.
+CmdStanPHP checks for these functions by name. Without them, the two features throw a `RuntimeException` that names the missing functions.
 
-Some changes cannot be detected, such as a new C++ compiler, a makefile included from `make/local`, or a header included from the user header. Compiling prints a note about the last two. Use `forceRecompile: true` after such a change. Switching shared CmdStan settings may require `rebuild_cmdstan()`.
+### phibble
 
-Running a model whose executable is out of date, for example after the Stan file was edited, throws `StaleExecutableException`. `$model->isCurrent()` checks first, and `$model->buildInfo()` shows how the executable was built.
+```sh
+composer require phpstats/phibble
+```
 
-If your `.gitignore` ignores model executables, add `.*.cmdstanphp.json` too. The record uses CmdStanR's format under a different name, so CmdStanR's `.<exe>.cmdstanr.json` and this package's record never overwrite each other.
+With phibble installed, a `Phibble\DataFrame` can be passed as model data, and `drawsTable()` and `summaryTable()` return data frames. phibble requires PHP 8.3 or later. Without phibble, `drawsColumns()` and `summaryColumns()` return the same data as plain column arrays.
 
-To use an executable without its Stan program, pass `exeFile` alone, as in `cmdstan_model(exeFile: 'bin/bernoulli')`. Nothing is built, and the build arguments are refused. `stanFile` and `exeFile` cannot be combined. `compile_stan_file('model.stan')` builds an executable without creating a model object and returns its path.
+### vl-convert
+
+`Figure::svg()` and `Figure::png()` run the [vl-convert](https://github.com/vega/vl-convert/releases) binary. Download it for your platform, then put `vl-convert` on `PATH` or set `VL_CONVERT` to its path. ASCII, Vega-Lite, and HTML figures need nothing extra.

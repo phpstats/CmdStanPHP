@@ -1,5 +1,5 @@
 ---
-title: "Compatibility contract"
+title: "Compatibility with CmdStanR"
 ---
 
 This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does **not** claim full CmdStanR compatibility. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/), and [CmdStan CLI](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html), consulted during implementation. PHP interfaces preserve modern option names wherever their meaning transfers directly. Method names do not carry over: PSR-1 makes a PHP method name camelCase, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()` here. The [method names](#method-names) table maps every one of them, and the package declares no snake_case alias beside the camelCase name.
@@ -49,16 +49,9 @@ This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does
 
 ### Method names
 
-The package named its methods after their CmdStanR, posterior, loo, and
-bayesplot counterparts, so `fit$output_files()` in R was
-`$fit->output_files()` here. PSR-1 makes a PHP method name camelCase, and
-this family declares no second spelling, so each R name now maps to one
-PHP name. Option names, CSV metadata keys, result-array keys, summary
-measure names, and the standalone functions are unchanged:
-`sample(iter_warmup: 500)` and `Summary::summarise($draws, ['ess_bulk'])`
-read as they always did. Every method whose name changed is below, with
-the methods added for CmdStanR 1.0. The R name is also the PHP name before
-the change; the CmdStanR 1.0 methods never had a snake_case PHP name.
+Matching names do not imply matching behavior. This table maps names only; the [supported workflows](#supported-workflows) above and the [PHP adaptations](#php-adaptations) below describe behavior.
+
+PSR-1 makes a PHP method name camelCase, so each CmdStanR, posterior, loo, and bayesplot method maps to one camelCase PHP method, with no snake_case alias. Option names, CSV metadata keys, result-array keys, summary measure names, and the standalone functions keep CmdStanR's spelling, as in `sample(iter_warmup: 500)` and `Summary::summarise($draws, ['ess_bulk'])`. Every renamed method is below.
 
 | Class | R name | PHP name |
 | --- | --- | --- |
@@ -174,7 +167,7 @@ the change; the CmdStanR 1.0 methods never had a snake_case PHP name.
 
 ## CmdStanR 1.0 {#cmdstanr-1-0}
 
-This package follows CmdStanR 1.0. Code written for an earlier CmdStanPHP needs these changes:
+This package follows CmdStanR 1.0. Code written for a development version from before the CmdStanR 1.0 port, which predates the first release, needs these changes:
 
 - `cmdstan_model()` and `new CmdStanModel()` compile before they return. `compile()` and the `compile` argument are gone; use `compile_stan_file()` to build without a model object.
 - `stanFile` and `exeFile` cannot be given together. Pass `exeFile` alone to use an existing executable, and `dir` to choose where a Stan program's executable goes. A model from `exeFile` alone refuses build arguments.
@@ -220,7 +213,7 @@ Diagnostic checks are structured messages accessible with `diagnosticWarnings()`
 
 Algorithm parameters left null use CmdStan's defaults. PHP-level defaults include four sample chains, sequential execution unless requested, and one MPI chain. CmdStanR defaults for automatically saving metric/configuration JSON are not imposed; request `save_metric` or `save_cmdstan_config`, or set the `cmdstanr_save_metric` and `cmdstanr_save_config` options. The installer defaults to one core where CmdStanR uses two. OpenCL and MPI require external toolchains/hardware. Windows has not been validated.
 
-Moment matching follows `loo::loo_moment_match()` as `CmdStanMCMC$loo()` calls it, with corrections to the split step and relative efficiencies. loo's development version adopted the split corrections in [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405) on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo's identity-map fallback while retaining the mean shift; its reason is recorded in `covariance_fallbacks`. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The [inference guide](inference.qmd) describes the result.
+Moment matching follows `loo::loo_moment_match()` as `CmdStanMCMC$loo()` calls it, with corrections to the split step and relative efficiencies. loo's development version adopted the split corrections in [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405) on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo's identity-map fallback while retaining the mean shift; its reason is recorded in `covariance_fallbacks`. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The [LOO guide](loo.qmd#moment-matching) describes the result.
 
 ## Not implemented
 

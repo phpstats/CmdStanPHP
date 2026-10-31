@@ -1,0 +1,49 @@
+---
+title: "Log density and model methods"
+---
+
+Some workflows need the model's log density itself: to check gradients, to evaluate the posterior at given parameter values, to move between the constrained and unconstrained scales, or to call the program's own Stan functions. CmdStanPHP provides these through CmdStan's executable methods and, without starting a process, through a compiled model library loaded with PHP's FFI extension.
+
+## Gradient checks and batch log density
+
+`diagnose()` compares the model's gradients with finite differences at the initial values, which finds errors in user-written gradients and numerical problems. `logProb()` evaluates the log density and its gradient at given parameter values in one CmdStan process. Both use `examples/normal.stan`, a model with one parameter `mu`.
+
+```php
+$normal = CmdStan\cmdstan_model('examples/normal.stan');
+$gradientCheck = $normal->diagnose(init: 0);
+echo $gradientCheck->gradients();
+$logDensity = $normal->logProb(unconstrained_params: ['params_r' => [[0.0], [1.0]]]);
+print_r($logDensity->draws(format: 'draws_matrix'));
+```
+
+`logProb()` takes exactly one of `unconstrained_params` or `constrained_params`, using CmdStan's input JSON format. This runs the executable's batch log-density method. The in-process methods below evaluate one point at a time without starting a process.
+
+## In-process model methods
+
+These methods need PHP's FFI extension. `$fit` is a fit of the Bernoulli model from [Getting started](getting-started.qmd).
+
+```php
+$fit->initModelMethods(seed: 1);
+$u = $fit->unconstrainVariables(['theta' => 0.3]);
+$lp = $fit->logProb($u);
+$gradient = $fit->gradLogProb($u, jacobian: false)['gradient'];
+$hessian = $fit->hessian($u)['hessian'];
+$values = $fit->constrainVariables($u);
+$unconstrained = $fit->unconstrainDraws(format: 'draws_matrix');
+```
+
+Model methods compile a shared library from the model's generated C++ with the selected CmdStan's compiler settings and load it with PHP FFI. The first build takes a few seconds; later calls reuse the library cached beside the Stan source. The library is bound to the fit's data and to a seed for the generated-quantities RNG. Log densities drop constant terms, and `jacobian` defaults to true, as in CmdStanR. An imported CSV fit needs the model: `$fit->initModelMethods(model: $model)`. `initModelMethods(data: $data)` binds other data, for example after a saved fit's data file is gone.
+
+Unconstrained values are flat lists in Stan's order, and `unconstrainDraws()` labels them with Stan's unconstrained names. Constrained values are keyed by variable name, with arrays and vectors as lists, matrices as lists of rows, complex numbers as `[re, im]` pairs, and tuples as lists of their elements, so `t.2` is `$values['t'][1]`. `unconstrainVariables()` accepts the same structure.
+
+## Stan functions
+
+```php
+$functions = $model->exposeFunctions();
+$functions->my_function(1.5, [1.0, 2.0]);
+$functions->call('normal_draw_rng', 0.0, 1.0, seed: 42);
+```
+
+`exposeFunctions()` compiles the model's `functions` block. Arguments may be positional or named by their Stan names. Supported types are real, int, complex, vectors, matrices, arrays of these, and tuples. Functions ending in `_rng` take an optional `seed`. Density functions ending in `_lpdf` or `_lpmf` return the full density. Functions ending in `_lp` and overloaded functions cannot be called. `functions()` on the returned object lists each signature and whether it is supported.
+
+FFI is enabled for the CLI by default. Under PHP-FPM or another web SAPI, set `ffi.enable=true` or preload the library.

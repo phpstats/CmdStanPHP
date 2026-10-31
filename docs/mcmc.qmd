@@ -1,0 +1,93 @@
+---
+title: "MCMC sampling"
+aliases:
+  - inference.html
+---
+
+`sample()` runs Stan's adaptive Hamiltonian Monte Carlo sampler (NUTS). It draws from the full posterior distribution, and it is the method to use unless speed rules it out. Each chain is a separate CmdStan process. The result is a `CmdStanMCMC` fit.
+
+## Run the sampler
+
+```php
+$model = CmdStan\cmdstan_model('examples/bernoulli.stan');
+$data = ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]];
+
+$fit = $model->sample(
+    data: $data,
+    seed: 123,
+    chains: 4,
+    parallel_chains: 2,
+    iter_warmup: 500,
+    iter_sampling: 1000,
+    adapt_delta: 0.9,
+    max_treedepth: 12,
+    output_dir: 'output',
+    show_messages: false,
+);
+
+print_r($fit->summary('theta'));
+print_r($fit->diagnosticSummary());
+print_r($fit->diagnosticWarnings());
+```
+
+- `chains` (default 4) sets the number of independent chains, and `parallel_chains` (default 1) how many run at once.
+- `iter_warmup` and `iter_sampling` set the iterations per chain. CmdStan's defaults are 1,000 each. Warmup draws adapt the step size and metric and are discarded unless `save_warmup: true`.
+- `seed` makes a run reproducible. A single seed is shared by all chains, and Stan derives a separate random stream from each chain's ID. A list gives one seed per chain.
+- `adapt_delta` is the target acceptance rate during adaptation (CmdStan's default is 0.8). Raising it gives smaller steps.
+- `max_treedepth` limits the number of leapfrog steps per iteration to 2 to that power (CmdStan's default depth is 10).
+- `output_dir` keeps the CSV files in a known directory. Without it, they go into a new temporary directory, which is not deleted.
+
+Options left out use CmdStan's defaults, and an unknown option throws. The [API reference](api.qmd#method-specific-options) lists every option.
+
+## Check convergence
+
+A summary is only as reliable as the chains behind it. Check these before using an estimate:
+
+- **R-hat** (`rhat` in `summary()`) compares the chains with each other and with themselves. Values above 1.01 mean the chains have not mixed, and the estimates should not be used.
+- **Effective sample size** (`ess_bulk` and `ess_tail`) estimates how many independent draws the autocorrelated draws are worth, for the center and the tails. Aim for at least 100 per chain.
+- **Divergent transitions** mean the sampler met curvature it could not follow, often in a hierarchical model's funnel. Even a few can bias the estimates.
+- **Maximum tree depth** means some iterations stopped at `max_treedepth`. It makes sampling slower and does not bias the estimates.
+- **E-BFMI** below 0.3 means the momentum resampling explores the energy distribution poorly, and the sampler may miss parts of the posterior.
+
+`summary()` reports R-hat and the effective sample sizes. `diagnosticSummary()` returns per-chain arrays `num_divergent`, `num_max_treedepth`, and `ebfmi`. After sampling, the fit checks divergences, tree depth, and E-BFMI, and `diagnosticWarnings()` returns messages such as `Chain 2: 3 divergent transitions.` or `Chain 1: E-BFMI below 0.3.`. These are not PHP warnings. Pass `diagnostics: []` to skip the checks. `cmdstanDiagnose()` runs CmdStan's own `diagnose` utility on the CSV files and returns its text.
+
+Common remedies:
+
+- Divergences: raise `adapt_delta`, for example to 0.95 or 0.99, or reparameterize the model. A non-centered parameterization usually removes a hierarchical funnel.
+- Maximum tree depth: raise `max_treedepth`, or rescale parameters to similar magnitudes.
+- High R-hat or low ESS: run longer chains, give better initial values, or simplify the model. Multimodal posteriors often show up here.
+
+## Threads and processes
+
+For a model built with `cppOptions: ['STAN_THREADS' => true]`, `threads_per_chain` sets each chain's thread count for `reduce_sum` and `map_rect`. Asking for more than one thread from an executable built without threading is an error. CPU use is `parallel_chains` multiplied by `threads_per_chain`.
+
+`show_progress_bar: true`, or the `cmdstanr_progress_bar` option, draws one progress bar for all chains on stderr. `timeout` limits each process, in seconds. A failing chain throws `ProcessException` and stops the chains still running.
+
+## Initial values
+
+`init` accepts any of these:
+
+- a nonnegative radius, so initial values are drawn uniformly from (−radius, radius) on the unconstrained scale (CmdStan's default is 2)
+- an associative array of parameter values, or a JSON file
+- a list of arrays or files, one per chain
+- a callable that receives the chain ID, as in `init: fn($id) => ['theta' => $id / 5]`
+- a fit object
+
+Tuple parameters are given as lists of their elements, and complex parameters as `[re, im]`. `$fit->init()` returns the initial values each chain used.
+
+A fit used as `init` supplies one draw per chain, as CmdStanR's `process_init()` does:
+
+```php
+$pf = $model->pathfinder(data: $data, seed: 123);
+$fit = $model->sample(data: $data, init: $pf, seed: 123, chains: 4);
+```
+
+MCMC draws are resampled without replacement. An optimization fit repeats its estimate for every chain. ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights computed from `lp__ - lp_approx__` over distinct parameter vectors, as in CmdStanR 1.0. Repeated draws are merged with their weights summed. Draws that multi-path Pathfinder already resampled with PSIS are not reweighted. Too few distinct draws throws. Flat columns such as `beta[2,1]` become nested arrays matched to the model's parameter declarations, and tuple and complex parameters are carried over. Variables other than parameters are dropped, and draws containing NaN or infinite values throw. The seed controls resampling with PHP's Mt19937 engine, so the selected draws differ from CmdStanR's for the same seed.
+
+## Metric
+
+`metric` is `diag_e` (the default), `dense_e`, or `unit_e`. A precomputed inverse metric can be given with `inv_metric`, or with `metric_file` for one file per chain. Use `metric: 'dense_e'` for matrix metrics. `$fit->invMetric()` and `$fit->stepSize()` return the adapted values per chain.
+
+## Fixed parameters
+
+`sample(fixed_param: true, iter_sampling: 100)` runs the generated quantities block without sampling parameters, for simulation from fixed values. It runs one chain with no warmup.

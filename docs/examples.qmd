@@ -1,0 +1,91 @@
+---
+title: "Examples"
+---
+
+The package ships three example models from CmdStanR, with their data: `logistic`, a logistic regression, and `schools` and `schools_ncp`, the eight schools hierarchical model in its centered and non-centered forms. The repository's `examples/` directory has the small programs used in these docs.
+
+## Bundled models
+
+`cmdstanr_example()` compiles an example, fits it with its bundled data, and returns the fit. The first argument names the example, and the second the method: `sample` (the default), `optimize`, `laplace`, `variational`, `pathfinder`, or `diagnose`. Other arguments are passed to the method. The executable is built in the directory set by the `cmdstanphp_example_dir` option, or in `cmdstanphp-examples` under the system temporary directory. `print_example_program()` prints the Stan program.
+
+```php
+CmdStan\print_example_program('schools_ncp');
+
+$fit = CmdStan\cmdstanr_example('schools_ncp', seed: 123, show_messages: false);
+print_r($fit->summary(['mu', 'tau'], measures: ['mean', 'sd', 'rhat', 'ess_bulk']));
+print_r($fit->diagnosticWarnings());
+```
+
+```text
+data {
+  int<lower=1> J;
+  vector<lower=0>[J] sigma;
+  vector[J] y;
+}
+parameters {
+  real mu;
+  real<lower=0> tau;
+  vector[J] theta_raw;
+}
+transformed parameters {
+  vector[J] theta = mu + tau * theta_raw;
+}
+model {
+  target += normal_lpdf(tau | 0, 10);
+  target += normal_lpdf(mu | 0, 10);
+  target += normal_lpdf(theta_raw | 0, 1);
+  target += normal_lpdf(y | theta, sigma);
+}
+Array
+(
+    [0] => Array
+        (
+            [variable] => mu
+            [mean] => 6.6143359951631
+            [sd] => 4.2648286711691
+            [rhat] => 1.0014001162774
+            [ess_bulk] => 3501.9077743615
+        )
+
+    [1] => Array
+        (
+            [variable] => tau
+            [mean] => 4.710142117602
+            [sd] => 3.6457106662655
+            [rhat] => 1.0004923423035
+            [ess_bulk] => 1748.8566170691
+        )
+
+)
+Array
+(
+)
+```
+
+The centered form, `schools`, samples the same posterior with `theta` as a parameter. With the same seed it produces divergent transitions in every chain:
+
+```php
+$fit = CmdStan\cmdstanr_example('schools', seed: 123, show_messages: false);
+print_r($fit->diagnosticWarnings());
+```
+
+```text
+Array
+(
+    [0] => Chain 1: 73 divergent transitions.
+    [1] => Chain 2: 74 divergent transitions.
+    [2] => Chain 2: E-BFMI below 0.3.
+    [3] => Chain 3: 25 divergent transitions.
+    [4] => Chain 4: 8 divergent transitions.
+)
+```
+
+The [MCMC guide](mcmc.qmd#check-convergence) explains these warnings. The outputs above are from CmdStan 2.40.0 on macOS. Other platforms and CmdStan versions give different draws for the same seed.
+
+## Programs in the repository
+
+The `examples/` directory of the [repository](https://github.com/phpstats/CmdStanPHP/tree/main/examples) holds:
+
+- `bernoulli.stan` and `bernoulli.php`, the model from [Getting started](getting-started.qmd) and a script that samples it. Run `php examples/bernoulli.php` from a clone of the repository after `composer install`.
+- `generated.stan`, the Bernoulli model with a posterior prediction, used in [Generated quantities](generated-quantities.qmd).
+- `normal.stan`, a one-parameter normal model, used in [Log density and model methods](log-density.qmd).

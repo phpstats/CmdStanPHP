@@ -1,0 +1,60 @@
+---
+title: "Figures"
+---
+
+CmdStanPHP draws the bayesplot diagnostics most used with MCMC: traces, histograms, densities, intervals, rank histograms, scatter plots, autocorrelation, and loo's Pareto k plot. The statistics are computed in PHP, so figures need no R and no JavaScript to compute.
+
+```php
+$density = CmdStan\mcmc_dens($fit, 'theta');
+echo $density->ascii(60, 10), "\n";
+echo CmdStan\mcmc_intervals($fit)->ascii(60), "\n";
+file_put_contents('theta.html', $density->html());
+$spec = $density->vegaLite(width: 480, height: 240);
+```
+
+```text
+theta: kernel density (bandwidth 0.02252)
+  |               ********
+  |             ***      ***
+  |            **          **
+  |           **            ***
+2 +          **               **
+  |         **                 ****
+  |        **                     ***
+  |      ***                        ****
+  |     **                             *******
+0 +******                                    ******************
+  +----+--------------------------------+----------------------
+       0                               0.5
+   theta (y: density)
+
+intervals: 50% inner, 90% outer, point = median
+theta |-----------[=========o==========]--------------------
+      +-----------------+--------------------------+--------
+                       0.2                        0.4
+       - outer, [=] inner, o = median
+```
+
+The figure functions follow bayesplot's names and return a `Figure`. A figure holds the computed statistics in `data`, as documented on the `Figure` class, and renders them in several forms:
+
+- `ascii(width, height)` returns plain ASCII text for a terminal, log, or text report. Echoing a figure prints this form with default sizes.
+- `vegaLite(width, height, maxRows)` returns a [Vega-Lite 5](https://vega.github.io/vega-lite/) spec as a PHP array with the data inlined, and `json()` returns the same spec as JSON that is safe to place in an HTML script element. Front ends render it with `vega-embed` or any other Vega-Lite runtime.
+- `html()` returns a standalone page that loads Vega, Vega-Lite, and vega-embed from the jsDelivr CDN.
+- `svg()` and `png(scale: 2.0)` render static images with [vl-convert](https://github.com/vega/vl-convert), a standalone binary that needs no Node or browser. Set `VL_CONVERT` to its path or put `vl-convert` on `PATH`.
+
+The available figures are:
+
+- `mcmc_trace($fit, 'theta')`: chains overlaid by iteration.
+- `mcmc_hist($fit, 'theta', bins: 30)`: histogram of all draws.
+- `mcmc_dens($fit, 'theta')` and `mcmc_dens_overlay($fit, 'theta')`: Gaussian kernel density of all draws, or one curve per chain.
+- `mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, probOuter: 0.9, pointEst: 'median')`: inner and outer intervals with a point estimate on a shared axis. Without a selection it plots every variable except `lp__`.
+- `mcmc_rank_hist($fit, 'theta', bins: 20)`: per-chain histograms of pooled ranks, with the count expected under uniform ranks marked.
+- `mcmc_scatter($fit, 'mu', 'sigma')`: joint draws, with divergent transitions marked on MCMC fits.
+- `mcmc_acf($fit, 'theta', lags: 20)`: per-chain autocorrelation bars.
+- `pareto_k_plot($fit->loo())`: Pareto k by observation, with the k threshold and k = 1 marked.
+
+A plotted variable names one element, such as `beta[2]`. `mcmc_intervals()` also accepts base names, which select every element. The functions take a fit or a `draws_array`.
+
+The bandwidth (R's `bw.nrd0`), densities, quantiles, ranks, and autocorrelations are computed in PHP and checked against R and bayesplot. Vega-Lite specs carry these values and use no Vega-Lite density, binning, or quantile transforms, so every rendering shows the same numbers. The ASCII form rounds positions to character cells; use the figure's `data` or the numeric methods, such as `summary()`, when exact values matter.
+
+Trace and scatter figures inline every draw. For large fits, `maxRows` keeps every k-th iteration of a trace, or every k-th draw of a scatter plus all divergent draws, so that about that many rows remain. Per-chain figures (rank histograms and autocorrelation) are faceted by chain, and their sizes apply to each chain's panel.

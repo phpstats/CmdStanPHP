@@ -1,0 +1,161 @@
+---
+title: "Getting started"
+---
+
+This page fits a first Stan model from PHP. It assumes the package, a C++ toolchain, and CmdStan are installed as described in [Installation](installation.qmd).
+
+## The model
+
+A Stan program declares its data, its parameters, and a model that relates them. This one estimates `theta`, the probability of a success, from `N` binary outcomes `y`. The prior on `theta` is uniform, so the posterior is a beta distribution.
+
+Save it as `bernoulli.stan` in your project directory:
+
+```stan
+data {
+  int<lower=0> N;
+  array[N] int<lower=0, upper=1> y;
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ beta(1, 1);
+  y ~ bernoulli(theta);
+}
+```
+
+## Compile and sample
+
+Save this script as `bernoulli.php` in the same directory:
+
+```php
+<?php
+require __DIR__.'/vendor/autoload.php';
+
+use function CmdStan\cmdstan_model;
+
+$model = cmdstan_model(__DIR__.'/bernoulli.stan');
+
+$fit = $model->sample(
+    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+    seed: 123,
+    chains: 4,
+    parallel_chains: 4,
+    show_messages: false,
+);
+
+print_r($fit->summary('theta'));
+print_r($fit->diagnosticSummary());
+print_r($fit->diagnosticWarnings());
+```
+
+Run it from the project directory:
+
+```sh
+php bernoulli.php
+```
+
+`cmdstan_model()` compiles `bernoulli.stan` to an executable named `bernoulli` beside it, unless an up-to-date executable is already there. `sample()` writes the data to a JSON file, runs four Markov chains as four CmdStan processes, and reads their CSV output into a `CmdStanMCMC` fit. Each chain runs 1,000 warmup iterations, which are discarded, and 1,000 sampling iterations. The fit therefore holds 4,000 draws of `theta`.
+
+## Read the results
+
+The script prints:
+
+```text
+Array
+(
+    [0] => Array
+        (
+            [variable] => theta
+            [mean] => 0.25688224553065
+            [median] => 0.241080625
+            [sd] => 0.12428477287867
+            [mad] => 0.12715007403
+            [q5] => 0.08003641255
+            [q95] => 0.4852966975
+            [rhat] => 1.0009548425564
+            [ess_bulk] => 1231.5526335488
+            [ess_tail] => 1476.7359726913
+            [mcse_mean] => 0.0034120356567473
+        )
+
+)
+Array
+(
+    [num_divergent] => Array
+        (
+            [0] => 0
+            [1] => 0
+            [2] => 0
+            [3] => 0
+        )
+
+    [num_max_treedepth] => Array
+        (
+            [0] => 0
+            [1] => 0
+            [2] => 0
+            [3] => 0
+        )
+
+    [ebfmi] => Array
+        (
+            [0] => 1.1147963277411
+            [1] => 0.92340805277899
+            [2] => 1.2710912715229
+            [3] => 0.94446252116701
+        )
+
+)
+Array
+(
+)
+```
+
+`summary()` returns one row per variable. The posterior mean of `theta` is about 0.26, and 90% of the draws lie between `q5` and `q95`, 0.08 and 0.49. The exact posterior is Beta(3, 9), whose mean is 0.25.
+
+The other columns check whether the chains can be trusted:
+
+- `rhat` compares the chains with each other. Values near 1 indicate that they sampled the same distribution. [Vehtari et al. (2021)](https://doi.org/10.1214/20-BA1221) recommend R-hat below 1.01.
+- `ess_bulk` and `ess_tail` are effective sample sizes for the center and the tails of the distribution. The draws are autocorrelated, so they carry less information than 4,000 independent draws. The same paper recommends at least 100 effective draws per chain, 400 here, for both.
+- `mcse_mean` is the Monte Carlo standard error of the mean.
+
+`diagnosticSummary()` reports, for each chain, the transitions that diverged, the transitions that reached the maximum tree depth, and the E-BFMI. Divergences mean the sampler could not follow the posterior's geometry, and estimates may be biased. `diagnosticWarnings()` lists messages for any of these problems and is empty here. The [MCMC guide](mcmc.qmd) explains these diagnostics and what to change when they fail.
+
+## Get the draws
+
+```php
+$draws = $fit->draws('theta', 'draws_matrix');
+echo count($draws), "\n";
+print_r(array_slice($draws, 0, 3));
+```
+
+```text
+4000
+Array
+(
+    [0] => Array
+        (
+            [theta] => 0.16902558
+        )
+
+    [1] => Array
+        (
+            [theta] => 0.46237896
+        )
+
+    [2] => Array
+        (
+            [theta] => 0.40915558
+        )
+
+)
+```
+
+`draws_matrix` is one row per draw, chain after chain. [Draws, summaries, and saving fits](draws.qmd) describes the other formats.
+
+## Where the files are
+
+The executable and two hidden files, `.bernoulli.cmdstanphp.json` and `.bernoulli.cmdstanphp.lock`, stay beside `bernoulli.stan`. The next run reuses the executable. Editing the Stan file makes the next `cmdstan_model()` call compile again. [Compiling models](compiling.qmd) explains when a model is rebuilt.
+
+The CSV files go into a new directory under the system temporary directory. `$fit->outputFiles()` lists them. They are not deleted when the fit is, so pass `output_dir` to keep them somewhere known, and remove them when they are no longer needed.

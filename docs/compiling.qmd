@@ -1,0 +1,53 @@
+---
+title: "Compiling models"
+---
+
+CmdStan turns each Stan program into a native executable. CmdStanPHP builds that executable when you create a model, records how it was built, and refuses to run it once it no longer matches the program.
+
+## Create a model
+
+```php
+CmdStan\check_syntax_stan_file('model.stan', pedantic: true);
+$model = CmdStan\cmdstan_model('model.stan', cppOptions: ['STAN_THREADS' => true], quiet: false);
+```
+
+`cmdstan_model()` compiles the model, or reuses an up-to-date executable, before it returns. There is no separate `compile()` step. The executable goes beside the Stan file, or into the directory given as `dir`. `quiet: false` reports whether the model is compiled and why. `check_syntax_stan_file()` runs only stanc, so it reports syntax errors without a C++ build.
+
+`compile_stan_file('model.stan')` builds an executable without creating a model object and returns its path.
+
+To run an executable without its Stan program, pass `exeFile` alone, as in `cmdstan_model(exeFile: 'bin/bernoulli')`. Nothing is built, and the build arguments are refused. `stanFile` and `exeFile` cannot be combined.
+
+## Build options
+
+`cppOptions` are make variables for this model's build, such as `['STAN_THREADS' => true]` for within-chain threading. `false` turns an option off even when CmdStan's `make/local` turns it on. `stancOptions` are stanc flags, such as `['O1']`. `includePaths` lists directories searched by `#include`, and `userHeader` names a C++ header with external function definitions. The [API reference](api.qmd#model-methods) lists the accepted values.
+
+## When a model is rebuilt
+
+Compiling writes a hidden build record beside the executable, such as `.bernoulli.cmdstanphp.json` beside `bernoulli`. The record holds hashes of the Stan program and its `#include` files, the user header, and CmdStan's `make/local`. It also holds the `cppOptions`, the `stancOptions`, and the CmdStan installation that built the executable. The next `cmdstan_model()` call rebuilds when one of these changed, and `quiet: false` names the change. A missing or unreadable record also causes a rebuild. `forceRecompile: true` rebuilds in any case.
+
+Builds run on a temporary copy of the program, and the result is installed by renaming it into place. A failed build leaves the previous executable and its record in place.
+
+Some changes cannot be detected: a new C++ compiler, a makefile included from `make/local`, or a header included from the user header. Compiling prints a note about the last two. Use `forceRecompile: true` after such a change. Switching shared CmdStan settings may also need `rebuild_cmdstan()`.
+
+## Stale executables
+
+Before each run, a model checks that its executable is still the one built from the current program. If the Stan file, an include, the user header, `make/local`, or CmdStan changed, the run throws `StaleExecutableException` with the reasons. Call `cmdstan_model()` again to rebuild. The Stan file must therefore exist whenever the model runs. `$model->isCurrent()` makes the same check without throwing, and `$model->buildInfo()` shows how the executable was built.
+
+The check compares the file status (inode, size, and modification and change times) of every file the build depends on. When none changed, it skips hashing and the stanc call.
+
+## Several processes
+
+Processes that create the same model at the same time, such as queue workers after a deploy changes a `.stan` file, build it once. Building holds an exclusive lock on a second hidden file, `.<exe>.cmdstanphp.lock`, which is never removed. The other processes wait, then find the new executable current. Checking an executable holds the same lock shared, so a check never sees an executable and record that another process is midway through replacing.
+
+`forceRecompile: true` still rebuilds in every process, one after another. Locking needs a file system with working `flock()`. A model in a read-only directory is checked without the lock.
+
+## Version control
+
+If your `.gitignore` ignores model executables, ignore the hidden files too:
+
+```text
+.*.cmdstanphp.json
+.*.cmdstanphp.lock
+```
+
+The record uses CmdStanR's format under a different name, so CmdStanR's `.<exe>.cmdstanr.json` and this package's record never overwrite each other.

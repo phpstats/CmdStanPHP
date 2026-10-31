@@ -1,0 +1,40 @@
+---
+title: "ADVI and Pathfinder"
+---
+
+Variational methods fit an approximating distribution to the posterior and draw from it. They are faster than MCMC and less accurate, especially in the tails and for correlated or multimodal posteriors. Their draws are useful for a quick look, and as initial values for `sample()`.
+
+## ADVI
+
+```php
+$model = CmdStan\cmdstan_model('examples/bernoulli.stan');
+$data = ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]];
+
+$vb = $model->variational(data: $data, algorithm: 'meanfield', draws: 1000, seed: 123);
+print_r($vb->summary('theta'));
+```
+
+ADVI fits a normal distribution on the unconstrained scale. `algorithm` is `meanfield`, which assumes independent parameters, or `fullrank`, which fits a full covariance. `draws` sets the number of draws (CmdStan's `output_samples`). The result is a `CmdStanVB`.
+
+CmdStan writes the variational mean as the first CSV row. It is excluded from the draws, and `variationalMean()` returns it. ADVI's optimization is stochastic, and a run can stop before the approximation converges. CmdStan reports this in its console output, which `$vb->output()` returns.
+
+## Pathfinder
+
+```php
+$pf = $model->pathfinder(data: $data, num_paths: 4, single_path_draws: 500, draws: 1000, seed: 123);
+print_r($pf->summary('theta'));
+```
+
+Pathfinder follows quasi-Newton optimization paths from several starting points and fits a normal approximation along each one. `num_paths` (default 4) sets the number of paths, `single_path_draws` the draws per path (CmdStan's `num_draws`), and `draws` the number of draws after the paths are combined by Pareto-smoothed importance resampling (CmdStan's `num_psis_draws`). `init` takes one set of initial values per path. The result is a `CmdStanPathfinder`.
+
+Its variables include `lp_approx__` and `path__`. With `save_single_paths: true`, `singlePathFits()` returns one `CmdStanPathfinder` per path, and `singlePathDiagnostics()` decodes each path's JSON output.
+
+## Results
+
+`lpApprox()` returns the approximation's log density at each draw as one list in draw order, for Pathfinder, ADVI, and Laplace. These methods have no MCMC convergence diagnostics, so summaries report `NAN` for R-hat and ESS.
+
+A fit from either method can initialize MCMC, as described in [initial values](mcmc.qmd#initial-values):
+
+```php
+$fit = $model->sample(data: $data, init: $pf, seed: 123);
+```

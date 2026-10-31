@@ -1,0 +1,33 @@
+---
+title: "Optimization and Laplace"
+---
+
+Optimization finds a posterior mode or a maximum likelihood estimate. It returns a point, with no uncertainty. The Laplace approximation adds uncertainty by drawing from a normal distribution centered at the mode, with the inverse Hessian as its covariance. Both are much faster than MCMC and suit models whose posterior is close to normal.
+
+## Optimize
+
+```php
+$model = CmdStan\cmdstan_model('examples/bernoulli.stan');
+$data = ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]];
+
+$mode = $model->optimize(data: $data, jacobian: true, seed: 123);
+print_r($mode->mle());
+echo $mode->lp(), "\n";
+```
+
+`algorithm` is `lbfgs` (CmdStan's default), `bfgs`, or `newton`. `jacobian: false`, the default, maximizes the likelihood times the prior on the constrained scale, which gives a penalized maximum likelihood estimate. `jacobian: true` includes the change-of-variables adjustment and finds the mode of the posterior on the unconstrained scale. The two differ for constrained parameters.
+
+The result is a `CmdStanMLE`. `mle()` returns the estimates by variable without `lp__`, and `lp()` returns the log density at the estimate. `summary()` returns `variable` and `estimate` rows, as CmdStanR's optimization summary does.
+
+Optimization can stop at a local mode, or fail to converge when the posterior has no mode, as in a hierarchical model whose group scale goes to zero. When CmdStan exits with an error, the run throws `ProcessException`, which holds CmdStan's output. The tolerances `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, and `tol_param`, and `iter`, control convergence.
+
+## Laplace approximation
+
+```php
+$fit = $model->laplace(data: $data, mode: $mode, draws: 1000, seed: 123);
+print_r($fit->summary('theta'));
+```
+
+`laplace()` draws from the normal approximation at a mode. `jacobian` defaults to `true` here. A fit supplied as `mode` must agree on the Jacobian setting. Without `mode`, the method first optimizes with the same data and Jacobian setting. `opt_args` passes further optimizer options to that run. With `output_basename`, that optimization is written as `<output_basename>-mode-01.csv` in the same output directory. A mode can also be a parameter JSON file, an optimizer CSV file, or an associative parameter array.
+
+The result is a `CmdStanLaplace`. Its draws include `lp__` and `lp_approx__`, the log density of the normal approximation at each draw, which `lpApprox()` returns as one list. The approximation is poor for skewed or bounded posteriors. Summaries report `NAN` for R-hat and ESS, which apply only to MCMC.

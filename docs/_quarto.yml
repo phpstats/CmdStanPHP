@@ -12,14 +12,38 @@ website:
     style: docked
     search: true
     contents:
-      - index.qmd
-      - installation.qmd
-      - inference.qmd
+      - text: "Overview"
+        href: index.qmd
+      - section: "Getting started"
+        contents:
+          - installation.qmd
+          - getting-started.qmd
+      - section: "Guides"
+        contents:
+          - compiling.qmd
+          - mcmc.qmd
+          - optimization.qmd
+          - variational.qmd
+          - generated-quantities.qmd
+          - draws.qmd
+          - log-density.qmd
+          - loo.qmd
+          - figures.qmd
       - section: "Reference"
         contents:
           - api.qmd
+      - section: "Examples"
+        contents:
+          - examples.qmd
+      - section: "Compatibility and limitations"
+        contents:
           - compatibility.qmd
-      - testing.qmd
+      - section: "Benchmarks and verification"
+        contents:
+          - verification.qmd
+      - section: "Contributing"
+        contents:
+          - contributing.qmd
 
 format:
   html:

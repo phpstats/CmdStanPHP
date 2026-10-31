@@ -2,7 +2,7 @@
 title: "API reference"
 ---
 
-All classes and functions are in the `CmdStan` namespace. Standalone functions keep CmdStanR's snake_case spelling. Methods, parameters, and properties are camelCase, as PSR-1 and this family's conventions require, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()`; the [compatibility contract](compatibility.qmd#method-names) maps every renamed method. CmdStan option names are unchanged. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. `null` generally leaves the installed CmdStan default in effect. Check the [compatibility contract](compatibility.qmd) for exceptions.
+All classes and functions are in the `CmdStan` namespace. Standalone functions keep CmdStanR's snake_case spelling. Methods, parameters, and properties are camelCase, as PSR-1 requires, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()`; the [compatibility contract](compatibility.qmd#method-names) maps every renamed method. CmdStan option names are unchanged. Inference methods accept PHP named arguments or one associative options array; they reject unknown options instead of silently ignoring them. `null` generally leaves the installed CmdStan default in effect. Check the [compatibility contract](compatibility.qmd) for exceptions.
 
 ## Functions
 
@@ -17,7 +17,7 @@ All classes and functions are in the `CmdStan` namespace. Standalone functions k
 | `set_cmdstan_path(path)` / `cmdstan_path()` | Select/read CmdStan installation |
 | `cmdstan_version()` | Read installed release version |
 | `check_cmdstan_toolchain()` | Return paths and versions of make, CmdStan's C++ compiler, and stanc; throws when make or the compiler is missing. It does not prove a compilation will succeed |
-| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)` | Download or unpack and build a release (see the installation guide) |
+| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)` | Download or unpack and build a release (see [Installation](installation.qmd#install-cmdstan)) |
 | `cmdstan_make_local(dir: null, cppOptions: [], append: true)` | Read or write CmdStan's `make/local` |
 | `rebuild_cmdstan(cores: null, timeout: null)` | Clean and rebuild selected CmdStan |
 | `options(set: [])` / `cmdstan_option(name, default: null)` | Set global options, returning previous values, or read one option |
@@ -26,7 +26,7 @@ All classes and functions are in the `CmdStan` namespace. Standalone functions k
 | `read_cmdstan_csv(files)` / `as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)` | Import one or more CmdStan CSV files (`.csv`, `.csv.gz`, or `.csv.bz2`) into a typed fit. `variables` reads only those variables, and `format` sets the fit's default draws format |
 | `read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)` | Return CmdStanR's `read_cmdstan_csv()` list shape |
 | `draws_to_csv(chains, dir)` | Export `[chain][iteration][variable]` associative draw rows to separate CSV files |
-| `mcmc_trace`, `mcmc_hist`, `mcmc_dens`, `mcmc_dens_overlay`, `mcmc_intervals`, `mcmc_rank_hist`, `mcmc_scatter`, `mcmc_acf`, `pareto_k_plot` | Return a `Figure` named after its bayesplot or loo counterpart; see the inference guide |
+| `mcmc_trace`, `mcmc_hist`, `mcmc_dens`, `mcmc_dens_overlay`, `mcmc_intervals`, `mcmc_rank_hist`, `mcmc_scatter`, `mcmc_acf`, `pareto_k_plot` | Return a `Figure` named after its bayesplot or loo counterpart; see [Figures](figures.qmd) |
 | `cmdstanr_example(example: 'logistic', method: 'sample', ...options)` / `print_example_program(example)` | Run or print the `logistic`, `schools`, or `schools_ncp` example |
 
 `num_threads()` remains as a deprecated CmdStanR name. CmdStanR 1.0 removed `read_sample_csv()` and `write_stan_tempfile()`, and this package no longer has them.
@@ -39,7 +39,7 @@ Data arrays use named PHP arrays at the top level and zero-indexed lists for Sta
 
 ## Model methods
 
-`cmdstan_model()` and `new CmdStanModel()` take the same arguments. They compile the model, or reuse an up-to-date executable, before they return. Give `stanFile`, whose executable goes beside it or in `dir`, or `exeFile` alone to use an existing executable. The two cannot be combined, and a model from `exeFile` alone refuses the build arguments, because there is nothing to build. A hidden build record beside the executable, `.<exe>.cmdstanphp.json`, records the Stan program and its `#include` files, the user header, `cppOptions`, `stancOptions`, `make/local`, and the CmdStan that built the executable. The model is rebuilt exactly when one of these changed. `quiet: false` (or the `cmdstanr_verbose` option) reports whether and why it compiles, and `forceRecompile: true` rebuilds anyway. The installation guide describes [builds and build records](installation.qmd#compile-a-model).
+`cmdstan_model()` and `new CmdStanModel()` take the same arguments. They compile the model, or reuse an up-to-date executable, before they return. Give `stanFile`, whose executable goes beside it or in `dir`, or `exeFile` alone to use an existing executable. The two cannot be combined, and a model from `exeFile` alone refuses the build arguments, because there is nothing to build. A hidden build record beside the executable, `.<exe>.cmdstanphp.json`, records the Stan program and its `#include` files, the user header, `cppOptions`, `stancOptions`, `make/local`, and the CmdStan that built the executable. The model is rebuilt exactly when one of these changed. `quiet: false` (or the `cmdstanr_verbose` option) reports whether and why it compiles, and `forceRecompile: true` rebuilds anyway. [Compiling models](compiling.qmd) describes builds and build records.
 
 Processes that create the same model at once, such as queue workers after a deploy changes a `.stan` file, build it once. Building holds an exclusive lock on a second hidden file beside the executable, `.<exe>.cmdstanphp.lock`, which is never removed. The others wait, then find the new executable current. Checking an executable against its record holds the same lock shared, so a check never sees an executable and record that another process is midway through replacing. `forceRecompile: true` still rebuilds in every process, one after another, so models that were created earlier report a replaced executable. Locking needs a file system with working `flock()`, and a model in a read-only directory is checked without the lock.
 
@@ -66,7 +66,7 @@ CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. `set_cmdstan_p
 
 `data`, `seed`, `refresh`, `init`, `output_dir`, `output_basename`, `sig_figs`, `opencl_ids`, `show_messages`, `show_exceptions`, `save_cmdstan_config`, `timeout`. Every method except `diagnose()` and `logProb()` also takes `compress`.
 
-`init` additionally accepts a fit object (see the inference guide). The CmdStanR names that CmdStanR 1.0 removed are unknown options here too: `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, and the `jacobian_adjustment` argument.
+`init` additionally accepts a fit object (see [initial values](mcmc.qmd#initial-values)). The CmdStanR names that CmdStanR 1.0 removed are unknown options here too: `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, and the `jacobian_adjustment` argument.
 
 The thread option depends on the method: `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for `optimize()`, `variational()`, `pathfinder()`, and `laplace()`. `pathfinder()` still accepts `num_threads` with an `E_USER_DEPRECATED` notice. Asking for more than one thread from an executable built without threading is an error. `compress` (`'none'`, `'gzip'`, or `'bzip2'`; default: the `cmdstanr_compress` option) compresses the output and latent-dynamics CSVs after the run. `sig_figs` is 1–18. `opencl_ids` contains platform/device IDs and requires an OpenCL build. `output_basename` contains only letters, numbers, dots, underscores, and hyphens. `save_latent_dynamics`, a `sample()` and `variational()` option, creates auxiliary diagnostic CSVs. `save_cmdstan_config` requests CmdStan configuration JSON beside the CSVs.
 
@@ -121,7 +121,7 @@ These methods need PHP FFI. The first call compiles a shared library for the fit
 
 ### Method-specific fit methods
 
-`CmdStanMCMC` adds `loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`. `rEff: false`, CmdStanR 1.0's default, skips the relative efficiencies; `rEff: true` computes them. LOO also returns `diagnostics` with Pareto k values. `momentMatch: true` needs model methods and the `phit` posterior-draw kernels, and adds a `moment_match` key; see the inference guide.
+`CmdStanMCMC` adds `loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. Both return `estimates` (each with `Estimate` and `SE`), `pointwise` rows, and flat keys such as `elpd_loo` and `se_elpd_loo`. `rEff: false`, CmdStanR 1.0's default, skips the relative efficiencies; `rEff: true` computes them. LOO also returns `diagnostics` with Pareto k values. `momentMatch: true` needs model methods and the `phit` posterior-draw kernels, and adds a `moment_match` key; see [moment matching](loo.qmd#moment-matching).
 
 `CmdStanMLE` adds `mle()`/`optimizedParams()` (the estimates by variable, without `lp__`) and `lp()`; its `summary()` returns `variable`/`estimate` rows, matching CmdStanR's optimization summary. `CmdStanVB` adds `variationalMean()` and `lpApprox()`, the approximation's log density at each draw as one list in draw order. Pathfinder and Laplace also expose `lpApprox()`; Laplace exposes `mode()`, and generated quantities fits expose `fittedParamsFiles()`. `CmdStanPathfinder` adds `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, and `singlePathDiagnostics()` for runs with `save_single_paths: true`, and lists `lp_approx__` and `path__` among its variables. `CmdStanDiagnose` adds `gradients()` (gradient-check console output).
 
@@ -146,7 +146,7 @@ Every `data` argument (`sample()`, `sampleMpi()`, `optimize()`, `variational()`,
 | string | Rejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes |
 | null, dates, other objects | Rejected with the column name and row, because Stan data has no missing values |
 
-Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them since phibble [93858fa](https://github.com/phpstats/phibble/commit/93858fa); add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
+Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them from phibble 0.1.0; add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
 
 Fit methods are camelCase, as are `StanData`'s and `Tables`' `from...()` constructors and the package's other static helpers, such as `CmdStanFit::fromCsv()` and `Inits::fromFit()`. `StanData` is a value object with readonly `data`, `levels`, `columns` (the names of the columns of `X`), and `meta`. `toArray()` returns `data`, and `with(['prior_scale' => 2.5])` adds or replaces variables.
 
@@ -182,7 +182,7 @@ data {
 }
 ```
 
-`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit `741d38f` and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `dropIntercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `Phit\model_matrix()` result and is the only code that depends on its shape.
+`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `dropIntercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `Phit\model_matrix()` result and is the only code that depends on its shape.
 
 | Formula part | Stan data |
 | --- | --- |
@@ -227,7 +227,7 @@ CmdStanPHP is part of the phpstats family of PHP statistics packages:
 - [phplyr](https://github.com/phpstats/phplyr): dplyr-style verbs for phibble tables.
 - [phiz](https://github.com/phpstats/phiz): a Vega-Lite grammar of graphics.
 
-The family packages target PHP 8.5. CmdStanPHP keeps PHP 8.2 support and requires none of them.
+CmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.
 
 ## Errors
 

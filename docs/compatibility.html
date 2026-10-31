@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Compatibility contract – CmdStanPHP</title>
+<title>Compatibility with CmdStanR – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -86,7 +86,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility contract</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility and limitations</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility with CmdStanR</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -114,25 +114,13 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">CmdStanPHP</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./installation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Installation</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./inference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Inference guide</span></a>
+ <span class="menu-text">Overview</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Getting started</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -140,24 +128,168 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API reference</span></a>
+  <a href="./installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Compatibility contract</span></a>
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
   </div>
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./testing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Testing and GitHub Pages</span></a>
+  <a href="./compiling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compiling models</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MCMC sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Optimization and Laplace</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./variational.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ADVI and Pathfinder</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./generated-quantities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generated quantities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draws.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Draws, summaries, and saving fits</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./log-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Log density and model methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./loo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LOO and WAIC</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./figures.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Figures</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API reference</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Examples</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Compatibility and limitations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Benchmarks and verification</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./verification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Verification</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contributing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -181,9 +313,9 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility contract</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility and limitations</a></li><li class="breadcrumb-item"><a href="./compatibility.html">Compatibility with CmdStanR</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Compatibility contract</h1>
+<h1 class="title">Compatibility with CmdStanR</h1>
 </div>
 
 
@@ -406,7 +538,8 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <section id="method-names" class="level3">
 <h3 class="anchored" data-anchor-id="method-names">Method names</h3>
-<p>The package named its methods after their CmdStanR, posterior, loo, and bayesplot counterparts, so <code>fit$output_files()</code> in R was <code>$fit-&gt;output_files()</code> here. PSR-1 makes a PHP method name camelCase, and this family declares no second spelling, so each R name now maps to one PHP name. Option names, CSV metadata keys, result-array keys, summary measure names, and the standalone functions are unchanged: <code>sample(iter_warmup: 500)</code> and <code>Summary::summarise($draws, ['ess_bulk'])</code> read as they always did. Every method whose name changed is below, with the methods added for CmdStanR 1.0. The R name is also the PHP name before the change; the CmdStanR 1.0 methods never had a snake_case PHP name.</p>
+<p>Matching names do not imply matching behavior. This table maps names only; the <a href="#supported-workflows">supported workflows</a> above and the <a href="#php-adaptations">PHP adaptations</a> below describe behavior.</p>
+<p>PSR-1 makes a PHP method name camelCase, so each CmdStanR, posterior, loo, and bayesplot method maps to one camelCase PHP method, with no snake_case alias. Option names, CSV metadata keys, result-array keys, summary measure names, and the standalone functions keep CmdStanR’s spelling, as in <code>sample(iter_warmup: 500)</code> and <code>Summary::summarise($draws, ['ess_bulk'])</code>. Every renamed method is below.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -972,7 +1105,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="cmdstanr-1-0" class="level2">
 <h2 class="anchored" data-anchor-id="cmdstanr-1-0">CmdStanR 1.0</h2>
-<p>This package follows CmdStanR 1.0. Code written for an earlier CmdStanPHP needs these changes:</p>
+<p>This package follows CmdStanR 1.0. Code written for a development version from before the CmdStanR 1.0 port, which predates the first release, needs these changes:</p>
 <ul>
 <li><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> compile before they return. <code>compile()</code> and the <code>compile</code> argument are gone; use <code>compile_stan_file()</code> to build without a model object.</li>
 <li><code>stanFile</code> and <code>exeFile</code> cannot be given together. Pass <code>exeFile</code> alone to use an existing executable, and <code>dir</code> to choose where a Stan program’s executable goes. A model from <code>exeFile</code> alone refuses build arguments.</li>
@@ -1010,7 +1143,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Diagnostic checks are structured messages accessible with <code>diagnosticWarnings()</code>, rather than PHP runtime warnings. Console output is buffered. <code>show_progress_bar: true</code> draws one progress bar for all chains on stderr and leaves CmdStan’s iteration lines out of the output. There is no R interrupt integration; CmdStan processes still running when PHP shuts down are terminated. <code>show_messages</code> controls stdout, <code>show_exceptions</code> controls stderr. Pathfinder’s deprecated <code>num_threads</code> raises <code>E_USER_DEPRECATED</code> and maps to <code>threads</code>; giving both throws. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves output files that a run created and copies imported CSVs and the data file; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.</p>
 <p><code>options()</code> and <code>cmdstan_option()</code> provide CmdStanR’s global options that have a PHP meaning: default output directory, Stan file directory, forced recompilation, draws format, initialization warnings, verbose compilation, printed rows, line numbers, compression, the progress bar, saving the metric and configuration, and <code>mc.cores</code>. <code>cmdstanr_no_ver_check</code> is accepted and has no effect because this package never checks for updates. <code>cmdstanr_spinner</code> is accepted and has no effect.</p>
 <p>Algorithm parameters left null use CmdStan’s defaults. PHP-level defaults include four sample chains, sequential execution unless requested, and one MPI chain. CmdStanR defaults for automatically saving metric/configuration JSON are not imposed; request <code>save_metric</code> or <code>save_cmdstan_config</code>, or set the <code>cmdstanr_save_metric</code> and <code>cmdstanr_save_config</code> options. The installer defaults to one core where CmdStanR uses two. OpenCL and MPI require external toolchains/hardware. Windows has not been validated.</p>
-<p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with corrections to the split step and relative efficiencies. loo’s development version adopted the split corrections in <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo’s identity-map fallback while retaining the mean shift; its reason is recorded in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./inference.html">inference guide</a> describes the result.</p>
+<p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with corrections to the split step and relative efficiencies. loo’s development version adopted the split corrections in <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo’s identity-map fallback while retaining the mean shift; its reason is recorded in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./loo.html#moment-matching">LOO guide</a> describes the result.</p>
 </section>
 <section id="not-implemented" class="level2">
 <h2 class="anchored" data-anchor-id="not-implemented">Not implemented</h2>

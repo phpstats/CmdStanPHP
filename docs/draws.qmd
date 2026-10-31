@@ -1,0 +1,27 @@
+---
+title: "Draws, summaries, and saving fits"
+---
+
+Every fitting method returns a fit object that reads CmdStan's CSV output. This page covers getting draws and summaries out of a fit, and keeping a fit after the PHP process ends.
+
+```php
+$rows = $fit->draws('theta', 'draws_df');
+$csvFiles = $fit->saveOutputFiles('saved');
+$fit->saveObject('saved/fit.bin');
+$imported = CmdStan\read_cmdstan_csv($csvFiles);
+```
+
+`draws_array` is `[iteration][chain][variable]`, with zero-based PHP indices and associative variable names. `draws_matrix` concatenates chain rows. `draws_df` adds one-based `.chain`, `.iteration`, and `.draw` metadata. `draws_list` gives a variable-to-values map per chain. `draws_rvars` maps each variable's base name to `dims`, `nchains`, `ndraws`, and `draws`, where `draws` is nested by the variable's dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return `draws_array` and other fits return `draws_matrix`, unless the `cmdstanr_draws_format` option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as `beta` includes all `beta[i]` elements. Warmup is excluded unless `incWarmup: true`.
+
+`summary()` returns mean, median, sample SD, scaled MAD, requested quantiles (default q5/q95), and, for MCMC, rank-normalized R-hat, bulk ESS, and MCSE from CmdStan's `stansummary`, plus tail ESS using posterior-compatible inclusive quantile indicators and Geyer's truncation. Non-MCMC or fewer than four sampling draws return `NAN` for convergence statistics.
+
+```php
+$fit->summary('theta', measures: ['mean', 'sd', 'rhat', 'ess_bulk', 'quantile2']);
+$fit->summary(null, [0.1, 0.9], ['median', 'range' => fn(array $x) => max($x) - min($x)]);
+```
+
+The `measures` argument follows posterior's `summarise_draws()`. Named measures include `mean`, `median`, `sd`, `var`, `mad`, `quantile2`, `rhat`, `ess_bulk`, `ess_tail`, `mcse_mean`, `mcse_sd`, `mcse_quantile`, and the groups `default_summary_measures`, `default_convergence_measures`, and `default_mcse_measures`. A callable needs a string key. It receives all draws as one list, and also the list of chains if it declares a second parameter. These measures are computed in PHP and do not need CmdStan. Nonfinite values can also produce `NAN`; use appropriate JSON handling when exposing summaries over HTTP.
+
+Runs create private temporary output directories unless `output_dir` is supplied. Output directories persist after the fit object is collected; delete them explicitly when no longer needed. Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv` with `output_basename`, with chain ids padded to at least two digits. `compress: 'gzip'` or `'bzip2'` (default: the `cmdstanr_compress` option) compresses the output and latent-dynamics CSVs after the run, and `read_cmdstan_csv()` reads `.csv.gz` and `.csv.bz2` files. Saving output follows CmdStanR's file naming, with padded ids, and updates the fit's paths; `saveOutputFiles(compress: ...)` recompresses on the way. Output files created by the run are moved, imported CSVs and the data file are copied, and existing destinations are never overwritten. `materialize()` reads the draws, initial values, and profiles into memory, and `saveObject()` materializes the fit before serializing it. Serialized fit objects embed parsed draws and cached MCMC summary statistics. Only unserialize files you trust. Serialized objects do not embed a CmdStan installation or provide standalone generated quantities without their CSV files.
+
+Console output is buffered until processes finish. With the progress bar on, CmdStan's iteration lines are left out of the output. `command()` returns each process's command line. `show_messages` controls stdout and `show_exceptions` controls stderr (defaults to the value of `show_messages`). Complete logs are retained in `output()`. A process failure throws `ProcessException` and cancels other running chains. Set `timeout` to bound each process in seconds.

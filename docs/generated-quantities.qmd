@@ -1,0 +1,25 @@
+---
+title: "Generated quantities"
+---
+
+A Stan program's `generated quantities` block computes values from each draw, such as predictions, simulated data, or pointwise log-likelihoods. `sample()` runs the block during sampling. `generateQuantities()` runs it later on draws from an existing fit, for example to predict with a new program or new data without sampling again.
+
+## Standalone generated quantities
+
+```php
+$model = CmdStan\cmdstan_model('examples/bernoulli.stan');
+$data = ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]];
+$fit = $model->sample(data: $data, seed: 123);
+
+$predictionModel = CmdStan\cmdstan_model('examples/generated.stan');
+$gq = $predictionModel->generateQuantities($fit, data: $data, seed: 123, parallel_chains: 2);
+$predictions = $gq->draws('prediction', 'draws_matrix');
+```
+
+`examples/generated.stan` is the Bernoulli program with a `generated quantities` block that draws a `prediction`. Its parameter declarations must match the fitted model's.
+
+The first argument is a fit, a CSV file name, or a list of CSV file names. MCMC fits run one process per chain. Optimization, Laplace, ADVI, and Pathfinder fits are accepted too, and their draws are written as one sample-style CSV, as in CmdStanR 1.0. Compressed CSVs are decompressed first. `draws_to_csv()` writes draw arrays to CSV files for this purpose. `threads_per_chain` and `parallel_chains` work as in `sample()`. The result is a `CmdStanGQ`, whose `fittedParamsFiles()` returns the input files.
+
+## Fixed parameters
+
+`sample(fixed_param: true, iter_sampling: 100)` runs the generated quantities block at fixed parameter values given by `init`, which suits simulation from a known model. It runs one chain with no warmup.

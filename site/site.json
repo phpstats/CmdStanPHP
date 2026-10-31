@@ -6,18 +6,49 @@
         "CmdStanPHP compiles Stan programs from PHP, runs inference through CmdStan, and returns the posterior draws as typed PHP objects. It ports CmdStanR's model, executable, and CSV workflow and keeps CmdStanR's snake_case names for its standalone functions and for CmdStan's options, with camelCase methods, so a translated R script reads much like its original. Inference methods take PHP named arguments or one associative options array, and they reject an unknown option instead of ignoring it.",
         "The inference methods are MCMC with parallel chains, L-BFGS, BFGS, and Newton optimization, meanfield and fullrank ADVI, single- and multi-path Pathfinder, Laplace approximation, standalone generated quantities, and finite-difference gradient checking. Each one returns a fit object carrying draws in posterior's formats, summaries with rank-normalized R-hat and bulk and tail effective sample size, per-chain sampler diagnostics, and PSIS-LOO and WAIC, with optional moment matching in LOO.",
         "PHP's FFI extension gives in-process access to a compiled model: its log density, gradients, Hessian, constrain and unconstrain transforms, and its user-defined Stan functions called as PHP methods. The bayesplot diagnostics are computed in PHP, including trace, histogram, density, intervals, rank histograms, scatter, autocorrelation, and loo's Pareto k plot. Each one renders as ASCII text for a terminal or a log, a Vega-Lite spec for a front end, a standalone HTML page, or an SVG or PNG image through vl-convert.",
-        "The package needs PHP 8.2 or newer, a CmdStan installation, and PHP's proc_open. It has no runtime Composer dependency beyond the JSON extension, and its own installer downloads and builds an official CmdStan release. Model data can be a phibble data frame or any object that exposes its columns, StanData builds hierarchical regression data from columns or from an R-style formula, and draws and summaries come back as plain column arrays or as a phibble DataFrame. None of the other phpstats packages is required."
+        "The package needs PHP 8.2 to 8.5, the JSON extension, PHP's proc_open(), and CmdStan 2.37 or later with make and a C++ compiler. It has no Composer dependencies, and its installer downloads and builds an official CmdStan release. Model data can be a phibble data frame or any object that exposes its columns, StanData builds hierarchical regression data from columns or from an R-style formula, and draws and summaries come back as plain column arrays or as a phibble DataFrame. None of the other phpstats packages is required."
     ],
     "install": [
         "composer require phpstats/cmdstanphp"
     ],
-    "requires": [
-        "PHP 8.2+",
-        "JSON extension",
-        "proc_open",
-        "CmdStan 2.37+",
-        "make and a C++ toolchain"
+    "php": [
+        "8.2",
+        "8.3",
+        "8.4",
+        "8.5"
     ],
+    "requires": [
+        "JSON extension",
+        "proc_open() enabled"
+    ],
+    "optional": [
+        {
+            "name": "FFI extension",
+            "for": "in-process log densities, gradients, and transforms, and calling Stan functions from PHP"
+        },
+        {
+            "name": "phit extension",
+            "for": "moment matching in loo() and StanData::fromFormula()"
+        },
+        {
+            "name": "phpstats/phibble",
+            "for": "data frames as model data, and draws and summaries as data frames"
+        },
+        {
+            "name": "vl-convert",
+            "for": "figures saved as SVG or PNG"
+        }
+    ],
+    "build": [
+        "CmdStan 2.37 or later",
+        "make",
+        "A C++ compiler supported by CmdStan"
+    ],
+    "platforms": [
+        "Linux",
+        "macOS"
+    ],
+    "quickstart": "getting-started",
     "repository": "https://github.com/phpstats/CmdStanPHP",
     "example": {
         "chain": "use function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model('bernoulli.stan');\n\n$fit = $model->sample(\n    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],\n    seed: 123,\n    chains: 4,\n    parallel_chains: 2,\n    iter_warmup: 500,\n    iter_sampling: 500,\n    show_messages: false,\n);\n\nprint_r($fit->summary('theta', measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk']));",
@@ -36,25 +67,65 @@
                 "path": "installation.qmd"
             },
             {
-                "title": "Inference guide",
-                "path": "inference.qmd"
+                "title": "Getting started",
+                "path": "getting-started.qmd"
+            },
+            {
+                "title": "Compiling models",
+                "path": "compiling.qmd"
+            },
+            {
+                "title": "MCMC sampling",
+                "path": "mcmc.qmd"
+            },
+            {
+                "title": "Optimization and Laplace",
+                "path": "optimization.qmd"
+            },
+            {
+                "title": "ADVI and Pathfinder",
+                "path": "variational.qmd"
+            },
+            {
+                "title": "Generated quantities",
+                "path": "generated-quantities.qmd"
+            },
+            {
+                "title": "Draws, summaries, and saving fits",
+                "path": "draws.qmd"
+            },
+            {
+                "title": "Log density and model methods",
+                "path": "log-density.qmd"
+            },
+            {
+                "title": "LOO and WAIC",
+                "path": "loo.qmd"
+            },
+            {
+                "title": "Figures",
+                "path": "figures.qmd"
             },
             {
                 "title": "API reference",
                 "path": "api.qmd"
             },
             {
-                "title": "Compatibility contract",
+                "title": "Examples",
+                "path": "examples.qmd"
+            },
+            {
+                "title": "Compatibility with CmdStanR",
                 "path": "compatibility.qmd"
             },
             {
-                "title": "Testing and GitHub Pages",
-                "path": "testing.qmd"
+                "title": "Verification",
+                "path": "verification.qmd"
+            },
+            {
+                "title": "Contributing",
+                "path": "contributing.qmd"
             }
         ]
-    },
-    "optional": [
-        "FFI extension",
-        "phit extension"
-    ]
+    }
 }

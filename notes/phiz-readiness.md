@@ -1,6 +1,6 @@
 # Figures and phiz: what could move and what stays
 
-Status: planning note, October 2026. Nothing has moved yet. [phiz](https://github.com/erikwestlund/phiz) is a new Vega-Lite grammar of graphics in the phpstats family, and its API is not settled. This note records which parts of `CmdStan\Figure`, `CmdStan\VegaLite`, `CmdStan\Plot`, and `CmdStan\AsciiChart` are general plotting infrastructure and which are Stan diagnostics. It also lists what phiz would need before the diagnostics could be rebuilt on it.
+Status: planning note, October 2026. Nothing has moved yet. [phiz](https://github.com/phpstats/phiz) is a new Vega-Lite grammar of graphics in the phpstats family, and its API is not settled. This note records which parts of `CmdStan\Figure`, `CmdStan\VegaLite`, `CmdStan\Plot`, and `CmdStan\AsciiChart` are general plotting infrastructure and which are Stan diagnostics. It also lists what phiz would need before the diagnostics could be rebuilt on it.
 
 This directory is excluded from the documentation site.
 
