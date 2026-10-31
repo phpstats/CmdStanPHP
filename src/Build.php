@@ -31,6 +31,26 @@ final class Build
         'force_recompile_option' => 'the `cmdstanr_force_recompile` option is set',
     ];
     public static function recordFile(string $exe): string { return dirname($exe).'/.'.basename($exe).'.cmdstanphp.json'; }
+    /**
+     * The lock file beside an executable. Building and installing hold it exclusively; checking the executable against
+     * its record holds it shared, so no process sees a pair that another is midway through replacing, and processes
+     * that start together build once. The file is never removed: removing a lock file lets two holders lock different
+     * files.
+     */
+    public static function lockFile(string $exe): string { return dirname($exe).'/.'.basename($exe).'.cmdstanphp.lock'; }
+    /**
+     * Locks an executable's lock file (LOCK_SH or LOCK_EX), waiting for other holders. Only LOCK_EX creates the file, so
+     * checking an executable that was never built here leaves its directory alone. Null when there is no lock to take:
+     * no lock file for LOCK_SH, or a directory that cannot be written for LOCK_EX.
+     */
+    public static function lock(string $exe, int $operation): mixed
+    {
+        $handle = @fopen(self::lockFile($exe), $operation === LOCK_EX ? 'c' : 'r');
+        if ($handle === false) { return null; }
+        if (!flock($handle, $operation)) { fclose($handle); return null; }
+        return $handle;
+    }
+    public static function unlock(mixed $handle): void { if (is_resource($handle)) { flock($handle, LOCK_UN); fclose($handle); } }
     public static function hash(string $file): string { return hash_file('xxh128', $file) ?: throw new \RuntimeException('Cannot read '.$file); }
     /** The model name stanc and CmdStan see: the Stan file's basename without its extension, spaces replaced by underscores. */
     public static function modelName(string $stanFile): string { return str_replace(' ', '_', (string)preg_replace('/\.(stan|stanfunctions)$/', '', basename($stanFile))); }

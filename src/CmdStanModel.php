@@ -33,9 +33,12 @@ final class CmdStanModel
             if ($pedantic) { $refuse('pedantic', 'Pedantic mode checks a Stan program, and there is none.'); }
             $real = realpath($exeFile);
             if ($real === false || !is_file($real)) { throw new \InvalidArgumentException('Executable not found: '.$exeFile); }
-            $this->exeFile = $real; $read = Build::readRecord($real);
-            if ($read['status'] === 'available') { $this->adopt($read['record']); $this->exeHash = $read['record']['executable_hash']; }
-            else { $this->features = Build::reportedFeatures($real); $this->exeHash = Build::hash($real); }
+            $this->exeFile = $real; $lock = Build::lock($real, LOCK_SH);
+            try {
+                $read = Build::readRecord($real);
+                if ($read['status'] === 'available') { $this->adopt($read['record']); $this->exeHash = $read['record']['executable_hash']; }
+                else { $this->features = Build::reportedFeatures($real); $this->exeHash = Build::hash($real); }
+            } finally { Build::unlock($lock); }
             return;
         }
         $real = realpath((string)$stanFile);
@@ -50,6 +53,14 @@ final class CmdStanModel
         $includes = Build::includePaths($real, $includePaths);
         $added = Build::addedStancOptions($real, $pedantic, $cpp, $userHeader, $stanc);
         $configuration = ['cpp_options' => $cpp, 'stanc_options' => $stanc, 'stanc_options_added' => $added, 'stanc_options_from_make' => [], 'stanc_name' => Build::modelName($real).'_model', 'include_paths' => $includes];
+        // The check, the build and the fingerprint of the result happen under one exclusive lock: processes that start
+        // together wait for the first build and then find it current, instead of each installing its own.
+        $lock = Build::lock($this->exeFile, LOCK_EX);
+        try { $this->build($real, $configuration, $cpp, $stanc, $added, $includes, $userHeader, $pedantic, $quiet, $forceRecompile, $timeout); }
+        finally { Build::unlock($lock); }
+    }
+    private function build(string $real, array $configuration, array $cpp, array $stanc, array $added, array $includes, ?string $userHeader, bool $pedantic, bool $quiet, ?bool $forceRecompile, ?float $timeout): void
+    {
         $read = is_file($this->exeFile) ? Build::readRecord($this->exeFile) : ['status' => 'no_executable', 'record' => null];
         $current = Build::current(); $dependencies = null;
         if ($read['status'] === 'available' && $read['record']['cmdstan'] == $current) { $this->info = Build::info($real, $includes, $timeout); $dependencies = Build::dependencies($real, $this->info, $userHeader); }
@@ -120,6 +131,12 @@ final class CmdStanModel
         }
         if (!is_file($this->stanFile)) { throw new StaleExecutableException("The Stan file '".$this->stanFile."' this model was created from no longer exists. To run the executable without its program, create the model with cmdstan_model(exeFile: ...)."); }
         if ($this->stamps !== null && $this->stamps === $this->stamps()) { return; }
+        $lock = Build::lock($this->exeFile, LOCK_SH);
+        try { $this->checkRecord(); } finally { Build::unlock($lock); }
+    }
+    /** assertCurrent()'s comparison of the executable and its record with this model, run under a shared lock. */
+    private function checkRecord(): void
+    {
         $read = is_file($this->exeFile) ? Build::readRecord($this->exeFile) : ['status' => 'no_executable', 'record' => null];
         if ($read['status'] === 'no_executable') { $reasons = ["there is no executable at '".$this->exeFile."'"]; }
         elseif ($read['status'] !== 'available') { $reasons = [Build::recordReason($read)]; }
@@ -143,7 +160,9 @@ final class CmdStanModel
     public static function stanBuildInfo(string $exeFile): array
     {
         $exe = realpath($exeFile) ?: throw new \InvalidArgumentException('Executable not found: '.$exeFile);
-        $read = Build::readRecord($exe); $record = $read['status'] === 'available' ? $read['record'] : null;
+        $lock = Build::lock($exe, LOCK_SH);
+        try { $read = Build::readRecord($exe); } finally { Build::unlock($lock); }
+        $record = $read['status'] === 'available' ? $read['record'] : null;
         $features = $record['reported_features'] ?? Build::reportedFeatures($exe);
         if (!isset($features['stan_version'])) { throw new \RuntimeException("Running '".$exe."' with the argument `info` did not report a Stan version, so it is either not a CmdStan executable or cannot be run."); }
         $out = ['record' => ['status' => $read['status'], 'reason' => $record === null ? Build::recordReason($read) : null], 'reported_features' => Build::featureSummary($features)];

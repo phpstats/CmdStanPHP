@@ -989,6 +989,7 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>The port differs from CmdStanR 1.0 in these deliberate ways:</p>
 <ul>
+<li>Concurrent builds of one model are serialized by a lock file, <code>.&lt;exe&gt;.cmdstanphp.lock</code>. CmdStanR has no lock, so a model built at the same moment by CmdStanR and CmdStanPHP is not protected.</li>
 <li>The build record is <code>.&lt;exe&gt;.cmdstanphp.json</code>, in CmdStanR’s format 1. CmdStanR writes <code>.&lt;exe&gt;.cmdstanr.json</code>, so a model built by both never has one record overwritten by the other.</li>
 <li>Before each run, a model compares the file status (inode, size, and modification and change times) of everything the build depends on. When none changed, it skips hashing and the stanc call.</li>
 <li><code>format()</code> and <code>format_stan_file()</code> return the formatted program instead of printing it.</li>

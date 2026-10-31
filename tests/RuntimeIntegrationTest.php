@@ -53,4 +53,44 @@ final class RuntimeIntegrationTest extends TestCase
         new CmdStanModel($file); $model = new CmdStanModel($file, pedantic: true);
         self::assertSame([realpath($this->dir)], $model->includePaths()); self::assertTrue($model->isCurrent());
     }
+    /**
+     * Eight processes that create the same model at once build it once and all run it: before the build lock, the others could
+     * find no executable, or a record that did not match it yet, while one was installing, or replace an executable that
+     * another had already adopted. Run on a fresh program, then after the program changes, as after a deploy.
+     */
+    public function testConcurrentProcessesShareOneBuild(): void
+    {
+        try { CmdStan::path(); } catch (\RuntimeException) { self::markTestSkipped('Set CMDSTAN to run integration tests.'); }
+        $stan = write_stan_file("data { int N; array[N] int y; } parameters { real<lower=0,upper=1> theta; } model { y ~ bernoulli(theta); }", $this->dir.'/shared.stan');
+        $script = $this->dir.'/worker.php';
+        file_put_contents($script, '<?php require '.var_export(dirname(__DIR__).'/vendor/autoload.php', true).';
+            try { $fit = \CmdStan\cmdstan_model($argv[1])->sample(data: '.var_export(self::DATA, true).', chains: 1, iter_warmup: 20, iter_sampling: 20, seed: 1, show_messages: false, output_dir: $argv[2]); echo count($fit->draws("theta", "draws_matrix")); }
+            catch (\Throwable $e) { echo get_class($e), ": ", $e->getMessage(); }');
+        foreach (['fresh', 'changed'] as $round) {
+            if ($round === 'changed') { file_put_contents($stan, "\n// changed\n", FILE_APPEND); }
+            $workers = [];
+            for ($i = 0; $i < 8; ++$i) {
+                $out = $this->dir.'/'.$round.$i; mkdir($out);
+                $workers[] = proc_open([PHP_BINARY, $script, $stan, $out], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, ['CMDSTAN' => CmdStan::path()] + getenv());
+                $streams[$i] = $pipes;
+            }
+            foreach ($workers as $i => $process) {
+                $stdout = stream_get_contents($streams[$i][1]); stream_get_contents($streams[$i][2]); proc_close($process);
+                self::assertSame('20', $stdout, $round.' worker '.$i);
+            }
+        }
+        self::assertTrue((new CmdStanModel($stan))->isCurrent());
+    }
+    /** A check waits for an install in progress: while the lock is held the executable is missing, and afterwards it is back. */
+    public function testCheckWaitsForAnInstallInProgress(): void
+    {
+        $model = $this->model(); $exe = $model->exeFile(); $script = $this->dir.'/installer.php';
+        file_put_contents($script, '<?php $lock = fopen($argv[1], "c"); flock($lock, LOCK_EX); rename($argv[2], $argv[2].".old"); echo "locked\n"; fflush(STDOUT);
+            usleep(500000); copy($argv[2].".old", $argv[2]); chmod($argv[2], 0755); unlink($argv[2].".old"); flock($lock, LOCK_UN);');
+        $process = proc_open([PHP_BINARY, $script, \CmdStan\Build::lockFile($exe), $exe], [1 => ['pipe', 'w']], $pipes);
+        self::assertSame("locked\n", fgets($pipes[1]));
+        self::assertFileDoesNotExist($exe);
+        self::assertTrue($model->isCurrent(), 'the check saw the executable mid-install');
+        proc_close($process);
+    }
 }

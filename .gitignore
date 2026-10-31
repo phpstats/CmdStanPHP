@@ -10,6 +10,7 @@
 /docs/_site/
 /docs/.quarto/
 *.cmdstanphp.json
+*.cmdstanphp.lock
 *_model_methods-*.so
 *_model_methods-*.dylib
 *_functions-*.so
