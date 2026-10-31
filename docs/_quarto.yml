@@ -34,6 +34,7 @@ website:
           - api.qmd
       - section: "Examples"
         contents:
+          - examples/sample.qmd
           - examples.qmd
       - section: "Compatibility and limitations"
         contents:

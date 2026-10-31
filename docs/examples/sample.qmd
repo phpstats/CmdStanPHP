@@ -1,0 +1,107 @@
+---
+title: "Compile, sample, and summarize a Stan model"
+---
+
+This example fits the eight schools hierarchical model with MCMC and reads its summary and draws.
+
+Prerequisites: CmdStanPHP, CmdStan, and a C++ toolchain, installed as described in [Installation](../installation.qmd).
+
+## Data
+
+Eight schools ran the same coaching program for a test. Each school reports an estimated effect `y` and its standard error `sigma` (Rubin 1981). The data are written in the script.
+
+## Code
+
+Save this as `sample.php` in a Composer project and run `php sample.php`:
+
+```php
+<?php
+require 'vendor/autoload.php';
+
+use function CmdStan\cmdstan_model;
+use function CmdStan\write_stan_file;
+
+$code = <<<'STAN'
+data {
+  int<lower=1> J;
+  vector[J] y;
+  vector<lower=0>[J] sigma;
+}
+parameters {
+  real mu;
+  real<lower=0> tau;
+  vector[J] theta_raw;
+}
+transformed parameters {
+  vector[J] theta = mu + tau * theta_raw;
+}
+model {
+  mu ~ normal(0, 10);
+  tau ~ normal(0, 10);
+  theta_raw ~ std_normal();
+  y ~ normal(theta, sigma);
+}
+STAN;
+
+$model = cmdstan_model(write_stan_file($code, dir: __DIR__, basename: 'schools'));
+
+$data = [
+    'J' => 8,
+    'y' => [28, 8, -3, 7, -1, 1, 18, 12],
+    'sigma' => [15, 10, 16, 11, 9, 11, 10, 18],
+];
+
+$fit = $model->sample(
+    data: $data,
+    seed: 123,
+    chains: 4,
+    parallel_chains: 4,
+    adapt_delta: 0.95,
+    show_messages: false,
+);
+
+printf("%-10s %7s %7s %7s %7s %6s %8s\n", 'variable', 'mean', 'sd', 'q5', 'q95', 'rhat', 'ess_bulk');
+foreach ($fit->summary(['mu', 'tau', 'theta']) as $row) {
+    printf(
+        "%-10s %7.2f %7.2f %7.2f %7.2f %6.3f %8.0f\n",
+        $row['variable'], $row['mean'], $row['sd'], $row['q5'], $row['q95'], $row['rhat'], $row['ess_bulk'],
+    );
+}
+
+print_r($fit->diagnosticWarnings());
+
+$tau = array_column($fit->draws('tau', 'draws_matrix'), 'tau');
+echo count($tau), " draws of tau\n";
+echo implode(', ', array_map(fn($x) => round($x, 2), array_slice($tau, 0, 5))), "\n";
+```
+
+## Output
+
+```text
+variable      mean      sd      q5     q95   rhat ess_bulk
+mu            6.40    4.06   -0.31   13.12  1.001     3582
+tau           4.78    3.75    0.37   12.00  1.000     2176
+theta[1]      8.87    6.90   -0.84   21.11  1.000     4184
+theta[2]      6.72    5.47   -2.11   15.66  1.001     5706
+theta[3]      5.37    6.35   -5.21   14.78  1.001     4311
+theta[4]      6.64    5.63   -2.76   15.59  1.001     4613
+theta[5]      4.83    5.50   -4.85   13.22  1.001     4452
+theta[6]      5.46    5.79   -4.55   14.29  1.000     4957
+theta[7]      8.75    5.91    0.12   19.22  1.002     4966
+theta[8]      6.90    6.39   -3.13   17.47  1.001     4643
+Array
+(
+)
+4000 draws of tau
+1.41, 1.36, 1.63, 0.63, 0.06
+```
+
+## Explanation
+
+`write_stan_file()` saves the Stan program as `schools.stan` beside the script, and `cmdstan_model()` compiles it. The first run compiles the model. Later runs reuse the executable until the program changes. `sample()` runs four chains of 1,000 warmup and 1,000 sampling iterations, so each variable has 4,000 draws.
+
+The model estimates each school's effect `theta` together with the mean `mu` and the standard deviation `tau` of the effects across schools. Each school's estimate moves toward `mu`. School 1 reported 28, and its posterior mean is 8.87. The program samples `theta_raw` and computes `theta` from it (the non-centered parameterization), which avoids the divergent transitions that the direct form produces when `tau` is near zero. `adapt_delta: 0.95` makes the sampler take smaller steps.
+
+R-hat is below 1.01 and every bulk effective sample size is above 400, and `diagnosticWarnings()` returns an empty list. [MCMC sampling](../mcmc.qmd) explains these checks. `draws('tau', 'draws_matrix')` returns one row per draw, chain after chain. [Draws, summaries, and saving fits](../draws.qmd) describes the other formats, and the [API reference](../api.qmd) lists every option of `sample()` and `summary()`.
+
+[Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)
