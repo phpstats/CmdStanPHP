@@ -43,7 +43,7 @@
     ],
     "build": [
         "make",
-        "A C++ compiler supported by CmdStan"
+        "C++ compiler supported by CmdStan"
     ],
     "platforms": [
         "Linux",
