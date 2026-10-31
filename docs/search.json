@@ -235,7 +235,18 @@
     "href": "getting-started.html",
     "title": "Getting started",
     "section": "",
-    "text": "This page fits a first Stan model from PHP. It assumes the package, a C++ toolchain, and CmdStan are installed as described in Installation.",
+    "text": "This page fits a first Stan model from PHP. It assumes a C++ toolchain and CmdStan are installed as described in Installation.",
+    "crumbs": [
+      "Getting started",
+      "Getting started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#set-up-a-project",
+    "href": "getting-started.html#set-up-a-project",
+    "title": "Getting started",
+    "section": "Set up a project",
+    "text": "Set up a project\nCreate an empty directory and install the package into it:\nmkdir bernoulli && cd bernoulli\ncomposer require phpstats/cmdstanphp\nThe model and the script below go in this directory. The data are written inline in the script.",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -279,7 +290,7 @@
     "href": "getting-started.html#get-the-draws",
     "title": "Getting started",
     "section": "Get the draws",
-    "text": "Get the draws\n$draws = $fit-&gt;draws('theta', 'draws_matrix');\necho count($draws), \"\\n\";\nprint_r(array_slice($draws, 0, 3));\n4000\nArray\n(\n    [0] =&gt; Array\n        (\n            [theta] =&gt; 0.16902558\n        )\n\n    [1] =&gt; Array\n        (\n            [theta] =&gt; 0.46237896\n        )\n\n    [2] =&gt; Array\n        (\n            [theta] =&gt; 0.40915558\n        )\n\n)\ndraws_matrix is one row per draw, chain after chain. Draws, summaries, and saving fits describes the other formats.",
+    "text": "Get the draws\nAdd these lines to the end of bernoulli.php and run it again:\n$draws = $fit-&gt;draws('theta', 'draws_matrix');\necho count($draws), \"\\n\";\nprint_r(array_slice($draws, 0, 3));\n4000\nArray\n(\n    [0] =&gt; Array\n        (\n            [theta] =&gt; 0.16902558\n        )\n\n    [1] =&gt; Array\n        (\n            [theta] =&gt; 0.46237896\n        )\n\n    [2] =&gt; Array\n        (\n            [theta] =&gt; 0.40915558\n        )\n\n)\ndraws_matrix is one row per draw, chain after chain. Draws, summaries, and saving fits describes the other formats.",
     "crumbs": [
       "Getting started",
       "Getting started"

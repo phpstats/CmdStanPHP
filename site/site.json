@@ -11,6 +11,7 @@
     "install": [
         "composer require phpstats/cmdstanphp"
     ],
+    "installation": "installation",
     "php": [
         "8.2",
         "8.3",
@@ -45,8 +46,7 @@
         "A C++ compiler supported by CmdStan"
     ],
     "platforms": [
-        "Linux",
-        "macOS"
+        "Linux"
     ],
     "quickstart": "getting-started",
     "repository": "https://github.com/phpstats/CmdStanPHP",

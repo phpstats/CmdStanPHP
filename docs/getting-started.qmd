@@ -2,7 +2,18 @@
 title: "Getting started"
 ---
 
-This page fits a first Stan model from PHP. It assumes the package, a C++ toolchain, and CmdStan are installed as described in [Installation](installation.qmd).
+This page fits a first Stan model from PHP. It assumes a C++ toolchain and CmdStan are installed as described in [Installation](installation.qmd).
+
+## Set up a project
+
+Create an empty directory and install the package into it:
+
+```sh
+mkdir bernoulli && cd bernoulli
+composer require phpstats/cmdstanphp
+```
+
+The model and the script below go in this directory. The data are written inline in the script.
 
 ## The model
 
@@ -123,6 +134,8 @@ The other columns check whether the chains can be trusted:
 `diagnosticSummary()` reports, for each chain, the transitions that diverged, the transitions that reached the maximum tree depth, and the E-BFMI. Divergences mean the sampler could not follow the posterior's geometry, and estimates may be biased. `diagnosticWarnings()` lists messages for any of these problems and is empty here. The [MCMC guide](mcmc.qmd) explains these diagnostics and what to change when they fail.
 
 ## Get the draws
+
+Add these lines to the end of `bernoulli.php` and run it again:
 
 ```php
 $draws = $fit->draws('theta', 'draws_matrix');
