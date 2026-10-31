@@ -46,7 +46,8 @@
         "A C++ compiler supported by CmdStan"
     ],
     "platforms": [
-        "Linux"
+        "Linux",
+        "macOS"
     ],
     "quickstart": "getting-started",
     "repository": "https://github.com/phpstats/CmdStanPHP",
