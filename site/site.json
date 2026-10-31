@@ -9,14 +9,14 @@
         "The package needs PHP 8.2 or newer, a CmdStan installation, and PHP's proc_open. It has no runtime Composer dependency beyond the JSON extension, and its own installer downloads and builds an official CmdStan release. Model data can be a phibble data frame or any object that exposes its columns, StanData builds hierarchical regression data from columns or from an R-style formula, and draws and summaries come back as plain column arrays or as a phibble DataFrame. None of the other phpstats packages is required."
     ],
     "install": [
-        "composer config repositories.cmdstanphp vcs https://github.com/phpstats/CmdStanPHP",
-        "composer require phpstats/cmdstanphp:dev-main"
+        "composer require phpstats/cmdstanphp"
     ],
     "requires": [
-        "PHP 8.2 or newer, with the JSON extension and proc_open enabled",
-        "CmdStan 2.37 or newer, with make and a C++ toolchain; CI covers 2.37 and 2.40",
-        "The FFI extension for in-process model methods and exposeFunctions()",
-        "The phit extension for moment matching in loo() and for StanData::fromFormula()"
+        "PHP 8.2+",
+        "JSON extension",
+        "proc_open",
+        "CmdStan 2.37+",
+        "make and a C++ toolchain"
     ],
     "repository": "https://github.com/phpstats/CmdStanPHP",
     "example": {
@@ -52,5 +52,9 @@
                 "path": "testing.qmd"
             }
         ]
-    }
+    },
+    "optional": [
+        "FFI extension",
+        "phit extension"
+    ]
 }
