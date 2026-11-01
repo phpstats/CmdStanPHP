@@ -28,7 +28,7 @@
     "commit": "1808c60"
   },
   "method": "Each run is a fresh process. Each interface runs once as a warm-up, then the three alternate for 7 rounds in a rotated order. The time runs from the interface call that loads the precompiled model to holding the summary: it covers loading the model, writing the data (held in memory in the runtime's usual structure) to JSON, running 4 chains in parallel as 4 CmdStan processes (parallel_chains 4 everywhere) with seed 20261101, reading the CSV output, and the summary (CmdStanPHP summary() and cmdstanr $summary() with mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta; CmdStanPy summary(), which runs CmdStan's stansummary for every column). Starting the runtime and loading the interface's libraries are outside the timing. Every process runs under /usr/bin/time -l. Memory is the interface process's peak memory footprint as macOS reports it: its own allocations, without the clean file pages it maps and without the CmdStan chain processes. peak_rss_mib gives the peak resident set size, which counts those pages.",
-  "code_commit": "dde8e0b",
+  "code_commit": "ec64935",
   "check": {
     "draws_identical": true,
     "max_abs_draw_difference": 0.0,
@@ -39,7 +39,7 @@
     }
   },
   "code": {
-    "CmdStanPHP": "$model = cmdstan_model(exeFile: $exe);\n$fit = $model->sample(\n    data: $data,\n    seed: 20261101,\n    chains: 4,\n    parallel_chains: 4,\n    iter_warmup: 1000,\n    iter_sampling: 1000,\n    output_dir: $out,\n    show_messages: false,\n);\n$summary = $fit->summary(\n    ['mu', 'tau', 'theta'],\n    measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk'],\n);",
+    "CmdStanPHP": "$model = cmdstan_model(exeFile: $exe);\n$fit = $model->sample(\n    data: $data,\n    seed: 20261101,\n    chains: 4,\n    parallel_chains: 4,\n    iter_warmup: 1000,\n    iter_sampling: 1000,\n    output_dir: $out,\n    show_messages: false,\n);\n$summary = $fit->summary(\n    ['mu', 'tau', 'theta'],\n    measures: [\n        'mean', 'sd', 'quantile2', 'rhat', 'ess_bulk',\n    ],\n);",
     "CmdStanR": "model <- cmdstan_model(exe_file = exe)\nfit <- model$sample(\n  data = data,\n  seed = 20261101,\n  chains = 4,\n  parallel_chains = 4,\n  iter_warmup = 1000,\n  iter_sampling = 1000,\n  output_dir = out,\n  show_messages = FALSE,\n  refresh = 0\n)\nsummary <- fit$summary(\n  c(\"mu\", \"tau\", \"theta\"),\n  \"mean\",\n  \"sd\",\n  ~quantile(.x, probs = c(0.05, 0.95)),\n  \"rhat\",\n  \"ess_bulk\"\n)",
     "CmdStanPy": "model = cmdstanpy.CmdStanModel(exe_file=exe)\nfit = model.sample(\n    data=data,\n    seed=20261101,\n    chains=4,\n    parallel_chains=4,\n    iter_warmup=1000,\n    iter_sampling=1000,\n    output_dir=out,\n    show_progress=False,\n)\nsummary = fit.summary(percentiles=(5, 95))"
   },
