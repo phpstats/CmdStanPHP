@@ -368,7 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Optimization finds a posterior mode or a maximum likelihood estimate. It returns a point, with no uncertainty. The Laplace approximation adds uncertainty by drawing from a normal distribution centered at the mode, with the inverse Hessian as its covariance. Both are much faster than MCMC and suit models whose posterior is close to normal.</p>
+<p>Optimization finds a posterior mode or a maximum likelihood estimate. It returns a point, with no uncertainty. The Laplace approximation adds uncertainty by drawing from a normal distribution centered at the mode, with the inverse Hessian as its covariance. Both are usually much faster than MCMC. The Laplace approximation is accurate only when the posterior is close to normal on the unconstrained scale.</p>
 <section id="optimize" class="level2">
 <h2 class="anchored" data-anchor-id="optimize">Optimize</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'examples/bernoulli.stan'</span>)<span class="ot">;</span></span>

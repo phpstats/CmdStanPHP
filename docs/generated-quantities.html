@@ -379,7 +379,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">$gq</span> <span class="op">=</span> <span class="va">$predictionModel</span>-&gt;generateQuantities(<span class="va">$fit</span><span class="ot">,</span> data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span> parallel_chains<span class="ot">:</span> <span class="dv">2</span>)<span class="ot">;</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">$predictions</span> <span class="op">=</span> <span class="va">$gq</span>-&gt;draws(<span class="st">'prediction'</span><span class="ot">,</span> <span class="st">'draws_matrix'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>examples/generated.stan</code> is the Bernoulli program with a <code>generated quantities</code> block that draws a <code>prediction</code>. Its parameter declarations must match the fitted model’s.</p>
-<p>The first argument is a fit, a CSV file name, or a list of CSV file names. MCMC fits run one process per chain. Optimization, Laplace, ADVI, and Pathfinder fits are accepted too, and their draws are written as one sample-style CSV, as in CmdStanR 1.0. Compressed CSVs are decompressed first. <code>draws_to_csv()</code> writes draw arrays to CSV files for this purpose. <code>threads_per_chain</code> and <code>parallel_chains</code> work as in <code>sample()</code>. The result is a <code>CmdStanGQ</code>, whose <code>fittedParamsFiles()</code> returns the input files.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>First argument</th>
+<th>Processes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>An MCMC fit</td>
+<td>One per chain</td>
+</tr>
+<tr class="even">
+<td>An optimization, Laplace, ADVI, or Pathfinder fit</td>
+<td>One. Its draws are written as one sample-style CSV file, as in CmdStanR 1.0.</td>
+</tr>
+<tr class="odd">
+<td>A CSV file name, or a list of them</td>
+<td>One per file. Compressed files are decompressed first.</td>
+</tr>
+</tbody>
+</table>
+<p><code>draws_to_csv()</code> writes draw arrays to CSV files for this purpose. <code>threads_per_chain</code> and <code>parallel_chains</code> work as in <code>sample()</code>. The result is a <code>CmdStanGQ</code>, whose <code>fittedParamsFiles()</code> returns the input files.</p>
 </section>
 <section id="fixed-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="fixed-parameters">Fixed parameters</h2>

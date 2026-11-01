@@ -2,7 +2,7 @@
 title: "Optimization and Laplace"
 ---
 
-Optimization finds a posterior mode or a maximum likelihood estimate. It returns a point, with no uncertainty. The Laplace approximation adds uncertainty by drawing from a normal distribution centered at the mode, with the inverse Hessian as its covariance. Both are much faster than MCMC and suit models whose posterior is close to normal.
+Optimization finds a posterior mode or a maximum likelihood estimate. It returns a point, with no uncertainty. The Laplace approximation adds uncertainty by drawing from a normal distribution centered at the mode, with the inverse Hessian as its covariance. Both are usually much faster than MCMC. The Laplace approximation is accurate only when the posterior is close to normal on the unconstrained scale.
 
 ## Optimize
 

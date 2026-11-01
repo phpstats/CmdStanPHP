@@ -396,8 +396,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="continuous-integration" class="level2">
 <h2 class="anchored" data-anchor-id="continuous-integration">Continuous integration</h2>
-<p><code>.github/workflows/tests.yml</code> runs unit tests on PHP 8.2, 8.3, 8.4, and 8.5. A separate integration matrix builds CmdStan 2.37 and 2.40 on Linux, runs the real-model suite, and caches each toolchain. The integration jobs enable PHP’s FFI extension and render every figure kind to SVG, and one to PNG, with a downloaded vl-convert binary. The 2.40 job additionally installs the reference R packages and runs the compatibility suite. CmdStanR 1.0 is a release candidate, so CI installs it from a pinned commit of its v1.0 branch (<code>stan-dev/cmdstanr@0a54123</code>) and checks that its version is at least 0.99.0. Installation is performed using this package’s installer to exercise its download/build path. Compilation on small CI machines is memory-intensive; integration uses two make jobs.</p>
-<p>The integration jobs build <code>phit</code> from the pinned <a href="https://github.com/phpstats/phit"><code>phpstats/phit</code></a> commit <code>b71e406ee58fc7a255687514b2818c3c615a517b</code>, which adds <code>Phit\model_matrix()</code> and <code>Phit\fit_lmer()</code> (the draw kernels and <code>Phit\dist_normal_rng()</code> are unchanged since <code>e7457cb</code>), using PHP 8.4 headers to match the runner. They require all three draw kernels, FFI, the seeded draw generator, <code>Phit\model_matrix()</code>, and <code>Phit\fit_lmer()</code> before running native unit tests (including <code>StanData::fromFormula()</code> against the real function), real-model tests, and (on CmdStan 2.40) R comparisons. These runs fail on skipped tests. The real-model run excludes the compatibility group until R is installed. The lightweight unit matrix still tests the optional-extension path without <code>phit</code>. Local native tests must likewise use a PHP executable matching the extension module ABI; a Homebrew PHP 8.5 extension cannot load into Herd PHP 8.4.</p>
+<p><code>.github/workflows/tests.yml</code> runs on Linux:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Job</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Unit</td>
+<td>The unit suite on PHP 8.2, 8.3, 8.4, and 8.5, without phit, testing the path without optional extensions</td>
+</tr>
+<tr class="even">
+<td>Integration</td>
+<td>Builds CmdStan 2.37 and 2.40 with this package’s installer (two make jobs, cached), builds phit, enables FFI, and runs the native unit tests and the real-model suite on PHP 8.4. Every figure kind is rendered to SVG and one to PNG.</td>
+</tr>
+<tr class="odd">
+<td>Compatibility</td>
+<td>On the CmdStan 2.40 job, installs the R packages and runs the compatibility suite</td>
+</tr>
+</tbody>
+</table>
+<p>The integration jobs check that FFI, phit’s three draw kernels, its seeded draw generator, <code>Phit\model_matrix()</code>, and <code>Phit\fit_lmer()</code> are present, and they fail on skipped tests.</p>
+<p>Pinned versions, set in <code>tests.yml</code>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Dependency</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CmdStanR</td>
+<td>Commit <code>0a54123</code> of its v1.0 branch, a release candidate. CI checks that its version is at least 0.99.0.</td>
+</tr>
+<tr class="even">
+<td>phit</td>
+<td>Commit <code>bb9133e</code>, built against PHP 8.4 headers</td>
+</tr>
+<tr class="odd">
+<td>vl-convert</td>
+<td>1.9.0</td>
+</tr>
+</tbody>
+</table>
+<p>Locally, the phit extension must be built for the PHP that loads it, so an extension built for Homebrew’s PHP 8.5 does not load into Herd’s PHP 8.4.</p>
 </section>
 <section id="documentation" class="level2">
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>

@@ -361,7 +361,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>CmdStanPHP draws the bayesplot diagnostics most used with MCMC: traces, histograms, densities, intervals, rank histograms, scatter plots, autocorrelation, and loo’s Pareto k plot. The statistics are computed in PHP, so figures need no R and no JavaScript to compute.</p>
+<p>Draw bayesplot’s MCMC diagnostics and loo’s Pareto k plot, and render them as text, Vega-Lite, HTML, SVG, or PNG.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$density</span> <span class="op">=</span> CmdStan\mcmc_dens(<span class="va">$fit</span><span class="ot">,</span> <span class="st">'theta'</span>)<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$density</span>-&gt;ascii(<span class="dv">60</span><span class="ot">,</span> <span class="dv">10</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\mcmc_intervals(<span class="va">$fit</span>)-&gt;ascii(<span class="dv">60</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
@@ -387,24 +387,93 @@ theta |-----------[=========o==========]--------------------
       +-----------------+--------------------------+--------
                        0.2                        0.4
        - outer, [=] inner, o = median</code></pre>
-<p>The figure functions follow bayesplot’s names and return a <code>Figure</code>. A figure holds the computed statistics in <code>data</code>, as documented on the <code>Figure</code> class, and renders them in several forms:</p>
-<ul>
-<li><code>ascii(width, height)</code> returns plain ASCII text for a terminal, log, or text report. Echoing a figure prints this form with default sizes.</li>
-<li><code>vegaLite(width, height, maxRows)</code> returns a <a href="https://vega.github.io/vega-lite/">Vega-Lite 5</a> spec as a PHP array with the data inlined, and <code>json()</code> returns the same spec as JSON that is safe to place in an HTML script element. Front ends render it with <code>vega-embed</code> or any other Vega-Lite runtime.</li>
-<li><code>html()</code> returns a standalone page that loads Vega, Vega-Lite, and vega-embed from the jsDelivr CDN.</li>
-<li><code>svg()</code> and <code>png(scale: 2.0)</code> render static images with <a href="https://github.com/vega/vl-convert">vl-convert</a>, a standalone binary that needs no Node or browser. Set <code>VL_CONVERT</code> to its path or put <code>vl-convert</code> on <code>PATH</code>.</li>
-</ul>
-<p>The available figures are:</p>
-<ul>
-<li><code>mcmc_trace($fit, 'theta')</code>: chains overlaid by iteration.</li>
-<li><code>mcmc_hist($fit, 'theta', bins: 30)</code>: histogram of all draws.</li>
-<li><code>mcmc_dens($fit, 'theta')</code> and <code>mcmc_dens_overlay($fit, 'theta')</code>: Gaussian kernel density of all draws, or one curve per chain.</li>
-<li><code>mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, probOuter: 0.9, pointEst: 'median')</code>: inner and outer intervals with a point estimate on a shared axis. Without a selection it plots every variable except <code>lp__</code>.</li>
-<li><code>mcmc_rank_hist($fit, 'theta', bins: 20)</code>: per-chain histograms of pooled ranks, with the count expected under uniform ranks marked.</li>
-<li><code>mcmc_scatter($fit, 'mu', 'sigma')</code>: joint draws, with divergent transitions marked on MCMC fits.</li>
-<li><code>mcmc_acf($fit, 'theta', lags: 20)</code>: per-chain autocorrelation bars.</li>
-<li><code>pareto_k_plot($fit-&gt;loo())</code>: Pareto k by observation, with the k threshold and k = 1 marked.</li>
-</ul>
+<p>The figure functions follow bayesplot’s names and return a <code>Figure</code>, which holds the computed statistics in <code>data</code> and renders them:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Output</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ascii(width, height)</code></td>
+<td>Plain text for a terminal, log, or report. Echoing a figure prints this form.</td>
+<td>Nothing</td>
+</tr>
+<tr class="even">
+<td><code>vegaLite(width, height, maxRows)</code></td>
+<td>A <a href="https://vega.github.io/vega-lite/">Vega-Lite 5</a> spec as a PHP array, with the data inlined</td>
+<td>A Vega-Lite runtime, such as <code>vega-embed</code>, to display it</td>
+</tr>
+<tr class="odd">
+<td><code>json()</code></td>
+<td>The same spec as JSON that is safe inside an HTML script element</td>
+<td>The same</td>
+</tr>
+<tr class="even">
+<td><code>html()</code></td>
+<td>A standalone page</td>
+<td>Loads Vega, Vega-Lite, and vega-embed from the jsDelivr CDN</td>
+</tr>
+<tr class="odd">
+<td><code>svg()</code>, <code>png(scale: 2.0)</code></td>
+<td>Static images</td>
+<td>The <a href="https://github.com/vega/vl-convert">vl-convert</a> binary on <code>PATH</code>, or its path in <code>VL_CONVERT</code></td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>mcmc_trace($fit, 'theta')</code></td>
+<td>Chains overlaid by iteration</td>
+</tr>
+<tr class="even">
+<td><code>mcmc_hist($fit, 'theta', bins: 30)</code></td>
+<td>Histogram of all draws</td>
+</tr>
+<tr class="odd">
+<td><code>mcmc_dens($fit, 'theta')</code></td>
+<td>Gaussian kernel density of all draws</td>
+</tr>
+<tr class="even">
+<td><code>mcmc_dens_overlay($fit, 'theta')</code></td>
+<td>One density curve per chain</td>
+</tr>
+<tr class="odd">
+<td><code>mcmc_intervals($fit, ['mu', 'beta'], prob: 0.5, probOuter: 0.9, pointEst: 'median')</code></td>
+<td>Inner and outer intervals with a point estimate on a shared axis. Without a selection, every variable except <code>lp__</code>.</td>
+</tr>
+<tr class="even">
+<td><code>mcmc_rank_hist($fit, 'theta', bins: 20)</code></td>
+<td>Per-chain histograms of pooled ranks, with the count expected under uniform ranks marked</td>
+</tr>
+<tr class="odd">
+<td><code>mcmc_scatter($fit, 'mu', 'sigma')</code></td>
+<td>Joint draws, with divergent transitions marked on MCMC fits</td>
+</tr>
+<tr class="even">
+<td><code>mcmc_acf($fit, 'theta', lags: 20)</code></td>
+<td>Per-chain autocorrelation bars</td>
+</tr>
+<tr class="odd">
+<td><code>pareto_k_plot($fit-&gt;loo())</code></td>
+<td>Pareto k by observation, with the threshold and k = 1 marked</td>
+</tr>
+</tbody>
+</table>
 <p>A plotted variable names one element, such as <code>beta[2]</code>. <code>mcmc_intervals()</code> also accepts base names, which select every element. The functions take a fit or a <code>draws_array</code>.</p>
 <p>The bandwidth (R’s <code>bw.nrd0</code>), densities, quantiles, ranks, and autocorrelations are computed in PHP and checked against R and bayesplot. Vega-Lite specs carry these values and use no Vega-Lite density, binning, or quantile transforms, so every rendering shows the same numbers. The ASCII form rounds positions to character cells; use the figure’s <code>data</code> or the numeric methods, such as <code>summary()</code>, when exact values matter.</p>
 <p>Trace and scatter figures inline every draw. For large fits, <code>maxRows</code> keeps every k-th iteration of a trace, or every k-th draw of a scatter plus all divergent draws, so that about that many rows remain. Per-chain figures (rank histograms and autocorrelation) are faceted by chain, and their sizes apply to each chain’s panel.</p>

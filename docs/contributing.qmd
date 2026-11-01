@@ -33,9 +33,25 @@ Tests that need the phit extension load it into PHP, for example `php -d extensi
 
 ## Continuous integration
 
-`.github/workflows/tests.yml` runs unit tests on PHP 8.2, 8.3, 8.4, and 8.5. A separate integration matrix builds CmdStan 2.37 and 2.40 on Linux, runs the real-model suite, and caches each toolchain. The integration jobs enable PHP's FFI extension and render every figure kind to SVG, and one to PNG, with a downloaded vl-convert binary. The 2.40 job additionally installs the reference R packages and runs the compatibility suite. CmdStanR 1.0 is a release candidate, so CI installs it from a pinned commit of its v1.0 branch (`stan-dev/cmdstanr@0a54123`) and checks that its version is at least 0.99.0. Installation is performed using this package's installer to exercise its download/build path. Compilation on small CI machines is memory-intensive; integration uses two make jobs.
+`.github/workflows/tests.yml` runs on Linux:
 
-The integration jobs build `phit` from the pinned [`phpstats/phit`](https://github.com/phpstats/phit) commit `b71e406ee58fc7a255687514b2818c3c615a517b`, which adds `Phit\model_matrix()` and `Phit\fit_lmer()` (the draw kernels and `Phit\dist_normal_rng()` are unchanged since `e7457cb`), using PHP 8.4 headers to match the runner. They require all three draw kernels, FFI, the seeded draw generator, `Phit\model_matrix()`, and `Phit\fit_lmer()` before running native unit tests (including `StanData::fromFormula()` against the real function), real-model tests, and (on CmdStan 2.40) R comparisons. These runs fail on skipped tests. The real-model run excludes the compatibility group until R is installed. The lightweight unit matrix still tests the optional-extension path without `phit`. Local native tests must likewise use a PHP executable matching the extension module ABI; a Homebrew PHP 8.5 extension cannot load into Herd PHP 8.4.
+| Job | What it does |
+|---|---|
+| Unit | The unit suite on PHP 8.2, 8.3, 8.4, and 8.5, without phit, testing the path without optional extensions |
+| Integration | Builds CmdStan 2.37 and 2.40 with this package's installer (two make jobs, cached), builds phit, enables FFI, and runs the native unit tests and the real-model suite on PHP 8.4. Every figure kind is rendered to SVG and one to PNG. |
+| Compatibility | On the CmdStan 2.40 job, installs the R packages and runs the compatibility suite |
+
+The integration jobs check that FFI, phit's three draw kernels, its seeded draw generator, `Phit\model_matrix()`, and `Phit\fit_lmer()` are present, and they fail on skipped tests.
+
+Pinned versions, set in `tests.yml`:
+
+| Dependency | Version |
+|---|---|
+| CmdStanR | Commit `0a54123` of its v1.0 branch, a release candidate. CI checks that its version is at least 0.99.0. |
+| phit | Commit `bb9133e`, built against PHP 8.4 headers |
+| vl-convert | 1.9.0 |
+
+Locally, the phit extension must be built for the PHP that loads it, so an extension built for Homebrew's PHP 8.5 does not load into Herd's PHP 8.4.
 
 ## Documentation
 

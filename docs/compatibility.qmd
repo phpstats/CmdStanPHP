@@ -2,9 +2,9 @@
 title: "Compatibility with CmdStanR"
 ---
 
-This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does **not** claim full CmdStanR compatibility. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/), and [CmdStan CLI](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html), consulted during implementation. PHP interfaces preserve modern option names wherever their meaning transfers directly. Method names do not carry over: PSR-1 makes a PHP method name camelCase, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()` here. The [method names](#method-names) table maps every one of them, and the package declares no snake_case alias beside the camelCase name.
+CmdStanPHP ports CmdStanR's model, executable, and CSV workflow to PHP. It does not implement every CmdStanR feature. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), with the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/) and the [CmdStan command-line options](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html).
 
-## Supported workflows
+## Supported {#supported-workflows}
 
 | CmdStanR capability | PHP implementation | Verification |
 | --- | --- | --- |
@@ -47,11 +47,13 @@ This package ports CmdStanR's core model/executable/CSV workflow to PHP. It does
 | CmdStanR, posterior, loo, and bayesplot method names | camelCase, mapped one to one in [method names](#method-names) | Signature inventory in the family repository |
 | Comparison reference | CmdStanR 1.0 from its pinned v1.0 branch | The compatibility suite in CI |
 
-### Method names
+## Naming {#method-names}
 
-Matching names do not imply matching behavior. This table maps names only; the [supported workflows](#supported-workflows) above and the [PHP adaptations](#php-adaptations) below describe behavior.
+- Methods are camelCase, as PSR-1 requires, with no snake_case alias: CmdStanR's `fit$output_files()` is `$fit->outputFiles()`.
+- Standalone functions, option names, CSV metadata keys, result-array keys, and summary measure names keep CmdStanR's spelling, as in `sample(iter_warmup: 500)` and `Summary::summarise($draws, ['ess_bulk'])`.
+- A matching name does not imply matching behavior. [Differences](#php-adaptations) describes behavior.
 
-PSR-1 makes a PHP method name camelCase, so each CmdStanR, posterior, loo, and bayesplot method maps to one camelCase PHP method, with no snake_case alias. Option names, CSV metadata keys, result-array keys, summary measure names, and the standalone functions keep CmdStanR's spelling, as in `sample(iter_warmup: 500)` and `Summary::summarise($draws, ['ess_bulk'])`. Every renamed method is below.
+Every renamed method:
 
 | Class | R name | PHP name |
 | --- | --- | --- |
@@ -165,24 +167,34 @@ PSR-1 makes a PHP method name camelCase, so each CmdStanR, posterior, loo, and b
 | `Plot` | `pareto_k()` | `paretoK()` |
 |  | `rank_hist()` | `rankHist()` |
 
-## CmdStanR 1.0 {#cmdstanr-1-0}
+## Differences {#php-adaptations}
 
-This package follows CmdStanR 1.0. Code written for a development version from before the CmdStanR 1.0 port, which predates the first release, needs these changes:
+### Data
 
-- `cmdstan_model()` and `new CmdStanModel()` compile before they return. `compile()` and the `compile` argument are gone; use `compile_stan_file()` to build without a model object.
-- `stanFile` and `exeFile` cannot be given together. Pass `exeFile` alone to use an existing executable, and `dir` to choose where a Stan program's executable goes. A model from `exeFile` alone refuses build arguments.
-- Running a model whose executable is out of date throws `StaleExecutableException`, so the Stan file must exist whenever the model runs.
-- `cppOptions` entries must be named, and `false` turns an option off. `stancOptions` refuse flags that have their own argument, such as `warn-pedantic` (use `pedantic`) and `include-paths` (use `includePaths`).
-- CmdStan 2.37 or newer is required.
-- The deprecated arguments are removed. These are `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, `variational()`'s `output_samples` (use `draws`), and `jacobian_adjustment` (use `jacobian`). Passing one to a fitting method is an unknown-option error. The model methods' `jacobianAdjustment` argument is removed too, as are `read_sample_csv()` and `write_stan_tempfile()`.
-- Thread options are per method: `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for the other methods. `save_latent_dynamics` is a `sample()` and `variational()` option only.
-- Table data with string columns is refused instead of being coded in alphabetical order. Factors still become indices.
-- `lpApprox()` returns one flat list in draw order. `mle()` leaves out `lp__`; read it with `lp()`. `loo()` defaults to `rEff: false`. `metadata()['num_chains']` counts the chains.
-- Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv`, with chain ids padded to two digits. Saved files are padded too.
-- `variableSkeleton()` is removed from fits. `constrainVariables()` returns tuples as lists of their elements and complex values as `[re, im]`, and `unconstrainVariables()` accepts that structure.
-- `initModelMethods()` takes `data`, `seed`, `verbose`, `quiet`, and `model`; the `hessian` argument is gone. `saveDataFile()` copies the data file and leaves the original.
+- R named lists become associative PHP arrays, and numeric arrays must be rectangular lists. Complex numbers are `[re, im]` pairs, and tuples are lists of their elements.
+- R sparse matrices, `NA`, and automatic R object conversion have no PHP equivalent.
+- Data frames and factors can come from phibble or any object with `toModelData()` or `toColumns()`, as described in the [API reference](api.qmd#data-frames-and-the-phpstats-family). Table data with string columns is refused, as in CmdStanR 1.0.
+- `code()` returns one source string. Syntax errors throw exceptions instead of returning an R diagnostic list.
 
-The port differs from CmdStanR 1.0 in these deliberate ways:
+### Draws and summaries
+
+- Draws are PHP arrays with documented shapes. Indices are zero-based, and draw metadata is one-based. R's tibble, posterior, bayesplot, and ggplot2 classes are not emulated. [Draws, summaries, and saving fits](draws.qmd) describes the formats.
+- Summary quantiles use linear interpolation (R's default type 7), and scaled MAD uses 1.4826.
+- The default MCMC summary takes R-hat and bulk ESS from the installed CmdStan's `stansummary` and computes tail ESS in PHP. With `measures`, `summary()` uses a PHP port of posterior's `summarise_draws()` and needs no CmdStan. Results are checked against the installed R packages and are not guaranteed to be identical to every posterior version.
+- ADVI's mean row is stored separately. ADVI and Laplace `log_p__` columns become `lp__`, and their approximate densities `lp_approx__`, as in CmdStanR. Convergence statistics are `NAN` for fits other than MCMC.
+- `metadata()` returns one merged array with CmdStanR's keys, such as `iter_sampling`, `max_treedepth`, and `stan_variable_sizes`, alongside CmdStan's raw argument names. `chainMetadata()` returns the per-chain arrays. `invMetric()` returns matrices by default and reads metric JSON when every chain has one.
+
+### Model methods
+
+- Model methods and exposed functions compile a shared library against the selected CmdStan and load it with PHP FFI. Web SAPIs need `ffi.enable=true` or preloading.
+- Log densities drop constant terms and default to `jacobian: true`, as in CmdStanR. Unconstrained vectors are flat lists. Constrained variables are nested zero-based arrays, with matrices as lists of rows.
+- Serialized fits store the library path, data, and seed, and reconnect on first use, after which the generated-quantities random number generator restarts from its seed.
+
+### Initialization from fits
+
+Initialization from a fit follows CmdStanR 1.0's `process_init()`. MCMC draws are resampled without replacement, an optimization estimate is repeated, and ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights over distinct parameter vectors. Draws that multi-path Pathfinder already resampled are not reweighted. Resampling uses PHP's seeded Mt19937 engine, so a seed selects different draws than in CmdStanR.
+
+### Builds, processes, and files
 
 - Concurrent builds of one model are serialized by a lock file, `.<exe>.cmdstanphp.lock`. CmdStanR has no lock, so a model built at the same moment by CmdStanR and CmdStanPHP is not protected.
 - The build record is `.<exe>.cmdstanphp.json`, in CmdStanR's format 1. CmdStanR writes `.<exe>.cmdstanr.json`, so a model built by both never has one record overwritten by the other.
@@ -192,26 +204,18 @@ The port differs from CmdStanR 1.0 in these deliberate ways:
 - `saveObject()` uses PHP serialization; there is no `qs2` format.
 - There is no compilation spinner. `cmdstanr_spinner` is accepted and has no effect.
 - `cmdstanDefaults()` names CmdStan's defaults as this package's options, and `reportedFeatures()` returns what the executable reports about its build.
+- Diagnostic checks are messages from `diagnosticWarnings()`, not PHP warnings.
+- Console output is printed when the processes finish. There is no R interrupt integration, and CmdStan processes still running when PHP shuts down are terminated.
+- Output files are not deleted when a fit is. Saving moves files that a run created and copies imported CSV files and the data file, and existing files are never overwritten. Downstream CmdStan commands still need the CSV files of a restored fit.
 
-## PHP adaptations
+### Options and defaults
 
-R named lists become associative PHP arrays; numeric arrays must be rectangular zero-indexed lists. Complex numbers are `[re, im]` pairs and tuples are lists of their elements. R sparse matrices, NA, and automatic R object conversion have no PHP equivalent. Data frames and factors can come from phibble or any object with `toModelData()` or `toColumns()`, following the conventions in the [API reference](api.qmd#data-frames-and-the-phpstats-family). `code()` returns one source string. Syntax errors throw exceptions rather than returning an R diagnostic list.
-
-R posterior objects become PHP arrays with documented shapes. All array indices are zero-based; draw metadata is one-based. `draws_array` retains iteration/chain axes, `draws_matrix` concatenates chains, `draws_df` is associative rows, `draws_list` maps variables to values per chain, and `draws_rvars` nests each variable's draws by its dimensions. R tibble, posterior, bayesplot, and ggplot2 classes are not emulated. The default draws format follows CmdStanR: `draws_array` for MCMC and generated quantities and `draws_matrix` for other methods.
-
-Summary quantiles use linear interpolation (R's default type 7). Scaled MAD uses 1.4826. The default MCMC summary delegates R-hat and bulk ESS to the installed CmdStan `stansummary` and computes tail ESS in PHP. Passing `measures` to `summary()` uses a PHP port of posterior's `summarise_draws()`, including rank-normalized R-hat, bulk/tail ESS, and MCSE, so it does not need CmdStan. Results are checked against the installed reference R packages, but are not guaranteed bit-for-bit identical to every version of posterior. ADVI's mean row is stored separately. ADVI and Laplace `log_p__` columns are normalized to `lp__` and their approximate densities to `lp_approx__`, matching CmdStanR. Non-MCMC convergence statistics are `NAN`.
-
-`metadata()` returns one merged array with CmdStanR's keys, such as `iter_sampling`, `max_treedepth`, and `stan_variable_sizes`, alongside CmdStan's raw argument names. `chainMetadata()` returns the per-chain arrays. `invMetric()` returns matrices by default and reads metric JSON when every chain has one.
-
-Model methods and exposed functions compile a shared library against the selected CmdStan and load it with PHP FFI. FFI is enabled for the CLI by default (`ffi.enable=preload`); web SAPIs need `ffi.enable=true` or preloading. Libraries are cached beside the Stan source with a fingerprint in the file name. Model methods drop constant terms and default to `jacobian: true`, as in CmdStanR. Unconstrained vectors are flat lists, and constrained variables are nested zero-based arrays with matrices as lists of rows, tuples as lists of their elements, and complex values as `[re, im]`. Fits serialize the library path, data, and seed, and reconnect on first use; the generated-quantities RNG then restarts from its seed.
-
-Initialization from a fit follows CmdStanR 1.0's `process_init()`. MCMC draws are resampled without replacement, an optimization estimate is repeated, and ADVI, Laplace, and Pathfinder draws are resampled with Pareto-smoothed importance weights over distinct parameter vectors. Draws that multi-path Pathfinder already resampled with PSIS are not reweighted, and repeated draws are merged with their weights summed. Resampling uses PHP's seeded Mt19937 engine, so a given seed selects different draws than CmdStanR does.
-
-Diagnostic checks are structured messages accessible with `diagnosticWarnings()`, rather than PHP runtime warnings. Console output is buffered. `show_progress_bar: true` draws one progress bar for all chains on stderr and leaves CmdStan's iteration lines out of the output. There is no R interrupt integration; CmdStan processes still running when PHP shuts down are terminated. `show_messages` controls stdout, `show_exceptions` controls stderr. Pathfinder's deprecated `num_threads` raises `E_USER_DEPRECATED` and maps to `threads`; giving both throws. Output files persist after garbage collection, so callers manage cleanup explicitly. Saving moves output files that a run created and copies imported CSVs and the data file; existing destinations are never overwritten. Saved fit objects use PHP serialization and embed parsed results; CSVs are still needed for downstream CmdStan commands.
-
-`options()` and `cmdstan_option()` provide CmdStanR's global options that have a PHP meaning: default output directory, Stan file directory, forced recompilation, draws format, initialization warnings, verbose compilation, printed rows, line numbers, compression, the progress bar, saving the metric and configuration, and `mc.cores`. `cmdstanr_no_ver_check` is accepted and has no effect because this package never checks for updates. `cmdstanr_spinner` is accepted and has no effect.
-
-Algorithm parameters left null use CmdStan's defaults. PHP-level defaults include four sample chains, sequential execution unless requested, and one MPI chain. CmdStanR defaults for automatically saving metric/configuration JSON are not imposed; request `save_metric` or `save_cmdstan_config`, or set the `cmdstanr_save_metric` and `cmdstanr_save_config` options. The installer defaults to one core where CmdStanR uses two. OpenCL and MPI require external toolchains/hardware. Windows has not been validated.
+- `options()` and `cmdstan_option()` provide CmdStanR's global options that have a PHP meaning. `cmdstanr_no_ver_check` and `cmdstanr_spinner` are accepted and have no effect.
+- Options left `null` use CmdStan's defaults. `sample()` runs four chains, one at a time unless `parallel_chains` or `mc.cores` says otherwise. `sampleMpi()` runs one chain.
+- Metric and configuration JSON are written only when requested with `save_metric`, `save_cmdstan_config`, or their options.
+- The installer uses one core by default, where CmdStanR uses two.
+- Pathfinder's deprecated `num_threads` raises `E_USER_DEPRECATED` and maps to `threads`. Giving both throws.
+- OpenCL and MPI need external toolchains or hardware, and Windows has not been tested.
 
 ### Moment matching and loo (as of 2026-10-31) {#moment-matching-and-loo}
 
@@ -228,3 +232,21 @@ The following CmdStanR features have no implementation:
 - Parity with every CmdStanR version's error and warning messages.
 
 No unsupported option is accepted silently. This repository's tests validate the implemented contract against CmdStanR 1.0 and the installed posterior and loo packages; they are not the upstream CmdStanR test suite. Direct conformance tests run CmdStanR and PHP with the same seeds and compare draws, descriptive summaries, MCMC sampler diagnostics, CSV metadata, model methods, exposed functions, PSIS, LOO, WAIC, and posterior summary measures.
+
+## Code written before CmdStanR 1.0 (2026-10) {#cmdstanr-1-0}
+
+This package follows CmdStanR 1.0. Code written for development versions from before the port, which predate the first release, needs these changes:
+
+- `cmdstan_model()` and `new CmdStanModel()` compile before they return. `compile()` and the `compile` argument are gone; use `compile_stan_file()` to build without a model object.
+- `stanFile` and `exeFile` cannot be given together. Pass `exeFile` alone to use an existing executable, and `dir` to choose where a Stan program's executable goes. A model from `exeFile` alone refuses build arguments.
+- Running a model whose executable is out of date throws `StaleExecutableException`, so the Stan file must exist whenever the model runs.
+- `cppOptions` entries must be named, and `false` turns an option off. `stancOptions` refuse flags that have their own argument, such as `warn-pedantic` (use `pedantic`) and `include-paths` (use `includePaths`).
+- CmdStan 2.37 or newer is required.
+- The deprecated arguments are removed. These are `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, `variational()`'s `output_samples` (use `draws`), and `jacobian_adjustment` (use `jacobian`). Passing one to a fitting method is an unknown-option error. The model methods' `jacobianAdjustment` argument is removed too, as are `read_sample_csv()` and `write_stan_tempfile()`.
+- Thread options are per method: `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for the other methods. `save_latent_dynamics` is a `sample()` and `variational()` option only.
+- Table data with string columns is refused instead of being coded in alphabetical order. Factors still become indices.
+- `lpApprox()` returns one flat list in draw order. `mle()` leaves out `lp__`; read it with `lp()`. `loo()` defaults to `rEff: false`. `metadata()['num_chains']` counts the chains.
+- Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv`, with chain ids padded to two digits. Saved files are padded too.
+- `variableSkeleton()` is removed from fits. `constrainVariables()` returns tuples as lists of their elements and complex values as `[re, im]`, and `unconstrainVariables()` accepts that structure.
+- `initModelMethods()` takes `data`, `seed`, `verbose`, `quiet`, and `model`; the `hessian` argument is gone. `saveDataFile()` copies the data file and leaves the original.
+
