@@ -82,6 +82,22 @@ precise_cmdstanpy = {
     for k in ('cmdstanphp', 'cmdstanr')
 }
 
+# One case per variable and measure: CmdStanPHP's value against each peer's own summary, with CmdStanPy's at
+# 12 significant figures. A case passes within ABS_TOL + REL_TOL * |cmdstanr's value|.
+ABS_TOL, REL_TOL = 1e-9, 1e-9
+peers = {'cmdstanr': results['cmdstanr']['summary'], 'CmdStanPy': results['cmdstanpy']['summary_sig_figs_12']}
+cases = []
+for i, row in enumerate(results['cmdstanphp']['summary']):
+    for m in measures:
+        errors = {name: abs(row[m] - rows[i][m]) for name, rows in peers.items()}
+        worst = max(errors.values())
+        cases.append({'name': row['variable'], 'quantity': m, 'max_abs_error': worst, 'peers': errors,
+                      'passed': worst <= ABS_TOL + REL_TOL * abs(peers['cmdstanr'][i][m])})
+draw_errors = {names[b]: next(d['max_abs_draw_difference'] for d in differences if d['interfaces'] == ['CmdStanPHP', names[b]])
+               for b in ('cmdstanr', 'cmdstanpy')}
+cases.append({'name': 'draws', 'quantity': 'all CSV columns, 4 chains x 1000 draws', 'max_abs_error': max(draw_errors.values()),
+              'peers': draw_errors, 'passed': max(draw_errors.values()) == 0})
+
 same_arguments = all(arguments[k] == arguments['cmdstanphp'] for k in names)
 # The release tag when src/ matches it, otherwise the git description of the checkout.
 tag = subprocess.run(['git', 'describe', '--tags', '--abbrev=0'], cwd=root, capture_output=True, text=True).stdout.strip()
@@ -93,6 +109,9 @@ code = (here / 'example.php').read_text()
 out = {
     'title': 'Bayesian (Stan): CmdStanPHP, cmdstanr, and CmdStanPy',
     'description': 'The non-centered eight schools model (Rubin 1981) run through three CmdStan interfaces with the same CmdStan, data, seed, chain ids, and initialization. The draws are identical, and each interface summarizes them with its own code.',
+    'reference': 'cmdstanr 0.9.0 with posterior 1.7.1 and CmdStanPy 1.3.0 (summary at sig_figs 12), on CmdStan 2.40.0, R 4.6.1, Python 3.14.7, and PHP 8.4.25',
+    'tolerance': 'summaries: 1e-9 + 1e-9*|cmdstanr value|; draws: exact',
+    'cases': cases,
     'versions': {
         'CmdStan': results['cmdstanphp']['versions']['CmdStan'],
         'CmdStanPHP': cmdstanphp_version,

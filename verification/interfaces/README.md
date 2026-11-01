@@ -32,3 +32,5 @@ Each interface runs 4 chains with ids 1 to 4, 1,000 warmup and 1,000 sampling it
 ## Results
 
 The draws are identical: the largest absolute difference between any two interfaces is 0 across all 25 CSV columns and 4,000 draws. CmdStanPHP's and cmdstanr's summaries differ by less than 1e-10. CmdStanPy's `summary()` runs CmdStan's `stansummary` and rounds its output to 6 significant figures by default, so its values differ from the others by up to that rounding (4e-5 for a 95% quantile near 16). With `summary(sig_figs=12)` the largest difference from CmdStanPHP is 5e-9, in bulk ESS.
+
+`interfaces.json` also lists one case per variable and summary measure, in the format of the other phpstats verification files. Each case compares CmdStanPHP with cmdstanr and with CmdStanPy at 12 significant figures, and it passes within 1e-9 + 1e-9 times the absolute value of cmdstanr's result. A final case, `draws`, passes only when the draws are identical.
