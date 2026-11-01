@@ -352,10 +352,9 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#initialization-from-fits" id="toc-initialization-from-fits" class="nav-link" data-scroll-target="#initialization-from-fits">Initialization from fits</a></li>
   <li><a href="#builds-processes-and-files" id="toc-builds-processes-and-files" class="nav-link" data-scroll-target="#builds-processes-and-files">Builds, processes, and files</a></li>
   <li><a href="#options-and-defaults" id="toc-options-and-defaults" class="nav-link" data-scroll-target="#options-and-defaults">Options and defaults</a></li>
-  <li><a href="#moment-matching-and-loo" id="toc-moment-matching-and-loo" class="nav-link" data-scroll-target="#moment-matching-and-loo">Moment matching and loo (as of 2026-10-31)</a></li>
+  <li><a href="#moment-matching-and-loo" id="toc-moment-matching-and-loo" class="nav-link" data-scroll-target="#moment-matching-and-loo">Moment matching and loo</a></li>
   </ul></li>
   <li><a href="#not-implemented" id="toc-not-implemented" class="nav-link" data-scroll-target="#not-implemented">Not implemented</a></li>
-  <li><a href="#cmdstanr-1-0" id="toc-cmdstanr-1-0" class="nav-link" data-scroll-target="#cmdstanr-1-0">Code written before CmdStanR 1.0 (2026-10)</a></li>
   </ul>
 </nav>
     </div>
@@ -1217,8 +1216,14 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 </section>
 <section id="moment-matching-and-loo" class="level3">
-<h3 class="anchored" data-anchor-id="moment-matching-and-loo">Moment matching and loo (as of 2026-10-31)</h3>
-<p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with corrections to the split step and relative efficiencies. loo’s development version adopted the split corrections in <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo’s identity-map fallback while retaining the mean shift; its reason is recorded in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./loo.html#moment-matching">LOO guide</a> describes the result.</p>
+<h3 class="anchored" data-anchor-id="moment-matching-and-loo">Moment matching and loo</h3>
+<p>Moment matching follows <code>loo::loo_moment_match()</code> as <code>CmdStanMCMC$loo()</code> calls it, with these differences from loo 2.10.1:</p>
+<ul>
+<li>The split step uses the exact inverse of the accumulated affine map T(x) = A(x − m) + m + t, which is T⁻¹(y) = A⁻¹(y − m − t) + m. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map.</li>
+<li>The split relative efficiency is the minimum over both halves of the draws. loo uses the second half twice.</li>
+<li>Relative efficiencies are computed from exp(log_lik − max), which avoids the <code>NA</code> that loo returns when every likelihood value is tiny.</li>
+</ul>
+<p>Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order. A singular weighted covariance uses loo’s identity-map fallback, keeping the mean shift and recording the reason in <code>covariance_fallbacks</code>. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The <a href="./loo.html#moment-matching">LOO guide</a> describes the result.</p>
 </section>
 </section>
 <section id="not-implemented" class="level2">
@@ -1232,24 +1237,6 @@ ul.task-list li input[type="checkbox"] {
 <li>Parity with every CmdStanR version’s error and warning messages.</li>
 </ul>
 <p>No unsupported option is accepted silently. This repository’s tests validate the implemented contract against CmdStanR 1.0 and the installed posterior and loo packages; they are not the upstream CmdStanR test suite. Direct conformance tests run CmdStanR and PHP with the same seeds and compare draws, descriptive summaries, MCMC sampler diagnostics, CSV metadata, model methods, exposed functions, PSIS, LOO, WAIC, and posterior summary measures.</p>
-</section>
-<section id="cmdstanr-1-0" class="level2">
-<h2 class="anchored" data-anchor-id="cmdstanr-1-0">Code written before CmdStanR 1.0 (2026-10)</h2>
-<p>This package follows CmdStanR 1.0. Code written for development versions from before the port, which predate the first release, needs these changes:</p>
-<ul>
-<li><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> compile before they return. <code>compile()</code> and the <code>compile</code> argument are gone; use <code>compile_stan_file()</code> to build without a model object.</li>
-<li><code>stanFile</code> and <code>exeFile</code> cannot be given together. Pass <code>exeFile</code> alone to use an existing executable, and <code>dir</code> to choose where a Stan program’s executable goes. A model from <code>exeFile</code> alone refuses build arguments.</li>
-<li>Running a model whose executable is out of date throws <code>StaleExecutableException</code>, so the Stan file must exist whenever the model runs.</li>
-<li><code>cppOptions</code> entries must be named, and <code>false</code> turns an option off. <code>stancOptions</code> refuse flags that have their own argument, such as <code>warn-pedantic</code> (use <code>pedantic</code>) and <code>include-paths</code> (use <code>includePaths</code>).</li>
-<li>CmdStan 2.37 or newer is required.</li>
-<li>The deprecated arguments are removed. These are <code>sample()</code>‘s <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>, <code>variational()</code>’s <code>output_samples</code> (use <code>draws</code>), and <code>jacobian_adjustment</code> (use <code>jacobian</code>). Passing one to a fitting method is an unknown-option error. The model methods’ <code>jacobianAdjustment</code> argument is removed too, as are <code>read_sample_csv()</code> and <code>write_stan_tempfile()</code>.</li>
-<li>Thread options are per method: <code>threads_per_chain</code> for <code>sample()</code> and <code>generateQuantities()</code>, and <code>threads</code> for the other methods. <code>save_latent_dynamics</code> is a <code>sample()</code> and <code>variational()</code> option only.</li>
-<li>Table data with string columns is refused instead of being coded in alphabetical order. Factors still become indices.</li>
-<li><code>lpApprox()</code> returns one flat list in draw order. <code>mle()</code> leaves out <code>lp__</code>; read it with <code>lp()</code>. <code>loo()</code> defaults to <code>rEff: false</code>. <code>metadata()['num_chains']</code> counts the chains.</li>
-<li>Output files are named <code>&lt;model&gt;-&lt;YYYYmmddHHMM&gt;-&lt;id&gt;-&lt;hex&gt;.csv</code>, or <code>&lt;output_basename&gt;-&lt;id&gt;.csv</code>, with chain ids padded to two digits. Saved files are padded too.</li>
-<li><code>variableSkeleton()</code> is removed from fits. <code>constrainVariables()</code> returns tuples as lists of their elements and complex values as <code>[re, im]</code>, and <code>unconstrainVariables()</code> accepts that structure.</li>
-<li><code>initModelMethods()</code> takes <code>data</code>, <code>seed</code>, <code>verbose</code>, <code>quiet</code>, and <code>model</code>; the <code>hessian</code> argument is gone. <code>saveDataFile()</code> copies the data file and leaves the original.</li>
-</ul>
 
 
 </section>

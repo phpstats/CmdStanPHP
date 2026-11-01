@@ -349,11 +349,6 @@ ul.task-list li input[type="checkbox"] {
   </ul></li>
   <li><a href="#unit-and-integration-tests" id="toc-unit-and-integration-tests" class="nav-link" data-scroll-target="#unit-and-integration-tests">Unit and integration tests</a></li>
   <li><a href="#limits" id="toc-limits" class="nav-link" data-scroll-target="#limits">Limits</a></li>
-  <li><a href="#technical-notes" id="toc-technical-notes" class="nav-link" data-scroll-target="#technical-notes">Technical notes</a>
-  <ul class="collapse">
-  <li><a href="#rs-csv-parsing" id="toc-rs-csv-parsing" class="nav-link" data-scroll-target="#rs-csv-parsing">R’s CSV parsing</a></li>
-  <li><a href="#moment-matching-references-2026-10" id="toc-moment-matching-references-2026-10" class="nav-link" data-scroll-target="#moment-matching-references-2026-10">Moment-matching references (2026-10)</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -420,18 +415,12 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
-<p>The integration and compatibility jobs fail on skipped tests. The integration suite also passes on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0), last run on 2026-10-31.</p>
+<p>The integration and compatibility jobs fail on skipped tests. The integration suite also passes on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0).</p>
 </section>
 <section id="comparisons-with-r" class="level2">
 <h2 class="anchored" data-anchor-id="comparisons-with-r">Comparisons with R</h2>
 <p>Each comparison runs the same input through CmdStanPHP and the R reference. In the method comparisons, CmdStanR runs CmdStanPHP’s compiled executable through <code>cmdstan_model(exe_file = ...)</code>, so both use the same build, data, seed, and output precision. A relative tolerance t means |PHP − R| ≤ t × max(1, |R|).</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Compared</th>
@@ -473,7 +462,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>Summaries of an indexed parameter, by default and with <code>measures</code></td>
-<td><code>posterior::summarise_draws()</code> on CmdStanPHP’s draws</td>
+<td><code>posterior::summarise_draws()</code> on CmdStanPHP’s draws, passed to R as binary doubles</td>
 <td>A hierarchical model, <code>shoe_latent[1..12]</code>, 4 chains of 1,000 draws</td>
 <td>1e-8 relative</td>
 </tr>
@@ -491,7 +480,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td>Moment matching</td>
-<td><code>loo::loo_moment_match.default()</code> and CmdStanR’s <code>loo(moment_match = TRUE)</code></td>
+<td><code>loo::loo_moment_match.default()</code>, with the split step corrected as described in <a href="./compatibility.html#moment-matching-and-loo">Compatibility</a>, and CmdStanR’s <code>loo(moment_match = TRUE)</code></td>
 <td>Analytic regression posteriors, and a same-seed fit</td>
 <td>1e-8 relative</td>
 </tr>
@@ -558,19 +547,8 @@ ul.task-list li input[type="checkbox"] {
 <li>macOS is tested locally, not in CI. Native Windows, MPI clusters, and OpenCL hardware are not tested.</li>
 <li><a href="./compatibility.html#not-implemented">Compatibility</a> lists the features that are not implemented.</li>
 </ul>
-</section>
-<section id="technical-notes" class="level2">
-<h2 class="anchored" data-anchor-id="technical-notes">Technical notes</h2>
-<section id="rs-csv-parsing" class="level3">
-<h3 class="anchored" data-anchor-id="rs-csv-parsing">R’s CSV parsing</h3>
-<p>The indexed-parameter comparison gives R CmdStanPHP’s draws as binary doubles instead of letting R read the CSV files. R’s CSV parsing is not always correctly rounded, and a one-ulp difference can reorder two nearly tied folded draws, which moves the tail half of R-hat by about 1e-6.</p>
-</section>
-<section id="moment-matching-references-2026-10" class="level3">
-<h3 class="anchored" data-anchor-id="moment-matching-references-2026-10">Moment-matching references (2026-10)</h3>
-<p>The moment-matching reference was first checked with CmdStanR 0.9.0 and two loo 2.10.1.9000 development builds: 7991145, from before <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a>, and fd910fe, which includes it. The R reference in <code>tests/fixtures/moment_match.R</code> records the loo version and commit and contains the corrected split inverse and two-half efficiency. With an earlier loo, the suite checks that loo’s own split differs where a shift is combined with scaling or a covariance map. With a corrected loo, it checks that loo’s split matches CmdStanPHP on every design. Transform order has its own regression test. <a href="./compatibility.html#moment-matching-and-loo">Compatibility</a> describes the differences.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

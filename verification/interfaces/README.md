@@ -37,10 +37,10 @@ The draws are identical: the largest absolute difference between any two interfa
 
 ## Workload benchmark
 
-`bench/run.py` times the same model end to end from each interface and writes `site/benchmarks/interfaces-workload.json`. It compiles `schools.stan` once with CmdStan's makefile into `bench/model/`, and every interface loads that executable through its `exe_file` argument, so compilation is outside the timing. Each run is a fresh process under `/usr/bin/time -l`: `bench/cmdstanphp.php`, `bench/cmdstanr.R`, or `bench/cmdstanpy_run.py`. Each one times loading the model, sampling 4 chains of 1,000 warmup and 1,000 sampling iterations with `parallel_chains = 4`, and summarizing, and prints the elapsed milliseconds. The harness runs each interface once as a warm-up and then 7 rotated rounds, records the median time, the peak memory footprint, and the peak RSS, and checks that the last round's draws are identical.
+`bench/run.py` times the same model end to end from each interface and writes `site/benchmarks/interfaces-workload.json`. It compiles `schools.stan` once with CmdStan's makefile into `bench/model/`, and every interface loads that executable through its `exe_file` argument, so compilation is outside the timing. Each run is a fresh process under `peakmem`, built from `bench/peakmem.c` with `cc -O2 -o peakmem peakmem.c` and placed on `PATH`, which reports the process's peak anonymous memory and peak RSS on Linux: `bench/cmdstanphp.php`, `bench/cmdstanr.R`, or `bench/cmdstanpy_run.py`. Each one times loading the model, sampling 4 chains of 1,000 warmup and 1,000 sampling iterations with `parallel_chains = 4`, and summarizing, and prints the elapsed milliseconds. The harness runs each interface once as a warm-up and then 7 rotated rounds, records the median time, the peak anonymous memory, and the peak RSS, and checks that the last round's draws are identical.
 
 ```sh
 python3 verification/interfaces/bench/run.py
 ```
 
-It needs the CmdStanPy virtual environment that `run.sh` creates.
+It needs Linux and the CmdStanPy virtual environment that `run.sh` creates.

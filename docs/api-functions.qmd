@@ -54,4 +54,4 @@ Data arrays are named PHP arrays at the top level, with lists for Stan arrays, v
 | `cmdstanr_example(example: 'logistic', method: 'sample', ...options)` | A fit of the `logistic`, `schools`, or `schools_ncp` example |
 | `print_example_program(example)` | Prints an example's Stan program |
 
-`num_threads()` remains as a deprecated CmdStanR name. CmdStanR 1.0 removed `read_sample_csv()` and `write_stan_tempfile()`, and this package does not have them.
+`num_threads()` is deprecated, as in CmdStanR.

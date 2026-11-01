@@ -22,7 +22,7 @@ GitHub Actions runs on Linux (Ubuntu) for every push to main and every pull requ
 | Integration | PHP 8.4, CmdStan 2.37.0 and 2.40.0, with FFI and the phit extension | Integration suite. Every figure kind is rendered to SVG and one to PNG with vl-convert 1.9.0. |
 | Compatibility | The CmdStan 2.40.0 integration job | CmdStanR 1.0 (commit `0a54123` of its v1.0 branch, version 0.99.0, a release candidate), and posterior, loo, and bayesplot from stan-dev's R-universe and CRAN |
 
-The integration and compatibility jobs fail on skipped tests. The integration suite also passes on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0), last run on 2026-10-31.
+The integration and compatibility jobs fail on skipped tests. The integration suite also passes on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0).
 
 ## Comparisons with R
 
@@ -35,10 +35,10 @@ Each comparison runs the same input through CmdStanPHP and the R reference. In t
 | R-hat, bulk ESS, and tail ESS | CmdStanR | The same fits | 1e-8 |
 | Sampler diagnostics | CmdStanR's `diagnostic_summary()` | The same CSV files | 1e-12 |
 | CSV metadata keys, and example programs and data | CmdStanR | All methods and bundled examples | Exact |
-| Summaries of an indexed parameter, by default and with `measures` | `posterior::summarise_draws()` on CmdStanPHP's draws | A hierarchical model, `shoe_latent[1..12]`, 4 chains of 1,000 draws | 1e-8 relative |
+| Summaries of an indexed parameter, by default and with `measures` | `posterior::summarise_draws()` on CmdStanPHP's draws, passed to R as binary doubles | A hierarchical model, `shoe_latent[1..12]`, 4 chains of 1,000 draws | 1e-8 relative |
 | Every posterior summary measure | posterior | Fixed draws, with custom probabilities | 1e-8 relative |
 | PSIS, Pareto k, the GPD fit, relative efficiency, LOO, and WAIC | loo | Fixed log-likelihood draws | 1e-8 relative |
-| Moment matching | `loo::loo_moment_match.default()` and CmdStanR's `loo(moment_match = TRUE)` | Analytic regression posteriors, and a same-seed fit | 1e-8 relative |
+| Moment matching | `loo::loo_moment_match.default()`, with the split step corrected as described in [Compatibility](compatibility.qmd#moment-matching-and-loo), and CmdStanR's `loo(moment_match = TRUE)` | Analytic regression posteriors, and a same-seed fit | 1e-8 relative |
 | Log density and gradient | CmdStanR model methods | One model, several points | 1e-10 |
 | Hessian | CmdStanR model methods | The same | 1e-6, with its gradient to 1e-8 |
 | Constrain and unconstrain | CmdStanR model methods | The same, and unconstrained draws | 1e-12, draws to 1e-10 |
@@ -70,13 +70,3 @@ Tests that need FFI skip without it, and the suite skips without CmdStan.
 - Tests use small models and modest numbers of draws, and they are not CmdStanR's own test suite.
 - macOS is tested locally, not in CI. Native Windows, MPI clusters, and OpenCL hardware are not tested.
 - [Compatibility](compatibility.qmd#not-implemented) lists the features that are not implemented.
-
-## Technical notes
-
-### R's CSV parsing
-
-The indexed-parameter comparison gives R CmdStanPHP's draws as binary doubles instead of letting R read the CSV files. R's CSV parsing is not always correctly rounded, and a one-ulp difference can reorder two nearly tied folded draws, which moves the tail half of R-hat by about 1e-6.
-
-### Moment-matching references (2026-10)
-
-The moment-matching reference was first checked with CmdStanR 0.9.0 and two loo 2.10.1.9000 development builds: 7991145, from before [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405), and fd910fe, which includes it. The R reference in `tests/fixtures/moment_match.R` records the loo version and commit and contains the corrected split inverse and two-half efficiency. With an earlier loo, the suite checks that loo's own split differs where a shift is combined with scaling or a covariance map. With a corrected loo, it checks that loo's split matches CmdStanPHP on every design. Transform order has its own regression test. [Compatibility](compatibility.qmd#moment-matching-and-loo) describes the differences.

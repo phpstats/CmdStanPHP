@@ -217,9 +217,15 @@ Initialization from a fit follows CmdStanR 1.0's `process_init()`. MCMC draws ar
 - Pathfinder's deprecated `num_threads` raises `E_USER_DEPRECATED` and maps to `threads`. Giving both throws.
 - OpenCL and MPI need external toolchains or hardware, and Windows has not been tested.
 
-### Moment matching and loo (as of 2026-10-31) {#moment-matching-and-loo}
+### Moment matching and loo {#moment-matching-and-loo}
 
-Moment matching follows `loo::loo_moment_match()` as `CmdStanMCMC$loo()` calls it, with corrections to the split step and relative efficiencies. loo's development version adopted the split corrections in [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405) on 2026-10-13; the differences below are from loo 2.10.1 and earlier development builds. The split uses the exact inverse of the accumulated affine map, where loo subtracts the shift after the inverse linear map. The split relative efficiency is the minimum over both halves, where loo uses the second half twice. Relative efficiencies use exp(log_lik − max), which avoids the NA that loo returns when every likelihood value is tiny. Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order, including cases where scaling follows a covariance map. A singular weighted covariance uses loo's identity-map fallback while retaining the mean shift; its reason is recorded in `covariance_fallbacks`. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The [LOO guide](loo.qmd#moment-matching) describes the result.
+Moment matching follows `loo::loo_moment_match()` as `CmdStanMCMC$loo()` calls it, with these differences from loo 2.10.1:
+
+- The split step uses the exact inverse of the accumulated affine map T(x) = A(x − m) + m + t, which is T⁻¹(y) = A⁻¹(y − m − t) + m. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map.
+- The split relative efficiency is the minimum over both halves of the draws. loo uses the second half twice.
+- Relative efficiencies are computed from exp(log_lik − max), which avoids the `NA` that loo returns when every likelihood value is tiny.
+
+Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match loo and CmdStanR. Accepted scale and covariance steps are composed in their original order. A singular weighted covariance uses loo's identity-map fallback, keeping the mean shift and recording the reason in `covariance_fallbacks`. Other numerical or model failures stop the observation at its last accepted state and record a reason. Covariances are never regularized. The [LOO guide](loo.qmd#moment-matching) describes the result.
 
 ## Not implemented
 
@@ -232,21 +238,3 @@ The following CmdStanR features have no implementation:
 - Parity with every CmdStanR version's error and warning messages.
 
 No unsupported option is accepted silently. This repository's tests validate the implemented contract against CmdStanR 1.0 and the installed posterior and loo packages; they are not the upstream CmdStanR test suite. Direct conformance tests run CmdStanR and PHP with the same seeds and compare draws, descriptive summaries, MCMC sampler diagnostics, CSV metadata, model methods, exposed functions, PSIS, LOO, WAIC, and posterior summary measures.
-
-## Code written before CmdStanR 1.0 (2026-10) {#cmdstanr-1-0}
-
-This package follows CmdStanR 1.0. Code written for development versions from before the port, which predate the first release, needs these changes:
-
-- `cmdstan_model()` and `new CmdStanModel()` compile before they return. `compile()` and the `compile` argument are gone; use `compile_stan_file()` to build without a model object.
-- `stanFile` and `exeFile` cannot be given together. Pass `exeFile` alone to use an existing executable, and `dir` to choose where a Stan program's executable goes. A model from `exeFile` alone refuses build arguments.
-- Running a model whose executable is out of date throws `StaleExecutableException`, so the Stan file must exist whenever the model runs.
-- `cppOptions` entries must be named, and `false` turns an option off. `stancOptions` refuse flags that have their own argument, such as `warn-pedantic` (use `pedantic`) and `include-paths` (use `includePaths`).
-- CmdStan 2.37 or newer is required.
-- The deprecated arguments are removed. These are `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, `variational()`'s `output_samples` (use `draws`), and `jacobian_adjustment` (use `jacobian`). Passing one to a fitting method is an unknown-option error. The model methods' `jacobianAdjustment` argument is removed too, as are `read_sample_csv()` and `write_stan_tempfile()`.
-- Thread options are per method: `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for the other methods. `save_latent_dynamics` is a `sample()` and `variational()` option only.
-- Table data with string columns is refused instead of being coded in alphabetical order. Factors still become indices.
-- `lpApprox()` returns one flat list in draw order. `mle()` leaves out `lp__`; read it with `lp()`. `loo()` defaults to `rEff: false`. `metadata()['num_chains']` counts the chains.
-- Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv`, with chain ids padded to two digits. Saved files are padded too.
-- `variableSkeleton()` is removed from fits. `constrainVariables()` returns tuples as lists of their elements and complex values as `[re, im]`, and `unconstrainVariables()` accepts that structure.
-- `initModelMethods()` takes `data`, `seed`, `verbose`, `quiet`, and `model`; the `hessian` argument is gone. `saveDataFile()` copies the data file and leaves the original.
-
