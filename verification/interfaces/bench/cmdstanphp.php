@@ -21,7 +21,9 @@ $fit = $model->sample(
 );
 $summary = $fit->summary(
     ['mu', 'tau', 'theta'],
-    measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk'],
+    measures: [
+        'mean', 'sd', 'quantile2', 'rhat', 'ess_bulk',
+    ],
 );
 $elapsed = (hrtime(true) - $start) / 1e6;
 
