@@ -21,7 +21,7 @@ Optional:
 - [phibble](https://github.com/phpstats/phibble), for model data from a `Phibble\DataFrame` and for draws and summaries returned as data frames
 - [vl-convert](https://github.com/vega/vl-convert/releases), for figures saved as SVG or PNG
 
-composer.json allows PHP `>=8.2 <8.6`. `proc_open()` must be enabled, because every compilation and run starts a CmdStan process, so hosts that list it in `disable_functions` cannot run models. [Verification](verification.qmd) lists what CI tests.
+composer.json allows PHP `>=8.2 <8.6`. `proc_open()` must be enabled, because every compilation and run starts a CmdStan process, so hosts that list it in `disable_functions` cannot run models. [Contributing](contributing.qmd#continuous-integration) lists what CI tests.
 
 ## Supported platforms
 

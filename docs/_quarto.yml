@@ -45,9 +45,6 @@ website:
       - section: "Compatibility and limitations"
         contents:
           - compatibility.qmd
-      - section: "Benchmarks and verification"
-        contents:
-          - verification.qmd
       - section: "Contributing"
         contents:
           - contributing.qmd

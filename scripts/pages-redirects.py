@@ -35,8 +35,17 @@ def target(name):
     return TARGET if name == 'index' else f'{TARGET}/{name}'
 
 
+# Pages removed from the docs, and the phpstats.org page that replaced them.
+REMOVED = {
+    'verification': 'https://cmdstanphp.phpstats.org/verification',
+    'testing': 'https://cmdstanphp.phpstats.org/verification',
+}
+
 args.out.mkdir(parents=True, exist_ok=True)
 written = []
+for name, url in REMOVED.items():
+    (args.out / f'{name}.html').write_text(page(url))
+    written.append(f'{name}.html -> {url}')
 for source in sorted(args.docs.glob('*.html')):
     name = source.stem
     if (args.docs / f'{name}.qmd').exists():

@@ -29,7 +29,28 @@ composer test:compatibility   # additionally needs R + cmdstanr 1.0, posterior, 
 - `composer test:compatibility` compares results with R and needs the R packages listed in the comment.
 - `composer lint` checks syntax and the family naming rules with PHP_CodeSniffer.
 
-Tests that need the phit extension load it into PHP, for example `php -d extension=/path/to/libphit.dylib vendor/bin/phpunit`. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it. [Verification](verification.qmd) describes what each suite covers.
+Tests that need the phit extension load it into PHP, for example `php -d extension=/path/to/libphit.dylib vendor/bin/phpunit`. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it.
+
+## What the suites cover
+
+The unit suite covers JSON shapes and invalid data, CSV comments, warmup, and special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. Process behavior is tested with real PHP subprocesses. Data frames are tested with stand-in tables and a stand-in `Phibble\DataFrame`. Without phit, `StanData::fromFormula()` is tested with a stand-in `Phit\model_matrix()`, and with phit, against the real function. The moment-matching tests need phit and skip without it.
+
+The integration suite compiles the bundled models and runs real CmdStan methods:
+
+- Bernoulli posterior estimates against the analytic mean, R-hat and ESS, seeded parallel chains, modes, and draw counts.
+- Generated quantities, fixed parameters, syntax checking and formatting, gradient checking, log density, input errors, metrics, and auxiliary files.
+- A hierarchical regression from `StanData::fromColumns()`, a model on table data, and, with phit, `score ~ study_hours + (1 | school)` from `StanData::fromFormula()`, compared with `Phit\fit_lmer()`.
+- FFI model methods and exposed functions, initialization from fits, the example models, and LOO with and without moment matching.
+
+Tests that need FFI skip without it, and the suite skips without CmdStan.
+
+The compatibility suite runs CmdStanR, posterior, loo, and bayesplot on the same inputs and compares the results. [Verification](https://cmdstanphp.phpstats.org/verification) on phpstats.org reports each comparison with its reference, tolerance, and largest error. To write those records, run the suite through the exporter:
+
+```sh
+PHIT_LIBRARY=/path/to/libphit.so php verification/compatibility/run.php
+```
+
+It sets `CMDSTANPHP_EVIDENCE`, which makes the compatibility tests write each comparison to `verification/compatibility/output/results.jsonl`, and then writes one record per topic to `site/verifications/` and the full results to `verification/compatibility/results.json`. Failed and skipped tests appear in the records with their reasons. Arguments after `--` go to PHPUnit, and the exit status is PHPUnit's.
 
 ## Continuous integration
 

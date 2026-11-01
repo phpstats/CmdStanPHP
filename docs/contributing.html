@@ -336,29 +336,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Benchmarks and verification</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./verification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Verification</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link active">
@@ -379,6 +362,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#set-up" id="toc-set-up" class="nav-link active" data-scroll-target="#set-up">Set up</a></li>
   <li><a href="#run-the-tests" id="toc-run-the-tests" class="nav-link" data-scroll-target="#run-the-tests">Run the tests</a></li>
+  <li><a href="#what-the-suites-cover" id="toc-what-the-suites-cover" class="nav-link" data-scroll-target="#what-the-suites-cover">What the suites cover</a></li>
   <li><a href="#continuous-integration" id="toc-continuous-integration" class="nav-link" data-scroll-target="#continuous-integration">Continuous integration</a></li>
   <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
   </ul>
@@ -428,7 +412,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>composer test:compatibility</code> compares results with R and needs the R packages listed in the comment.</li>
 <li><code>composer lint</code> checks syntax and the family naming rules with PHP_CodeSniffer.</li>
 </ul>
-<p>Tests that need the phit extension load it into PHP, for example <code>php -d extension=/path/to/libphit.dylib vendor/bin/phpunit</code>. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it. <a href="./verification.html">Verification</a> describes what each suite covers.</p>
+<p>Tests that need the phit extension load it into PHP, for example <code>php -d extension=/path/to/libphit.dylib vendor/bin/phpunit</code>. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it.</p>
+</section>
+<section id="what-the-suites-cover" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-suites-cover">What the suites cover</h2>
+<p>The unit suite covers JSON shapes and invalid data, CSV comments, warmup, and special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. Process behavior is tested with real PHP subprocesses. Data frames are tested with stand-in tables and a stand-in <code>Phibble\DataFrame</code>. Without phit, <code>StanData::fromFormula()</code> is tested with a stand-in <code>Phit\model_matrix()</code>, and with phit, against the real function. The moment-matching tests need phit and skip without it.</p>
+<p>The integration suite compiles the bundled models and runs real CmdStan methods:</p>
+<ul>
+<li>Bernoulli posterior estimates against the analytic mean, R-hat and ESS, seeded parallel chains, modes, and draw counts.</li>
+<li>Generated quantities, fixed parameters, syntax checking and formatting, gradient checking, log density, input errors, metrics, and auxiliary files.</li>
+<li>A hierarchical regression from <code>StanData::fromColumns()</code>, a model on table data, and, with phit, <code>score ~ study_hours + (1 | school)</code> from <code>StanData::fromFormula()</code>, compared with <code>Phit\fit_lmer()</code>.</li>
+<li>FFI model methods and exposed functions, initialization from fits, the example models, and LOO with and without moment matching.</li>
+</ul>
+<p>Tests that need FFI skip without it, and the suite skips without CmdStan.</p>
+<p>The compatibility suite runs CmdStanR, posterior, loo, and bayesplot on the same inputs and compares the results. <a href="https://cmdstanphp.phpstats.org/verification">Verification</a> on phpstats.org reports each comparison with its reference, tolerance, and largest error. To write those records, run the suite through the exporter:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">PHIT_LIBRARY</span><span class="op">=</span>/path/to/libphit.so <span class="ex">php</span> verification/compatibility/run.php</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It sets <code>CMDSTANPHP_EVIDENCE</code>, which makes the compatibility tests write each comparison to <code>verification/compatibility/output/results.jsonl</code>, and then writes one record per topic to <code>site/verifications/</code> and the full results to <code>verification/compatibility/results.json</code>. Failed and skipped tests appear in the records with their reasons. Arguments after <code>--</code> go to PHPUnit, and the exit status is PHPUnit’s.</p>
 </section>
 <section id="continuous-integration" class="level2">
 <h2 class="anchored" data-anchor-id="continuous-integration">Continuous integration</h2>
@@ -493,8 +492,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
 <p>All site content is under <code>docs/</code>, written in Quarto. Each page is a <code>.qmd</code> source with its rendered <code>.html</code> committed beside it, which is also the layout the phpstats.org site reads when it imports a package’s documentation. No page executes code, so rendering needs neither CmdStan nor a Stan toolchain.</p>
 <p>To render the site after editing a page:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render docs</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rsync</span> <span class="at">-a</span> <span class="at">--exclude</span> <span class="st">'.DS_Store'</span> docs/_site/ docs/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render docs</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rsync</span> <span class="at">-a</span> <span class="at">--exclude</span> <span class="st">'.DS_Store'</span> docs/_site/ docs/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Quarto writes the rendered site to the untracked <code>docs/_site</code>, and the second command publishes it beside the sources. Both commands are needed. The render step deletes the published pages and <code>site_libs/</code> from <code>docs/</code>, so running it without the <code>rsync</code> leaves the rendered site staged only under <code>docs/_site</code>. Commit the regenerated <code>.html</code> files along with <code>search.json</code>, <code>sitemap.xml</code>, <code>robots.txt</code>, and <code>site_libs/</code> whenever a source page changes. To preview while editing, run <code>quarto preview docs</code>.</p>
 <p>Links between pages are written as relative <code>.qmd</code> targets, which Quarto renders as relative <code>.html</code> links. The site therefore works at a domain root, at a repository subpath, and when phpstats.org imports the rendered pages.</p>
 <p><code>.github/workflows/pages.yml</code> checks the committed site’s internal links with <code>scripts/check-docs.py</code> on pull requests and on main, so a broken link is caught before publication. A separate job publishes <code>docs/</code> from main or a manual dispatch on main. Deployment uses GitHub’s Pages artifact and environment; no token beyond <code>GITHUB_TOKEN</code> is needed.</p>
