@@ -30,30 +30,35 @@ print_r($fit->diagnosticSummary());
 print_r($fit->diagnosticWarnings());
 ```
 
-- `chains` (default 4) sets the number of independent chains, and `parallel_chains` (default 1) how many run at once.
-- `iter_warmup` and `iter_sampling` set the iterations per chain. CmdStan's defaults are 1,000 each. Warmup draws adapt the step size and metric and are discarded unless `save_warmup: true`.
-- `seed` makes a run reproducible. A single seed is shared by all chains, and Stan derives a separate random stream from each chain's ID. A list gives one seed per chain.
-- `adapt_delta` is the target acceptance rate during adaptation (CmdStan's default is 0.8). Raising it gives smaller steps.
-- `max_treedepth` limits the number of leapfrog steps per iteration to 2 to that power (CmdStan's default depth is 10).
-- `output_dir` keeps the CSV files in a known directory. Without it, they go into a new temporary directory, which is not deleted.
+| Option | Meaning | Default |
+|---|---|---|
+| `chains` | Number of independent chains | 4 |
+| `parallel_chains` | Chains run at once | The `mc.cores` option, else 1 |
+| `iter_warmup`, `iter_sampling` | Iterations per chain. Warmup draws adapt the step size and metric and are discarded unless `save_warmup: true`. | 1,000 each |
+| `seed` | One seed for all chains, each with its own random stream from its chain ID, or a list with one seed per chain | Chosen by CmdStan |
+| `adapt_delta` | Target acceptance rate during adaptation. Higher values give smaller steps. | 0.8 |
+| `max_treedepth` | Limits each iteration to 2 to this power leapfrog steps | 10 |
+| `output_dir` | Directory for the CSV files | The `cmdstanr_output_dir` option, else a new temporary directory, which is not deleted |
 
 Options left out use CmdStan's defaults, and an unknown option throws. The [API reference](api.qmd#method-specific-options) lists every option.
 
 ## Check convergence
 
-A summary is only as reliable as the chains behind it. Check these before using an estimate:
+Check these before using an estimate:
 
-- **R-hat** (`rhat` in `summary()`) compares the chains with each other and with themselves. Values above 1.01 mean the chains have not mixed, and the estimates should not be used.
+- **R-hat** (`rhat` in `summary()`) compares the chains with each other and with themselves. Values above 1.01 suggest that the chains have not mixed, so investigate before using the estimates.
 - **Effective sample size** (`ess_bulk` and `ess_tail`) estimates how many independent draws the autocorrelated draws are worth, for the center and the tails. Aim for at least 100 per chain.
 - **Divergent transitions** mean the sampler met curvature it could not follow, often in a hierarchical model's funnel. Even a few can bias the estimates.
-- **Maximum tree depth** means some iterations stopped at `max_treedepth`. It makes sampling slower and does not bias the estimates.
+- **Maximum tree depth** means some iterations stopped at `max_treedepth`. It is mainly an efficiency warning, but frequent hits can point to difficult geometry or a poorly scaled model.
 - **E-BFMI** below 0.3 means the momentum resampling explores the energy distribution poorly, and the sampler may miss parts of the posterior.
 
-`summary()` reports R-hat and the effective sample sizes. `diagnosticSummary()` returns per-chain arrays `num_divergent`, `num_max_treedepth`, and `ebfmi`. After sampling, the fit checks divergences, tree depth, and E-BFMI, and `diagnosticWarnings()` returns messages such as `Chain 2: 3 divergent transitions.` or `Chain 1: E-BFMI below 0.3.`. These are not PHP warnings. Pass `diagnostics: []` to skip the checks. `cmdstanDiagnose()` runs CmdStan's own `diagnose` utility on the CSV files and returns its text.
+These checks detect common problems. Passing them does not prove that the chains converged, and a value just past a threshold does not prove that they failed.
 
-Common remedies:
+`summary()` reports R-hat and the effective sample sizes. `diagnosticSummary()` returns per-chain arrays `num_divergent`, `num_max_treedepth`, and `ebfmi`. After sampling, the fit checks divergences, tree depth, and E-BFMI, and `diagnosticWarnings()` returns messages such as `Chain 2: 3 divergent transitions.` or `Chain 1: E-BFMI below 0.3.`. These are not PHP warnings, and an empty list means none of the three checks fired. Pass `diagnostics: []` to skip the checks. `cmdstanDiagnose()` runs CmdStan's own `diagnose` utility on the CSV files and returns its text.
 
-- Divergences: raise `adapt_delta`, for example to 0.95 or 0.99, or reparameterize the model. A non-centered parameterization usually removes a hierarchical funnel.
+Common remedies, none of which is guaranteed to work:
+
+- Divergences: raise `adapt_delta`, for example to 0.95 or 0.99, or reparameterize the model. A non-centered parameterization often helps with a hierarchical funnel.
 - Maximum tree depth: raise `max_treedepth`, or rescale parameters to similar magnitudes.
 - High R-hat or low ESS: run longer chains, give better initial values, or simplify the model. Multimodal posteriors often show up here.
 
@@ -65,13 +70,13 @@ For a model built with `cppOptions: ['STAN_THREADS' => true]`, `threads_per_chai
 
 ## Initial values
 
-`init` accepts any of these:
-
-- a nonnegative radius, so initial values are drawn uniformly from (−radius, radius) on the unconstrained scale (CmdStan's default is 2)
-- an associative array of parameter values, or a JSON file
-- a list of arrays or files, one per chain
-- a callable that receives the chain ID, as in `init: fn($id) => ['theta' => $id / 5]`
-- a fit object
+| `init` value | Meaning |
+|---|---|
+| A nonnegative number | Draw initial values uniformly from (−value, value) on the unconstrained scale. CmdStan's default is 2. |
+| An associative array, or a JSON file name | Values for the named parameters, used for every chain |
+| A list of arrays or files | One per chain |
+| A callable | Receives the chain ID and returns the values, as in `init: fn($id) => ['theta' => $id / 5]` |
+| A fit object | One draw per chain from an earlier fit, described below |
 
 Tuple parameters are given as lists of their elements, and complex parameters as `[re, im]`. `$fit->init()` returns the initial values each chain used.
 

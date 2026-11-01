@@ -2,26 +2,93 @@
 title: "Draws, summaries, and saving fits"
 ---
 
-Every fitting method returns a fit object that reads CmdStan's CSV output. This page covers getting draws and summaries out of a fit, and keeping a fit after the PHP process ends.
+Every fitting method returns a fit object that reads CmdStan's CSV output. Get draws and summaries from the fit, and save it to keep it after the PHP process ends.
+
+## Draw formats
 
 ```php
+$array = $fit->draws('theta');
 $rows = $fit->draws('theta', 'draws_df');
-$csvFiles = $fit->saveOutputFiles('saved');
-$fit->saveObject('saved/fit.bin');
-$imported = CmdStan\read_cmdstan_csv($csvFiles);
 ```
 
-`draws_array` is `[iteration][chain][variable]`, with zero-based PHP indices and associative variable names. `draws_matrix` concatenates chain rows. `draws_df` adds one-based `.chain`, `.iteration`, and `.draw` metadata. `draws_list` gives a variable-to-values map per chain. `draws_rvars` maps each variable's base name to `dims`, `nchains`, `ndraws`, and `draws`, where `draws` is nested by the variable's dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return `draws_array` and other fits return `draws_matrix`, unless the `cmdstanr_draws_format` option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as `beta` includes all `beta[i]` elements. Warmup is excluded unless `incWarmup: true`.
+| Format | Shape | Notes |
+|---|---|---|
+| `draws_array` | `[iteration][chain][variable => value]` | Default for MCMC and generated quantities fits. Chains must have equal lengths. |
+| `draws_matrix` | `[draw][variable => value]` | Default for other fits. Chain 1's rows come first, then chain 2's. |
+| `draws_df` | `[draw][variable => value]` plus `.chain`, `.iteration`, and `.draw` | The added values are one-based. |
+| `draws_list` | `[chain][variable => list of values]` | |
+| `draws_rvars` | `[base name => ['dims', 'nchains', 'ndraws', 'draws']]` | `draws` is nested by the variable's dimensions, and each leaf lists all draws, chain by chain. |
 
-`summary()` returns mean, median, sample SD, scaled MAD, requested quantiles (default q5/q95), and, for MCMC, rank-normalized R-hat, bulk ESS, and MCSE from CmdStan's `stansummary`, plus tail ESS using posterior-compatible inclusive quantile indicators and Geyer's truncation. Non-MCMC or fewer than four sampling draws return `NAN` for convergence statistics.
+- PHP indices are zero-based: `$array[0][1]['theta']` is the first iteration of the second chain. Stan's indices in names such as `beta[1]` and the `.chain`, `.iteration`, and `.draw` values are one-based. In `draws_rvars`, `beta[1]` is at `draws[0]`.
+- The `cmdstanr_draws_format` option sets a different default: `draws_array`, `draws_matrix`, `draws_df`, or `draws_list`.
+- `draws_array` throws when chains have different lengths. The other formats accept them.
+- Warmup draws are left out unless they were saved with `save_warmup: true` and requested with `incWarmup: true`.
+- `samplerDiagnostics()` returns the sampler's columns, such as `divergent__` and `treedepth__`, in the same formats.
+- `drawsColumns()` returns one array per column, and `drawsTable()` returns a `Phibble\DataFrame` when phibble is installed.
+
+## Variable selection
+
+- A base name such as `beta` selects every element: `beta[1]`, `beta[2,1]`, and so on. An element name such as `beta[2]` selects one.
+- `null` selects every variable, including `lp__`. Sampler columns, whose names end in `__`, are left out.
+- An unknown name throws an `InvalidArgumentException`.
+- Variables keep the CSV's column order, except in `draws_list`, which follows the requested order.
+
+## Summaries
 
 ```php
-$fit->summary('theta', measures: ['mean', 'sd', 'rhat', 'ess_bulk', 'quantile2']);
-$fit->summary(null, [0.1, 0.9], ['median', 'range' => fn(array $x) => max($x) - min($x)]);
+$fit->summary('theta');
+$fit->summary('theta', measures: ['mean', 'sd', 'rhat', 'ess_bulk']);
+$fit->summary(null, [0.1, 0.9], [
+    'median',
+    'range' => fn(array $x) => max($x) - min($x),
+]);
 ```
 
-The `measures` argument follows posterior's `summarise_draws()`. Named measures include `mean`, `median`, `sd`, `var`, `mad`, `quantile2`, `rhat`, `ess_bulk`, `ess_tail`, `mcse_mean`, `mcse_sd`, `mcse_quantile`, and the groups `default_summary_measures`, `default_convergence_measures`, and `default_mcse_measures`. A callable needs a string key. It receives all draws as one list, and also the list of chains if it declares a second parameter. These measures are computed in PHP and do not need CmdStan. Nonfinite values can also produce `NAN`; use appropriate JSON handling when exposing summaries over HTTP.
+Without `measures`, `summary()` returns one row per variable with these columns:
 
-Runs create private temporary output directories unless `output_dir` is supplied. Output directories persist after the fit object is collected; delete them explicitly when no longer needed. Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv` with `output_basename`, with chain ids padded to at least two digits. `compress: 'gzip'` or `'bzip2'` (default: the `cmdstanr_compress` option) compresses the output and latent-dynamics CSVs after the run, and `read_cmdstan_csv()` reads `.csv.gz` and `.csv.bz2` files. Saving output follows CmdStanR's file naming, with padded ids, and updates the fit's paths; `saveOutputFiles(compress: ...)` recompresses on the way. Output files created by the run are moved, imported CSVs and the data file are copied, and existing destinations are never overwritten. `materialize()` reads the draws, initial values, and profiles into memory, and `saveObject()` materializes the fit before serializing it. Serialized fit objects embed parsed draws and cached MCMC summary statistics. Only unserialize files you trust. Serialized objects do not embed a CmdStan installation or provide standalone generated quantities without their CSV files.
+| Column | Meaning |
+|---|---|
+| `mean`, `median` | Posterior mean and median |
+| `sd` | Sample standard deviation |
+| `mad` | Median absolute deviation, scaled by 1.4826 |
+| `q5`, `q95` | Quantiles, named after the probabilities in the second argument |
+| `rhat`, `ess_bulk`, `mcse_mean` | Rank-normalized R-hat, bulk effective sample size, and Monte Carlo standard error of the mean, from CmdStan's `stansummary` |
+| `ess_tail` | Tail effective sample size, computed in PHP as posterior computes it |
 
-Console output is buffered until processes finish. With the progress bar on, CmdStan's iteration lines are left out of the output. `command()` returns each process's command line. `show_messages` controls stdout and `show_exceptions` controls stderr (defaults to the value of `show_messages`). Complete logs are retained in `output()`. A process failure throws `ProcessException` and cancels other running chains. Set `timeout` to bound each process in seconds.
+The convergence columns are `NAN` for fits other than MCMC and for chains with fewer than four sampling draws.
+
+With `measures`, the summary follows posterior's `summarise_draws()` and is computed in PHP without CmdStan:
+
+- Named measures: `mean`, `median`, `sd`, `var`, `mad`, `quantile2`, `rhat`, `rhat_basic`, `ess_bulk`, `ess_tail`, `ess_basic`, `ess_mean`, `ess_sd`, `ess_median`, `ess_quantile`, `mcse_mean`, `mcse_median`, `mcse_sd`, and `mcse_quantile`.
+- Groups: `default_summary_measures`, `default_convergence_measures`, and `default_mcse_measures`.
+- A callable needs a string key, which names its column. It receives all draws as one list, and also the list of chains if it declares a second parameter.
+
+`summaryColumns()` and `summaryTable()` return the same summary as column arrays or as a phibble data frame. Summaries can contain `NAN`, which `json_encode()` rejects, so replace it before encoding a summary as JSON.
+
+## Saving and reloading
+
+```php
+$files = $fit->saveOutputFiles('saved');
+$fit->saveObject('saved/fit.bin');
+
+$again = CmdStan\read_cmdstan_csv($files);
+$restored = unserialize(file_get_contents('saved/fit.bin'));
+```
+
+- `saveOutputFiles()` writes the CSV files to a directory as `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, with chain ids padded to two digits, and points the fit at the new files. `basename`, `timestamp`, and `random` change the name, and `compress` recompresses the files.
+- Files that the run created are moved. Imported CSV files and the data file are copied. An existing destination file is never overwritten, and the call throws instead.
+- `saveDataFile()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveConfigFiles()`, and `saveMetricFiles()` save the run's other files the same way.
+- `read_cmdstan_csv()` and `as_cmdstan_fit()` make a fit from CSV files, including `.csv.gz` and `.csv.bz2` files.
+- `saveObject()` reads the draws, initial values, and profiles into memory, which `materialize()` also does, and serializes the fit. The file does not include CmdStan, and running generated quantities from a restored fit still needs its CSV files. Unserialize only files you trust.
+
+## Output files
+
+- Without `output_dir` or the `cmdstanr_output_dir` option, each run writes to a new temporary directory. The directory is not deleted when the fit is, so remove it when it is no longer needed.
+- Output files are named `<model>-<YYYYmmddHHMM>-<id>-<hex>.csv`, or `<output_basename>-<id>.csv` when `output_basename` is set. `outputFiles()` lists them.
+- `compress: 'gzip'` or `'bzip2'` compresses the output and latent-dynamics CSV files after the run. The default comes from the `cmdstanr_compress` option.
+
+## Logs and errors
+
+- CmdStan's console output is printed when the processes finish. `show_messages` controls standard output, and `show_exceptions` controls standard error and defaults to `show_messages`. With the progress bar on, CmdStan's iteration lines are left out.
+- `output()` returns each process's complete output, and `command()` returns its command line.
+- A failing process throws `ProcessException` and stops the processes still running. `timeout` limits each process, in seconds.

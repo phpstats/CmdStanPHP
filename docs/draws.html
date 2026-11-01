@@ -336,8 +336,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#draw-formats" id="toc-draw-formats" class="nav-link active" data-scroll-target="#draw-formats">Draw formats</a></li>
+  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection">Variable selection</a></li>
+  <li><a href="#summaries" id="toc-summaries" class="nav-link" data-scroll-target="#summaries">Summaries</a></li>
+  <li><a href="#saving-and-reloading" id="toc-saving-and-reloading" class="nav-link" data-scroll-target="#saving-and-reloading">Saving and reloading</a></li>
+  <li><a href="#output-files" id="toc-output-files" class="nav-link" data-scroll-target="#output-files">Output files</a></li>
+  <li><a href="#logs-and-errors" id="toc-logs-and-errors" class="nav-link" data-scroll-target="#logs-and-errors">Logs and errors</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -361,20 +372,159 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Every fitting method returns a fit object that reads CmdStan’s CSV output. This page covers getting draws and summaries out of a fit, and keeping a fit after the PHP process ends.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$rows</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;draws(<span class="st">'theta'</span><span class="ot">,</span> <span class="st">'draws_df'</span>)<span class="ot">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$csvFiles</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;saveOutputFiles(<span class="st">'saved'</span>)<span class="ot">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveObject(<span class="st">'saved/fit.bin'</span>)<span class="ot">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="va">$imported</span> <span class="op">=</span> CmdStan\read_cmdstan_csv(<span class="va">$csvFiles</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>draws_array</code> is <code>[iteration][chain][variable]</code>, with zero-based PHP indices and associative variable names. <code>draws_matrix</code> concatenates chain rows. <code>draws_df</code> adds one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> metadata. <code>draws_list</code> gives a variable-to-values map per chain. <code>draws_rvars</code> maps each variable’s base name to <code>dims</code>, <code>nchains</code>, <code>ndraws</code>, and <code>draws</code>, where <code>draws</code> is nested by the variable’s dimensions and each leaf lists all draws chain by chain. Without a format, MCMC and generated quantities fits return <code>draws_array</code> and other fits return <code>draws_matrix</code>, unless the <code>cmdstanr_draws_format</code> option is set. Array format requires equal chain lengths; other formats permit unequal lengths. Selecting a base name such as <code>beta</code> includes all <code>beta[i]</code> elements. Warmup is excluded unless <code>incWarmup: true</code>.</p>
-<p><code>summary()</code> returns mean, median, sample SD, scaled MAD, requested quantiles (default q5/q95), and, for MCMC, rank-normalized R-hat, bulk ESS, and MCSE from CmdStan’s <code>stansummary</code>, plus tail ESS using posterior-compatible inclusive quantile indicators and Geyer’s truncation. Non-MCMC or fewer than four sampling draws return <code>NAN</code> for convergence statistics.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span><span class="ot">,</span> measures<span class="ot">:</span> [<span class="st">'mean'</span><span class="ot">,</span> <span class="st">'sd'</span><span class="ot">,</span> <span class="st">'rhat'</span><span class="ot">,</span> <span class="st">'ess_bulk'</span><span class="ot">,</span> <span class="st">'quantile2'</span>])<span class="ot">;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="kw">null</span><span class="ot">,</span> [<span class="fl">0.1</span><span class="ot">,</span> <span class="fl">0.9</span>]<span class="ot">,</span> [<span class="st">'median'</span><span class="ot">,</span> <span class="st">'range'</span> =&gt; <span class="kw">fn</span>(<span class="dt">array</span> <span class="va">$x</span>) =&gt; <span class="fu">max</span>(<span class="va">$x</span>) <span class="op">-</span> <span class="fu">min</span>(<span class="va">$x</span>)])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The <code>measures</code> argument follows posterior’s <code>summarise_draws()</code>. Named measures include <code>mean</code>, <code>median</code>, <code>sd</code>, <code>var</code>, <code>mad</code>, <code>quantile2</code>, <code>rhat</code>, <code>ess_bulk</code>, <code>ess_tail</code>, <code>mcse_mean</code>, <code>mcse_sd</code>, <code>mcse_quantile</code>, and the groups <code>default_summary_measures</code>, <code>default_convergence_measures</code>, and <code>default_mcse_measures</code>. A callable needs a string key. It receives all draws as one list, and also the list of chains if it declares a second parameter. These measures are computed in PHP and do not need CmdStan. Nonfinite values can also produce <code>NAN</code>; use appropriate JSON handling when exposing summaries over HTTP.</p>
-<p>Runs create private temporary output directories unless <code>output_dir</code> is supplied. Output directories persist after the fit object is collected; delete them explicitly when no longer needed. Output files are named <code>&lt;model&gt;-&lt;YYYYmmddHHMM&gt;-&lt;id&gt;-&lt;hex&gt;.csv</code>, or <code>&lt;output_basename&gt;-&lt;id&gt;.csv</code> with <code>output_basename</code>, with chain ids padded to at least two digits. <code>compress: 'gzip'</code> or <code>'bzip2'</code> (default: the <code>cmdstanr_compress</code> option) compresses the output and latent-dynamics CSVs after the run, and <code>read_cmdstan_csv()</code> reads <code>.csv.gz</code> and <code>.csv.bz2</code> files. Saving output follows CmdStanR’s file naming, with padded ids, and updates the fit’s paths; <code>saveOutputFiles(compress: ...)</code> recompresses on the way. Output files created by the run are moved, imported CSVs and the data file are copied, and existing destinations are never overwritten. <code>materialize()</code> reads the draws, initial values, and profiles into memory, and <code>saveObject()</code> materializes the fit before serializing it. Serialized fit objects embed parsed draws and cached MCMC summary statistics. Only unserialize files you trust. Serialized objects do not embed a CmdStan installation or provide standalone generated quantities without their CSV files.</p>
-<p>Console output is buffered until processes finish. With the progress bar on, CmdStan’s iteration lines are left out of the output. <code>command()</code> returns each process’s command line. <code>show_messages</code> controls stdout and <code>show_exceptions</code> controls stderr (defaults to the value of <code>show_messages</code>). Complete logs are retained in <code>output()</code>. A process failure throws <code>ProcessException</code> and cancels other running chains. Set <code>timeout</code> to bound each process in seconds.</p>
+<p>Every fitting method returns a fit object that reads CmdStan’s CSV output. Get draws and summaries from the fit, and save it to keep it after the PHP process ends.</p>
+<section id="draw-formats" class="level2">
+<h2 class="anchored" data-anchor-id="draw-formats">Draw formats</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$array</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;draws(<span class="st">'theta'</span>)<span class="ot">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$rows</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;draws(<span class="st">'theta'</span><span class="ot">,</span> <span class="st">'draws_df'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Shape</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>draws_array</code></td>
+<td><code>[iteration][chain][variable =&gt; value]</code></td>
+<td>Default for MCMC and generated quantities fits. Chains must have equal lengths.</td>
+</tr>
+<tr class="even">
+<td><code>draws_matrix</code></td>
+<td><code>[draw][variable =&gt; value]</code></td>
+<td>Default for other fits. Chain 1’s rows come first, then chain 2’s.</td>
+</tr>
+<tr class="odd">
+<td><code>draws_df</code></td>
+<td><code>[draw][variable =&gt; value]</code> plus <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code></td>
+<td>The added values are one-based.</td>
+</tr>
+<tr class="even">
+<td><code>draws_list</code></td>
+<td><code>[chain][variable =&gt; list of values]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>draws_rvars</code></td>
+<td><code>[base name =&gt; ['dims', 'nchains', 'ndraws', 'draws']]</code></td>
+<td><code>draws</code> is nested by the variable’s dimensions, and each leaf lists all draws, chain by chain.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>PHP indices are zero-based: <code>$array[0][1]['theta']</code> is the first iteration of the second chain. Stan’s indices in names such as <code>beta[1]</code> and the <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> values are one-based. In <code>draws_rvars</code>, <code>beta[1]</code> is at <code>draws[0]</code>.</li>
+<li>The <code>cmdstanr_draws_format</code> option sets a different default: <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, or <code>draws_list</code>.</li>
+<li><code>draws_array</code> throws when chains have different lengths. The other formats accept them.</li>
+<li>Warmup draws are left out unless they were saved with <code>save_warmup: true</code> and requested with <code>incWarmup: true</code>.</li>
+<li><code>samplerDiagnostics()</code> returns the sampler’s columns, such as <code>divergent__</code> and <code>treedepth__</code>, in the same formats.</li>
+<li><code>drawsColumns()</code> returns one array per column, and <code>drawsTable()</code> returns a <code>Phibble\DataFrame</code> when phibble is installed.</li>
+</ul>
+</section>
+<section id="variable-selection" class="level2">
+<h2 class="anchored" data-anchor-id="variable-selection">Variable selection</h2>
+<ul>
+<li>A base name such as <code>beta</code> selects every element: <code>beta[1]</code>, <code>beta[2,1]</code>, and so on. An element name such as <code>beta[2]</code> selects one.</li>
+<li><code>null</code> selects every variable, including <code>lp__</code>. Sampler columns, whose names end in <code>__</code>, are left out.</li>
+<li>An unknown name throws an <code>InvalidArgumentException</code>.</li>
+<li>Variables keep the CSV’s column order, except in <code>draws_list</code>, which follows the requested order.</li>
+</ul>
+</section>
+<section id="summaries" class="level2">
+<h2 class="anchored" data-anchor-id="summaries">Summaries</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span>)<span class="ot">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span><span class="ot">,</span> measures<span class="ot">:</span> [<span class="st">'mean'</span><span class="ot">,</span> <span class="st">'sd'</span><span class="ot">,</span> <span class="st">'rhat'</span><span class="ot">,</span> <span class="st">'ess_bulk'</span>])<span class="ot">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(<span class="kw">null</span><span class="ot">,</span> [<span class="fl">0.1</span><span class="ot">,</span> <span class="fl">0.9</span>]<span class="ot">,</span> [</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'median'</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'range'</span> =&gt; <span class="kw">fn</span>(<span class="dt">array</span> <span class="va">$x</span>) =&gt; <span class="fu">max</span>(<span class="va">$x</span>) <span class="op">-</span> <span class="fu">min</span>(<span class="va">$x</span>)<span class="ot">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Without <code>measures</code>, <code>summary()</code> returns one row per variable with these columns:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>mean</code>, <code>median</code></td>
+<td>Posterior mean and median</td>
+</tr>
+<tr class="even">
+<td><code>sd</code></td>
+<td>Sample standard deviation</td>
+</tr>
+<tr class="odd">
+<td><code>mad</code></td>
+<td>Median absolute deviation, scaled by 1.4826</td>
+</tr>
+<tr class="even">
+<td><code>q5</code>, <code>q95</code></td>
+<td>Quantiles, named after the probabilities in the second argument</td>
+</tr>
+<tr class="odd">
+<td><code>rhat</code>, <code>ess_bulk</code>, <code>mcse_mean</code></td>
+<td>Rank-normalized R-hat, bulk effective sample size, and Monte Carlo standard error of the mean, from CmdStan’s <code>stansummary</code></td>
+</tr>
+<tr class="even">
+<td><code>ess_tail</code></td>
+<td>Tail effective sample size, computed in PHP as posterior computes it</td>
+</tr>
+</tbody>
+</table>
+<p>The convergence columns are <code>NAN</code> for fits other than MCMC and for chains with fewer than four sampling draws.</p>
+<p>With <code>measures</code>, the summary follows posterior’s <code>summarise_draws()</code> and is computed in PHP without CmdStan:</p>
+<ul>
+<li>Named measures: <code>mean</code>, <code>median</code>, <code>sd</code>, <code>var</code>, <code>mad</code>, <code>quantile2</code>, <code>rhat</code>, <code>rhat_basic</code>, <code>ess_bulk</code>, <code>ess_tail</code>, <code>ess_basic</code>, <code>ess_mean</code>, <code>ess_sd</code>, <code>ess_median</code>, <code>ess_quantile</code>, <code>mcse_mean</code>, <code>mcse_median</code>, <code>mcse_sd</code>, and <code>mcse_quantile</code>.</li>
+<li>Groups: <code>default_summary_measures</code>, <code>default_convergence_measures</code>, and <code>default_mcse_measures</code>.</li>
+<li>A callable needs a string key, which names its column. It receives all draws as one list, and also the list of chains if it declares a second parameter.</li>
+</ul>
+<p><code>summaryColumns()</code> and <code>summaryTable()</code> return the same summary as column arrays or as a phibble data frame. Summaries can contain <code>NAN</code>, which <code>json_encode()</code> rejects, so replace it before encoding a summary as JSON.</p>
+</section>
+<section id="saving-and-reloading" class="level2">
+<h2 class="anchored" data-anchor-id="saving-and-reloading">Saving and reloading</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$files</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;saveOutputFiles(<span class="st">'saved'</span>)<span class="ot">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveObject(<span class="st">'saved/fit.bin'</span>)<span class="ot">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="va">$again</span> <span class="op">=</span> CmdStan\read_cmdstan_csv(<span class="va">$files</span>)<span class="ot">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="va">$restored</span> <span class="op">=</span> <span class="fu">unserialize</span>(<span class="fu">file_get_contents</span>(<span class="st">'saved/fit.bin'</span>))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><code>saveOutputFiles()</code> writes the CSV files to a directory as <code>&lt;model&gt;-&lt;YYYYmmddHHMM&gt;-&lt;id&gt;-&lt;hex&gt;.csv</code>, with chain ids padded to two digits, and points the fit at the new files. <code>basename</code>, <code>timestamp</code>, and <code>random</code> change the name, and <code>compress</code> recompresses the files.</li>
+<li>Files that the run created are moved. Imported CSV files and the data file are copied. An existing destination file is never overwritten, and the call throws instead.</li>
+<li><code>saveDataFile()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveConfigFiles()</code>, and <code>saveMetricFiles()</code> save the run’s other files the same way.</li>
+<li><code>read_cmdstan_csv()</code> and <code>as_cmdstan_fit()</code> make a fit from CSV files, including <code>.csv.gz</code> and <code>.csv.bz2</code> files.</li>
+<li><code>saveObject()</code> reads the draws, initial values, and profiles into memory, which <code>materialize()</code> also does, and serializes the fit. The file does not include CmdStan, and running generated quantities from a restored fit still needs its CSV files. Unserialize only files you trust.</li>
+</ul>
+</section>
+<section id="output-files" class="level2">
+<h2 class="anchored" data-anchor-id="output-files">Output files</h2>
+<ul>
+<li>Without <code>output_dir</code> or the <code>cmdstanr_output_dir</code> option, each run writes to a new temporary directory. The directory is not deleted when the fit is, so remove it when it is no longer needed.</li>
+<li>Output files are named <code>&lt;model&gt;-&lt;YYYYmmddHHMM&gt;-&lt;id&gt;-&lt;hex&gt;.csv</code>, or <code>&lt;output_basename&gt;-&lt;id&gt;.csv</code> when <code>output_basename</code> is set. <code>outputFiles()</code> lists them.</li>
+<li><code>compress: 'gzip'</code> or <code>'bzip2'</code> compresses the output and latent-dynamics CSV files after the run. The default comes from the <code>cmdstanr_compress</code> option.</li>
+</ul>
+</section>
+<section id="logs-and-errors" class="level2">
+<h2 class="anchored" data-anchor-id="logs-and-errors">Logs and errors</h2>
+<ul>
+<li>CmdStan’s console output is printed when the processes finish. <code>show_messages</code> controls standard output, and <code>show_exceptions</code> controls standard error and defaults to <code>show_messages</code>. With the progress bar on, CmdStan’s iteration lines are left out.</li>
+<li><code>output()</code> returns each process’s complete output, and <code>command()</code> returns its command line.</li>
+<li>A failing process throws <code>ProcessException</code> and stops the processes still running. <code>timeout</code> limits each process, in seconds.</li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

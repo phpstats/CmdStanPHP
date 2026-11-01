@@ -454,7 +454,7 @@ No warnings
 <li>Four chains of 1,000 sampling iterations, after 1,000 warmup iterations, give 4,000 draws per variable.</li>
 <li>Partial pooling pulls each school’s <code>theta</code> toward <code>mu</code>. The pull is stronger when <code>tau</code> is small or a school’s <code>sigma</code> is large.</li>
 <li>The non-centered form, <code>theta = mu + tau * theta_raw</code>, usually produces far fewer divergent transitions than sampling <code>theta</code> directly. It does not rule them out.</li>
-<li>Use the estimates only when <code>rhat</code> is below 1.01, <code>ess_bulk</code> is at least 100 per chain, and there are no warnings.</li>
+<li>Before using the estimates, check that <code>rhat</code> is below 1.01, <code>ess_bulk</code> is at least 100 per chain, and there are no warnings. Passing these checks does not prove convergence.</li>
 <li>A fixed seed reproduces the draws only with the same CmdStan version, compiler, and machine.</li>
 </ul>
 <p><a href="../compiling.html">Compiling models</a> · <a href="../mcmc.html">MCMC sampling</a> · <a href="../draws.html">Draws, summaries, and saving fits</a> · <a href="../api.html">API reference</a> · <a href="https://cmdstanphp.phpstats.org/vignettes/bayesian-schools">Interactive version</a></p>

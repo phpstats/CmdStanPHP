@@ -127,7 +127,7 @@ Array
 
 The other columns check whether the chains can be trusted:
 
-- `rhat` compares the chains with each other. Values near 1 indicate that they sampled the same distribution. [Vehtari et al. (2021)](https://doi.org/10.1214/20-BA1221) recommend R-hat below 1.01.
+- `rhat` compares the chains with each other. Values near 1 are consistent with the chains having sampled the same distribution. [Vehtari et al. (2021)](https://doi.org/10.1214/20-BA1221) recommend R-hat below 1.01.
 - `ess_bulk` and `ess_tail` are effective sample sizes for the center and the tails of the distribution. The draws are autocorrelated, so they carry less information than 4,000 independent draws. The same paper recommends at least 100 effective draws per chain, 400 here, for both.
 - `mcse_mean` is the Monte Carlo standard error of the mean.
 
