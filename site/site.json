@@ -171,7 +171,8 @@
         "site/verifications/interfaces.json"
     ],
     "benchmarks": [
-        "site/benchmarks/interfaces-workload.json"
+        "site/benchmarks/interfaces-workload.json",
+        "site/benchmarks/interfaces-split.json"
     ],
     "evidence_gaps": {
         "benchmarks": "No benchmark covers larger models, CSV reading at scale, or compilation time.",

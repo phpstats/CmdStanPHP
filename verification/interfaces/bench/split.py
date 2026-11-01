@@ -123,7 +123,9 @@ for phase, case in CASES.items():
         if phase == 'sample':
             row['note'] = f'{round(row["value"] - alone, 1)} ms more than CmdStan alone'
         if phase == 'ms':
-            row['note'] = f'{round(row["value"] - alone, 1)} ms outside CmdStan\'s executable'
+            row['note'] = f'{round(row["value"] - alone, 1)} ms more than CmdStan alone'
+            if n == 'CmdStanPy':
+                row['note'] += ", including CmdStan's stansummary executable, which its summary runs"
         rows.append(row)
     if phase == 'sample':
         rows.append({'case': case, 'implementation': ALONE, 'value': alone, 'reps': times[ALONE]['sample'],
@@ -144,7 +146,7 @@ record = {
     'measure': 'Elapsed time',
     'unit': 'ms',
     'statistic': 'median',
-    'time_spent_in': 'Load and Summary: the interface process. Sample: CmdStan\'s executable, launched by the interface, plus the interface\'s own work. CmdStan alone: CmdStan\'s executable only.',
+    'time_spent_in': 'Load and Summary: the interface process. Sample: CmdStan\'s executable, launched by the interface, plus the interface\'s own work. CmdStan alone: CmdStan\'s executable only. CmdStanPy\'s summary also runs CmdStan\'s stansummary executable.',
     'method': f'Each run is a fresh process. Each runs once as a warm-up, then the four alternate for {ROUNDS} rounds in a rotated order. Inside each interface the clock is read before loading the precompiled model, after it, after sample() returns, and after the summary; the phases are the differences, and Total runs from the first read to the last, as in the interface benchmark. Starting the runtime and loading libraries are outside the timing. CmdStan alone writes the data file before its clock starts and stops the clock when the last of the 4 chains exits. The summaries differ by interface as in the interface benchmark: CmdStanPy\'s runs CmdStan\'s stansummary.',
     'memory_method': 'child_peak_rss_mib, for CmdStan alone only: the largest peak resident set size among the 4 chain processes, from getrusage(RUSAGE_CHILDREN).',
     'check': {'draws_identical': identical},
@@ -153,7 +155,8 @@ record = {
         'php': sh('php', '-r', 'echo PHP_VERSION;'),
         'versions': {
             'CmdStan': Path(CMDSTAN).name.removeprefix('cmdstan-'),
-            'CmdStanPHP': sh('git', 'describe', '--tags', '--dirty', cwd=root),
+            # Dirty only when the package itself has changes; the records this run writes do not count.
+            'CmdStanPHP': sh('git', 'describe', '--tags', cwd=root) + ('' if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'src', 'composer.json'], cwd=root).returncode == 0 else '-dirty'),
             'cmdstanr': sh('Rscript', '-e', 'cat(as.character(packageVersion("cmdstanr")))'),
             'posterior': sh('Rscript', '-e', 'cat(as.character(packageVersion("posterior")))'),
             'cmdstanpy': sh(str(python), '-c', 'import cmdstanpy; print(cmdstanpy.__version__)'),

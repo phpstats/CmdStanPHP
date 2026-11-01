@@ -1,0 +1,240 @@
+{
+  "title": "Where the time goes: eight schools in CmdStanPHP, CmdStanR, and CmdStanPy",
+  "label": "Time by phase",
+  "description": "The eight schools workload of the interface benchmark, timed in three phases inside each interface, beside the same 4 chains run by CmdStan's executable with no interface. The sample phase includes the chains, so the difference between an interface's sample phase and CmdStan alone is the time the interface spends writing the data, starting the processes, and waiting for them.",
+  "workload": "Eight schools, 4 chains × 2,000 iterations",
+  "implementations": {
+    "CmdStan alone": "CmdStan's compiled executable, 4 processes started together from Python with the arguments CmdStanPHP passes",
+    "CmdStanPHP": "CmdStanPHP, plain PHP (no phit)",
+    "CmdStanR": "cmdstanr with posterior",
+    "CmdStanPy": "CmdStanPy"
+  },
+  "measure": "Elapsed time",
+  "unit": "ms",
+  "statistic": "median",
+  "time_spent_in": "Load and Summary: the interface process. Sample: CmdStan's executable, launched by the interface, plus the interface's own work. CmdStan alone: CmdStan's executable only. CmdStanPy's summary also runs CmdStan's stansummary executable.",
+  "method": "Each run is a fresh process. Each runs once as a warm-up, then the four alternate for 7 rounds in a rotated order. Inside each interface the clock is read before loading the precompiled model, after it, after sample() returns, and after the summary; the phases are the differences, and Total runs from the first read to the last, as in the interface benchmark. Starting the runtime and loading libraries are outside the timing. CmdStan alone writes the data file before its clock starts and stops the clock when the last of the 4 chains exits. The summaries differ by interface as in the interface benchmark: CmdStanPy's runs CmdStan's stansummary.",
+  "memory_method": "child_peak_rss_mib, for CmdStan alone only: the largest peak resident set size among the 4 chain processes, from getrusage(RUSAGE_CHILDREN).",
+  "check": {
+    "draws_identical": true
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 9955HX 16-Core Processor",
+    "cores": 2,
+    "memory_gb": 8,
+    "os": "Linux, Ubuntu 24.04.5 LTS (x86_64)",
+    "php": "8.5.12",
+    "versions": {
+      "CmdStan": "2.40.0",
+      "CmdStanPHP": "v0.1.2-35-gccadda9",
+      "cmdstanr": "0.9.0",
+      "posterior": "1.7.0",
+      "cmdstanpy": "1.3.0",
+      "R": "4.6.2",
+      "Python": "3.14.10"
+    },
+    "threads": {
+      "chains": 4
+    },
+    "cache": "warm",
+    "compilation": "Outside the timing. The model is compiled once with CmdStan's makefile, and every run loads that executable (sha256 9db59bddf970).",
+    "repeats": 7,
+    "warmups": 1,
+    "date": "2026-11-01",
+    "commit": "ccadda9"
+  },
+  "rows": [
+    {
+      "case": "Load the model",
+      "implementation": "CmdStanPHP",
+      "value": 12.269,
+      "reps": [
+        12.306,
+        12.316,
+        12.237,
+        12.267,
+        12.266,
+        12.304,
+        12.269
+      ]
+    },
+    {
+      "case": "Load the model",
+      "implementation": "CmdStanR",
+      "value": 59.223,
+      "reps": [
+        60.906,
+        59.696,
+        59.048,
+        59.223,
+        59.28,
+        59.143,
+        58.996
+      ]
+    },
+    {
+      "case": "Load the model",
+      "implementation": "CmdStanPy",
+      "value": 0.046,
+      "reps": [
+        0.045,
+        0.046,
+        0.047,
+        0.047,
+        0.043,
+        0.047,
+        0.043
+      ]
+    },
+    {
+      "case": "Sample: write data, run 4 chains, wait for them",
+      "implementation": "CmdStanPHP",
+      "value": 70.683,
+      "reps": [
+        76.585,
+        68.677,
+        70.616,
+        70.683,
+        77.335,
+        77.35,
+        70.555
+      ],
+      "note": "23.8 ms more than CmdStan alone"
+    },
+    {
+      "case": "Sample: write data, run 4 chains, wait for them",
+      "implementation": "CmdStanR",
+      "value": 313.645,
+      "reps": [
+        321.827,
+        315.582,
+        313.645,
+        314.128,
+        310.482,
+        312.886,
+        311.939
+      ],
+      "note": "266.8 ms more than CmdStan alone"
+    },
+    {
+      "case": "Sample: write data, run 4 chains, wait for them",
+      "implementation": "CmdStanPy",
+      "value": 55.961,
+      "reps": [
+        56.05,
+        57.376,
+        55.961,
+        55.636,
+        56.158,
+        55.888,
+        55.221
+      ],
+      "note": "9.1 ms more than CmdStan alone"
+    },
+    {
+      "case": "Sample: write data, run 4 chains, wait for them",
+      "implementation": "CmdStan alone",
+      "value": 46.887,
+      "reps": [
+        47.438,
+        46.99,
+        46.689,
+        46.545,
+        47.047,
+        46.887,
+        45.515
+      ],
+      "child_peak_rss_mib": 13.5,
+      "note": "The 4 chain processes only, started together with CmdStanPHP's arguments"
+    },
+    {
+      "case": "Summary: read the CSV files and summarize",
+      "implementation": "CmdStanPHP",
+      "value": 45.158,
+      "reps": [
+        45.158,
+        45.054,
+        45.08,
+        45.434,
+        45.301,
+        44.721,
+        45.233
+      ]
+    },
+    {
+      "case": "Summary: read the CSV files and summarize",
+      "implementation": "CmdStanR",
+      "value": 69.707,
+      "reps": [
+        69.857,
+        70.104,
+        69.15,
+        71.106,
+        69.343,
+        69.707,
+        68.725
+      ]
+    },
+    {
+      "case": "Summary: read the CSV files and summarize",
+      "implementation": "CmdStanPy",
+      "value": 54.594,
+      "reps": [
+        54.655,
+        54.537,
+        54.709,
+        54.594,
+        54.623,
+        54.571,
+        54.47
+      ]
+    },
+    {
+      "case": "Total",
+      "implementation": "CmdStanPHP",
+      "value": 128.384,
+      "reps": [
+        134.049,
+        126.047,
+        127.934,
+        128.384,
+        134.903,
+        134.375,
+        128.057
+      ],
+      "note": "81.5 ms more than CmdStan alone"
+    },
+    {
+      "case": "Total",
+      "implementation": "CmdStanR",
+      "value": 441.843,
+      "reps": [
+        452.59,
+        445.381,
+        441.843,
+        444.457,
+        439.106,
+        441.736,
+        439.66
+      ],
+      "note": "395.0 ms more than CmdStan alone"
+    },
+    {
+      "case": "Total",
+      "implementation": "CmdStanPy",
+      "value": 110.717,
+      "reps": [
+        110.751,
+        111.959,
+        110.717,
+        110.276,
+        110.825,
+        110.506,
+        109.734
+      ],
+      "note": "63.8 ms more than CmdStan alone, including CmdStan's stansummary executable, which its summary runs"
+    }
+  ],
+  "reproduce": "python3 verification/interfaces/bench/split.py",
+  "source": "verification/interfaces/bench/split.py"
+}
