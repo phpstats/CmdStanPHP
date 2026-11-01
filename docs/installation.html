@@ -381,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>CmdStanPHP is a Composer package that runs <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a>, Stan’s command-line interface. Installing it takes three steps: the Composer package, a C++ toolchain, and a CmdStan release.</p>
+<p>Install the Composer package, a C++ toolchain, and a <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a> release.</p>
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
 <p>Required:</p>
@@ -399,12 +399,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="https://github.com/phpstats/phibble">phibble</a>, for model data from a <code>Phibble\DataFrame</code> and for draws and summaries returned as data frames</li>
 <li><a href="https://github.com/vega/vl-convert/releases">vl-convert</a>, for figures saved as SVG or PNG</li>
 </ul>
-<p>composer.json allows PHP <code>&gt;=8.2 &lt;8.6</code>. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.</p>
-<p><code>proc_open()</code> must be enabled, because every compilation and every run starts a CmdStan process. Hosts that list it in <code>disable_functions</code> cannot run models.</p>
+<p>composer.json allows PHP <code>&gt;=8.2 &lt;8.6</code>. <code>proc_open()</code> must be enabled, because every compilation and run starts a CmdStan process, so hosts that list it in <code>disable_functions</code> cannot run models. <a href="./verification.html">Verification</a> lists what CI tests.</p>
 </section>
 <section id="supported-platforms" class="level2">
 <h2 class="anchored" data-anchor-id="supported-platforms">Supported platforms</h2>
-<p>CI runs every test on Linux (Ubuntu). The integration suite also passes on macOS on Apple silicon. Native Windows has not been tested. The code chooses Windows file suffixes and compiler names, but no Windows build or run has been checked. On Windows, run PHP inside WSL, which uses the tested Linux path.</p>
+<ul>
+<li>Linux: tested in CI.</li>
+<li>macOS on Apple silicon: the integration suite passes locally.</li>
+<li>Windows: not tested. Run PHP inside WSL, which uses the Linux path.</li>
+</ul>
 </section>
 <section id="install-the-package" class="level2">
 <h2 class="anchored" data-anchor-id="install-the-package">Install the package</h2>
@@ -423,12 +426,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="install-cmdstan">Install CmdStan</h2>
 <p>If CmdStan 2.37 or later is already installed, skip to <a href="#select-cmdstan">selecting CmdStan</a>.</p>
 <p><code>install_cmdstan()</code> downloads an official release from GitHub, builds it, and selects it:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="st">'vendor/autoload.php'</span><span class="ot">;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$path</span> <span class="op">=</span> CmdStan\install_cmdstan(<span class="st">'2.40.0'</span><span class="ot">,</span> cores<span class="ot">:</span> <span class="dv">2</span><span class="ot">,</span> timeout<span class="ot">:</span> <span class="dv">1800</span>)<span class="ot">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$path</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$path</span> <span class="op">=</span> CmdStan\install_cmdstan(<span class="st">'2.40.0'</span><span class="ot">,</span> cores<span class="ot">:</span> <span class="dv">2</span><span class="ot">,</span> timeout<span class="ot">:</span> <span class="dv">1800</span>)<span class="ot">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$path</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The release goes into <code>~/.cmdstan/cmdstan-2.40.0</code>, or into the directory given as <code>dir</code>. Without a version, the installer takes the latest release. Versions before 2.37 are rejected. Installing needs <code>curl</code>, <code>tar</code>, make, the C++ compiler, internet access, and enough memory for compilation. The build takes several minutes. <code>cores</code> sets the number of parallel make jobs, and <code>timeout</code> is in seconds.</p>
-<p>The installer checks the archive’s entry paths and links before extracting, extracts into a private staging directory, and builds at the final location. It refuses to replace an installed version unless <code>overwrite: true</code> is passed. With <code>overwrite: true</code> the old installation is kept until the new build succeeds and is restored if the build fails.</p>
+<p>The installer refuses to replace an installed version unless <code>overwrite: true</code> is passed. With <code>overwrite: true</code>, the old installation is restored if the new build fails. Archives with entry paths or links outside their directory are rejected.</p>
 <p>Other ways to install:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>CmdStan\install_cmdstan(releaseFile<span class="ot">:</span> <span class="st">'/downloads/cmdstan-2.40.0.tar.gz'</span>)<span class="ot">;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>CmdStan\install_cmdstan(releaseUrl<span class="ot">:</span> <span class="st">'https://example.com/cmdstan-2.40.0.tar.gz'</span>)<span class="ot">;</span></span>
@@ -449,11 +450,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="check-the-installation" class="level2">
 <h2 class="anchored" data-anchor-id="check-the-installation">Check the installation</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="st">'vendor/autoload.php'</span><span class="ot">;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\cmdstan_path()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\cmdstan_version()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(CmdStan\check_cmdstan_toolchain())<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\cmdstan_path()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> CmdStan\cmdstan_version()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(CmdStan\check_cmdstan_toolchain())<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>On macOS with CmdStan 2.40.0 this prints:</p>
 <pre class="text"><code>/Users/you/.cmdstan/cmdstan-2.40.0
 2.40.0

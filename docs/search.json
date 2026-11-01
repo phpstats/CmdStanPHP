@@ -147,7 +147,7 @@
     "href": "installation.html",
     "title": "Installation",
     "section": "",
-    "text": "CmdStanPHP is a Composer package that runs CmdStan, Stan’s command-line interface. Installing it takes three steps: the Composer package, a C++ toolchain, and a CmdStan release.",
+    "text": "Install the Composer package, a C++ toolchain, and a CmdStan release.",
     "crumbs": [
       "Getting started",
       "Installation"
@@ -158,7 +158,7 @@
     "href": "installation.html#requirements",
     "title": "Installation",
     "section": "Requirements",
-    "text": "Requirements\nRequired:\n\nPHP 8.2, 8.3, 8.4, or 8.5\nThe JSON extension\nPHP’s proc_open() function\nCmdStan 2.37 or later\nmake and a C++ compiler that CmdStan supports\n\nOptional:\n\nThe FFI extension, for in-process log densities, gradients, and transforms, and for calling a model’s Stan functions from PHP\nThe phit extension, for moment matching in loo() and for StanData::fromFormula()\nphibble, for model data from a Phibble\\DataFrame and for draws and summaries returned as data frames\nvl-convert, for figures saved as SVG or PNG\n\ncomposer.json allows PHP &gt;=8.2 &lt;8.6. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.\nproc_open() must be enabled, because every compilation and every run starts a CmdStan process. Hosts that list it in disable_functions cannot run models.",
+    "text": "Requirements\nRequired:\n\nPHP 8.2, 8.3, 8.4, or 8.5\nThe JSON extension\nPHP’s proc_open() function\nCmdStan 2.37 or later\nmake and a C++ compiler that CmdStan supports\n\nOptional:\n\nThe FFI extension, for in-process log densities, gradients, and transforms, and for calling a model’s Stan functions from PHP\nThe phit extension, for moment matching in loo() and for StanData::fromFormula()\nphibble, for model data from a Phibble\\DataFrame and for draws and summaries returned as data frames\nvl-convert, for figures saved as SVG or PNG\n\ncomposer.json allows PHP &gt;=8.2 &lt;8.6. proc_open() must be enabled, because every compilation and run starts a CmdStan process, so hosts that list it in disable_functions cannot run models. Verification lists what CI tests.",
     "crumbs": [
       "Getting started",
       "Installation"
@@ -169,7 +169,7 @@
     "href": "installation.html#supported-platforms",
     "title": "Installation",
     "section": "Supported platforms",
-    "text": "Supported platforms\nCI runs every test on Linux (Ubuntu). The integration suite also passes on macOS on Apple silicon. Native Windows has not been tested. The code chooses Windows file suffixes and compiler names, but no Windows build or run has been checked. On Windows, run PHP inside WSL, which uses the tested Linux path.",
+    "text": "Supported platforms\n\nLinux: tested in CI.\nmacOS on Apple silicon: the integration suite passes locally.\nWindows: not tested. Run PHP inside WSL, which uses the Linux path.",
     "crumbs": [
       "Getting started",
       "Installation"
@@ -202,7 +202,7 @@
     "href": "installation.html#install-cmdstan",
     "title": "Installation",
     "section": "Install CmdStan",
-    "text": "Install CmdStan\nIf CmdStan 2.37 or later is already installed, skip to selecting CmdStan.\ninstall_cmdstan() downloads an official release from GitHub, builds it, and selects it:\nrequire 'vendor/autoload.php';\n\n$path = CmdStan\\install_cmdstan('2.40.0', cores: 2, timeout: 1800);\necho $path, \"\\n\";\nThe release goes into ~/.cmdstan/cmdstan-2.40.0, or into the directory given as dir. Without a version, the installer takes the latest release. Versions before 2.37 are rejected. Installing needs curl, tar, make, the C++ compiler, internet access, and enough memory for compilation. The build takes several minutes. cores sets the number of parallel make jobs, and timeout is in seconds.\nThe installer checks the archive’s entry paths and links before extracting, extracts into a private staging directory, and builds at the final location. It refuses to replace an installed version unless overwrite: true is passed. With overwrite: true the old installation is kept until the new build succeeds and is restored if the build fails.\nOther ways to install:\nCmdStan\\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz');\nCmdStan\\install_cmdstan(releaseUrl: 'https://example.com/cmdstan-2.40.0.tar.gz');\nCmdStan\\install_cmdstan('2.40.0', cppOptions: ['STAN_THREADS' =&gt; true]);\n\nreleaseFile is a local .tar.gz and releaseUrl an HTTPS .tar.gz URL. The version is read from the archive’s top-level cmdstan-* directory.\ncppOptions are written to CmdStan’s make/local before the build.\ncopyMakeLocal: true first copies the make/local of the CmdStan in use into the new installation. The default, null, asks in an interactive terminal and otherwise does not copy.\n\ncmdstan_make_local() reads, appends to, or replaces the selected installation’s make/local, and rebuild_cmdstan(cores: 2) runs clean-all and build on it.",
+    "text": "Install CmdStan\nIf CmdStan 2.37 or later is already installed, skip to selecting CmdStan.\ninstall_cmdstan() downloads an official release from GitHub, builds it, and selects it:\n$path = CmdStan\\install_cmdstan('2.40.0', cores: 2, timeout: 1800);\necho $path, \"\\n\";\nThe release goes into ~/.cmdstan/cmdstan-2.40.0, or into the directory given as dir. Without a version, the installer takes the latest release. Versions before 2.37 are rejected. Installing needs curl, tar, make, the C++ compiler, internet access, and enough memory for compilation. The build takes several minutes. cores sets the number of parallel make jobs, and timeout is in seconds.\nThe installer refuses to replace an installed version unless overwrite: true is passed. With overwrite: true, the old installation is restored if the new build fails. Archives with entry paths or links outside their directory are rejected.\nOther ways to install:\nCmdStan\\install_cmdstan(releaseFile: '/downloads/cmdstan-2.40.0.tar.gz');\nCmdStan\\install_cmdstan(releaseUrl: 'https://example.com/cmdstan-2.40.0.tar.gz');\nCmdStan\\install_cmdstan('2.40.0', cppOptions: ['STAN_THREADS' =&gt; true]);\n\nreleaseFile is a local .tar.gz and releaseUrl an HTTPS .tar.gz URL. The version is read from the archive’s top-level cmdstan-* directory.\ncppOptions are written to CmdStan’s make/local before the build.\ncopyMakeLocal: true first copies the make/local of the CmdStan in use into the new installation. The default, null, asks in an interactive terminal and otherwise does not copy.\n\ncmdstan_make_local() reads, appends to, or replaces the selected installation’s make/local, and rebuild_cmdstan(cores: 2) runs clean-all and build on it.",
     "crumbs": [
       "Getting started",
       "Installation"
@@ -224,7 +224,7 @@
     "href": "installation.html#check-the-installation",
     "title": "Installation",
     "section": "Check the installation",
-    "text": "Check the installation\nrequire 'vendor/autoload.php';\n\necho CmdStan\\cmdstan_path(), \"\\n\";\necho CmdStan\\cmdstan_version(), \"\\n\";\nprint_r(CmdStan\\check_cmdstan_toolchain());\nOn macOS with CmdStan 2.40.0 this prints:\n/Users/you/.cmdstan/cmdstan-2.40.0\n2.40.0\nArray\n(\n    [make] =&gt; Array\n        (\n            [path] =&gt; /usr/bin/make\n            [version] =&gt; GNU Make 3.81\n        )\n\n    [cxx] =&gt; Array\n        (\n            [name] =&gt; clang++\n            [path] =&gt; /usr/bin/clang++\n            [version] =&gt; Apple clang version 21.0.0 (clang-2100.3.34.2)\n        )\n\n    [stanc] =&gt; Array\n        (\n            [path] =&gt; /Users/you/.cmdstan/cmdstan-2.40.0/bin/stanc\n            [version] =&gt; stanc3 42d3cdf (Unix)\n        )\n\n)\ncmdstan_path() throws when no CmdStan installation is found. check_cmdstan_toolchain() throws when make or the C++ compiler is missing. It does not install missing tools, and a successful check does not prove that a compilation will succeed.",
+    "text": "Check the installation\necho CmdStan\\cmdstan_path(), \"\\n\";\necho CmdStan\\cmdstan_version(), \"\\n\";\nprint_r(CmdStan\\check_cmdstan_toolchain());\nOn macOS with CmdStan 2.40.0 this prints:\n/Users/you/.cmdstan/cmdstan-2.40.0\n2.40.0\nArray\n(\n    [make] =&gt; Array\n        (\n            [path] =&gt; /usr/bin/make\n            [version] =&gt; GNU Make 3.81\n        )\n\n    [cxx] =&gt; Array\n        (\n            [name] =&gt; clang++\n            [path] =&gt; /usr/bin/clang++\n            [version] =&gt; Apple clang version 21.0.0 (clang-2100.3.34.2)\n        )\n\n    [stanc] =&gt; Array\n        (\n            [path] =&gt; /Users/you/.cmdstan/cmdstan-2.40.0/bin/stanc\n            [version] =&gt; stanc3 42d3cdf (Unix)\n        )\n\n)\ncmdstan_path() throws when no CmdStan installation is found. check_cmdstan_toolchain() throws when make or the C++ compiler is missing. It does not install missing tools, and a successful check does not prove that a compilation will succeed.",
     "crumbs": [
       "Getting started",
       "Installation"
@@ -257,18 +257,7 @@
     "href": "getting-started.html",
     "title": "Getting started",
     "section": "",
-    "text": "This page fits a first Stan model from PHP. It assumes a C++ toolchain and CmdStan are installed as described in Installation.",
-    "crumbs": [
-      "Getting started",
-      "Getting started"
-    ]
-  },
-  {
-    "objectID": "getting-started.html#set-up-a-project",
-    "href": "getting-started.html#set-up-a-project",
-    "title": "Getting started",
-    "section": "Set up a project",
-    "text": "Set up a project\nCreate an empty directory and install the package into it:\nmkdir bernoulli && cd bernoulli\ncomposer require phpstats/cmdstanphp\nThe model and the script below go in this directory. The data are written inline in the script.",
+    "text": "Fit a first Stan model from PHP and check the result. CmdStanPHP, a C++ toolchain, and CmdStan must be installed as described in Installation.",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -279,7 +268,7 @@
     "href": "getting-started.html#the-model",
     "title": "Getting started",
     "section": "The model",
-    "text": "The model\nA Stan program declares its data, its parameters, and a model that relates them. This one estimates theta, the probability of a success, from N binary outcomes y. The prior on theta is uniform, so the posterior is a beta distribution.\nSave it as bernoulli.stan in your project directory:\ndata {\n  int&lt;lower=0&gt; N;\n  array[N] int&lt;lower=0, upper=1&gt; y;\n}\nparameters {\n  real&lt;lower=0, upper=1&gt; theta;\n}\nmodel {\n  theta ~ beta(1, 1);\n  y ~ bernoulli(theta);\n}",
+    "text": "The model\nA Stan program declares its data, its parameters, and a model that relates them. This one estimates theta, the probability of a success, from N binary outcomes y. The prior on theta is uniform, so the posterior is a beta distribution. Save it as bernoulli.stan:\ndata {\n  int&lt;lower=0&gt; N;\n  array[N] int&lt;lower=0, upper=1&gt; y;\n}\nparameters {\n  real&lt;lower=0, upper=1&gt; theta;\n}\nmodel {\n  theta ~ beta(1, 1);\n  y ~ bernoulli(theta);\n}",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -290,7 +279,7 @@
     "href": "getting-started.html#compile-and-sample",
     "title": "Getting started",
     "section": "Compile and sample",
-    "text": "Compile and sample\nSave this script as bernoulli.php in the same directory:\n&lt;?php\nrequire __DIR__.'/vendor/autoload.php';\n\nuse function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model(__DIR__.'/bernoulli.stan');\n\n$fit = $model-&gt;sample(\n    data: ['N' =&gt; 10, 'y' =&gt; [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],\n    seed: 123,\n    chains: 4,\n    parallel_chains: 4,\n    show_messages: false,\n);\n\nprint_r($fit-&gt;summary('theta'));\nprint_r($fit-&gt;diagnosticSummary());\nprint_r($fit-&gt;diagnosticWarnings());\nRun it from the project directory:\nphp bernoulli.php\ncmdstan_model() compiles bernoulli.stan to an executable named bernoulli beside it, unless an up-to-date executable is already there. sample() writes the data to a JSON file, runs four Markov chains as four CmdStan processes, and reads their CSV output into a CmdStanMCMC fit. Each chain runs 1,000 warmup iterations, which are discarded, and 1,000 sampling iterations. The fit therefore holds 4,000 draws of theta.",
+    "text": "Compile and sample\nuse function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model(__DIR__.'/bernoulli.stan');\n\n$fit = $model-&gt;sample(\n    data: [\n        'N' =&gt; 10,\n        'y' =&gt; [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],\n    ],\n    seed: 123,\n    chains: 4,\n    parallel_chains: 4,\n    show_messages: false,\n);\n\nforeach ($fit-&gt;summary('theta')[0] as $column =&gt; $value) {\n    $shown = is_float($value) ? sprintf('%.4g', $value) : $value;\n    echo str_pad($column, 10), $shown, \"\\n\";\n}\n\n$d = $fit-&gt;diagnosticSummary();\necho \"\\nchain divergent max_treedepth ebfmi\\n\";\nforeach ($d['ebfmi'] as $i =&gt; $ebfmi) {\n    printf(\n        \"%5d %9d %13d %5.2f\\n\",\n        $i + 1,\n        $d['num_divergent'][$i],\n        $d['num_max_treedepth'][$i],\n        $ebfmi,\n    );\n}\n\n$warnings = $fit-&gt;diagnosticWarnings();\necho $warnings ? implode(\"\\n\", $warnings) : 'No warnings';\necho \"\\n\";\ncmdstan_model() compiles bernoulli.stan to an executable named bernoulli beside it, unless an up-to-date executable is already there. sample() writes the data to a JSON file, runs four Markov chains as four CmdStan processes, and reads their CSV output into a CmdStanMCMC fit. Each chain runs 1,000 warmup iterations, which are discarded, and 1,000 sampling iterations, so the fit holds 4,000 draws of theta.",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -301,7 +290,7 @@
     "href": "getting-started.html#read-the-results",
     "title": "Getting started",
     "section": "Read the results",
-    "text": "Read the results\nThe script prints:\nArray\n(\n    [0] =&gt; Array\n        (\n            [variable] =&gt; theta\n            [mean] =&gt; 0.25688224553065\n            [median] =&gt; 0.241080625\n            [sd] =&gt; 0.12428477287867\n            [mad] =&gt; 0.12715007403\n            [q5] =&gt; 0.08003641255\n            [q95] =&gt; 0.4852966975\n            [rhat] =&gt; 1.0009548425564\n            [ess_bulk] =&gt; 1231.5526335488\n            [ess_tail] =&gt; 1476.7359726913\n            [mcse_mean] =&gt; 0.0034120356567473\n        )\n\n)\nArray\n(\n    [num_divergent] =&gt; Array\n        (\n            [0] =&gt; 0\n            [1] =&gt; 0\n            [2] =&gt; 0\n            [3] =&gt; 0\n        )\n\n    [num_max_treedepth] =&gt; Array\n        (\n            [0] =&gt; 0\n            [1] =&gt; 0\n            [2] =&gt; 0\n            [3] =&gt; 0\n        )\n\n    [ebfmi] =&gt; Array\n        (\n            [0] =&gt; 1.1147963277411\n            [1] =&gt; 0.92340805277899\n            [2] =&gt; 1.2710912715229\n            [3] =&gt; 0.94446252116701\n        )\n\n)\nArray\n(\n)\nsummary() returns one row per variable. The posterior mean of theta is about 0.26, and 90% of the draws lie between q5 and q95, 0.08 and 0.49. The exact posterior is Beta(3, 9), whose mean is 0.25.\nThe other columns check whether the chains can be trusted:\n\nrhat compares the chains with each other. Values near 1 are consistent with the chains having sampled the same distribution. Vehtari et al. (2021) recommend R-hat below 1.01.\ness_bulk and ess_tail are effective sample sizes for the center and the tails of the distribution. The draws are autocorrelated, so they carry less information than 4,000 independent draws. The same paper recommends at least 100 effective draws per chain, 400 here, for both.\nmcse_mean is the Monte Carlo standard error of the mean.\n\ndiagnosticSummary() reports, for each chain, the transitions that diverged, the transitions that reached the maximum tree depth, and the E-BFMI. Divergences mean the sampler could not follow the posterior’s geometry, and estimates may be biased. diagnosticWarnings() lists messages for any of these problems and is empty here. The MCMC guide explains these diagnostics and what to change when they fail.",
+    "text": "Read the results\nvariable  theta\nmean      0.2569\nmedian    0.2411\nsd        0.1243\nmad       0.1272\nq5        0.08004\nq95       0.4853\nrhat      1.001\ness_bulk  1232\ness_tail  1477\nmcse_mean 0.003412\n\nchain divergent max_treedepth ebfmi\n    1         0             0  1.11\n    2         0             0  0.92\n    3         0             0  1.27\n    4         0             0  0.94\nNo warnings\nsummary() returns one row per variable, printed here one column per line. The posterior mean is close to that of the exact posterior, Beta(3, 9), which is 0.25, and 90% of the draws lie between q5 and q95.\nThe other columns check whether the chains can be trusted:\n\nrhat compares the chains with each other. Values near 1 are consistent with the chains having sampled the same distribution. Vehtari et al. (2021) recommend R-hat below 1.01.\ness_bulk and ess_tail are effective sample sizes for the center and the tails of the distribution. The draws are autocorrelated, so they carry less information than 4,000 independent draws. The same paper recommends at least 100 effective draws per chain, 400 here, for both.\nmcse_mean is the Monte Carlo standard error of the mean.\n\ndiagnosticSummary() reports, for each chain, the transitions that diverged, the transitions that reached the maximum tree depth, and the E-BFMI. Divergences mean the sampler could not follow the posterior’s geometry, and estimates may be biased. diagnosticWarnings() lists messages for any of these problems and is empty here. The MCMC guide explains these diagnostics and what to change when they fail.",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -312,7 +301,7 @@
     "href": "getting-started.html#get-the-draws",
     "title": "Getting started",
     "section": "Get the draws",
-    "text": "Get the draws\nAdd these lines to the end of bernoulli.php and run it again:\n$draws = $fit-&gt;draws('theta', 'draws_matrix');\necho count($draws), \"\\n\";\nprint_r(array_slice($draws, 0, 3));\n4000\nArray\n(\n    [0] =&gt; Array\n        (\n            [theta] =&gt; 0.16902558\n        )\n\n    [1] =&gt; Array\n        (\n            [theta] =&gt; 0.46237896\n        )\n\n    [2] =&gt; Array\n        (\n            [theta] =&gt; 0.40915558\n        )\n\n)\ndraws_matrix is one row per draw, chain after chain. Draws, summaries, and saving fits describes the other formats.",
+    "text": "Get the draws\n$draws = $fit-&gt;draws('theta', 'draws_matrix');\n$theta = array_column($draws, 'theta');\necho count($theta), \" draws\\n\";\necho implode(', ', array_slice($theta, 0, 3)), \"\\n\";\n4000 draws\n0.16902558, 0.46237896, 0.40915558\ndraws_matrix is one row per draw, chain after chain. Draws, summaries, and saving fits describes the other formats.",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -554,7 +543,7 @@
     "href": "compiling.html",
     "title": "Compiling models",
     "section": "",
-    "text": "CmdStan turns each Stan program into a native executable. CmdStanPHP builds that executable when you create a model, records how it was built, and refuses to run it once it no longer matches the program.",
+    "text": "Creating a model compiles its Stan program to a native executable, or reuses an up-to-date one. A run refuses an executable that no longer matches the program.",
     "crumbs": [
       "Guides",
       "Compiling models"
@@ -587,7 +576,7 @@
     "href": "compiling.html#when-a-model-is-rebuilt",
     "title": "Compiling models",
     "section": "When a model is rebuilt",
-    "text": "When a model is rebuilt\nCompiling writes a hidden build record beside the executable, such as .bernoulli.cmdstanphp.json beside bernoulli. The record holds hashes of the Stan program and its #include files, the user header, and CmdStan’s make/local. It also holds the cppOptions, the stancOptions, and the CmdStan installation that built the executable. The next cmdstan_model() call rebuilds when one of these changed, and quiet: false names the change. A missing or unreadable record also causes a rebuild. forceRecompile: true rebuilds in any case.\nBuilds run on a temporary copy of the program, and the result is installed by renaming it into place. A failed build leaves the previous executable and its record in place.\nSome changes cannot be detected: a new C++ compiler, a makefile included from make/local, or a header included from the user header. Compiling prints a note about the last two. Use forceRecompile: true after such a change. Switching shared CmdStan settings may also need rebuild_cmdstan().",
+    "text": "When a model is rebuilt\nCompiling writes a hidden build record beside the executable, such as .bernoulli.cmdstanphp.json beside bernoulli. The record holds hashes of the Stan program and its #include files, the user header, and CmdStan’s make/local. It also holds the cppOptions, the stancOptions, and the CmdStan installation that built the executable. The next cmdstan_model() call rebuilds when one of these changed, and quiet: false names the change. A missing or unreadable record also causes a rebuild. forceRecompile: true rebuilds in any case.\nA failed build throws and leaves the previous executable and its record in place.\nSome changes cannot be detected: a new C++ compiler, a makefile included from make/local, or a header included from the user header. Compiling prints a note about the last two. Use forceRecompile: true after such a change. Switching shared CmdStan settings may also need rebuild_cmdstan().",
     "crumbs": [
       "Guides",
       "Compiling models"
@@ -598,7 +587,7 @@
     "href": "compiling.html#stale-executables",
     "title": "Compiling models",
     "section": "Stale executables",
-    "text": "Stale executables\nBefore each run, a model checks that its executable is still the one built from the current program. If the Stan file, an include, the user header, make/local, or CmdStan changed, the run throws StaleExecutableException with the reasons. Call cmdstan_model() again to rebuild. The Stan file must therefore exist whenever the model runs. $model-&gt;isCurrent() makes the same check without throwing, and $model-&gt;buildInfo() shows how the executable was built.\nThe check compares the file status (inode, size, and modification and change times) of every file the build depends on. When none changed, it skips hashing and the stanc call.",
+    "text": "Stale executables\nBefore each run, a model checks that its executable is still the one built from the current program. If the Stan file, an include, the user header, make/local, or CmdStan changed, the run throws StaleExecutableException with the reasons. Call cmdstan_model() again to rebuild. The Stan file must therefore exist whenever the model runs. $model-&gt;isCurrent() makes the same check without throwing, and $model-&gt;buildInfo() shows how the executable was built.",
     "crumbs": [
       "Guides",
       "Compiling models"
@@ -609,7 +598,7 @@
     "href": "compiling.html#several-processes",
     "title": "Compiling models",
     "section": "Several processes",
-    "text": "Several processes\nProcesses that create the same model at the same time, such as queue workers after a deploy changes a .stan file, build it once. Building holds an exclusive lock on a second hidden file, .&lt;exe&gt;.cmdstanphp.lock, which is never removed. The other processes wait, then find the new executable current. Checking an executable holds the same lock shared, so a check never sees an executable and record that another process is midway through replacing.\nforceRecompile: true still rebuilds in every process, one after another. Locking needs a file system with working flock(). A model in a read-only directory is checked without the lock.",
+    "text": "Several processes\nProcesses that create the same model at the same time, such as queue workers after a deploy changes a .stan file, build it once. The others wait for that build and then use it. forceRecompile: true still rebuilds in every process, one after another.\nThis needs a file system with working flock(). A model in a read-only directory is checked without locking.",
     "crumbs": [
       "Guides",
       "Compiling models"
@@ -620,7 +609,18 @@
     "href": "compiling.html#version-control",
     "title": "Compiling models",
     "section": "Version control",
-    "text": "Version control\nIf your .gitignore ignores model executables, ignore the hidden files too:\n.*.cmdstanphp.json\n.*.cmdstanphp.lock\nThe record uses CmdStanR’s format under a different name, so CmdStanR’s .&lt;exe&gt;.cmdstanr.json and this package’s record never overwrite each other.",
+    "text": "Version control\nIf your .gitignore ignores model executables, ignore the hidden files too:\n.*.cmdstanphp.json\n.*.cmdstanphp.lock",
+    "crumbs": [
+      "Guides",
+      "Compiling models"
+    ]
+  },
+  {
+    "objectID": "compiling.html#implementation-details",
+    "href": "compiling.html#implementation-details",
+    "title": "Compiling models",
+    "section": "Implementation details",
+    "text": "Implementation details\n\nBuilds run on a temporary copy of the program, and the executable is installed by renaming it into place.\nThe stale check compares the file status (inode, size, and modification and change times) of every file the build depends on. When none changed, it skips hashing and the stanc call.\nBuilding holds an exclusive lock on .&lt;exe&gt;.cmdstanphp.lock, which is never removed. Checking an executable holds the same lock shared, so a check never sees an executable and record that another process is midway through replacing.\nThe build record uses CmdStanR’s format under a different name, so CmdStanR’s .&lt;exe&gt;.cmdstanr.json and this package’s record never overwrite each other.",
     "crumbs": [
       "Guides",
       "Compiling models"

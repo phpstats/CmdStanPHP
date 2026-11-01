@@ -2,24 +2,11 @@
 title: "Getting started"
 ---
 
-This page fits a first Stan model from PHP. It assumes a C++ toolchain and CmdStan are installed as described in [Installation](installation.qmd).
-
-## Set up a project
-
-Create an empty directory and install the package into it:
-
-```sh
-mkdir bernoulli && cd bernoulli
-composer require phpstats/cmdstanphp
-```
-
-The model and the script below go in this directory. The data are written inline in the script.
+Fit a first Stan model from PHP and check the result. CmdStanPHP, a C++ toolchain, and CmdStan must be installed as described in [Installation](installation.qmd).
 
 ## The model
 
-A Stan program declares its data, its parameters, and a model that relates them. This one estimates `theta`, the probability of a success, from `N` binary outcomes `y`. The prior on `theta` is uniform, so the posterior is a beta distribution.
-
-Save it as `bernoulli.stan` in your project directory:
+A Stan program declares its data, its parameters, and a model that relates them. This one estimates `theta`, the probability of a success, from `N` binary outcomes `y`. The prior on `theta` is uniform, so the posterior is a beta distribution. Save it as `bernoulli.stan`:
 
 ```stan
 data {
@@ -37,93 +24,70 @@ model {
 
 ## Compile and sample
 
-Save this script as `bernoulli.php` in the same directory:
-
 ```php
-<?php
-require __DIR__.'/vendor/autoload.php';
-
 use function CmdStan\cmdstan_model;
 
 $model = cmdstan_model(__DIR__.'/bernoulli.stan');
 
 $fit = $model->sample(
-    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+    data: [
+        'N' => 10,
+        'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    ],
     seed: 123,
     chains: 4,
     parallel_chains: 4,
     show_messages: false,
 );
 
-print_r($fit->summary('theta'));
-print_r($fit->diagnosticSummary());
-print_r($fit->diagnosticWarnings());
+foreach ($fit->summary('theta')[0] as $column => $value) {
+    $shown = is_float($value) ? sprintf('%.4g', $value) : $value;
+    echo str_pad($column, 10), $shown, "\n";
+}
+
+$d = $fit->diagnosticSummary();
+echo "\nchain divergent max_treedepth ebfmi\n";
+foreach ($d['ebfmi'] as $i => $ebfmi) {
+    printf(
+        "%5d %9d %13d %5.2f\n",
+        $i + 1,
+        $d['num_divergent'][$i],
+        $d['num_max_treedepth'][$i],
+        $ebfmi,
+    );
+}
+
+$warnings = $fit->diagnosticWarnings();
+echo $warnings ? implode("\n", $warnings) : 'No warnings';
+echo "\n";
 ```
 
-Run it from the project directory:
-
-```sh
-php bernoulli.php
-```
-
-`cmdstan_model()` compiles `bernoulli.stan` to an executable named `bernoulli` beside it, unless an up-to-date executable is already there. `sample()` writes the data to a JSON file, runs four Markov chains as four CmdStan processes, and reads their CSV output into a `CmdStanMCMC` fit. Each chain runs 1,000 warmup iterations, which are discarded, and 1,000 sampling iterations. The fit therefore holds 4,000 draws of `theta`.
+`cmdstan_model()` compiles `bernoulli.stan` to an executable named `bernoulli` beside it, unless an up-to-date executable is already there. `sample()` writes the data to a JSON file, runs four Markov chains as four CmdStan processes, and reads their CSV output into a `CmdStanMCMC` fit. Each chain runs 1,000 warmup iterations, which are discarded, and 1,000 sampling iterations, so the fit holds 4,000 draws of `theta`.
 
 ## Read the results
 
-The script prints:
-
 ```text
-Array
-(
-    [0] => Array
-        (
-            [variable] => theta
-            [mean] => 0.25688224553065
-            [median] => 0.241080625
-            [sd] => 0.12428477287867
-            [mad] => 0.12715007403
-            [q5] => 0.08003641255
-            [q95] => 0.4852966975
-            [rhat] => 1.0009548425564
-            [ess_bulk] => 1231.5526335488
-            [ess_tail] => 1476.7359726913
-            [mcse_mean] => 0.0034120356567473
-        )
+variable  theta
+mean      0.2569
+median    0.2411
+sd        0.1243
+mad       0.1272
+q5        0.08004
+q95       0.4853
+rhat      1.001
+ess_bulk  1232
+ess_tail  1477
+mcse_mean 0.003412
 
-)
-Array
-(
-    [num_divergent] => Array
-        (
-            [0] => 0
-            [1] => 0
-            [2] => 0
-            [3] => 0
-        )
-
-    [num_max_treedepth] => Array
-        (
-            [0] => 0
-            [1] => 0
-            [2] => 0
-            [3] => 0
-        )
-
-    [ebfmi] => Array
-        (
-            [0] => 1.1147963277411
-            [1] => 0.92340805277899
-            [2] => 1.2710912715229
-            [3] => 0.94446252116701
-        )
-
-)
-Array
-(
-)
+chain divergent max_treedepth ebfmi
+    1         0             0  1.11
+    2         0             0  0.92
+    3         0             0  1.27
+    4         0             0  0.94
+No warnings
 ```
 
-`summary()` returns one row per variable. The posterior mean of `theta` is about 0.26, and 90% of the draws lie between `q5` and `q95`, 0.08 and 0.49. The exact posterior is Beta(3, 9), whose mean is 0.25.
+`summary()` returns one row per variable, printed here one column per line. The posterior mean is close to that of the exact posterior, Beta(3, 9), which is 0.25, and 90% of the draws lie between `q5` and `q95`.
 
 The other columns check whether the chains can be trusted:
 
@@ -135,34 +99,16 @@ The other columns check whether the chains can be trusted:
 
 ## Get the draws
 
-Add these lines to the end of `bernoulli.php` and run it again:
-
 ```php
 $draws = $fit->draws('theta', 'draws_matrix');
-echo count($draws), "\n";
-print_r(array_slice($draws, 0, 3));
+$theta = array_column($draws, 'theta');
+echo count($theta), " draws\n";
+echo implode(', ', array_slice($theta, 0, 3)), "\n";
 ```
 
 ```text
-4000
-Array
-(
-    [0] => Array
-        (
-            [theta] => 0.16902558
-        )
-
-    [1] => Array
-        (
-            [theta] => 0.46237896
-        )
-
-    [2] => Array
-        (
-            [theta] => 0.40915558
-        )
-
-)
+4000 draws
+0.16902558, 0.46237896, 0.40915558
 ```
 
 `draws_matrix` is one row per draw, chain after chain. [Draws, summaries, and saving fits](draws.qmd) describes the other formats.

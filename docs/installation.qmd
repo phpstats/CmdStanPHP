@@ -2,7 +2,7 @@
 title: "Installation"
 ---
 
-CmdStanPHP is a Composer package that runs [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. Installing it takes three steps: the Composer package, a C++ toolchain, and a CmdStan release.
+Install the Composer package, a C++ toolchain, and a [CmdStan](https://mc-stan.org/docs/cmdstan-guide/) release.
 
 ## Requirements
 
@@ -21,13 +21,13 @@ Optional:
 - [phibble](https://github.com/phpstats/phibble), for model data from a `Phibble\DataFrame` and for draws and summaries returned as data frames
 - [vl-convert](https://github.com/vega/vl-convert/releases), for figures saved as SVG or PNG
 
-composer.json allows PHP `>=8.2 <8.6`. CI runs the unit tests on PHP 8.2, 8.3, 8.4, and 8.5, and the integration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0.
-
-`proc_open()` must be enabled, because every compilation and every run starts a CmdStan process. Hosts that list it in `disable_functions` cannot run models.
+composer.json allows PHP `>=8.2 <8.6`. `proc_open()` must be enabled, because every compilation and run starts a CmdStan process, so hosts that list it in `disable_functions` cannot run models. [Verification](verification.qmd) lists what CI tests.
 
 ## Supported platforms
 
-CI runs every test on Linux (Ubuntu). The integration suite also passes on macOS on Apple silicon. Native Windows has not been tested. The code chooses Windows file suffixes and compiler names, but no Windows build or run has been checked. On Windows, run PHP inside WSL, which uses the tested Linux path.
+- Linux: tested in CI.
+- macOS on Apple silicon: the integration suite passes locally.
+- Windows: not tested. Run PHP inside WSL, which uses the Linux path.
 
 ## Install the package
 
@@ -51,15 +51,13 @@ If CmdStan 2.37 or later is already installed, skip to [selecting CmdStan](#sele
 `install_cmdstan()` downloads an official release from GitHub, builds it, and selects it:
 
 ```php
-require 'vendor/autoload.php';
-
 $path = CmdStan\install_cmdstan('2.40.0', cores: 2, timeout: 1800);
 echo $path, "\n";
 ```
 
 The release goes into `~/.cmdstan/cmdstan-2.40.0`, or into the directory given as `dir`. Without a version, the installer takes the latest release. Versions before 2.37 are rejected. Installing needs `curl`, `tar`, make, the C++ compiler, internet access, and enough memory for compilation. The build takes several minutes. `cores` sets the number of parallel make jobs, and `timeout` is in seconds.
 
-The installer checks the archive's entry paths and links before extracting, extracts into a private staging directory, and builds at the final location. It refuses to replace an installed version unless `overwrite: true` is passed. With `overwrite: true` the old installation is kept until the new build succeeds and is restored if the build fails.
+The installer refuses to replace an installed version unless `overwrite: true` is passed. With `overwrite: true`, the old installation is restored if the new build fails. Archives with entry paths or links outside their directory are rejected.
 
 Other ways to install:
 
@@ -90,8 +88,6 @@ The path must contain CmdStan's makefile and the `stanc` compiler. `set_cmdstan_
 ## Check the installation
 
 ```php
-require 'vendor/autoload.php';
-
 echo CmdStan\cmdstan_path(), "\n";
 echo CmdStan\cmdstan_version(), "\n";
 print_r(CmdStan\check_cmdstan_toolchain());
