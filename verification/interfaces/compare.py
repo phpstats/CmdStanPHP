@@ -1,9 +1,12 @@
 """Compares the three interfaces' draws and summaries and writes site/verifications/interfaces.json."""
 import csv
+import datetime
 import itertools
 import json
+import platform
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 here = Path(__file__).resolve().parent
@@ -91,12 +94,13 @@ for i, row in enumerate(results['cmdstanphp']['summary']):
     for m in measures:
         errors = {name: abs(row[m] - rows[i][m]) for name, rows in peers.items()}
         worst = max(errors.values())
-        cases.append({'name': row['variable'], 'quantity': m, 'max_abs_error': worst, 'peers': errors,
-                      'passed': worst <= ABS_TOL + REL_TOL * abs(peers['cmdstanr'][i][m])})
+        cases.append({'name': row['variable'], 'quantity': m, 'status': 'pass' if worst <= ABS_TOL + REL_TOL * abs(peers['cmdstanr'][i][m]) else 'fail',
+                      'rule': 'summary', 'n_compared': len(peers), 'max_abs_error': worst, 'peers': errors})
 draw_errors = {names[b]: next(d['max_abs_draw_difference'] for d in differences if d['interfaces'] == ['CmdStanPHP', names[b]])
                for b in ('cmdstanr', 'cmdstanpy')}
-cases.append({'name': 'draws', 'quantity': 'all CSV columns, 4 chains x 1000 draws', 'max_abs_error': max(draw_errors.values()),
-              'peers': draw_errors, 'passed': max(draw_errors.values()) == 0})
+draws_compared = next(d['draws_compared'] * d['columns_compared'] for d in differences)
+cases.append({'name': 'draws', 'quantity': 'all CSV columns, 4 chains × 1,000 draws', 'status': 'pass' if max(draw_errors.values()) == 0 else 'fail',
+              'rule': 'draws', 'n_compared': draws_compared, 'max_abs_error': max(draw_errors.values()), 'peers': draw_errors})
 
 same_arguments = all(arguments[k] == arguments['cmdstanphp'] for k in names)
 # The release tag when src/ matches it, otherwise the git description of the checkout.
@@ -105,13 +109,35 @@ unchanged = subprocess.run(['git', 'diff', '--quiet', tag, '--', 'src', 'compose
 cmdstanphp_version = tag.lstrip('v') if unchanged else subprocess.run(
     ['git', 'describe', '--tags', '--dirty'], cwd=root, capture_output=True, text=True).stdout.strip()
 code = (here / 'example.php').read_text()
+if sys.platform == 'darwin':
+    os_name = f"macOS {platform.mac_ver()[0]} ({platform.machine()})"
+else:
+    os_name = 'Linux, ' + re.search(r'^PRETTY_NAME="(.+)"', Path('/etc/os-release').read_text(), re.M).group(1) + f' ({platform.machine()})'
+v = results['cmdstanr']['versions'] | results['cmdstanpy']['versions'] | results['cmdstanphp']['versions']
+r_version = re.search(r'\d+\.\d+\.\d+', v['R']).group(0)
 
 out = {
     'title': 'Mixed Gaussian (Bayesian): CmdStanPHP, cmdstanr, and CmdStanPy',
     'description': 'The non-centered eight schools model (Rubin 1981) run through three CmdStan interfaces with the same CmdStan, data, seed, chain ids, and initialization. The draws are identical, and each interface summarizes them with its own code.',
-    'reference': 'cmdstanr 0.9.0 with posterior 1.7.1 and CmdStanPy 1.3.0 (summary at sig_figs 12), on CmdStan 2.40.0, R 4.6.1, Python 3.14.7, and PHP 8.4.25',
+    'label': 'Other interfaces',
+    'kind': 'reference',
+    'group': 'Comparisons with other interfaces',
+    'checked': "Draws from the same CmdStan run settings, compared exactly, and each interface's own summary of them (mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta).",
+    'reference': f"cmdstanr {v['cmdstanr']} with posterior {v['posterior']}, and CmdStanPy {v['cmdstanpy']} (summary at sig_figs 12), on CmdStan {v['CmdStan']}, R {r_version}, Python {v['Python']}, and PHP {v['PHP']}",
     'tolerance': 'summaries: 1e-9 + 1e-9*|cmdstanr value|; draws: exact',
+    'comparison': [
+        {'id': 'summary', 'applies_to': "each summary value, against cmdstanr's and against CmdStanPy's; the case's error is the larger", 'kind': 'tolerance', 'atol': ABS_TOL, 'rtol': REL_TOL},
+        {'id': 'draws', 'applies_to': 'every CSV column of every draw, against both peers', 'kind': 'exact'},
+    ],
     'cases': cases,
+    'known_differences': ["CmdStanPy's summary() rounds stansummary's output to 6 significant figures by default, so its summary is compared at sig_figs 12."],
+    'reproduce': 'verification/interfaces/run.sh',
+    'environment': {
+        'date': datetime.date.today().isoformat(),
+        'commit': subprocess.run(['git', 'rev-parse', '--short=7', 'HEAD'], cwd=root, capture_output=True, text=True).stdout.strip(),
+        'php': v['PHP'],
+        'os': os_name,
+    },
     'versions': {
         'CmdStan': results['cmdstanphp']['versions']['CmdStan'],
         'CmdStanPHP': cmdstanphp_version,

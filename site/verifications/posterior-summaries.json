@@ -1,0 +1,677 @@
+{
+    "title": "Summaries: agreement with posterior",
+    "label": "Summaries",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "summary() by default (stansummary columns plus ess_tail) and with measures (the PHP port of summarise_draws()), every named posterior measure, custom quantile probabilities, and diagnosticSummary().",
+    "reference": "posterior 1.7.1 summarise_draws() on the same draws, and cmdstanr 0.99.0 (commit 0a54123) diagnostic_summary() on the same CSV files",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "posterior": "1.7.1"
+    },
+    "inputs": [
+        {
+            "name": "shoe_latent model",
+            "detail": "tests/fixtures/latent.stan, 60 observations in 12 groups, 4 chains of 1,000 warmup and 1,000 sampling iterations, seed 20260831. R reads CmdStanPHP's draws as binary doubles."
+        },
+        {
+            "name": "Fixed draws",
+            "detail": "Six variables (autoregressive, heavy-tailed, tied, constant, skewed, and shifted between chains), 4 chains × 101 draws, generated with seed 20240607."
+        }
+    ],
+    "comparison": [
+        {
+            "id": "rel-1e-13",
+            "kind": "tolerance",
+            "rtol": 1.0e-13,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-12",
+            "kind": "tolerance",
+            "atol": 1.0e-12,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "rel-1e-8",
+            "kind": "tolerance",
+            "rtol": 1.0e-8,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "exact",
+            "kind": "exact",
+            "applies_to": "variable names; column names and order"
+        }
+    ],
+    "cases": [
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "variable names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 14
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "draws passed to R",
+            "status": "pass",
+            "rule": "rel-1e-13",
+            "n_compared": 56000,
+            "max_abs_error": 5.10702591327572e-15,
+            "max_rel_error": 5.003887865077181e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "mean, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "mean, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 2.3314683517128287e-15,
+            "max_rel_error": 2.3314683517128287e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "median, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "median, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "sd, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.718447854656915e-16,
+            "max_rel_error": 4.718447854656915e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "sd, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 5.273559366969494e-16,
+            "max_rel_error": 5.273559366969494e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "mad, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "mad, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "rhat, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.8836856284323925e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "rhat, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.8836856284323925e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "ess_bulk, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 1.0913936421275139e-11,
+            "max_rel_error": 2.6359945867437017e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "ess_bulk, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 7.73070496506989e-12,
+            "max_rel_error": 3.1578862115269547e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "ess_tail, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 5.775291356258094e-11,
+            "max_rel_error": 7.280430592963573e-14
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "ess_tail, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 7.958078640513122e-11,
+            "max_rel_error": 3.125287437115567e-14
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q5, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q5, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q25, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q25, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q50, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q50, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q75, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q75, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q95, with measures",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.543586519852405e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "q95, default summary",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 14,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.543586519852405e-15
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "num_divergent per chain, against diagnostic_summary()",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 4,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "num_max_treedepth per chain, against diagnostic_summary()",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 4,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "shoe_latent model, 4 chains × 1,000 draws",
+            "quantity": "ebfmi per chain, against diagnostic_summary()",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 4,
+            "max_abs_error": 5.551115123125783e-16,
+            "max_rel_error": 5.551115123125783e-16
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "mean",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 6.661338147750939e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "median",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.9984014443252818e-15,
+            "max_rel_error": 1.830808167424583e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "sd",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.440892098500626e-15,
+            "max_rel_error": 2.0563615325957242e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "mad",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.9968028886505635e-15,
+            "max_rel_error": 3.395147810315583e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "q5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 1.8448578708936214e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "q95",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.552713678800501e-15,
+            "max_rel_error": 1.6823370164958152e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "rhat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.774758283725532e-15,
+            "max_rel_error": 3.7554815402800004e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "ess_bulk",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 2.8421709430404007e-13,
+            "max_rel_error": 1.3401048996008728e-15
+        },
+        {
+            "name": "Fixed draws, default measures",
+            "quantity": "ess_tail",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.3642420526593924e-12,
+            "max_rel_error": 6.309699813953172e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mean",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 6.661338147750939e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "median",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.9984014443252818e-15,
+            "max_rel_error": 1.830808167424583e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "sd",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.440892098500626e-15,
+            "max_rel_error": 2.0563615325957242e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mad",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.9968028886505635e-15,
+            "max_rel_error": 3.395147810315583e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "q5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 1.8448578708936214e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "q95",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.552713678800501e-15,
+            "max_rel_error": 1.6823370164958152e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "rhat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.774758283725532e-15,
+            "max_rel_error": 3.7554815402800004e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_bulk",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 2.8421709430404007e-13,
+            "max_rel_error": 1.3401048996008728e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_tail",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.3642420526593924e-12,
+            "max_rel_error": 6.309699813953172e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mcse_mean",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mcse_median",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.1102230246251565e-16,
+            "max_rel_error": 1.1102230246251565e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mcse_sd",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mcse_q5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.163336342344337e-16,
+            "max_rel_error": 4.163336342344337e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "mcse_q95",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "rhat_basic",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.552713678800501e-15,
+            "max_rel_error": 3.4460074556980396e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_basic",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.410605131648481e-13,
+            "max_rel_error": 1.7595885295653695e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_mean",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.410605131648481e-13,
+            "max_rel_error": 1.7595885295653695e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_sd",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.547473508864641e-13,
+            "max_rel_error": 2.4897747759083407e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_median",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 5.684341886080801e-13,
+            "max_rel_error": 1.8652744409596647e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_q5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.3642420526593924e-12,
+            "max_rel_error": 6.309699813953172e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "ess_q95",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 5.115907697472721e-13,
+            "max_rel_error": 1.100527620555565e-15
+        },
+        {
+            "name": "Fixed draws, every named measure",
+            "quantity": "column names and order",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 22
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "q2.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 1.595436335134457e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "q50",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.9984014443252818e-15,
+            "max_rel_error": 1.830808167424583e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "q97.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 3.552713678800501e-15,
+            "max_rel_error": 1.4379139305826716e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "mcse_q2.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.440892098500626e-15,
+            "max_rel_error": 3.1594065083342366e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "mcse_q50",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.1102230246251565e-16,
+            "max_rel_error": 1.1102230246251565e-16
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "mcse_q97.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.232311773929297e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "ess_q2.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 1.2363443602225743e-12,
+            "max_rel_error": 1.0220137565632273e-14
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "ess_q50",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 5.684341886080801e-13,
+            "max_rel_error": 1.8652744409596647e-15
+        },
+        {
+            "name": "Fixed draws, probabilities 0.025, 0.5, and 0.975",
+            "quantity": "ess_q97.5",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 7.389644451905042e-13,
+            "max_rel_error": 2.3427813469872064e-15
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

@@ -1,0 +1,125 @@
+{
+    "title": "Exposed Stan functions: agreement with CmdStanR",
+    "label": "Exposed functions",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "User-defined Stan functions called from PHP through exposeFunctions(): scalar, vector, matrix, array, integer, complex, RNG, and density functions.",
+    "reference": "cmdstanr 0.99.0 (commit 0a54123) expose_functions(), compiled with Rcpp 1.1.2 and RcppEigen 0.3.4.0.2",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "Rcpp": "1.1.2",
+        "RcppEigen": "0.3.4.0.2"
+    },
+    "inputs": "The functions block of tests/fixtures/native.stan, with the arguments shown in each case.",
+    "comparison": [
+        {
+            "id": "abs-1e-15",
+            "kind": "tolerance",
+            "atol": 1.0e-15,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-14",
+            "kind": "tolerance",
+            "atol": 1.0e-14,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "exact",
+            "kind": "exact",
+            "applies_to": "integer array"
+        }
+    ],
+    "cases": [
+        {
+            "name": "add(1.5, 2)",
+            "quantity": "real",
+            "status": "pass",
+            "rule": "abs-1e-15",
+            "n_compared": 1,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "scale([1, 2, 3], 2.0)",
+            "quantity": "vector",
+            "status": "pass",
+            "rule": "abs-1e-15",
+            "n_compared": 3,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "outer([1, 2], [3, 4, 5])",
+            "quantity": "matrix",
+            "status": "pass",
+            "rule": "abs-1e-15",
+            "n_compared": 6,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "twice([1.5, -2])",
+            "quantity": "array",
+            "status": "pass",
+            "rule": "abs-1e-15",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "pairs(3)",
+            "quantity": "integer array",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 6
+        },
+        {
+            "name": "cmul([1, 2], [3, -1])",
+            "quantity": "complex",
+            "status": "pass",
+            "rule": "abs-1e-15",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "draw_rng(0.5), seed 42",
+            "quantity": "RNG draw",
+            "status": "pass",
+            "rule": "abs-1e-14",
+            "n_compared": 1,
+            "max_abs_error": 1.1102230246251565e-16,
+            "max_rel_error": 1.1102230246251565e-16
+        },
+        {
+            "name": "shifted_lpdf(0.3, 1.0)",
+            "quantity": "log density",
+            "status": "pass",
+            "rule": "abs-1e-14",
+            "n_compared": 1,
+            "max_abs_error": 2.886579864025407e-15,
+            "max_rel_error": 2.480010569009853e-15
+        },
+        {
+            "name": "counts_lpmf(2, 1.5)",
+            "quantity": "log mass",
+            "status": "pass",
+            "rule": "abs-1e-14",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-15,
+            "max_rel_error": 2.409657209971461e-15
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

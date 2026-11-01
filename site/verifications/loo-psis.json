@@ -1,0 +1,430 @@
+{
+    "title": "PSIS, LOO, and WAIC: agreement with posterior and loo",
+    "label": "PSIS, LOO, and WAIC",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "Pareto smoothing and its diagnostics, Pareto k, the generalized Pareto fit, relative efficiency, PSIS weights, loo() with and without r_eff, and waic().",
+    "reference": "posterior 1.7.1 pareto_smooth(), pareto_khat(), and gpdfit(), and loo 2.10.1.9000 relative_eff(), psis(), loo(), and waic()",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "posterior": "1.7.1",
+        "loo": "2.10.1.9000"
+    },
+    "inputs": "Generated with seed 20240607: 1,000 and 100 lognormal values, 1,000 normal log weights, 50 generalized Pareto values, and log-likelihoods of 12 observations (one an outlier) over 4 chains × 250 draws.",
+    "comparison": [
+        {
+            "id": "rel-1e-8",
+            "kind": "tolerance",
+            "rtol": 1.0e-8,
+            "rel_floor": 1.0
+        }
+    ],
+    "cases": [
+        {
+            "name": "pareto_smooth(), both tails",
+            "quantity": "smoothed values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1000,
+            "max_abs_error": 1.1368683772161603e-13,
+            "max_rel_error": 4.9288815002356835e-15
+        },
+        {
+            "name": "pareto_smooth(), both tails",
+            "quantity": "khat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 3.2751579226442118e-15,
+            "max_rel_error": 3.2751579226442118e-15
+        },
+        {
+            "name": "pareto_smooth(), both tails",
+            "quantity": "min_ss",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.1671553440683056e-13,
+            "max_rel_error": 1.054761724355649e-14
+        },
+        {
+            "name": "pareto_smooth(), both tails",
+            "quantity": "khat_threshold",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), both tails",
+            "quantity": "convergence_rate",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 1.1102230246251565e-16,
+            "max_rel_error": 1.1102230246251565e-16
+        },
+        {
+            "name": "pareto_smooth(), right tail, r_eff 1",
+            "quantity": "smoothed values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1000,
+            "max_abs_error": 5.3290705182007514e-14,
+            "max_rel_error": 4.728060355589751e-15
+        },
+        {
+            "name": "pareto_smooth(), right tail, r_eff 1",
+            "quantity": "khat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 6.106226635438361e-16,
+            "max_rel_error": 6.106226635438361e-16
+        },
+        {
+            "name": "pareto_smooth(), right tail, r_eff 1",
+            "quantity": "min_ss",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 7.105427357601002e-14,
+            "max_rel_error": 2.7349293087195567e-15
+        },
+        {
+            "name": "pareto_smooth(), right tail, r_eff 1",
+            "quantity": "khat_threshold",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), right tail, r_eff 1",
+            "quantity": "convergence_rate",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), left tail, r_eff 0.8",
+            "quantity": "smoothed values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1000,
+            "max_abs_error": 4.618527782440651e-14,
+            "max_rel_error": 4.728060355589751e-15
+        },
+        {
+            "name": "pareto_smooth(), left tail, r_eff 0.8",
+            "quantity": "khat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "pareto_smooth(), left tail, r_eff 0.8",
+            "quantity": "min_ss",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "pareto_smooth(), left tail, r_eff 0.8",
+            "quantity": "khat_threshold",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), left tail, r_eff 0.8",
+            "quantity": "convergence_rate",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "pareto_smooth(), 100 values",
+            "quantity": "smoothed values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 100,
+            "max_abs_error": 4.973799150320701e-14,
+            "max_rel_error": 4.81110063397893e-15
+        },
+        {
+            "name": "pareto_smooth(), 100 values",
+            "quantity": "khat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.498001805406602e-16,
+            "max_rel_error": 2.498001805406602e-16
+        },
+        {
+            "name": "pareto_smooth(), 100 values",
+            "quantity": "min_ss",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.842170943040401e-14,
+            "max_rel_error": 1.6223697326921727e-15
+        },
+        {
+            "name": "pareto_smooth(), 100 values",
+            "quantity": "khat_threshold",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "pareto_smooth(), 100 values",
+            "quantity": "convergence_rate",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), log weights",
+            "quantity": "smoothed values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1000,
+            "max_abs_error": 4.973799150320701e-14,
+            "max_rel_error": 5.162537064506978e-15
+        },
+        {
+            "name": "pareto_smooth(), log weights",
+            "quantity": "khat",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 4.6629367034256575e-15,
+            "max_rel_error": 4.6629367034256575e-15
+        },
+        {
+            "name": "pareto_smooth(), log weights",
+            "quantity": "min_ss",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 9.981704351957887e-11,
+            "max_rel_error": 9.172360516380319e-14
+        },
+        {
+            "name": "pareto_smooth(), log weights",
+            "quantity": "khat_threshold",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pareto_smooth(), log weights",
+            "quantity": "convergence_rate",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 8.326672684688674e-15,
+            "max_rel_error": 8.326672684688674e-15
+        },
+        {
+            "name": "pareto_khat()",
+            "quantity": "k",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 3.2751579226442118e-15,
+            "max_rel_error": 3.2751579226442118e-15
+        },
+        {
+            "name": "gpdfit()",
+            "quantity": "k",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "gpdfit()",
+            "quantity": "sigma",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 4.218847493575595e-15,
+            "max_rel_error": 3.6877219356655686e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "relative_eff()",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 6.661338147750939e-16,
+            "max_rel_error": 6.661338147750939e-16
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "psis() log weights",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12000,
+            "max_abs_error": 8.348877145181177e-14,
+            "max_rel_error": 7.237798327728266e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "psis() Pareto k",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 7.549516567451064e-15,
+            "max_rel_error": 6.966649479522857e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "psis() n_eff",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 1.7621459846850485e-12,
+            "max_rel_error": 3.77510599572411e-15
+        },
+        {
+            "name": "psis() on 100 values",
+            "quantity": "log weights",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 100,
+            "max_abs_error": 7.993605777301127e-15,
+            "max_rel_error": 1.6653345369377348e-15
+        },
+        {
+            "name": "psis() on 100 values",
+            "quantity": "Pareto k",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 1.3322676295501878e-15,
+            "max_rel_error": 7.866566254667615e-16
+        },
+        {
+            "name": "psis() on 100 values",
+            "quantity": "n_eff",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 5.329070518200751e-15,
+            "max_rel_error": 2.878193629173467e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() estimates and SEs",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 8.526512829121202e-14,
+            "max_rel_error": 4.783780025451795e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() pointwise",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 60,
+            "max_abs_error": 7.815970093361102e-14,
+            "max_rel_error": 6.966649479522857e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() Pareto k",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 7.549516567451064e-15,
+            "max_rel_error": 6.966649479522857e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() n_eff",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 1.7621459846850485e-12,
+            "max_rel_error": 3.77510599572411e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() without r_eff, estimates and SEs",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 6.110667527536862e-13,
+            "max_rel_error": 2.271201389655006e-14
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() without r_eff, pointwise",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 60,
+            "max_abs_error": 5.329070518200751e-13,
+            "max_rel_error": 3.6770938197766974e-14
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "loo() without r_eff, n_eff",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 12,
+            "max_abs_error": 1.9326762412674725e-12,
+            "max_rel_error": 2.9834206234421735e-14
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "waic() estimates and SEs",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 6,
+            "max_abs_error": 4.263256414560601e-14,
+            "max_rel_error": 2.1969881953622944e-15
+        },
+        {
+            "name": "log_lik, 4 chains × 250 draws × 12 observations",
+            "quantity": "waic() pointwise",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 36,
+            "max_abs_error": 2.1316282072803006e-14,
+            "max_rel_error": 4.500464525977367e-15
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

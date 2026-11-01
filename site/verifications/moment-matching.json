@@ -1,0 +1,65 @@
+{
+    "title": "Moment matching: agreement with loo and CmdStanR",
+    "label": "Moment matching",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "loo(momentMatch: true), with and without the split step, against loo's moment matching on analytic posteriors and against CmdStanR's loo(moment_match = TRUE) on a same-seed fit.",
+    "reference": "loo 2.10.1.9000 loo_moment_match.default(), and cmdstanr 0.99.0 (commit 0a54123) loo(moment_match = TRUE)",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "loo": "2.10.1.9000"
+    },
+    "inputs": [
+        {
+            "name": "Analytic regressions",
+            "detail": "Conjugate normal regressions whose outlier needs shifts only, shifts and scaling, or a covariance map, with exact log densities (tests/MomentMatchFixture.php)."
+        },
+        {
+            "name": "Regression fit",
+            "detail": "A Stan regression with an outlier, 4 chains of 500 warmup and 1,000 sampling iterations, seed 20261012."
+        }
+    ],
+    "comparison": [],
+    "cases": [
+        {
+            "name": "Analytic regressions, unsplit",
+            "quantity": "every comparison in MomentMatchCompatibilityTest::testUnsplitMomentMatchingMatchesLoo",
+            "status": "skipped",
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+        },
+        {
+            "name": "Analytic regressions, split",
+            "quantity": "every comparison in MomentMatchCompatibilityTest::testSplitMatchesLooWithTheExactInverse",
+            "status": "skipped",
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+        },
+        {
+            "name": "Analytic regressions, loo's own split",
+            "quantity": "every comparison in MomentMatchCompatibilityTest::testDifferencesFromLooSplitAreTheDocumentedOnes",
+            "status": "skipped",
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+        },
+        {
+            "name": "Regression fit",
+            "quantity": "every comparison in MomentMatchIntegrationTest::testSameSeedMomentMatchingMatchesCmdStanR",
+            "status": "skipped",
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+        }
+    ],
+    "known_differences": [
+        "The split step uses the exact inverse of the accumulated affine map. loo 2.10.1 and earlier use an inverse that is wrong once a shift is combined with scaling or a covariance map, so with the split only shift-only observations are compared with those versions.",
+        "The split relative efficiency is the minimum over both halves of the draws; loo uses the second half twice.",
+        "Relative efficiencies are computed from exp(log_lik − max). Where loo reports NA because every likelihood value is tiny, CmdStanPHP must report a finite value."
+    ],
+    "reproduce": "PHIT_LIBRARY=/path/to/phit.so php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

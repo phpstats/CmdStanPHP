@@ -146,10 +146,6 @@
                 "path": "compatibility.qmd"
             },
             {
-                "title": "Verification",
-                "path": "verification.qmd"
-            },
-            {
                 "title": "Contributing",
                 "path": "contributing.qmd"
             }
@@ -163,9 +159,22 @@
         }
     ],
     "verifications": [
+        "site/verifications/cmdstanr-methods.json",
+        "site/verifications/posterior-summaries.json",
+        "site/verifications/loo-psis.json",
+        "site/verifications/moment-matching.json",
+        "site/verifications/model-methods.json",
+        "site/verifications/stan-functions.json",
+        "site/verifications/figures.json",
+        "site/verifications/rvars-inits.json",
+        "site/verifications/cmdstanr-metadata.json",
         "site/verifications/interfaces.json"
     ],
     "benchmarks": [
         "site/benchmarks/interfaces-workload.json"
-    ]
+    ],
+    "evidence_gaps": {
+        "benchmarks": "No benchmark covers larger models, CSV reading at scale, or compilation time.",
+        "verification": "CI runs on Linux only. macOS is tested locally, and native Windows is not tested."
+    }
 }

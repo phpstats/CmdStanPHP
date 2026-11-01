@@ -1,0 +1,571 @@
+{
+    "title": "Fitting methods: agreement with CmdStanR",
+    "label": "Fitting methods",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "Draws, approximate log densities, summaries, and sampler diagnostics from sample(), optimize(), variational(), pathfinder(), and laplace(), against CmdStanR running the same executable with the same data, seed, and options.",
+    "reference": "cmdstanr 0.99.0 (commit 0a54123) with posterior 1.7.1, running CmdStanPHP's compiled executable through cmdstan_model(exe_file = ...)",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "posterior": "1.7.1"
+    },
+    "inputs": "examples/bernoulli.stan with N = 10 and y = [0,1,0,0,0,0,0,0,0,1], seed 123, output at 18 significant figures. MCMC runs 2 chains of 200 warmup and 100 or 101 sampling iterations; the approximations take 100 draws.",
+    "comparison": [
+        {
+            "id": "abs-1e-13",
+            "kind": "tolerance",
+            "atol": 1.0e-13,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-12",
+            "kind": "tolerance",
+            "atol": 1.0e-12,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-8",
+            "kind": "tolerance",
+            "atol": 1.0e-8,
+            "rel_floor": 1.0
+        }
+    ],
+    "cases": [
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 200,
+            "max_abs_error": 5.551115123125783e-16,
+            "max_rel_error": 5.551115123125783e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 200,
+            "max_abs_error": 3.019806626980426e-14,
+            "max_rel_error": 2.8587725429998168e-15
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "num_divergent per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "num_max_treedepth per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "ebfmi per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 3.3306690738754696e-15,
+            "max_rel_error": 1.9750604782816808e-15
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta mean",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 5.551115123125783e-17,
+            "max_rel_error": 5.551115123125783e-17
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta median",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.6653345369377348e-16,
+            "max_rel_error": 1.6653345369377348e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta sd",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.249000902703301e-16,
+            "max_rel_error": 1.249000902703301e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta mad",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 9.71445146547012e-17,
+            "max_rel_error": 9.71445146547012e-17
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta q5",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.0816681711721685e-16,
+            "max_rel_error": 2.0816681711721685e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta q95",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.885780586188048e-16,
+            "max_rel_error": 3.885780586188048e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta rhat",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.886579864025407e-15,
+            "max_rel_error": 2.8760317878727167e-15
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta ess_bulk",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 5.684341886080802e-14,
+            "max_rel_error": 4.627699421463656e-16
+        },
+        {
+            "name": "sample, 2 chains × 100 draws",
+            "quantity": "theta ess_tail",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 1.2789769243681803e-13,
+            "max_rel_error": 1.04414388765855e-15
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 202,
+            "max_abs_error": 5.551115123125783e-16,
+            "max_rel_error": 5.551115123125783e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 202,
+            "max_abs_error": 3.019806626980426e-14,
+            "max_rel_error": 2.8587725429998168e-15
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "num_divergent per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "num_max_treedepth per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "ebfmi per chain",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 2,
+            "max_abs_error": 2.220446049250313e-15,
+            "max_rel_error": 1.3210585049013864e-15
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta mean",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.6653345369377348e-16,
+            "max_rel_error": 1.6653345369377348e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta median",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.6653345369377348e-16,
+            "max_rel_error": 1.6653345369377348e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta sd",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.163336342344337e-16,
+            "max_rel_error": 4.163336342344337e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta mad",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.636779683484747e-16,
+            "max_rel_error": 2.636779683484747e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta q5",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.579669976578771e-16,
+            "max_rel_error": 4.579669976578771e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta q95",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.7755575615628914e-16,
+            "max_rel_error": 2.7755575615628914e-16
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta rhat",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.886579864025407e-15,
+            "max_rel_error": 2.875109550843927e-15
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta ess_bulk",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 2.2737367544323206e-13,
+            "max_rel_error": 1.885111052870859e-15
+        },
+        {
+            "name": "sample, 2 chains × 101 draws",
+            "quantity": "theta ess_tail",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 1,
+            "max_abs_error": 1.9895196601282805e-13,
+            "max_rel_error": 1.4481348493643872e-15
+        },
+        {
+            "name": "optimize",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "optimize",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 1,
+            "max_abs_error": 2.6645352591003757e-15,
+            "max_rel_error": 3.9486168888492496e-16
+        },
+        {
+            "name": "optimize",
+            "quantity": "theta estimate",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 5.329070518200751e-15,
+            "max_rel_error": 7.837276525224955e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "approximate lp",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 3.2630736791383053e-15
+        },
+        {
+            "name": "variational",
+            "quantity": "theta mean",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.6653345369377348e-16,
+            "max_rel_error": 1.6653345369377348e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "theta median",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.163336342344337e-16,
+            "max_rel_error": 4.163336342344337e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "theta sd",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.191891195797325e-16,
+            "max_rel_error": 3.191891195797325e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "theta mad",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.7470027081099033e-16,
+            "max_rel_error": 3.7470027081099033e-16
+        },
+        {
+            "name": "variational",
+            "quantity": "theta q5",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.163336342344337e-17,
+            "max_rel_error": 4.163336342344337e-17
+        },
+        {
+            "name": "variational",
+            "quantity": "theta q95",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.6653345369377348e-16,
+            "max_rel_error": 1.6653345369377348e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 5.273559366969494e-16,
+            "max_rel_error": 5.273559366969494e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 5.329070518200751e-15,
+            "max_rel_error": 7.751297796722261e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "approximate lp",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 4.6629367034256575e-15,
+            "max_rel_error": 4.433973366386675e-15
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta mean",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 5.551115123125783e-17,
+            "max_rel_error": 5.551115123125783e-17
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta median",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta sd",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.7470027081099033e-16,
+            "max_rel_error": 3.7470027081099033e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta mad",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.469446951953614e-16,
+            "max_rel_error": 3.469446951953614e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta q5",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.579669976578771e-16,
+            "max_rel_error": 4.579669976578771e-16
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "theta q95",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "laplace",
+            "quantity": "lp__ draws",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 1.2434497875801753e-14,
+            "max_rel_error": 1.1720056700399567e-15
+        },
+        {
+            "name": "laplace",
+            "quantity": "approximate lp",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 100,
+            "max_abs_error": 4.884981308350689e-15,
+            "max_rel_error": 4.090066077561202e-15
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta mean",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.885780586188048e-16,
+            "max_rel_error": 3.885780586188048e-16
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta median",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 3.3306690738754696e-16,
+            "max_rel_error": 3.3306690738754696e-16
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta sd",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 1.1102230246251565e-16,
+            "max_rel_error": 1.1102230246251565e-16
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta mad",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 4.718447854656915e-16,
+            "max_rel_error": 4.718447854656915e-16
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta q5",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.7755575615628914e-17,
+            "max_rel_error": 2.7755575615628914e-17
+        },
+        {
+            "name": "laplace",
+            "quantity": "theta q95",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 1,
+            "max_abs_error": 2.220446049250313e-16,
+            "max_rel_error": 2.220446049250313e-16
+        }
+    ],
+    "exclusions": [
+        "Draws and summary values that CmdStanR reports as missing are not compared."
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

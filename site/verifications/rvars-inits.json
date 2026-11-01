@@ -1,0 +1,121 @@
+{
+    "title": "draws_rvars and initial values: agreement with posterior and CmdStanR",
+    "label": "draws_rvars and inits",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "The names, dimensions, chain counts, and values of draws_rvars, and initial values built from draws and matched to parameter dimensions.",
+    "reference": "posterior 1.7.1 as_draws_rvars(), and the initial values cmdstanr 0.99.0 (commit 0a54123) writes from draws",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "posterior": "1.7.1"
+    },
+    "inputs": "Draws of a scalar, a 2 × 3 matrix with missing cells, and a vector over 2 chains × 3 iterations; initial values from 2 draws for 2 chains and from 1 draw recycled for 3 chains.",
+    "comparison": [
+        {
+            "id": "rel-1e-15",
+            "kind": "tolerance",
+            "rtol": 1.0e-15,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "rel-1e-8",
+            "kind": "tolerance",
+            "rtol": 1.0e-8,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "exact",
+            "kind": "exact",
+            "applies_to": "variable names; dimensions; chain count; parameter names; shapes"
+        }
+    ],
+    "cases": [
+        {
+            "name": "draws_rvars",
+            "quantity": "variable names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 4
+        },
+        {
+            "name": "draws_rvars",
+            "quantity": "dimensions",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 5
+        },
+        {
+            "name": "draws_rvars",
+            "quantity": "chain count",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 4
+        },
+        {
+            "name": "draws_rvars",
+            "quantity": "values",
+            "status": "pass",
+            "rule": "rel-1e-8",
+            "n_compared": 60,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "Initial values, 2 draws for 2 chains",
+            "quantity": "parameter names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 12
+        },
+        {
+            "name": "Initial values, 2 draws for 2 chains",
+            "quantity": "shapes",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 30
+        },
+        {
+            "name": "Initial values, 2 draws for 2 chains",
+            "quantity": "values",
+            "status": "pass",
+            "rule": "rel-1e-15",
+            "n_compared": 30,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "Initial values, 1 draw recycled for 3 chains",
+            "quantity": "parameter names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 18
+        },
+        {
+            "name": "Initial values, 1 draw recycled for 3 chains",
+            "quantity": "shapes",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 45
+        },
+        {
+            "name": "Initial values, 1 draw recycled for 3 chains",
+            "quantity": "values",
+            "status": "pass",
+            "rule": "rel-1e-15",
+            "n_compared": 45,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

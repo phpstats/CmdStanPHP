@@ -1,0 +1,147 @@
+{
+    "title": "CSV metadata and examples: agreement with CmdStanR",
+    "label": "Metadata and examples",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "The metadata read from CmdStan CSV files for each method, and the bundled example programs and data, against CmdStanR.",
+    "reference": "cmdstanr 0.99.0 (commit 0a54123) read_cmdstan_csv(), print_example_program(), and its bundled example data",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)"
+    },
+    "inputs": "CSV files from examples/bernoulli.stan for each method (MCMC: 2 chains, 50 warmup and 20 sampling iterations, warmup saved), and the logistic, schools, and schools_ncp examples.",
+    "comparison": [
+        {
+            "id": "exact",
+            "kind": "exact",
+            "applies_to": "metadata keys present; metadata values; program text; data"
+        }
+    ],
+    "cases": [
+        {
+            "name": "sample",
+            "quantity": "metadata keys present",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 41
+        },
+        {
+            "name": "sample",
+            "quantity": "metadata values",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 50
+        },
+        {
+            "name": "optimize",
+            "quantity": "metadata keys present",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 31
+        },
+        {
+            "name": "optimize",
+            "quantity": "metadata values",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 32
+        },
+        {
+            "name": "variational",
+            "quantity": "metadata keys present",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 29
+        },
+        {
+            "name": "variational",
+            "quantity": "metadata values",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 33
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "metadata keys present",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 35
+        },
+        {
+            "name": "pathfinder",
+            "quantity": "metadata values",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 43
+        },
+        {
+            "name": "laplace",
+            "quantity": "metadata keys present",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 24
+        },
+        {
+            "name": "laplace",
+            "quantity": "metadata values",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 28
+        },
+        {
+            "name": "example logistic",
+            "quantity": "program text",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 1
+        },
+        {
+            "name": "example logistic",
+            "quantity": "data",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 402
+        },
+        {
+            "name": "example schools",
+            "quantity": "program text",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 1
+        },
+        {
+            "name": "example schools",
+            "quantity": "data",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 17
+        },
+        {
+            "name": "example schools_ncp",
+            "quantity": "program text",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 1
+        },
+        {
+            "name": "example schools_ncp",
+            "quantity": "data",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 17
+        }
+    ],
+    "exclusions": [
+        "The metadata entries time, init, fitted_params, profile_file, file, data_file, diagnostic_file, and start_datetime are not compared: they hold timings, paths, or the run's start time."
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

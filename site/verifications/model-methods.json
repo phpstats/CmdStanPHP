@@ -1,0 +1,187 @@
+{
+    "title": "Model methods: agreement with CmdStanR",
+    "label": "Model methods",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "log_prob(), grad_log_prob(), hessian(), constrain_variables(), unconstrain_variables(), unconstrain_draws(), and the variable skeleton, called in process through FFI.",
+    "reference": "cmdstanr 0.99.0 (commit 0a54123) model methods, compiled with Rcpp 1.1.2 and RcppEigen 0.3.4.0.2",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "cmdstanr": "0.99.0 (commit 0a54123)",
+        "Rcpp": "1.1.2",
+        "RcppEigen": "0.3.4.0.2"
+    },
+    "inputs": "tests/fixtures/native.stan (constrained scalars, a matrix, a simplex, and a covariance matrix) with N = 4, at one point of 19 unconstrained values, and at draws from CmdStanR.",
+    "comparison": [
+        {
+            "id": "abs-1e-12",
+            "kind": "tolerance",
+            "atol": 1.0e-12,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-10",
+            "kind": "tolerance",
+            "atol": 1.0e-10,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-8",
+            "kind": "tolerance",
+            "atol": 1.0e-8,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-6",
+            "kind": "tolerance",
+            "atol": 1.0e-6,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "exact",
+            "kind": "exact",
+            "applies_to": "constrain_variables() names; variable_skeleton(); unconstrained parameter names"
+        }
+    ],
+    "cases": [
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "log_prob()",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 1,
+            "max_abs_error": 4.263256414560601e-14,
+            "max_rel_error": 3.1866225845969106e-15
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "log_prob() without Jacobian",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 1,
+            "max_abs_error": 1.0658141036401503e-14,
+            "max_rel_error": 8.669888451490472e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "grad_log_prob() log density",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 1,
+            "max_abs_error": 4.263256414560601e-14,
+            "max_rel_error": 3.1866225845969106e-15
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "grad_log_prob() gradient",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 19,
+            "max_abs_error": 2.220446049250313e-15,
+            "max_rel_error": 9.468367915891218e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "grad_log_prob() without Jacobian log density",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 1,
+            "max_abs_error": 1.0658141036401503e-14,
+            "max_rel_error": 8.669888451490472e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "grad_log_prob() without Jacobian gradient",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 19,
+            "max_abs_error": 2.220446049250313e-15,
+            "max_rel_error": 9.468367915891218e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "hessian() log density",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 1,
+            "max_abs_error": 4.263256414560601e-14,
+            "max_rel_error": 3.1866225845969106e-15
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "hessian() gradient",
+            "status": "pass",
+            "rule": "abs-1e-8",
+            "n_compared": 19,
+            "max_abs_error": 2.220446049250313e-15,
+            "max_rel_error": 9.468367915891218e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "hessian() matrix",
+            "status": "pass",
+            "rule": "abs-1e-6",
+            "n_compared": 361,
+            "max_abs_error": 3.9968028886505635e-15,
+            "max_rel_error": 2.8865798639876505e-15
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "unconstrain_variables()",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 19,
+            "max_abs_error": 4.440892098500626e-16,
+            "max_rel_error": 4.440892098500626e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "constrain_variables() names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 7
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "constrain_variables() values",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 22,
+            "max_abs_error": 8.881784197001252e-16,
+            "max_rel_error": 4.874426516590324e-16
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "variable_skeleton()",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 12
+        },
+        {
+            "name": "native.stan, 19 unconstrained values",
+            "quantity": "unconstrained parameter names",
+            "status": "pass",
+            "rule": "exact",
+            "n_compared": 19
+        },
+        {
+            "name": "native.stan, CmdStanR draws",
+            "quantity": "unconstrain_draws()",
+            "status": "pass",
+            "rule": "abs-1e-10",
+            "n_compared": 95,
+            "max_abs_error": 6.46011022453763e-15,
+            "max_rel_error": 6.46011022453763e-15
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

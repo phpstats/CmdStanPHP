@@ -1,0 +1,91 @@
+{
+    "title": "Figure values: agreement with R and bayesplot",
+    "label": "Figure values",
+    "kind": "reference",
+    "group": "Comparisons with R",
+    "checked": "The values the figures draw: kernel density bandwidth and estimates, autocorrelations, ranks with ties, and interval quantiles.",
+    "reference": "R 4.6.1 bw.nrd0(), dnorm(), acf(), and rank(), and bayesplot 1.16.0.9000 mcmc_intervals_data() with posterior 1.7.1",
+    "versions": {
+        "PHP": "8.4.25",
+        "CmdStan": "2.40.0",
+        "R": "4.6.1",
+        "posterior": "1.7.1",
+        "bayesplot": "1.16.0.9000"
+    },
+    "inputs": "400 draws of an AR(1) series and 400 integers from 0 to 9, generated with seed 7; density evaluated at 41 points from −2 to 2.",
+    "comparison": [
+        {
+            "id": "abs-1e-14",
+            "kind": "tolerance",
+            "atol": 1.0e-14,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-13",
+            "kind": "tolerance",
+            "atol": 1.0e-13,
+            "rel_floor": 1.0
+        },
+        {
+            "id": "abs-1e-12",
+            "kind": "tolerance",
+            "atol": 1.0e-12,
+            "rel_floor": 1.0
+        }
+    ],
+    "cases": [
+        {
+            "name": "400 AR(1) draws and 400 tied integers",
+            "quantity": "density bandwidth",
+            "status": "pass",
+            "rule": "abs-1e-14",
+            "n_compared": 1,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "400 AR(1) draws and 400 tied integers",
+            "quantity": "density at 41 points",
+            "status": "pass",
+            "rule": "abs-1e-13",
+            "n_compared": 41,
+            "max_abs_error": 6.661338147750939e-16,
+            "max_rel_error": 6.661338147750939e-16
+        },
+        {
+            "name": "400 AR(1) draws and 400 tied integers",
+            "quantity": "autocorrelation, lags 0 to 20",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 21,
+            "max_abs_error": 4.996003610813204e-16,
+            "max_rel_error": 4.996003610813204e-16
+        },
+        {
+            "name": "400 AR(1) draws and 400 tied integers",
+            "quantity": "ranks with ties",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 400,
+            "max_abs_error": 0.0,
+            "max_rel_error": 0.0
+        },
+        {
+            "name": "400 AR(1) draws and 400 tied integers",
+            "quantity": "interval quantiles",
+            "status": "pass",
+            "rule": "abs-1e-12",
+            "n_compared": 10,
+            "max_abs_error": 2.4424906541753444e-15,
+            "max_rel_error": 2.062057563421804e-15
+        }
+    ],
+    "reproduce": "php verification/compatibility/run.php",
+    "source": "verification/compatibility/results.json",
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "0e80bd3",
+        "php": "8.4.25",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}
