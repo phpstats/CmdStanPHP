@@ -139,5 +139,8 @@
             "title": "Compile, sample, and summarize a Stan model",
             "description": "Fits the eight schools hierarchical model with MCMC and prints its summary, diagnostics, and draws."
         }
+    ],
+    "verifications": [
+        "site/verifications/interfaces.json"
     ]
 }

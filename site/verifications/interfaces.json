@@ -1,0 +1,466 @@
+{
+  "title": "Bayesian (Stan): CmdStanPHP, cmdstanr, and CmdStanPy",
+  "description": "The non-centered eight schools model (Rubin 1981) run through three CmdStan interfaces with the same CmdStan, data, seed, chain ids, and initialization. The draws are identical, and each interface summarizes them with its own code.",
+  "versions": {
+    "CmdStan": "2.40.0",
+    "CmdStanPHP": "0.1.2",
+    "cmdstanr": "0.9.0",
+    "posterior": "1.7.1",
+    "cmdstanpy": "1.3.0",
+    "R": "R version 4.6.1 (2026-06-24)",
+    "Python": "3.14.7",
+    "PHP": "8.4.25"
+  },
+  "model": "data {\n  int<lower=0> J;\n  array[J] real y;\n  array[J] real<lower=0> sigma;\n}\nparameters {\n  real mu;\n  real<lower=0> tau;\n  vector[J] theta_tilde;\n}\ntransformed parameters {\n  vector[J] theta = mu + tau * theta_tilde;\n}\nmodel {\n  mu ~ normal(0, 5);\n  tau ~ cauchy(0, 5);\n  theta_tilde ~ normal(0, 1);\n  y ~ normal(theta, sigma);\n}\n",
+  "data": {
+    "J": 8,
+    "y": [
+      28,
+      8,
+      -3,
+      7,
+      -1,
+      1,
+      18,
+      12
+    ],
+    "sigma": [
+      15,
+      10,
+      16,
+      11,
+      9,
+      11,
+      10,
+      18
+    ]
+  },
+  "arguments": {
+    "chains": 4,
+    "parallel_chains": 4,
+    "chain_ids": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "iter_warmup": 1000,
+    "iter_sampling": 1000,
+    "seed": 20261101,
+    "init": 2,
+    "other": "CmdStan's defaults for everything else, including NUTS with the diag_e metric, adapt_delta 0.8, max_treedepth 10, and the CSV output precision"
+  },
+  "cmdstan_arguments_identical": true,
+  "cmdstan_arguments_chain_1": [
+    " method = sample (Default)",
+    "   sample",
+    "     num_samples = 1000 (Default)",
+    "     num_warmup = 1000 (Default)",
+    "     save_warmup = false (Default)",
+    "     thin = 1 (Default)",
+    "     adapt",
+    "       engaged = true (Default)",
+    "       gamma = 0.05 (Default)",
+    "       delta = 0.8 (Default)",
+    "       kappa = 0.75 (Default)",
+    "       t0 = 10 (Default)",
+    "       init_buffer = 75 (Default)",
+    "       term_buffer = 50 (Default)",
+    "       window = 25 (Default)",
+    "       save_metric = false (Default)",
+    "     algorithm = hmc (Default)",
+    "       hmc",
+    "         engine = nuts (Default)",
+    "           nuts",
+    "             max_depth = 10 (Default)",
+    "         metric = diag_e (Default)",
+    "         stepsize = 1 (Default)",
+    "         stepsize_jitter = 0 (Default)",
+    "     num_chains = 1 (Default)",
+    " id = 1 (Default)",
+    " data",
+    " init = 2 (Default)",
+    " random",
+    "   seed = 20261101",
+    " output",
+    "   refresh = 100 (Default)",
+    "   save_cmdstan_config = false (Default)"
+  ],
+  "summary_source": {
+    "CmdStanPHP": "summary() with measures mean, sd, quantile2, rhat, and ess_bulk",
+    "cmdstanr": "fit$summary() (posterior package): mean, sd, quantile 0.05 and 0.95, rhat, ess_bulk",
+    "CmdStanPy": "fit.summary(percentiles=(5, 95)), which runs CmdStan's stansummary: Mean, StdDev, 5%, 95%, R_hat, ESS_bulk"
+  },
+  "summaries": {
+    "CmdStanPHP": [
+      {
+        "variable": "mu",
+        "mean": 4.454396392137175,
+        "sd": 3.2889993835681244,
+        "q5": -1.0488351200000001,
+        "q95": 9.853635934999998,
+        "rhat": 1.0021882511943057,
+        "ess_bulk": 4371.987149050401
+      },
+      {
+        "variable": "tau",
+        "mean": 3.5050759144517247,
+        "sd": 3.184597499262116,
+        "q5": 0.23134661550000002,
+        "q95": 9.678943440000001,
+        "rhat": 0.9994514675300027,
+        "ess_bulk": 2406.8293074637404
+      },
+      {
+        "variable": "theta[1]",
+        "mean": 6.1534560202034,
+        "sd": 5.63803808176712,
+        "q5": -1.6214748249999997,
+        "q95": 16.296684749999994,
+        "rhat": 0.9996266438644356,
+        "ess_bulk": 4581.480316521964
+      },
+      {
+        "variable": "theta[2]",
+        "mean": 4.969602264276203,
+        "sd": 4.6123446129792915,
+        "q5": -2.3524101300000004,
+        "q95": 12.494415,
+        "rhat": 1.001248945441008,
+        "ess_bulk": 5254.373882785773
+      },
+      {
+        "variable": "theta[3]",
+        "mean": 4.1172864208871,
+        "sd": 5.159802061436908,
+        "q5": -4.279078565,
+        "q95": 12.187785149999998,
+        "rhat": 1.0005677593364894,
+        "ess_bulk": 4196.144352504754
+      },
+      {
+        "variable": "theta[4]",
+        "mean": 4.83930778797475,
+        "sd": 4.903506567010138,
+        "q5": -2.90510955,
+        "q95": 12.895218749999989,
+        "rhat": 1.0031012492674631,
+        "ess_bulk": 4861.315640838557
+      },
+      {
+        "variable": "theta[5]",
+        "mean": 3.6249139668073225,
+        "sd": 4.678407328247628,
+        "q5": -4.41762108,
+        "q95": 10.649120999999997,
+        "rhat": 1.000406987149146,
+        "ess_bulk": 4371.969421259479
+      },
+      {
+        "variable": "theta[6]",
+        "mean": 4.15561939230385,
+        "sd": 4.73769369389173,
+        "q5": -3.514995945,
+        "q95": 11.348938649999996,
+        "rhat": 1.0010328765369252,
+        "ess_bulk": 4423.709476898209
+      },
+      {
+        "variable": "theta[7]",
+        "mean": 6.31710278572385,
+        "sd": 5.19060421656156,
+        "q5": -1.1036042849999999,
+        "q95": 15.60597879999999,
+        "rhat": 1.0003492364914464,
+        "ess_bulk": 4565.5412396852
+      },
+      {
+        "variable": "theta[8]",
+        "mean": 4.832574378389325,
+        "sd": 5.257174050538955,
+        "q5": -3.106148374999999,
+        "q95": 13.111990099999973,
+        "rhat": 1.0004913005896585,
+        "ess_bulk": 4552.768034047232
+      }
+    ],
+    "cmdstanr": [
+      {
+        "variable": "mu",
+        "mean": 4.45439639213718,
+        "sd": 3.28899938356812,
+        "q5": -1.04883512,
+        "q95": 9.853635935,
+        "rhat": 1.00218825119431,
+        "ess_bulk": 4371.9871490504
+      },
+      {
+        "variable": "tau",
+        "mean": 3.50507591445172,
+        "sd": 3.18459749926212,
+        "q5": 0.2313466155,
+        "q95": 9.67894344,
+        "rhat": 0.999451467530003,
+        "ess_bulk": 2406.82930746374
+      },
+      {
+        "variable": "theta[1]",
+        "mean": 6.1534560202034,
+        "sd": 5.63803808176712,
+        "q5": -1.621474825,
+        "q95": 16.29668475,
+        "rhat": 0.999626643864436,
+        "ess_bulk": 4581.48031652196
+      },
+      {
+        "variable": "theta[2]",
+        "mean": 4.9696022642762,
+        "sd": 4.61234461297929,
+        "q5": -2.35241013,
+        "q95": 12.494415,
+        "rhat": 1.00124894544101,
+        "ess_bulk": 5254.37388278577
+      },
+      {
+        "variable": "theta[3]",
+        "mean": 4.1172864208871,
+        "sd": 5.15980206143691,
+        "q5": -4.279078565,
+        "q95": 12.18778515,
+        "rhat": 1.00056775933649,
+        "ess_bulk": 4196.14435250476
+      },
+      {
+        "variable": "theta[4]",
+        "mean": 4.83930778797475,
+        "sd": 4.90350656701014,
+        "q5": -2.90510955,
+        "q95": 12.89521875,
+        "rhat": 1.00310124926746,
+        "ess_bulk": 4861.31564083855
+      },
+      {
+        "variable": "theta[5]",
+        "mean": 3.62491396680732,
+        "sd": 4.67840732824763,
+        "q5": -4.41762108,
+        "q95": 10.649121,
+        "rhat": 1.00040698714915,
+        "ess_bulk": 4371.96942125948
+      },
+      {
+        "variable": "theta[6]",
+        "mean": 4.15561939230385,
+        "sd": 4.73769369389173,
+        "q5": -3.514995945,
+        "q95": 11.34893865,
+        "rhat": 1.00103287653693,
+        "ess_bulk": 4423.70947689821
+      },
+      {
+        "variable": "theta[7]",
+        "mean": 6.31710278572385,
+        "sd": 5.19060421656156,
+        "q5": -1.103604285,
+        "q95": 15.6059788,
+        "rhat": 1.00034923649145,
+        "ess_bulk": 4565.54123968519
+      },
+      {
+        "variable": "theta[8]",
+        "mean": 4.83257437838933,
+        "sd": 5.25717405053896,
+        "q5": -3.106148375,
+        "q95": 13.1119901,
+        "rhat": 1.00049130058966,
+        "ess_bulk": 4552.76803404724
+      }
+    ],
+    "CmdStanPy": [
+      {
+        "variable": "mu",
+        "mean": 4.4544,
+        "sd": 3.289,
+        "q5": -1.04884,
+        "q95": 9.85364,
+        "rhat": 1.00219,
+        "ess_bulk": 4371.99
+      },
+      {
+        "variable": "tau",
+        "mean": 3.50508,
+        "sd": 3.1846,
+        "q5": 0.231347,
+        "q95": 9.67894,
+        "rhat": 0.999451,
+        "ess_bulk": 2406.83
+      },
+      {
+        "variable": "theta[1]",
+        "mean": 6.15346,
+        "sd": 5.63804,
+        "q5": -1.62147,
+        "q95": 16.2967,
+        "rhat": 0.999627,
+        "ess_bulk": 4581.48
+      },
+      {
+        "variable": "theta[2]",
+        "mean": 4.9696,
+        "sd": 4.61234,
+        "q5": -2.35241,
+        "q95": 12.4944,
+        "rhat": 1.00125,
+        "ess_bulk": 5254.37
+      },
+      {
+        "variable": "theta[3]",
+        "mean": 4.11729,
+        "sd": 5.1598,
+        "q5": -4.27908,
+        "q95": 12.1878,
+        "rhat": 1.00057,
+        "ess_bulk": 4196.14
+      },
+      {
+        "variable": "theta[4]",
+        "mean": 4.83931,
+        "sd": 4.90351,
+        "q5": -2.90511,
+        "q95": 12.8952,
+        "rhat": 1.0031,
+        "ess_bulk": 4861.32
+      },
+      {
+        "variable": "theta[5]",
+        "mean": 3.62491,
+        "sd": 4.67841,
+        "q5": -4.41762,
+        "q95": 10.6491,
+        "rhat": 1.00041,
+        "ess_bulk": 4371.97
+      },
+      {
+        "variable": "theta[6]",
+        "mean": 4.15562,
+        "sd": 4.73769,
+        "q5": -3.515,
+        "q95": 11.3489,
+        "rhat": 1.00103,
+        "ess_bulk": 4423.71
+      },
+      {
+        "variable": "theta[7]",
+        "mean": 6.3171,
+        "sd": 5.1906,
+        "q5": -1.1036,
+        "q95": 15.606,
+        "rhat": 1.00035,
+        "ess_bulk": 4565.54
+      },
+      {
+        "variable": "theta[8]",
+        "mean": 4.83257,
+        "sd": 5.25717,
+        "q5": -3.10615,
+        "q95": 13.112,
+        "rhat": 1.00049,
+        "ess_bulk": 4552.77
+      }
+    ]
+  },
+  "draw_differences": [
+    {
+      "interfaces": [
+        "CmdStanPHP",
+        "cmdstanr"
+      ],
+      "max_abs_draw_difference": 0.0,
+      "draws_compared": 4000,
+      "columns_compared": 25
+    },
+    {
+      "interfaces": [
+        "CmdStanPHP",
+        "CmdStanPy"
+      ],
+      "max_abs_draw_difference": 0.0,
+      "draws_compared": 4000,
+      "columns_compared": 25
+    },
+    {
+      "interfaces": [
+        "cmdstanr",
+        "CmdStanPy"
+      ],
+      "max_abs_draw_difference": 0.0,
+      "draws_compared": 4000,
+      "columns_compared": 25
+    }
+  ],
+  "summary_differences": [
+    {
+      "interfaces": [
+        "CmdStanPHP",
+        "cmdstanr"
+      ],
+      "max_abs_difference": {
+        "mean": 4.884981308350689e-15,
+        "sd": 4.440892098500626e-15,
+        "q5": 8.881784197001252e-16,
+        "q95": 2.6645352591003757e-14,
+        "rhat": 4.884981308350689e-15,
+        "ess_bulk": 1.000444171950221e-11
+      }
+    },
+    {
+      "interfaces": [
+        "CmdStanPHP",
+        "CmdStanPy"
+      ],
+      "max_abs_difference": {
+        "mean": 4.378389325765397e-06,
+        "sd": 4.612979291884756e-06,
+        "q5": 4.879999999873874e-06,
+        "q95": 3.864999999514396e-05,
+        "rhat": 3.012850853911786e-06,
+        "ess_bulk": 0.004359161443062476
+      }
+    },
+    {
+      "interfaces": [
+        "cmdstanr",
+        "CmdStanPy"
+      ],
+      "max_abs_difference": {
+        "mean": 4.378389330206289e-06,
+        "sd": 4.612979290108399e-06,
+        "q5": 4.880000000095919e-06,
+        "q95": 3.864999999869667e-05,
+        "rhat": 3.012850849914983e-06,
+        "ess_bulk": 0.004359161449428939
+      }
+    }
+  ],
+  "summary_differences_note": "CmdStanPHP's and cmdstanr's summaries agree to rounding error in double precision. CmdStanPy's summary() rounds stansummary's output to 6 significant figures by default, which accounts for its differences. With summary(sig_figs=12), its largest differences are those in summary_differences_cmdstanpy_sig_figs_12.",
+  "summary_differences_cmdstanpy_sig_figs_12": {
+    "CmdStanPHP": {
+      "mean": 4.74997818855627e-12,
+      "sd": 3.091749078976136e-12,
+      "q5": 8.881784197001252e-16,
+      "q95": 2.6645352591003757e-14,
+      "rhat": 4.305666934101282e-12,
+      "ess_bulk": 4.800313035957515e-09
+    },
+    "cmdstanr": {
+      "mean": 4.74997818855627e-12,
+      "sd": 3.0899727221367357e-12,
+      "q5": 0.0,
+      "q95": 0.0,
+      "rhat": 4.310107826199783e-12,
+      "ess_bulk": 4.8103174776770175e-09
+    }
+  },
+  "code": "<?php\nrequire 'vendor/autoload.php';\n\nuse function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model('schools.stan');\n\n$fit = $model->sample(\n    data: [\n        'J' => 8,\n        'y' => [28, 8, -3, 7, -1, 1, 18, 12],\n        'sigma' => [15, 10, 16, 11, 9, 11, 10, 18],\n    ],\n    seed: 20261101,\n    chains: 4,\n    iter_warmup: 1000,\n    iter_sampling: 1000,\n);\n\nprint_r($fit->summary(['mu', 'tau', 'theta'], measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk']));\n",
+  "source": "verification/interfaces"
+}
