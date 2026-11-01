@@ -3,10 +3,8 @@
     "title": "CmdStanPHP",
     "tagline": "Stan modeling and inference from PHP.",
     "summary": [
-        "CmdStanPHP compiles Stan programs from PHP, runs inference through CmdStan, and returns the posterior draws as typed PHP objects. It ports CmdStanR's model, executable, and CSV workflow and keeps CmdStanR's snake_case names for its standalone functions and for CmdStan's options, with camelCase methods, so a translated R script reads much like its original. Inference methods take PHP named arguments or one associative options array, and they reject an unknown option instead of ignoring it.",
-        "The inference methods are MCMC with parallel chains, L-BFGS, BFGS, and Newton optimization, meanfield and fullrank ADVI, single- and multi-path Pathfinder, Laplace approximation, standalone generated quantities, and finite-difference gradient checking. Each one returns a fit object carrying draws in posterior's formats, summaries with rank-normalized R-hat and bulk and tail effective sample size, per-chain sampler diagnostics, and PSIS-LOO and WAIC, with optional moment matching in LOO.",
-        "PHP's FFI extension gives in-process access to a compiled model: its log density, gradients, Hessian, constrain and unconstrain transforms, and its user-defined Stan functions called as PHP methods. The bayesplot diagnostics are computed in PHP, including trace, histogram, density, intervals, rank histograms, scatter, autocorrelation, and loo's Pareto k plot. Each one renders as ASCII text for a terminal or a log, a Vega-Lite spec for a front end, a standalone HTML page, or an SVG or PNG image through vl-convert.",
-        "The package needs PHP 8.2 to 8.5, the JSON extension, PHP's proc_open(), and CmdStan 2.37 or later with make and a C++ compiler. It has no Composer dependencies, and its installer downloads and builds an official CmdStan release. Model data can be a phibble data frame or any object that exposes its columns, StanData builds hierarchical regression data from columns or from an R-style formula, and draws and summaries come back as plain column arrays or as a phibble DataFrame. None of the other phpstats packages is required."
+        "Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP. CmdStanPHP runs Stan programs through CmdStan, Stan's command-line interface, and is a port of CmdStanR 1.0 that keeps its function and option names.",
+        "It fits models with MCMC, optimization, the Laplace approximation, ADVI, and Pathfinder, and runs standalone generated quantities. Fits return draws in posterior's formats, summaries with R-hat and effective sample sizes, sampler diagnostics, and PSIS-LOO and WAIC. Through PHP's FFI extension it also evaluates log densities and gradients in process and calls a model's Stan functions, and it draws bayesplot's diagnostic plots as text, Vega-Lite, HTML, SVG, or PNG."
     ],
     "install": [
         "composer require phpstats/cmdstanphp"
@@ -52,8 +50,8 @@
     "quickstart": "getting-started",
     "repository": "https://github.com/phpstats/CmdStanPHP",
     "example": {
-        "chain": "use function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model('bernoulli.stan');\n\n$fit = $model->sample(\n    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],\n    seed: 123,\n    chains: 4,\n    parallel_chains: 2,\n    iter_warmup: 500,\n    iter_sampling: 500,\n    show_messages: false,\n);\n\nprint_r($fit->summary('theta', measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk']));",
-        "output": "Array\n(\n    [0] => Array\n        (\n            [variable] => theta\n            [mean] => 0.245767235518\n            [sd] => 0.11840083300925\n            [q5] => 0.0742962453\n            [q95] => 0.460095425\n            [rhat] => 0.99947503401977\n            [ess_bulk] => 813.95155410288\n        )\n\n)"
+        "chain": "use function CmdStan\\cmdstan_model;\n\n$model = cmdstan_model(__DIR__.'/bernoulli.stan');\n\n$data = [\n    'N' => 10,\n    'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],\n];\n\n$fit = $model->sample(\n    data: $data,\n    seed: 123,\n    chains: 4,\n    parallel_chains: 4,\n    show_messages: false,\n);\n\necho \"variable   mean    sd    q5   q95  rhat ess_bulk\\n\";\nforeach ($fit->summary('theta') as $r) {\n    printf(\n        \"%-8s %6.3f %5.3f %5.3f %5.3f %5.3f %8.0f\\n\",\n        $r['variable'],\n        $r['mean'],\n        $r['sd'],\n        $r['q5'],\n        $r['q95'],\n        $r['rhat'],\n        $r['ess_bulk'],\n    );\n}",
+        "output": "variable   mean    sd    q5   q95  rhat ess_bulk\ntheta     0.257 0.124 0.080 0.485 1.001     1232"
     },
     "docs": {
         "root": "docs",
