@@ -4,40 +4,18 @@
     "href": "verification.html",
     "title": "Verification",
     "section": "",
-    "text": "CmdStanPHP is checked three ways: unit tests without CmdStan, integration tests that compile and run real models, and compatibility tests that run CmdStanR, posterior, loo, and bayesplot in R on the same inputs and compare the results. Contributing explains how to run them.",
+    "text": "CmdStanPHP has three test suites:\nContributing explains how to run them.",
     "crumbs": [
       "Benchmarks and verification",
       "Verification"
     ]
   },
   {
-    "objectID": "verification.html#what-ci-tests",
-    "href": "verification.html#what-ci-tests",
+    "objectID": "verification.html#what-ci-runs",
+    "href": "verification.html#what-ci-runs",
     "title": "Verification",
-    "section": "What CI tests",
-    "text": "What CI tests\nGitHub Actions runs these on Linux (Ubuntu) for every push to main and every pull request:\n\nUnit tests on PHP 8.2, 8.3, 8.4, and 8.5.\nIntegration tests on PHP 8.4 with CmdStan 2.37.0 and 2.40.0, built by this package’s installer, with FFI and the phit extension loaded. Every figure kind is rendered to SVG, and one to PNG, with vl-convert 1.9.0.\nCompatibility tests on the CmdStan 2.40.0 job, against CmdStanR 1.0 from commit 0a54123 of its v1.0 branch (version 0.99.0, a release candidate), and the posterior, loo, and bayesplot packages from stan-dev’s R-universe and CRAN.\n\nThe integration and compatibility jobs fail on skipped tests. macOS, native Windows, MPI clusters, and OpenCL hardware are not tested in CI. The integration suite has also been run on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0) during development, most recently on 2026-10-31.",
-    "crumbs": [
-      "Benchmarks and verification",
-      "Verification"
-    ]
-  },
-  {
-    "objectID": "verification.html#unit-tests",
-    "href": "verification.html#unit-tests",
-    "title": "Verification",
-    "section": "Unit tests",
-    "text": "Unit tests\nThe unit suite does not need CmdStan. Its moment-matching tests need the phit extension and skip without it. It verifies JSON shapes and invalid data, CSV comments/warmup/special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. It uses real PHP subprocesses for process behavior. Data frame interoperability is tested with stand-in tables and a stand-in Phibble\\DataFrame, so phibble is not needed. Without phit, StanData::fromFormula() is tested with a stand-in Phit\\model_matrix(). With it, the tests cover random intercepts and slopes, factor predictors and responses, and dropped rows against the real function.",
-    "crumbs": [
-      "Benchmarks and verification",
-      "Verification"
-    ]
-  },
-  {
-    "objectID": "verification.html#integration-tests",
-    "href": "verification.html#integration-tests",
-    "title": "Verification",
-    "section": "Integration tests",
-    "text": "Integration tests\nThe integration suite compiles the bundled models and invokes real CmdStan methods. It compares Bernoulli posterior estimates with their analytic mean, checks R-hat and ESS, verifies deterministic seeds with parallel chains, confirms modes and draw counts, and exercises generated quantities, fixed parameters, syntax/formatting, gradient checking, log density, input errors, metrics, and auxiliary files. It fits a hierarchical regression built with StanData::fromColumns(), runs a model on table data, and, when phit is loaded, fits score ~ study_hours + (1 | school) built with StanData::fromFormula() on phit’s schools data and compares the posterior means with Phit\\fit_lmer(). It also builds FFI libraries for model methods and exposed functions, initializes chains from fits, runs the example models, and computes LOO with and without moment matching. Tests that need FFI skip when it is unavailable. If CmdStan is not available, PHPUnit skips these tests; CI explicitly installs CmdStan so they execute there.",
+    "section": "What CI runs",
+    "text": "What CI runs\nGitHub Actions runs on Linux (Ubuntu) for every push to main and every pull request:\n\n\n\n\n\n\n\n\nJob\nPlatform\nScope\n\n\n\n\nUnit\nPHP 8.2, 8.3, 8.4, and 8.5\nUnit suite\n\n\nIntegration\nPHP 8.4, CmdStan 2.37.0 and 2.40.0, with FFI and the phit extension\nIntegration suite. Every figure kind is rendered to SVG and one to PNG with vl-convert 1.9.0.\n\n\nCompatibility\nThe CmdStan 2.40.0 integration job\nCmdStanR 1.0 (commit 0a54123 of its v1.0 branch, version 0.99.0, a release candidate), and posterior, loo, and bayesplot from stan-dev’s R-universe and CRAN\n\n\n\nThe integration and compatibility jobs fail on skipped tests. The integration suite also passes on macOS (Apple silicon, PHP 8.4, CmdStan 2.40.0), last run on 2026-10-31.",
     "crumbs": [
       "Benchmarks and verification",
       "Verification"
@@ -48,7 +26,18 @@
     "href": "verification.html#comparisons-with-r",
     "title": "Verification",
     "section": "Comparisons with R",
-    "text": "Comparisons with R\nThe compatibility suite runs the same algorithms with CmdStanR 1.0 and PHP using identical seeds and precision, then compares individual parameter/log-density draws, approximate densities, descriptive summaries, R-hat, bulk/tail ESS, and MCMC diagnostics. MCMC comparisons include even and odd chain lengths. A hierarchical model with an indexed parameter (shoe_latent[1..12], four chains of 1000 draws) is summarized both ways, by default through stansummary and with measures through the posterior port, and compared with posterior::summarise_draws() to 1e-8 for the mean, median, SD, MAD, a five-point quantile2(), R-hat, and bulk and tail ESS. R is given PHP’s draws as binary doubles rather than reading the CSV files itself, because R’s CSV parsing is not always correctly rounded and an ulp can reorder two near-tied folded draws, which moves R-hat’s tail half by about 1e-6. Its sampler diagnostics are compared with CmdStanR’s diagnostic_summary() on the same CSV files. Further comparisons cover CSV metadata keys, in-process log densities, gradients, Hessians, constrain/unconstrain results, exposed Stan functions, PSIS, LOO, LOO moment matching, WAIC, relative efficiency, and posterior summary measures. Moment matching is compared with loo::loo_moment_match.default() on analytic regression posteriors, both unmodified and with loo’s split step corrected as documented, and with CmdStanR’s loo(moment_match = TRUE) on a same-seed fit. The values behind the figures are compared with R and bayesplot. In the method comparisons, CmdStanR runs PHP’s compiled executable through cmdstan_model(exe_file = ...), so both packages run the same build. R, CmdStanR 1.0, posterior, loo, bayesplot, jsonlite, Rcpp, and RcppEigen are needed. These tests skip when their prerequisites are absent.\nThe moment-matching reference was first verified with CmdStanR 0.9.0 and two loo 2.10.1.9000 development builds: 7991145, from before stan-dev/loo#405, and fd910fe, which includes it. The isolated R reference in tests/fixtures/moment_match.R records the loo version and commit and contains the explicit split-inverse and two-half efficiency corrections. With an earlier loo, the suite checks that loo’s own split differs where a shift is combined with scaling or a covariance map. With a corrected loo, it checks that loo’s own split matches CmdStanPHP for every design. Transform-order preservation also has an independent regression test.",
+    "text": "Comparisons with R\nEach comparison runs the same input through CmdStanPHP and the R reference. In the method comparisons, CmdStanR runs CmdStanPHP’s compiled executable through cmdstan_model(exe_file = ...), so both use the same build, data, seed, and output precision. A relative tolerance t means |PHP − R| ≤ t × max(1, |R|).\n\n\n\n\n\n\n\n\n\nCompared\nReference\nInputs\nTolerance\n\n\n\n\nDraws and approximate log densities\nCmdStanR\nsample() with 100 and 101 draws per chain, optimize(), variational(), pathfinder(), and laplace()\n1e-13\n\n\nMean, median, SD, MAD, and quantiles\nCmdStanR\nThe same fits\n1e-12\n\n\nR-hat, bulk ESS, and tail ESS\nCmdStanR\nThe same fits\n1e-8\n\n\nSampler diagnostics\nCmdStanR’s diagnostic_summary()\nThe same CSV files\n1e-12\n\n\nCSV metadata keys, and example programs and data\nCmdStanR\nAll methods and bundled examples\nExact\n\n\nSummaries of an indexed parameter, by default and with measures\nposterior::summarise_draws() on CmdStanPHP’s draws\nA hierarchical model, shoe_latent[1..12], 4 chains of 1,000 draws\n1e-8 relative\n\n\nEvery posterior summary measure\nposterior\nFixed draws, with custom probabilities\n1e-8 relative\n\n\nPSIS, Pareto k, the GPD fit, relative efficiency, LOO, and WAIC\nloo\nFixed log-likelihood draws\n1e-8 relative\n\n\nMoment matching\nloo::loo_moment_match.default() and CmdStanR’s loo(moment_match = TRUE)\nAnalytic regression posteriors, and a same-seed fit\n1e-8 relative\n\n\nLog density and gradient\nCmdStanR model methods\nOne model, several points\n1e-10\n\n\nHessian\nCmdStanR model methods\nThe same\n1e-6, with its gradient to 1e-8\n\n\nConstrain and unconstrain\nCmdStanR model methods\nThe same, and unconstrained draws\n1e-12, draws to 1e-10\n\n\nExposed Stan functions\nCmdStanR’s expose_functions()\nScalar, vector, matrix, complex, RNG, and lpdf/lpmf functions\n1e-14 or 1e-15, integers exact\n\n\nFigure values: bandwidth, density, autocorrelation, ranks, and interval quantiles\nR and bayesplot\nFixed draws\n1e-12 to 1e-14\n\n\ndraws_rvars shapes, and initial values matched to parameter dimensions\nposterior and CmdStanR\nFixed draws and initial values\nShapes exact, values 1e-15\n\n\n\nR, CmdStanR 1.0, posterior, loo, bayesplot, jsonlite, Rcpp, and RcppEigen are needed. The tests skip when these are missing.\n\nOther interfaces\nThe eight schools model, run through CmdStanPHP, cmdstanr 0.9.0, and CmdStanPy 1.3.0 with the same CmdStan 2.40.0, data, seed, chain IDs, and initialization, gives identical draws. Each interface’s own summary agrees with CmdStanPHP’s to 1e-9 + 1e-9 × |cmdstanr’s value|, with CmdStanPy’s summary at 12 significant figures. verification/interfaces/run.sh reproduces it.",
+    "crumbs": [
+      "Benchmarks and verification",
+      "Verification"
+    ]
+  },
+  {
+    "objectID": "verification.html#unit-and-integration-tests",
+    "href": "verification.html#unit-and-integration-tests",
+    "title": "Verification",
+    "section": "Unit and integration tests",
+    "text": "Unit and integration tests\nThe unit suite covers JSON shapes and invalid data, CSV comments, warmup, and special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. Process behavior is tested with real PHP subprocesses. Data frames are tested with stand-in tables and a stand-in Phibble\\DataFrame. Without phit, StanData::fromFormula() is tested with a stand-in Phit\\model_matrix(), and with phit, against the real function. The moment-matching tests need phit and skip without it.\nThe integration suite compiles the bundled models and runs real CmdStan methods:\n\nBernoulli posterior estimates against the analytic mean, R-hat and ESS, seeded parallel chains, modes, and draw counts.\nGenerated quantities, fixed parameters, syntax checking and formatting, gradient checking, log density, input errors, metrics, and auxiliary files.\nA hierarchical regression from StanData::fromColumns(), a model on table data, and, with phit, score ~ study_hours + (1 | school) from StanData::fromFormula(), compared with Phit\\fit_lmer().\nFFI model methods and exposed functions, initialization from fits, the example models, and LOO with and without moment matching.\n\nTests that need FFI skip without it, and the suite skips without CmdStan.",
     "crumbs": [
       "Benchmarks and verification",
       "Verification"
@@ -59,7 +48,18 @@
     "href": "verification.html#limits",
     "title": "Verification",
     "section": "Limits",
-    "text": "Limits\nTests use small models and a modest number of draws. They do not constitute a full upstream CmdStanR conformance suite, do not test a real MPI cluster or OpenCL hardware, and do not establish native Windows support. The package’s compatibility contract lists remaining gaps.",
+    "text": "Limits\n\nTests use small models and modest numbers of draws, and they are not CmdStanR’s own test suite.\nmacOS is tested locally, not in CI. Native Windows, MPI clusters, and OpenCL hardware are not tested.\nCompatibility lists the features that are not implemented.",
+    "crumbs": [
+      "Benchmarks and verification",
+      "Verification"
+    ]
+  },
+  {
+    "objectID": "verification.html#technical-notes",
+    "href": "verification.html#technical-notes",
+    "title": "Verification",
+    "section": "Technical notes",
+    "text": "Technical notes\n\nR’s CSV parsing\nThe indexed-parameter comparison gives R CmdStanPHP’s draws as binary doubles instead of letting R read the CSV files. R’s CSV parsing is not always correctly rounded, and a one-ulp difference can reorder two nearly tied folded draws, which moves the tail half of R-hat by about 1e-6.\n\n\nMoment-matching references (2026-10)\nThe moment-matching reference was first checked with CmdStanR 0.9.0 and two loo 2.10.1.9000 development builds: 7991145, from before stan-dev/loo#405, and fd910fe, which includes it. The R reference in tests/fixtures/moment_match.R records the loo version and commit and contains the corrected split inverse and two-half efficiency. With an earlier loo, the suite checks that loo’s own split differs where a shift is combined with scaling or a covariance map. With a corrected loo, it checks that loo’s split matches CmdStanPHP on every design. Transform order has its own regression test. Compatibility describes the differences.",
     "crumbs": [
       "Benchmarks and verification",
       "Verification"
