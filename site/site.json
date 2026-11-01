@@ -137,7 +137,7 @@
         {
             "path": "examples/sample",
             "title": "Fit a Stan model with MCMC",
-            "description": "Compiles the eight schools hierarchical model, samples four chains, and prints the posterior summary, sampler warnings, and draws of one parameter."
+            "description": "Estimates coaching effects in eight schools with a hierarchical model and checks that the chains converged."
         }
     ],
     "verifications": [

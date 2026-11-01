@@ -32,7 +32,12 @@ model {
 }
 STAN;
 
-$model = cmdstan_model(write_stan_file($code, dir: __DIR__, basename: 'schools'));
+$file = write_stan_file(
+    $code,
+    dir: __DIR__,
+    basename: 'schools',
+);
+$model = cmdstan_model($file);
 
 $data = [
     'J' => 8,
@@ -49,47 +54,56 @@ $fit = $model->sample(
     show_messages: false,
 );
 
-printf("%-10s %7s %7s %7s %7s %6s %8s\n", 'variable', 'mean', 'sd', 'q5', 'q95', 'rhat', 'ess_bulk');
-foreach ($fit->summary(['mu', 'tau', 'theta']) as $row) {
+$rows = $fit->summary(['mu', 'tau', 'theta']);
+echo "variable   mean    sd     q5    q95  rhat ess_bulk\n";
+foreach ($rows as $r) {
     printf(
-        "%-10s %7.2f %7.2f %7.2f %7.2f %6.3f %8.0f\n",
-        $row['variable'], $row['mean'], $row['sd'], $row['q5'], $row['q95'], $row['rhat'], $row['ess_bulk'],
+        "%-8s %6.2f %5.2f %6.2f %6.2f %5.3f %8.0f\n",
+        $r['variable'],
+        $r['mean'],
+        $r['sd'],
+        $r['q5'],
+        $r['q95'],
+        $r['rhat'],
+        $r['ess_bulk'],
     );
 }
 
-print_r($fit->diagnosticWarnings());
+$warnings = $fit->diagnosticWarnings();
+echo $warnings ? implode("\n", $warnings) : 'No warnings';
+echo "\n";
 
-$tau = array_column($fit->draws('tau', 'draws_matrix'), 'tau');
-echo count($tau), " draws of tau\n";
-echo implode(', ', array_map(fn($x) => round($x, 2), array_slice($tau, 0, 5))), "\n";
+$draws = $fit->draws('tau', 'draws_matrix');
+$tau = array_column($draws, 'tau');
+echo count($tau), " draws of tau, the first five:\n";
+$first = array_slice($tau, 0, 5);
+printf("%.2f, %.2f, %.2f, %.2f, %.2f\n", ...$first);
 ```
 
 Output:
 
 ```text
-variable      mean      sd      q5     q95   rhat ess_bulk
-mu            6.40    4.06   -0.31   13.12  1.001     3582
-tau           4.78    3.75    0.37   12.00  1.000     2176
-theta[1]      8.87    6.90   -0.84   21.11  1.000     4184
-theta[2]      6.72    5.47   -2.11   15.66  1.001     5706
-theta[3]      5.37    6.35   -5.21   14.78  1.001     4311
-theta[4]      6.64    5.63   -2.76   15.59  1.001     4613
-theta[5]      4.83    5.50   -4.85   13.22  1.001     4452
-theta[6]      5.46    5.79   -4.55   14.29  1.000     4957
-theta[7]      8.75    5.91    0.12   19.22  1.002     4966
-theta[8]      6.90    6.39   -3.13   17.47  1.001     4643
-Array
-(
-)
-4000 draws of tau
+variable   mean    sd     q5    q95  rhat ess_bulk
+mu         6.40  4.06  -0.31  13.12 1.001     3582
+tau        4.78  3.75   0.37  12.00 1.000     2176
+theta[1]   8.87  6.90  -0.84  21.11 1.000     4184
+theta[2]   6.72  5.47  -2.11  15.66 1.001     5706
+theta[3]   5.37  6.35  -5.21  14.78 1.001     4311
+theta[4]   6.64  5.63  -2.76  15.59 1.001     4613
+theta[5]   4.83  5.50  -4.85  13.22 1.001     4452
+theta[6]   5.46  5.79  -4.55  14.29 1.000     4957
+theta[7]   8.75  5.91   0.12  19.22 1.002     4966
+theta[8]   6.90  6.39  -3.13  17.47 1.001     4643
+No warnings
+4000 draws of tau, the first five:
 1.41, 1.36, 1.63, 0.63, 0.06
 ```
 
-- `write_stan_file()` writes `schools.stan` beside the script and leaves it untouched when the program is unchanged. `cmdstan_model()` compiles it on the first run and reuses the executable until the program changes.
-- Each variable has 4,000 draws: four chains of 1,000 sampling iterations after 1,000 warmup iterations. `draws_matrix` lists them chain after chain.
-- Partial pooling: each school's `theta` is pulled toward the overall mean `mu`. The pull is stronger when the between-school standard deviation `tau` is small and for schools whose `sigma` is large.
-- The program samples `theta_raw` and computes `theta = mu + tau * theta_raw` (the non-centered parameterization). When `tau` is near zero, this form usually produces far fewer divergent transitions than sampling `theta` directly, but it does not rule them out. `adapt_delta: 0.95` makes the sampler take smaller steps, which also reduces divergences at some cost in speed.
-- Check the diagnostics before using the estimates. `rhat` should be below 1.01, and `ess_bulk` should be at least 100 per chain (400 here). `diagnosticWarnings()` reports divergent transitions, iterations that hit the maximum tree depth, and low E-BFMI, and an empty list means none occurred.
-- A fixed seed reproduces the draws with the same CmdStan version, compiler, and machine. A different CmdStan or compiler version, operating system, or processor can give different draws.
+- `write_stan_file()` rewrites `schools.stan` only when the program changes, so the model compiles on the first run and later runs reuse the executable.
+- Four chains of 1,000 sampling iterations, after 1,000 warmup iterations, give 4,000 draws per variable.
+- Partial pooling pulls each school's `theta` toward `mu`. The pull is stronger when `tau` is small or a school's `sigma` is large.
+- The non-centered form, `theta = mu + tau * theta_raw`, usually produces far fewer divergent transitions than sampling `theta` directly. It does not rule them out.
+- Use the estimates only when `rhat` is below 1.01, `ess_bulk` is at least 100 per chain, and there are no warnings.
+- A fixed seed reproduces the draws only with the same CmdStan version, compiler, and machine.
 
-[MCMC sampling](../mcmc.qmd) · [Draws, summaries, and saving fits](../draws.qmd) · [API reference](../api.qmd) · [Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)
+[Compiling models](../compiling.qmd) · [MCMC sampling](../mcmc.qmd) · [Draws, summaries, and saving fits](../draws.qmd) · [API reference](../api.qmd) · [Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)
