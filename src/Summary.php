@@ -134,12 +134,35 @@ final class Summary
         foreach ($chains as $chain) { $first[] = array_slice($chain, 0, (int)floor($half)); $second[] = array_slice($chain, (int)ceil($half + 1) - 1); }
         return array_merge($first, $second);
     }
+    /** Normal scores qnorm((r - 0.375) / (n + 0.25)) for the integer ranks 1..n of the most recent n. */
+    private static array $scores = [];
+    private static int $scoresFor = 0;
+    /** The split, rank-normalized chains of the most recent bulk input, shared by rhat() and essBulk(). */
+    private static ?array $bulkInput = null;
+    private static array $bulkZ = [];
     /** posterior::z_scale over all draws, keeping the chain structure. */
     private static function zScale(array $chains): array
     {
         $values = array_merge(...$chains); $n = count($values); $ranks = Special::rank($values); $z = []; $i = 0;
-        foreach ($chains as $c => $chain) { foreach ($chain as $j => $v) { $z[$c][$j] = is_nan($v) ? NAN : Special::qnorm(($ranks[$i] - 0.375) / ($n - 0.75 + 1)); ++$i; } }
+        if (self::$scoresFor !== $n) {
+            self::$scores = [];
+            for ($r = 1; $r <= $n; ++$r) { self::$scores[$r] = Special::qnorm(($r - 0.375) / ($n - 0.75 + 1)); }
+            self::$scoresFor = $n;
+        }
+        $scores = self::$scores;
+        foreach ($chains as $c => $chain) {
+            foreach ($chain as $j => $v) {
+                $rank = $ranks[$i++]; $k = (int)$rank;
+                $z[$c][$j] = is_nan($v) ? NAN : ($k == $rank ? $scores[$k] : Special::qnorm(($rank - 0.375) / ($n - 0.75 + 1)));
+            }
+        }
         return $z;
+    }
+    /** zScale(splitChains($chains)), reused when the same draws are summarized by both rhat() and essBulk(). */
+    private static function bulkZ(array $chains): array
+    {
+        if (self::$bulkInput !== $chains) { self::$bulkZ = self::zScale(self::splitChains($chains)); self::$bulkInput = $chains; }
+        return self::$bulkZ;
     }
     /** posterior:::.ess, the Geyer initial monotone sequence estimator (CmdStan/posterior agree; see Diagnostics::ess). */
     private static function essRaw(array $chains): float
@@ -160,7 +183,7 @@ final class Summary
     {
         $chains = self::matrix($x); $values = array_merge(...$chains);
         foreach ($values as $v) { if (is_nan($v)) { return NAN; } }
-        $bulk = self::rhatRaw(self::zScale(self::splitChains($chains)));
+        $bulk = self::rhatRaw(self::bulkZ($chains));
         $median = Special::median($values);
         $folded = array_map(fn($chain) => array_map(fn($v) => abs($v - $median), $chain), $chains);
         foreach (array_merge(...$folded) as $v) { if (is_nan($v)) { return NAN; } }
@@ -174,7 +197,7 @@ final class Summary
     {
         $chains = self::matrix($x);
         foreach (array_merge(...$chains) as $v) { if (is_nan($v)) { return NAN; } }
-        return self::essRaw(self::zScale(self::splitChains($chains)));
+        return self::essRaw(self::bulkZ($chains));
     }
     public static function essSd(array $x): float
     {

@@ -25,14 +25,20 @@ final class Diagnostics
     {
         $m = count($chains); $n = count($chains[0] ?? []);
         if ($m === 0 || $n < 3 || count(array_unique(array_map('count', $chains))) !== 1) { return NAN; }
-        $values = array_merge(...$chains);
-        if (count(array_filter($values, 'is_finite')) !== count($values) || max($values) - min($values) < PHP_FLOAT_EPSILON) { return NAN; }
-        $means = array_map(fn($chain) => array_sum($chain) / $n, $chains);
-        $centered = [];
-        foreach ($chains as $i => $chain) { $centered[] = array_map(fn($x) => $x - $means[$i], $chain); }
+        $min = INF; $max = -INF;
+        foreach ($chains as $chain) {
+            foreach ($chain as $x) { if (!is_finite($x)) { return NAN; } if ($x < $min) { $min = $x; } if ($x > $max) { $max = $x; } }
+        }
+        if ($max - $min < PHP_FLOAT_EPSILON) { return NAN; }
+        $means = []; $centered = [];
+        foreach ($chains as $i => $chain) {
+            $means[$i] = $mean = array_sum($chain) / $n; $c = [];
+            foreach ($chain as $x) { $c[] = $x - $mean; }
+            $centered[] = $c;
+        }
         $covariance = static function (int $lag) use ($centered, $m, $n): float {
-            $sum = 0.0;
-            foreach ($centered as $chain) { for ($i = 0; $i < $n - $lag; ++$i) { $sum += $chain[$i] * $chain[$i + $lag]; } }
+            $sum = 0.0; $last = $n - $lag;
+            foreach ($centered as $chain) { for ($i = 0, $j = $lag; $i < $last; ++$i, ++$j) { $sum += $chain[$i] * $chain[$j]; } }
             return $sum / ($n * $m);
         };
         $within = $covariance(0) * $n / ($n - 1);
