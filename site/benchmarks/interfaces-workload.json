@@ -1,0 +1,154 @@
+{
+  "title": "Bayesian (Stan) workload: CmdStanPHP, CmdStanR, and CmdStanPy",
+  "description": "Elapsed time and peak memory to sample the non-centered eight schools model with 4 parallel chains of 1,000 warmup and 1,000 sampling iterations and summarize the draws, from CmdStanPHP, CmdStanR (cmdstanr), and CmdStanPy. All three run the same compiled CmdStan executable with the same arguments and produce identical draws, so the differences are interface overhead: starting the runtime, writing the data, launching and waiting for the chain processes, reading the CSV output, and computing the summary.",
+  "measure": "Elapsed time",
+  "unit": "ms",
+  "statistic": "median",
+  "workload": "Eight schools, 4 chains × 2,000 iterations",
+  "memory_measure": "peak memory footprint",
+  "environment": {
+    "cpu": "Apple M5 Ultra",
+    "cores": 30,
+    "memory_gb": 96,
+    "os": "macOS 27.0.1 (arm64)",
+    "php": "8.4.25",
+    "versions": {
+      "CmdStan": "2.40.0",
+      "CmdStanPHP": "0.1.2",
+      "cmdstanr": "0.9.0",
+      "posterior": "1.7.1",
+      "cmdstanpy": "1.3.0",
+      "R": "4.6.1",
+      "Python": "3.14.7"
+    },
+    "parallel_chains": 4,
+    "compilation": "Outside the timing. The model is compiled once with CmdStan's makefile before any run, and every interface loads that executable (sha256 4569b7596eda) with its exe_file argument.",
+    "repeats": 7,
+    "date": "2026-11-01",
+    "commit": "8e13b1b"
+  },
+  "method": "Each run is a fresh process. Each interface runs once as a warm-up, then the three alternate for 7 rounds in a rotated order. The time runs from the interface call that loads the precompiled model to holding the summary: it covers loading the model, writing the data (held in memory in the runtime's usual structure) to JSON, running 4 chains in parallel as 4 CmdStan processes (parallel_chains 4 everywhere) with seed 20261101, reading the CSV output, and the summary (CmdStanPHP summary() and cmdstanr $summary() with mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta; CmdStanPy summary(), which runs CmdStan's stansummary for every column). Starting the runtime and loading the interface's libraries are outside the timing. Every process runs under /usr/bin/time -l. Memory is the interface process's peak memory footprint as macOS reports it: its own allocations, without the clean file pages it maps and without the CmdStan chain processes. peak_rss_mib gives the peak resident set size, which counts those pages.",
+  "check": {
+    "draws_identical": true,
+    "max_abs_draw_difference": 0.0,
+    "posterior_mean_mu": {
+      "CmdStanPHP": 4.454396392137175,
+      "CmdStanR": 4.45439639213718,
+      "CmdStanPy": 4.4544
+    }
+  },
+  "code": {
+    "CmdStanPHP": "$model = cmdstan_model(exeFile: $exe);\n$fit = $model->sample(data: $data, seed: 20261101, chains: 4, parallel_chains: 4,\n    iter_warmup: 1000, iter_sampling: 1000, output_dir: $out, show_messages: false);\n$summary = $fit->summary(['mu', 'tau', 'theta'], measures: ['mean', 'sd', 'quantile2', 'rhat', 'ess_bulk']);",
+    "CmdStanR": "model <- cmdstan_model(exe_file = exe)\nfit <- model$sample(data = data, seed = 20261101, chains = 4, parallel_chains = 4,\n                    iter_warmup = 1000, iter_sampling = 1000, output_dir = out,\n                    show_messages = FALSE, refresh = 0)\nsummary <- fit$summary(c(\"mu\", \"tau\", \"theta\"), \"mean\", \"sd\",\n                       ~quantile(.x, probs = c(0.05, 0.95)), \"rhat\", \"ess_bulk\")",
+    "CmdStanPy": "model = cmdstanpy.CmdStanModel(exe_file=exe)\nfit = model.sample(data=data, seed=20261101, chains=4, parallel_chains=4,\n                   iter_warmup=1000, iter_sampling=1000, output_dir=out, show_progress=False)\nsummary = fit.summary(percentiles=(5, 95))"
+  },
+  "languages": {
+    "CmdStanPHP": "php",
+    "CmdStanR": "r",
+    "CmdStanPy": "python"
+  },
+  "rows": [
+    {
+      "case": "Eight schools, 4 chains × 2,000 iterations",
+      "implementation": "CmdStanPHP",
+      "value": 131.09,
+      "reps": [
+        129.471,
+        134.476,
+        131.09,
+        130.51,
+        130.845,
+        133.542,
+        134.492
+      ],
+      "peak_memory_mib": 18.7,
+      "reps_peak_memory_mib": [
+        18.7,
+        18.8,
+        18.7,
+        18.7,
+        18.7,
+        18.6,
+        18.7
+      ],
+      "peak_rss_mib": 36.0,
+      "reps_peak_rss_mib": [
+        36.0,
+        36.1,
+        36.0,
+        36.0,
+        36.1,
+        36.0,
+        36.1
+      ]
+    },
+    {
+      "case": "Eight schools, 4 chains × 2,000 iterations",
+      "implementation": "CmdStanR",
+      "value": 584.383,
+      "reps": [
+        584.383,
+        576.843,
+        579.349,
+        608.192,
+        567.324,
+        595.023,
+        601.133
+      ],
+      "peak_memory_mib": 221.3,
+      "reps_peak_memory_mib": [
+        221.3,
+        220.9,
+        218.8,
+        224.0,
+        220.1,
+        221.4,
+        223.1
+      ],
+      "peak_rss_mib": 234.6,
+      "reps_peak_rss_mib": [
+        234.6,
+        234.1,
+        232.0,
+        237.2,
+        233.3,
+        234.6,
+        236.2
+      ]
+    },
+    {
+      "case": "Eight schools, 4 chains × 2,000 iterations",
+      "implementation": "CmdStanPy",
+      "value": 81.135,
+      "reps": [
+        78.944,
+        81.127,
+        83.302,
+        81.135,
+        77.697,
+        82.714,
+        85.602
+      ],
+      "peak_memory_mib": 63.0,
+      "reps_peak_memory_mib": [
+        63.0,
+        63.1,
+        63.3,
+        63.0,
+        62.9,
+        63.1,
+        63.0
+      ],
+      "peak_rss_mib": 84.5,
+      "reps_peak_rss_mib": [
+        84.5,
+        84.5,
+        84.7,
+        84.4,
+        84.3,
+        84.5,
+        84.5
+      ]
+    }
+  ]
+}
