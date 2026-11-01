@@ -43,4 +43,4 @@ The draws are identical: the largest absolute difference between any two interfa
 python3 verification/interfaces/bench/run.py
 ```
 
-It needs Linux and the CmdStanPy virtual environment that `run.sh` creates.
+It needs the CmdStanPy virtual environment that `run.sh` creates. On macOS it runs under `/usr/bin/time -l` instead and records the peak memory footprint. The published record is from Linux.
