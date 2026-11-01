@@ -12,8 +12,16 @@ data = {'J': 8, 'y': [28, 8, -3, 7, -1, 1, 18, 12], 'sigma': [15, 10, 16, 11, 9,
 
 start = time.perf_counter()
 model = cmdstanpy.CmdStanModel(exe_file=exe)
-fit = model.sample(data=data, seed=20261101, chains=4, parallel_chains=4,
-                   iter_warmup=1000, iter_sampling=1000, output_dir=out, show_progress=False)
+fit = model.sample(
+    data=data,
+    seed=20261101,
+    chains=4,
+    parallel_chains=4,
+    iter_warmup=1000,
+    iter_sampling=1000,
+    output_dir=out,
+    show_progress=False,
+)
 summary = fit.summary(percentiles=(5, 95))
 elapsed = (time.perf_counter() - start) * 1000
 

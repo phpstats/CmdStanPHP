@@ -131,6 +131,7 @@ record = {
         'commit': sh('git', 'rev-parse', '--short', 'HEAD', cwd=root),
     },
     'method': f'Each run is a fresh process. Each interface runs once as a warm-up, then the three alternate for {ROUNDS} rounds in a rotated order. The time runs from the interface call that loads the precompiled model to holding the summary: it covers loading the model, writing the data (held in memory in the runtime\'s usual structure) to JSON, running 4 chains in parallel as 4 CmdStan processes (parallel_chains 4 everywhere) with seed 20261101, reading the CSV output, and the summary (CmdStanPHP summary() and cmdstanr $summary() with mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta; CmdStanPy summary(), which runs CmdStan\'s stansummary for every column). Starting the runtime and loading the interface\'s libraries are outside the timing. Every process runs under /usr/bin/time -l. Memory is the interface process\'s peak memory footprint as macOS reports it: its own allocations, without the clean file pages it maps and without the CmdStan chain processes. peak_rss_mib gives the peak resident set size, which counts those pages.',
+    'code_commit': sh('git', 'rev-parse', '--short', 'HEAD', cwd=root),
     'check': {'draws_identical': identical, 'max_abs_draw_difference': max_diff,
               'posterior_mean_mu': {n: last[n]['mu'] for n in order}},
     'code': code,
