@@ -1,10 +1,10 @@
 # Interface comparison
 
-These scripts run the non-centered eight schools model (Rubin 1981) through CmdStanPHP, cmdstanr, and CmdStanPy and compare the results. All three use the same CmdStan, data, seed, chain ids, and initialization, so CmdStan produces the same draws, and each interface then summarizes them with its own code. `compare.py` writes the results to `site/verifications/interfaces.json`, which phpstats.org shows in its verification section.
+These scripts run the non-centered eight schools model (Rubin 1981), a hierarchical Gaussian model that phpstats.org lists as "Mixed Gaussian (Bayesian)", through CmdStanPHP, cmdstanr, and CmdStanPy and compare the results. All three use the same CmdStan, data, seed, chain ids, and initialization, so CmdStan produces the same draws, and each interface then summarizes them with its own code. `compare.py` writes the results to `site/verifications/interfaces.json`, which phpstats.org shows in its verification section.
 
 ## Files
 
-- `schools.stan` and `data.json` are the model and the data.
+- `schools.stan` and `data.json` are the model and the data. The data are the eight schools effects and standard errors from Rubin (1981), also published as [schools.csv](https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv) (columns school, y, and sigma) in phpstats/datasets.
 - `cmdstanphp.php`, `cmdstanr.R`, and `cmdstanpy_run.py` each copy the model into `output/<interface>/`, compile it there, sample, and save the summary and the CSV file paths to `output/<interface>/summary.json`.
 - `compare.py` reads the CSV files and summaries, checks that the CmdStan arguments recorded in each CSV header match, computes the largest absolute differences in draws and in summaries, and writes the JSON file.
 - `example.php` is the short script the site shows beside the results. It produces the same draws.

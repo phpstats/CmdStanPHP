@@ -102,7 +102,7 @@ tag = sh('git', 'describe', '--tags', '--abbrev=0', cwd=root)
 unchanged = subprocess.run(['git', 'diff', '--quiet', tag, '--', 'src', 'composer.json'], cwd=root).returncode == 0
 case = 'Eight schools, 4 chains × 2,000 iterations'
 record = {
-    'title': 'Bayesian (Stan) workload: CmdStanPHP, CmdStanR, and CmdStanPy',
+    'title': 'Mixed Gaussian (Bayesian) workload: CmdStanPHP, CmdStanR, and CmdStanPy',
     'description': 'Elapsed time and peak memory to sample the non-centered eight schools model with 4 parallel chains of 1,000 warmup and 1,000 sampling iterations and summarize the draws, from CmdStanPHP, CmdStanR (cmdstanr), and CmdStanPy. All three run the same compiled CmdStan executable with the same arguments and produce identical draws, so the differences are interface overhead: starting the runtime, writing the data, launching and waiting for the chain processes, reading the CSV output, and computing the summary.',
     'measure': 'Elapsed time',
     'unit': 'ms',

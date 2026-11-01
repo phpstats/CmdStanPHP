@@ -1,5 +1,5 @@
 {
-  "title": "Bayesian (Stan): CmdStanPHP, cmdstanr, and CmdStanPy",
+  "title": "Mixed Gaussian (Bayesian): CmdStanPHP, cmdstanr, and CmdStanPy",
   "description": "The non-centered eight schools model (Rubin 1981) run through three CmdStan interfaces with the same CmdStan, data, seed, chain ids, and initialization. The draws are identical, and each interface summarizes them with its own code.",
   "reference": "cmdstanr 0.9.0 with posterior 1.7.1 and CmdStanPy 1.3.0 (summary at sig_figs 12), on CmdStan 2.40.0, R 4.6.1, Python 3.14.7, and PHP 8.4.25",
   "tolerance": "summaries: 1e-9 + 1e-9*|cmdstanr value|; draws: exact",
