@@ -2,22 +2,11 @@
 title: "Compile, sample, and summarize a Stan model"
 ---
 
-This example fits the eight schools hierarchical model with MCMC and reads its summary and draws.
+Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler's warnings, and draws of `tau`.
 
-Prerequisites: CmdStanPHP, CmdStan, and a C++ toolchain, installed as described in [Installation](../installation.qmd).
-
-## Data
-
-Eight schools ran the same coaching program for a test. Each school reports an estimated effect `y` and its standard error `sigma` (Rubin 1981). The data are written in the script.
-
-## Code
-
-Save this as `sample.php` in a Composer project and run `php sample.php`:
+Compiling a model needs CmdStan and a C++ toolchain, as described in [Installation](../installation.qmd). The data are the estimated coaching effects `y` and their standard errors `sigma` for eight schools (Rubin 1981), also available as [schools.csv](https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv).
 
 ```php
-<?php
-require 'vendor/autoload.php';
-
 use function CmdStan\cmdstan_model;
 use function CmdStan\write_stan_file;
 
@@ -75,7 +64,7 @@ echo count($tau), " draws of tau\n";
 echo implode(', ', array_map(fn($x) => round($x, 2), array_slice($tau, 0, 5))), "\n";
 ```
 
-## Output
+Output:
 
 ```text
 variable      mean      sd      q5     q95   rhat ess_bulk
@@ -96,12 +85,11 @@ Array
 1.41, 1.36, 1.63, 0.63, 0.06
 ```
 
-## Explanation
+- `write_stan_file()` writes `schools.stan` beside the script and leaves it untouched when the program is unchanged. `cmdstan_model()` compiles it on the first run and reuses the executable until the program changes.
+- Each variable has 4,000 draws: four chains of 1,000 sampling iterations after 1,000 warmup iterations. `draws_matrix` lists them chain after chain.
+- Partial pooling: each school's `theta` is pulled toward the overall mean `mu`. The pull is stronger when the between-school standard deviation `tau` is small and for schools whose `sigma` is large.
+- The program samples `theta_raw` and computes `theta = mu + tau * theta_raw` (the non-centered parameterization). When `tau` is near zero, this form usually produces far fewer divergent transitions than sampling `theta` directly, but it does not rule them out. `adapt_delta: 0.95` makes the sampler take smaller steps, which also reduces divergences at some cost in speed.
+- Check the diagnostics before using the estimates. `rhat` should be below 1.01, and `ess_bulk` should be at least 100 per chain (400 here). `diagnosticWarnings()` reports divergent transitions, iterations that hit the maximum tree depth, and low E-BFMI, and an empty list means none occurred.
+- A fixed seed reproduces the draws with the same CmdStan version, compiler, and machine. A different CmdStan or compiler version, operating system, or processor can give different draws.
 
-`write_stan_file()` saves the Stan program as `schools.stan` beside the script, and `cmdstan_model()` compiles it. The first run compiles the model. Later runs reuse the executable until the program changes. `sample()` runs four chains of 1,000 warmup and 1,000 sampling iterations, so each variable has 4,000 draws.
-
-The model estimates each school's effect `theta` together with the mean `mu` and the standard deviation `tau` of the effects across schools. Each school's estimate moves toward `mu`. School 1 reported 28, and its posterior mean is 8.87. The program samples `theta_raw` and computes `theta` from it (the non-centered parameterization), which avoids the divergent transitions that the direct form produces when `tau` is near zero. `adapt_delta: 0.95` makes the sampler take smaller steps.
-
-R-hat is below 1.01 and every bulk effective sample size is above 400, and `diagnosticWarnings()` returns an empty list. [MCMC sampling](../mcmc.qmd) explains these checks. `draws('tau', 'draws_matrix')` returns one row per draw, chain after chain. [Draws, summaries, and saving fits](../draws.qmd) describes the other formats, and the [API reference](../api.qmd) lists every option of `sample()` and `summary()`.
-
-[Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)
+[MCMC sampling](../mcmc.qmd) · [Draws, summaries, and saving fits](../draws.qmd) · [API reference](../api.qmd) · [Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)

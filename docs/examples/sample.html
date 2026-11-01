@@ -336,17 +336,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data">Data</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code</a></li>
-  <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
-  <li><a href="#explanation" id="toc-explanation" class="nav-link" data-scroll-target="#explanation">Explanation</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -370,76 +361,64 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This example fits the eight schools hierarchical model with MCMC and reads its summary and draws.</p>
-<p>Prerequisites: CmdStanPHP, CmdStan, and a C++ toolchain, installed as described in <a href="../installation.html">Installation</a>.</p>
-<section id="data" class="level2">
-<h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>Eight schools ran the same coaching program for a test. Each school reports an estimated effect <code>y</code> and its standard error <code>sigma</code> (Rubin 1981). The data are written in the script.</p>
-</section>
-<section id="code" class="level2">
-<h2 class="anchored" data-anchor-id="code">Code</h2>
-<p>Save this as <code>sample.php</code> in a Composer project and run <code>php sample.php</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="st">'vendor/autoload.php'</span><span class="ot">;</span></span>
+<p>Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler’s warnings, and draws of <code>tau</code>.</p>
+<p>Compiling a model needs CmdStan and a C++ toolchain, as described in <a href="../installation.html">Installation</a>. The data are the estimated coaching effects <code>y</code> and their standard errors <code>sigma</code> for eight schools (Rubin 1981), also available as <a href="https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv">schools.csv</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\cmdstan_model<span class="ot">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\write_stan_file<span class="ot">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\cmdstan_model<span class="ot">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\write_stan_file<span class="ot">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">$code</span> <span class="op">=</span> <span class="vs">&lt;&lt;&lt;'STAN'</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">data {</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; J;</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] y;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[J] sigma;</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">parameters {</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">  real mu;</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] theta_raw;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="va">$code</span> <span class="op">=</span> <span class="vs">&lt;&lt;&lt;'STAN'</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">data {</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="st">  int&lt;lower=1&gt; J;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] y;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">  vector&lt;lower=0&gt;[J] sigma;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">parameters {</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">  real mu;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">  real&lt;lower=0&gt; tau;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] theta_raw;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] theta = mu + tau * theta_raw;</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="st">transformed parameters {</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="st">  vector[J] theta = mu + tau * theta_raw;</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="st">  mu ~ normal(0, 10);</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="st">  tau ~ normal(0, 10);</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="st">  theta_raw ~ std_normal();</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="st">  y ~ normal(theta, sigma);</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="vs">STAN</span>;</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> cmdstan_model(write_stan_file(<span class="va">$code</span><span class="ot">,</span> <span class="fu">dir</span><span class="ot">:</span> <span class="cn">__DIR__</span><span class="ot">,</span> <span class="fu">basename</span><span class="ot">:</span> <span class="st">'schools'</span>))<span class="ot">;</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> [</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'J'</span> =&gt; <span class="dv">8</span><span class="ot">,</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span> =&gt; [<span class="dv">28</span><span class="ot">,</span> <span class="dv">8</span><span class="ot">,</span> <span class="op">-</span><span class="dv">3</span><span class="ot">,</span> <span class="dv">7</span><span class="ot">,</span> <span class="op">-</span><span class="dv">1</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">18</span><span class="ot">,</span> <span class="dv">12</span>]<span class="ot">,</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sigma'</span> =&gt; [<span class="dv">15</span><span class="ot">,</span> <span class="dv">10</span><span class="ot">,</span> <span class="dv">16</span><span class="ot">,</span> <span class="dv">11</span><span class="ot">,</span> <span class="dv">9</span><span class="ot">,</span> <span class="dv">11</span><span class="ot">,</span> <span class="dv">10</span><span class="ot">,</span> <span class="dv">18</span>]<span class="ot">,</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    parallel_chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    adapt_delta<span class="ot">:</span> <span class="fl">0.95</span><span class="ot">,</span></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">printf</span>(<span class="st">"%-10s %7s %7s %7s %7s %6s %8s</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span> <span class="st">'variable'</span><span class="ot">,</span> <span class="st">'mean'</span><span class="ot">,</span> <span class="st">'sd'</span><span class="ot">,</span> <span class="st">'q5'</span><span class="ot">,</span> <span class="st">'q95'</span><span class="ot">,</span> <span class="st">'rhat'</span><span class="ot">,</span> <span class="st">'ess_bulk'</span>)<span class="ot">;</span></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$fit</span>-&gt;summary([<span class="st">'mu'</span><span class="ot">,</span> <span class="st">'tau'</span><span class="ot">,</span> <span class="st">'theta'</span>]) <span class="kw">as</span> <span class="va">$row</span>) {</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">printf</span>(</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"%-10s %7.2f %7.2f %7.2f %7.2f %6.3f %8.0f</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        <span class="va">$row</span>[<span class="st">'variable'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'mean'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'sd'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'q5'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'q95'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'rhat'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'ess_bulk'</span>]<span class="ot">,</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    )<span class="ot">;</span></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;diagnosticWarnings())<span class="ot">;</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="va">$tau</span> <span class="op">=</span> <span class="fu">array_column</span>(<span class="va">$fit</span>-&gt;draws(<span class="st">'tau'</span><span class="ot">,</span> <span class="st">'draws_matrix'</span>)<span class="ot">,</span> <span class="st">'tau'</span>)<span class="ot">;</span></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">count</span>(<span class="va">$tau</span>)<span class="ot">,</span> <span class="st">" draws of tau</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">implode</span>(<span class="st">', '</span><span class="ot">,</span> <span class="fu">array_map</span>(<span class="kw">fn</span>(<span class="va">$x</span>) =&gt; <span class="fu">round</span>(<span class="va">$x</span><span class="ot">,</span> <span class="dv">2</span>)<span class="ot">,</span> <span class="fu">array_slice</span>(<span class="va">$tau</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">5</span>)))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="output" class="level2">
-<h2 class="anchored" data-anchor-id="output">Output</h2>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="st">model {</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="st">  mu ~ normal(0, 10);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="st">  tau ~ normal(0, 10);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="st">  theta_raw ~ std_normal();</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="st">  y ~ normal(theta, sigma);</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="vs">STAN</span>;</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> cmdstan_model(write_stan_file(<span class="va">$code</span><span class="ot">,</span> <span class="fu">dir</span><span class="ot">:</span> <span class="cn">__DIR__</span><span class="ot">,</span> <span class="fu">basename</span><span class="ot">:</span> <span class="st">'schools'</span>))<span class="ot">;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> [</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'J'</span> =&gt; <span class="dv">8</span><span class="ot">,</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span> =&gt; [<span class="dv">28</span><span class="ot">,</span> <span class="dv">8</span><span class="ot">,</span> <span class="op">-</span><span class="dv">3</span><span class="ot">,</span> <span class="dv">7</span><span class="ot">,</span> <span class="op">-</span><span class="dv">1</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">18</span><span class="ot">,</span> <span class="dv">12</span>]<span class="ot">,</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sigma'</span> =&gt; [<span class="dv">15</span><span class="ot">,</span> <span class="dv">10</span><span class="ot">,</span> <span class="dv">16</span><span class="ot">,</span> <span class="dv">11</span><span class="ot">,</span> <span class="dv">9</span><span class="ot">,</span> <span class="dv">11</span><span class="ot">,</span> <span class="dv">10</span><span class="ot">,</span> <span class="dv">18</span>]<span class="ot">,</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    parallel_chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    adapt_delta<span class="ot">:</span> <span class="fl">0.95</span><span class="ot">,</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="fu">printf</span>(<span class="st">"%-10s %7s %7s %7s %7s %6s %8s</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span> <span class="st">'variable'</span><span class="ot">,</span> <span class="st">'mean'</span><span class="ot">,</span> <span class="st">'sd'</span><span class="ot">,</span> <span class="st">'q5'</span><span class="ot">,</span> <span class="st">'q95'</span><span class="ot">,</span> <span class="st">'rhat'</span><span class="ot">,</span> <span class="st">'ess_bulk'</span>)<span class="ot">;</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$fit</span>-&gt;summary([<span class="st">'mu'</span><span class="ot">,</span> <span class="st">'tau'</span><span class="ot">,</span> <span class="st">'theta'</span>]) <span class="kw">as</span> <span class="va">$row</span>) {</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">printf</span>(</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"%-10s %7.2f %7.2f %7.2f %7.2f %6.3f %8.0f</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">$row</span>[<span class="st">'variable'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'mean'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'sd'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'q5'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'q95'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'rhat'</span>]<span class="ot">,</span> <span class="va">$row</span>[<span class="st">'ess_bulk'</span>]<span class="ot">,</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    )<span class="ot">;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;diagnosticWarnings())<span class="ot">;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="va">$tau</span> <span class="op">=</span> <span class="fu">array_column</span>(<span class="va">$fit</span>-&gt;draws(<span class="st">'tau'</span><span class="ot">,</span> <span class="st">'draws_matrix'</span>)<span class="ot">,</span> <span class="st">'tau'</span>)<span class="ot">;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">count</span>(<span class="va">$tau</span>)<span class="ot">,</span> <span class="st">" draws of tau</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">implode</span>(<span class="st">', '</span><span class="ot">,</span> <span class="fu">array_map</span>(<span class="kw">fn</span>(<span class="va">$x</span>) =&gt; <span class="fu">round</span>(<span class="va">$x</span><span class="ot">,</span> <span class="dv">2</span>)<span class="ot">,</span> <span class="fu">array_slice</span>(<span class="va">$tau</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">5</span>)))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Output:</p>
 <pre class="text"><code>variable      mean      sd      q5     q95   rhat ess_bulk
 mu            6.40    4.06   -0.31   13.12  1.001     3582
 tau           4.78    3.75    0.37   12.00  1.000     2176
@@ -456,16 +435,17 @@ Array
 )
 4000 draws of tau
 1.41, 1.36, 1.63, 0.63, 0.06</code></pre>
-</section>
-<section id="explanation" class="level2">
-<h2 class="anchored" data-anchor-id="explanation">Explanation</h2>
-<p><code>write_stan_file()</code> saves the Stan program as <code>schools.stan</code> beside the script, and <code>cmdstan_model()</code> compiles it. The first run compiles the model. Later runs reuse the executable until the program changes. <code>sample()</code> runs four chains of 1,000 warmup and 1,000 sampling iterations, so each variable has 4,000 draws.</p>
-<p>The model estimates each school’s effect <code>theta</code> together with the mean <code>mu</code> and the standard deviation <code>tau</code> of the effects across schools. Each school’s estimate moves toward <code>mu</code>. School 1 reported 28, and its posterior mean is 8.87. The program samples <code>theta_raw</code> and computes <code>theta</code> from it (the non-centered parameterization), which avoids the divergent transitions that the direct form produces when <code>tau</code> is near zero. <code>adapt_delta: 0.95</code> makes the sampler take smaller steps.</p>
-<p>R-hat is below 1.01 and every bulk effective sample size is above 400, and <code>diagnosticWarnings()</code> returns an empty list. <a href="../mcmc.html">MCMC sampling</a> explains these checks. <code>draws('tau', 'draws_matrix')</code> returns one row per draw, chain after chain. <a href="../draws.html">Draws, summaries, and saving fits</a> describes the other formats, and the <a href="../api.html">API reference</a> lists every option of <code>sample()</code> and <code>summary()</code>.</p>
-<p><a href="https://cmdstanphp.phpstats.org/vignettes/bayesian-schools">Interactive version</a></p>
+<ul>
+<li><code>write_stan_file()</code> writes <code>schools.stan</code> beside the script and leaves it untouched when the program is unchanged. <code>cmdstan_model()</code> compiles it on the first run and reuses the executable until the program changes.</li>
+<li>Each variable has 4,000 draws: four chains of 1,000 sampling iterations after 1,000 warmup iterations. <code>draws_matrix</code> lists them chain after chain.</li>
+<li>Partial pooling: each school’s <code>theta</code> is pulled toward the overall mean <code>mu</code>. The pull is stronger when the between-school standard deviation <code>tau</code> is small and for schools whose <code>sigma</code> is large.</li>
+<li>The program samples <code>theta_raw</code> and computes <code>theta = mu + tau * theta_raw</code> (the non-centered parameterization). When <code>tau</code> is near zero, this form usually produces far fewer divergent transitions than sampling <code>theta</code> directly, but it does not rule them out. <code>adapt_delta: 0.95</code> makes the sampler take smaller steps, which also reduces divergences at some cost in speed.</li>
+<li>Check the diagnostics before using the estimates. <code>rhat</code> should be below 1.01, and <code>ess_bulk</code> should be at least 100 per chain (400 here). <code>diagnosticWarnings()</code> reports divergent transitions, iterations that hit the maximum tree depth, and low E-BFMI, and an empty list means none occurred.</li>
+<li>A fixed seed reproduces the draws with the same CmdStan version, compiler, and machine. A different CmdStan or compiler version, operating system, or processor can give different draws.</li>
+</ul>
+<p><a href="../mcmc.html">MCMC sampling</a> · <a href="../draws.html">Draws, summaries, and saving fits</a> · <a href="../api.html">API reference</a> · <a href="https://cmdstanphp.phpstats.org/vignettes/bayesian-schools">Interactive version</a></p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
