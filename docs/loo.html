@@ -341,9 +341,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#psis-loo" id="toc-psis-loo" class="nav-link active" data-scroll-target="#psis-loo">PSIS-LOO</a>
+  <li><a href="#the-log-likelihood-variable" id="toc-the-log-likelihood-variable" class="nav-link active" data-scroll-target="#the-log-likelihood-variable">The log-likelihood variable</a></li>
+  <li><a href="#psis-loo" id="toc-psis-loo" class="nav-link" data-scroll-target="#psis-loo">PSIS-LOO</a></li>
+  <li><a href="#moment-matching" id="toc-moment-matching" class="nav-link" data-scroll-target="#moment-matching">Moment matching</a>
   <ul class="collapse">
-  <li><a href="#moment-matching" id="toc-moment-matching" class="nav-link" data-scroll-target="#moment-matching">Moment matching</a></li>
+  <li><a href="#algorithm-details" id="toc-algorithm-details" class="nav-link" data-scroll-target="#algorithm-details">Algorithm details</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -370,40 +372,167 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Leave-one-out cross-validation (LOO) estimates how well a model predicts each observation when that observation is left out of the fit. It is used to compare models. CmdStanPHP computes PSIS-LOO, which approximates LOO from a single MCMC fit with Pareto-smoothed importance sampling, and WAIC. Both need a pointwise log-likelihood variable, usually <code>log_lik</code>, in the generated quantities block:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    log_lik[n] = bernoulli_lpmf(y[n] | theta);</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Leave-one-out cross-validation (LOO) estimates how well a model predicts each observation when that observation is left out of the fit, and is used to compare models. CmdStanPHP computes PSIS-LOO, which approximates LOO from one MCMC fit with Pareto-smoothed importance sampling, and WAIC.</p>
+<section id="the-log-likelihood-variable" class="level2">
+<h2 class="anchored" data-anchor-id="the-log-likelihood-variable">The log-likelihood variable</h2>
+<p>Both need the pointwise log-likelihood of each observation as a generated quantity, usually named <code>log_lik</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; y;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; theta;</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  theta ~ beta(<span class="dv">1</span>, <span class="dv">1</span>);</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  y ~ bernoulli(theta);</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    log_lik[n] = bernoulli_lpmf(y[n] | theta);</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 <section id="psis-loo" class="level2">
 <h2 class="anchored" data-anchor-id="psis-loo">PSIS-LOO</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span>)<span class="ot">;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$loo</span>[<span class="st">'elpd_loo'</span>]<span class="ot">,</span> <span class="st">' ± '</span><span class="ot">,</span> <span class="va">$loo</span>[<span class="st">'se_elpd_loo'</span>]<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$loo</span>[<span class="st">'diagnostics'</span>][<span class="st">'pareto_k'</span>])<span class="ot">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="va">$waic</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;waic(<span class="st">'log_lik'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>loo()</code> computes PSIS-LOO from a pointwise log-likelihood variable in generated quantities. It follows the loo package as called by CmdStanR 1.0. Relative efficiencies are skipped by default (<code>rEff: false</code>), because they can be slow to compute; pass <code>rEff: true</code> to compute them. Results contain <code>estimates</code>, <code>pointwise</code> rows, Pareto k diagnostics, and <code>k_threshold</code>. Inspect observations whose Pareto k exceeds the threshold.</p>
-<section id="moment-matching" class="level3">
-<h3 class="anchored" data-anchor-id="moment-matching">Moment matching</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span><span class="ot">,</span> momentMatch<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$loo</span>[<span class="st">'moment_match'</span>][<span class="st">'observations'</span>] <span class="kw">as</span> <span class="va">$o</span>) {</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="va">$o</span>[<span class="st">'observation'</span>]<span class="ot">,</span> <span class="st">': k '</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'pareto_k_initial'</span>]<span class="ot">,</span> <span class="st">' -&gt; '</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'pareto_k'</span>]<span class="ot">,</span> <span class="st">' ('</span><span class="ot">,</span> <span class="va">$o</span>[<span class="st">'stop'</span>]<span class="ot">,</span> <span class="st">")</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>momentMatch: true</code> applies importance-weighted moment matching (Paananen et al., 2021) to each observation whose Pareto k exceeds the threshold, as <code>loo::loo_moment_match()</code> does for CmdStanR. It needs model methods (FFI) and the posterior-draw kernels of the <code>phit</code> extension: <code>Phit\draws_moments()</code>, <code>Phit\draws_covariance_map()</code>, and <code>Phit\draws_affine()</code>. CmdStanPHP checks for these functions by name and throws a <code>RuntimeException</code> naming any that are missing. The options <code>max_iters</code> (default 30), <code>k_threshold</code> (default <code>min(1 - 1/log10(S), 0.7)</code>), <code>split</code> (default true), and <code>cov</code> (default true) have loo’s meanings. The covariance step runs only when there are at least ten draws per parameter.</p>
-<p>The draws are the fit’s post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is <code>logProb()</code> with <code>jacobian: true</code> and |det T| comes from the kernel’s <code>log_abs_det</code>. The log-likelihood of a transformed draw is recomputed with <code>constrainVariables()</code>. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.</p>
-<p>The result keeps the shape of <code>loo()</code> and updates <code>pointwise</code>, <code>diagnostics</code>, <code>estimates</code>, the flat estimate keys, and <code>warnings</code>, as loo does. <code>influence_pareto_k</code> keeps its PSIS value. The added <code>moment_match</code> key lists each matched observation with its initial and final Pareto k, the full-posterior k (<code>pareto_kf</code>), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. <code>stop</code> is one of these values:</p>
+<p>With <code>$model</code> compiled from this program and <code>$data</code> holding <code>N</code> and <code>y</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span>)<span class="ot">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$loo</span>[<span class="st">'estimates'</span>] <span class="kw">as</span> <span class="va">$name</span> =&gt; <span class="va">$e</span>) {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">printf</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"%-9s %7.2f  SE %5.2f</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">$name</span><span class="ot">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">$e</span>[<span class="st">'Estimate'</span>]<span class="ot">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">$e</span>[<span class="st">'SE'</span>]<span class="ot">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    )<span class="ot">;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="va">$k</span> <span class="op">=</span> <span class="va">$loo</span>[<span class="st">'diagnostics'</span>][<span class="st">'pareto_k'</span>]<span class="ot">;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="va">$limit</span> <span class="op">=</span> <span class="va">$loo</span>[<span class="st">'k_threshold'</span>]<span class="ot">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="va">$high</span> <span class="op">=</span> <span class="fu">array_filter</span>(<span class="va">$k</span><span class="ot">,</span> <span class="kw">fn</span>(<span class="va">$v</span>) =&gt; <span class="va">$v</span> <span class="op">&gt;</span> <span class="va">$limit</span>)<span class="ot">;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">printf</span>(<span class="st">"max Pareto k %.2f, limit %.2f</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span> <span class="fu">max</span>(<span class="va">$k</span>)<span class="ot">,</span> <span class="va">$limit</span>)<span class="ot">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">count</span>(<span class="va">$high</span>)<span class="ot">,</span> <span class="st">" observations above the threshold</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>elpd_loo    -6.03  SE  1.81
+p_loo        0.93  SE  0.39
+looic       12.05  SE  3.62
+max Pareto k 0.40, limit 0.70
+0 observations above the threshold</code></pre>
 <ul>
-<li><code>k_below_threshold</code>: Pareto k reached the threshold.</li>
-<li><code>no_improvement</code>: no transformation lowered Pareto k.</li>
-<li><code>max_iters</code>: the iteration limit was reached.</li>
-<li><code>covariance_not_positive_definite</code>: a covariance could not be factorized, or the weighted covariance had fewer than two effective draws.</li>
-<li><code>singular_transform</code> or <code>nonfinite_transform</code>: an affine map was numerically singular or produced nonfinite values.</li>
-<li><code>model_error</code>: the model threw while evaluating transformed draws.</li>
-<li><code>invalid_log_ratios</code>: the transformed importance ratios could not be Pareto smoothed.</li>
+<li><code>estimates</code> holds <code>elpd_loo</code> (expected log predictive density), <code>p_loo</code> (effective number of parameters), and <code>looic</code> (−2 × <code>elpd_loo</code>), each with its standard error. The same values are also flat keys such as <code>elpd_loo</code> and <code>se_elpd_loo</code>.</li>
+<li><code>pointwise</code> has one row per observation, and <code>diagnostics</code> holds <code>pareto_k</code>, <code>n_eff</code>, and <code>r_eff</code> per observation.</li>
+<li>Pareto k above <code>k_threshold</code>, which is min(1 − 1/log10(S), 0.7) for S draws, means the importance-sampling estimate for that observation is unreliable. <code>warnings</code> lists problems found while fitting the Pareto distribution.</li>
+<li>Relative efficiencies are skipped by default, as CmdStanR 1.0 does, because they can be slow to compute. Pass <code>rEff: true</code> to compute them.</li>
+<li><code>$fit-&gt;waic('log_lik')</code> returns <code>elpd_waic</code>, <code>p_waic</code>, and <code>waic</code> in the same shape, and its <code>warnings</code> counts observations whose <code>p_waic</code> exceeds 0.4.</li>
 </ul>
-<p>In the last five cases the observation keeps its last accepted transformation, <code>message</code> records the failure, and a warning counts the affected observations. Covariances are never regularized. A failed weighted covariance instead uses loo’s identity linear map, retaining the mean shift and recording the reason in <code>covariance_fallbacks</code>. This normally repeats the rejected mean-shift step and ends with <code>no_improvement</code>. A split that fails falls back to the unsplit estimate and is recorded in <code>message</code>.</p>
-<p>The split step differs from loo 2.10.1 and from development builds before <a href="https://github.com/stan-dev/loo/pull/405">stan-dev/loo#405</a> (merged on 2026-10-13) in two ways. That pull request made the same two split corrections in loo, and the compatibility suite checks that a corrected loo’s split matches CmdStanPHP on its test designs. CmdStanPHP uses the exact inverse T⁻¹(y) = A⁻¹(y − m − t) + m of the accumulated map T(x) = A(x − m) + m + t. Accepted scale and covariance matrices are multiplied in acceptance order, so noncommuting transformations retain their original effect. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map, so loo evaluates part of the mixture density at the wrong points. CmdStanPHP also takes the split relative efficiency as the minimum over both halves of the draws, where loo uses the second half twice. Relative efficiencies are computed from exp(log_lik − max). loo exponentiates unshifted values, and posterior then reports NA when every value is tiny. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match CmdStanR.</p>
+</section>
+<section id="moment-matching" class="level2">
+<h2 class="anchored" data-anchor-id="moment-matching">Moment matching</h2>
+<p>Moment matching (Paananen et al., 2021) improves the estimate for observations whose Pareto k exceeds the threshold, as <code>loo::loo_moment_match()</code> does.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$loo</span> <span class="op">=</span> <span class="va">$fit</span>-&gt;loo(<span class="st">'log_lik'</span><span class="ot">,</span> momentMatch<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$loo</span>[<span class="st">'moment_match'</span>][<span class="st">'observations'</span>] <span class="kw">as</span> <span class="va">$o</span>) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">printf</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"%s: k %.2f -&gt; %.2f (%s)</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">$o</span>[<span class="st">'observation'</span>]<span class="ot">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">$o</span>[<span class="st">'pareto_k_initial'</span>]<span class="ot">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">$o</span>[<span class="st">'pareto_k'</span>]<span class="ot">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">$o</span>[<span class="st">'stop'</span>]<span class="ot">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    )<span class="ot">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Requirements:</p>
+<ul>
+<li>The FFI extension, for the model’s log density and transforms.</li>
+<li>The phit extension’s <code>Phit\draws_moments()</code>, <code>Phit\draws_covariance_map()</code>, and <code>Phit\draws_affine()</code>. A missing function throws a <code>RuntimeException</code> that names it.</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Option</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>max_iters</code></td>
+<td>Iterations per observation</td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td><code>k_threshold</code></td>
+<td>Pareto k to reach</td>
+<td>min(1 − 1/log10(S), 0.7)</td>
+</tr>
+<tr class="odd">
+<td><code>split</code></td>
+<td>Use the split importance sampling step</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td><code>cov</code></td>
+<td>Try a covariance transformation. It runs only with at least ten draws per parameter.</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<p>The result keeps the shape of <code>loo()</code> with updated <code>pointwise</code>, <code>diagnostics</code>, <code>estimates</code>, flat keys, and <code>warnings</code>. <code>influence_pareto_k</code> keeps its PSIS value. The added <code>moment_match</code> key lists each matched observation, by name such as <code>log_lik[3]</code> and by zero-based <code>index</code>, with its initial and final Pareto k, the full-posterior k (<code>pareto_kf</code>), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. <code>stop</code> is one of:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>stop</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>k_below_threshold</code></td>
+<td>Pareto k reached the threshold.</td>
+</tr>
+<tr class="even">
+<td><code>no_improvement</code></td>
+<td>No transformation lowered Pareto k.</td>
+</tr>
+<tr class="odd">
+<td><code>max_iters</code></td>
+<td>The iteration limit was reached.</td>
+</tr>
+<tr class="even">
+<td><code>covariance_not_positive_definite</code></td>
+<td>A covariance could not be factorized, or the weighted covariance had fewer than two effective draws.</td>
+</tr>
+<tr class="odd">
+<td><code>singular_transform</code>, <code>nonfinite_transform</code></td>
+<td>An affine map was numerically singular or produced nonfinite values.</td>
+</tr>
+<tr class="even">
+<td><code>model_error</code></td>
+<td>The model threw while evaluating transformed draws.</td>
+</tr>
+<tr class="odd">
+<td><code>invalid_log_ratios</code></td>
+<td>The transformed importance ratios could not be Pareto smoothed.</td>
+</tr>
+</tbody>
+</table>
+<p>In the last five cases the observation keeps its last accepted transformation, <code>message</code> records the failure, and a warning counts the affected observations. Covariances are never regularized. A failed weighted covariance uses loo’s identity linear map instead, keeping the mean shift and recording the reason in <code>covariance_fallbacks</code>, and usually ends with <code>no_improvement</code>. A split that fails falls back to the unsplit estimate and is recorded in <code>message</code>.</p>
+<section id="algorithm-details" class="level3">
+<h3 class="anchored" data-anchor-id="algorithm-details">Algorithm details</h3>
+<p>The draws are the fit’s post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is <code>logProb()</code> with <code>jacobian: true</code> and |det T| comes from the kernel’s <code>log_abs_det</code>. The log-likelihood of a transformed draw is recomputed with <code>constrainVariables()</code>. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.</p>
+<p>The split step and the relative efficiencies differ from loo 2.10.1 in ways described in <a href="./compatibility.html#moment-matching-and-loo">Compatibility</a>. Without the split, and with the split when only shifts are accepted, <code>elpd_loo</code> and Pareto k match CmdStanR.</p>
 <p><code>CmdStan\MomentMatch::loo()</code> runs the same algorithm on any unconstrained draws with caller-supplied <code>logProbUpars</code> and <code>logLikIUpars</code> callbacks. <code>CmdStan\DrawKernels</code> wraps the three kernels.</p>
 
 

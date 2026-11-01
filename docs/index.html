@@ -341,8 +341,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#an-example" id="toc-an-example" class="nav-link active" data-scroll-target="#an-example">An example</a></li>
-  <li><a href="#what-it-does" id="toc-what-it-does" class="nav-link" data-scroll-target="#what-it-does">What it does</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link active" data-scroll-target="#example">Example</a></li>
+  <li><a href="#features" id="toc-features" class="nav-link" data-scroll-target="#features">Features</a></li>
   </ul>
 </nav>
     </div>
@@ -368,11 +368,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>CmdStanPHP fits Bayesian statistical models from PHP with <a href="https://mc-stan.org">Stan</a>. You write a model in the Stan language and pass it data from PHP. Stan estimates the model’s unknown parameters and returns them as draws from their posterior distribution. From the draws you get estimates, uncertainty intervals, and predictions.</p>
-<p>Stan programs run through <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a>, Stan’s command-line interface. CmdStanPHP compiles each program to an executable, runs it in separate processes, and reads its output into PHP arrays. It is a port of <a href="https://mc-stan.org/cmdstanr/">CmdStanR</a> 1.0, the R interface to CmdStan, and keeps CmdStanR’s function and option names. No R installation is needed.</p>
-<section id="an-example" class="level2">
-<h2 class="anchored" data-anchor-id="an-example">An example</h2>
-<p>This Stan program, <code>examples/bernoulli.stan</code> in the repository, estimates the probability <code>theta</code> of a success from ten yes-or-no outcomes:</p>
+<p>Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP.</p>
+<p>CmdStanPHP runs <a href="https://mc-stan.org">Stan</a> programs through <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a>, Stan’s command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. It is a port of <a href="https://mc-stan.org/cmdstanr/">CmdStanR</a> 1.0 and keeps CmdStanR’s function and option names. It needs CmdStan and a C++ toolchain, as described in <a href="./installation.html">Installation</a>, and does not need R.</p>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<p>This Stan program estimates the probability <code>theta</code> of a success from <code>N</code> yes-or-no outcomes <code>y</code>. Save it as <code>bernoulli.stan</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; y;</span>
@@ -384,38 +384,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  theta ~ beta(<span class="dv">1</span>, <span class="dv">1</span>);</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  y ~ bernoulli(theta);</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This PHP script compiles the program and draws 4,000 samples of <code>theta</code> from four Markov chains:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/vendor/autoload.php'</span><span class="ot">;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\cmdstan_model<span class="ot">;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> cmdstan_model(<span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/bernoulli.stan'</span>)<span class="ot">;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> [<span class="st">'N'</span> =&gt; <span class="dv">10</span><span class="ot">,</span> <span class="st">'y'</span> =&gt; [<span class="dv">0</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">1</span>]]<span class="ot">,</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    parallel_chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print_r</span>(<span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span>))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Save both files in a project with CmdStanPHP installed and run <code>php bernoulli.php</code>. <a href="./getting-started.html">Getting started</a> shows the output and explains it.</p>
+<p>Compile it, sample four chains, and summarize <code>theta</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\cmdstan_model<span class="ot">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> cmdstan_model(<span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/bernoulli.stan'</span>)<span class="ot">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'N'</span> =&gt; <span class="dv">10</span><span class="ot">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span> =&gt; [<span class="dv">0</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">0</span><span class="ot">,</span> <span class="dv">1</span>]<span class="ot">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    parallel_chains<span class="ot">:</span> <span class="dv">4</span><span class="ot">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    show_messages<span class="ot">:</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="st">"variable   mean    sd    q5   q95  rhat ess_bulk</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$fit</span>-&gt;summary(<span class="st">'theta'</span>) <span class="kw">as</span> <span class="va">$r</span>) {</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">printf</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"%-8s %6.3f %5.3f %5.3f %5.3f %5.3f %8.0f</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'variable'</span>]<span class="ot">,</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'mean'</span>]<span class="ot">,</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'sd'</span>]<span class="ot">,</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'q5'</span>]<span class="ot">,</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'q95'</span>]<span class="ot">,</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'rhat'</span>]<span class="ot">,</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">$r</span>[<span class="st">'ess_bulk'</span>]<span class="ot">,</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    )<span class="ot">;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>variable   mean    sd    q5   q95  rhat ess_bulk
+theta     0.257 0.124 0.080 0.485 1.001     1232</code></pre>
+<p><a href="./getting-started.html">Getting started</a> explains the output and the convergence checks.</p>
 </section>
-<section id="what-it-does" class="level2">
-<h2 class="anchored" data-anchor-id="what-it-does">What it does</h2>
+<section id="features" class="level2">
+<h2 class="anchored" data-anchor-id="features">Features</h2>
 <ul>
-<li>Compiles Stan programs and rebuilds them only when the program or its build settings change.</li>
-<li>Fits models with MCMC (parallel chains), L-BFGS, BFGS, and Newton optimization, the Laplace approximation, meanfield and fullrank ADVI, and Pathfinder.</li>
-<li>Runs generated quantities on existing fits, and checks gradients.</li>
-<li>Returns draws in posterior’s formats, and summaries with R-hat, bulk and tail effective sample size, and sampler diagnostics.</li>
-<li>Computes PSIS-LOO and WAIC, with optional moment matching.</li>
-<li>Evaluates log densities, gradients, and transforms in process, and calls a model’s Stan functions from PHP, through the FFI extension.</li>
-<li>Draws bayesplot’s diagnostic plots as ASCII text, Vega-Lite specs, HTML, SVG, or PNG.</li>
-<li>Accepts a phibble data frame as model data and returns draws and summaries as data frames.</li>
+<li>Inference: MCMC, optimization, the Laplace approximation, ADVI, Pathfinder, and standalone generated quantities</li>
+<li>Results: draws in posterior’s formats, summaries, and sampler diagnostics</li>
+<li>Model comparison: PSIS-LOO and WAIC, with optional moment matching</li>
+<li>Model methods: log densities, gradients, and transforms in process, and a model’s Stan functions called from PHP, through FFI</li>
+<li>Figures: bayesplot’s diagnostic plots as text, Vega-Lite, HTML, SVG, or PNG</li>
 </ul>
-<p><a href="./compatibility.html">Compatibility</a> lists how CmdStanPHP differs from CmdStanR and which CmdStanR features it does not implement.</p>
+<p><a href="./compatibility.html">Compatibility with CmdStanR</a> lists the differences from CmdStanR and the features it does not implement.</p>
 
 
 </section>

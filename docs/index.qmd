@@ -2,13 +2,13 @@
 title: "CmdStanPHP"
 ---
 
-CmdStanPHP fits Bayesian statistical models from PHP with [Stan](https://mc-stan.org). You write a model in the Stan language and pass it data from PHP. Stan estimates the model's unknown parameters and returns them as draws from their posterior distribution. From the draws you get estimates, uncertainty intervals, and predictions.
+Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP.
 
-Stan programs run through [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. CmdStanPHP compiles each program to an executable, runs it in separate processes, and reads its output into PHP arrays. It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0, the R interface to CmdStan, and keeps CmdStanR's function and option names. No R installation is needed.
+CmdStanPHP runs [Stan](https://mc-stan.org) programs through [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and keeps CmdStanR's function and option names. It needs CmdStan and a C++ toolchain, as described in [Installation](installation.qmd), and does not need R.
 
-## An example
+## Example
 
-This Stan program, `examples/bernoulli.stan` in the repository, estimates the probability `theta` of a success from ten yes-or-no outcomes:
+This Stan program estimates the probability `theta` of a success from `N` yes-or-no outcomes `y`. Save it as `bernoulli.stan`:
 
 ```stan
 data {
@@ -24,38 +24,54 @@ model {
 }
 ```
 
-This PHP script compiles the program and draws 4,000 samples of `theta` from four Markov chains:
+Compile it, sample four chains, and summarize `theta`:
 
 ```php
-<?php
-require __DIR__.'/vendor/autoload.php';
-
 use function CmdStan\cmdstan_model;
 
 $model = cmdstan_model(__DIR__.'/bernoulli.stan');
 
+$data = [
+    'N' => 10,
+    'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+];
+
 $fit = $model->sample(
-    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+    data: $data,
     seed: 123,
     chains: 4,
     parallel_chains: 4,
     show_messages: false,
 );
 
-print_r($fit->summary('theta'));
+echo "variable   mean    sd    q5   q95  rhat ess_bulk\n";
+foreach ($fit->summary('theta') as $r) {
+    printf(
+        "%-8s %6.3f %5.3f %5.3f %5.3f %5.3f %8.0f\n",
+        $r['variable'],
+        $r['mean'],
+        $r['sd'],
+        $r['q5'],
+        $r['q95'],
+        $r['rhat'],
+        $r['ess_bulk'],
+    );
+}
 ```
 
-Save both files in a project with CmdStanPHP installed and run `php bernoulli.php`. [Getting started](getting-started.qmd) shows the output and explains it.
+```text
+variable   mean    sd    q5   q95  rhat ess_bulk
+theta     0.257 0.124 0.080 0.485 1.001     1232
+```
 
-## What it does
+[Getting started](getting-started.qmd) explains the output and the convergence checks.
 
-- Compiles Stan programs and rebuilds them only when the program or its build settings change.
-- Fits models with MCMC (parallel chains), L-BFGS, BFGS, and Newton optimization, the Laplace approximation, meanfield and fullrank ADVI, and Pathfinder.
-- Runs generated quantities on existing fits, and checks gradients.
-- Returns draws in posterior's formats, and summaries with R-hat, bulk and tail effective sample size, and sampler diagnostics.
-- Computes PSIS-LOO and WAIC, with optional moment matching.
-- Evaluates log densities, gradients, and transforms in process, and calls a model's Stan functions from PHP, through the FFI extension.
-- Draws bayesplot's diagnostic plots as ASCII text, Vega-Lite specs, HTML, SVG, or PNG.
-- Accepts a phibble data frame as model data and returns draws and summaries as data frames.
+## Features
 
-[Compatibility](compatibility.qmd) lists how CmdStanPHP differs from CmdStanR and which CmdStanR features it does not implement.
+- Inference: MCMC, optimization, the Laplace approximation, ADVI, Pathfinder, and standalone generated quantities
+- Results: draws in posterior's formats, summaries, and sampler diagnostics
+- Model comparison: PSIS-LOO and WAIC, with optional moment matching
+- Model methods: log densities, gradients, and transforms in process, and a model's Stan functions called from PHP, through FFI
+- Figures: bayesplot's diagnostic plots as text, Vega-Lite, HTML, SVG, or PNG
+
+[Compatibility with CmdStanR](compatibility.qmd) lists the differences from CmdStanR and the features it does not implement.

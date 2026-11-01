@@ -2,9 +2,24 @@
 title: "LOO and WAIC"
 ---
 
-Leave-one-out cross-validation (LOO) estimates how well a model predicts each observation when that observation is left out of the fit. It is used to compare models. CmdStanPHP computes PSIS-LOO, which approximates LOO from a single MCMC fit with Pareto-smoothed importance sampling, and WAIC. Both need a pointwise log-likelihood variable, usually `log_lik`, in the generated quantities block:
+Leave-one-out cross-validation (LOO) estimates how well a model predicts each observation when that observation is left out of the fit, and is used to compare models. CmdStanPHP computes PSIS-LOO, which approximates LOO from one MCMC fit with Pareto-smoothed importance sampling, and WAIC.
+
+## The log-likelihood variable
+
+Both need the pointwise log-likelihood of each observation as a generated quantity, usually named `log_lik`:
 
 ```stan
+data {
+  int<lower=0> N;
+  array[N] int<lower=0, upper=1> y;
+}
+parameters {
+  real<lower=0, upper=1> theta;
+}
+model {
+  theta ~ beta(1, 1);
+  y ~ bernoulli(theta);
+}
 generated quantities {
   vector[N] log_lik;
   for (n in 1:N) {
@@ -15,40 +30,93 @@ generated quantities {
 
 ## PSIS-LOO
 
+With `$model` compiled from this program and `$data` holding `N` and `y`:
+
 ```php
+$fit = $model->sample(
+    data: $data,
+    seed: 123,
+    show_messages: false,
+);
 $loo = $fit->loo('log_lik');
-echo $loo['elpd_loo'], ' ± ', $loo['se_elpd_loo'], "\n";
-print_r($loo['diagnostics']['pareto_k']);
-$waic = $fit->waic('log_lik');
+
+foreach ($loo['estimates'] as $name => $e) {
+    printf(
+        "%-9s %7.2f  SE %5.2f\n",
+        $name,
+        $e['Estimate'],
+        $e['SE'],
+    );
+}
+
+$k = $loo['diagnostics']['pareto_k'];
+$limit = $loo['k_threshold'];
+$high = array_filter($k, fn($v) => $v > $limit);
+printf("max Pareto k %.2f, limit %.2f\n", max($k), $limit);
+echo count($high), " observations above the threshold\n";
 ```
 
-`loo()` computes PSIS-LOO from a pointwise log-likelihood variable in generated quantities. It follows the loo package as called by CmdStanR 1.0. Relative efficiencies are skipped by default (`rEff: false`), because they can be slow to compute; pass `rEff: true` to compute them. Results contain `estimates`, `pointwise` rows, Pareto k diagnostics, and `k_threshold`. Inspect observations whose Pareto k exceeds the threshold.
+```text
+elpd_loo    -6.03  SE  1.81
+p_loo        0.93  SE  0.39
+looic       12.05  SE  3.62
+max Pareto k 0.40, limit 0.70
+0 observations above the threshold
+```
 
-### Moment matching
+- `estimates` holds `elpd_loo` (expected log predictive density), `p_loo` (effective number of parameters), and `looic` (−2 × `elpd_loo`), each with its standard error. The same values are also flat keys such as `elpd_loo` and `se_elpd_loo`.
+- `pointwise` has one row per observation, and `diagnostics` holds `pareto_k`, `n_eff`, and `r_eff` per observation.
+- Pareto k above `k_threshold`, which is min(1 − 1/log10(S), 0.7) for S draws, means the importance-sampling estimate for that observation is unreliable. `warnings` lists problems found while fitting the Pareto distribution.
+- Relative efficiencies are skipped by default, as CmdStanR 1.0 does, because they can be slow to compute. Pass `rEff: true` to compute them.
+- `$fit->waic('log_lik')` returns `elpd_waic`, `p_waic`, and `waic` in the same shape, and its `warnings` counts observations whose `p_waic` exceeds 0.4.
+
+## Moment matching
+
+Moment matching (Paananen et al., 2021) improves the estimate for observations whose Pareto k exceeds the threshold, as `loo::loo_moment_match()` does.
 
 ```php
 $loo = $fit->loo('log_lik', momentMatch: true);
 foreach ($loo['moment_match']['observations'] as $o) {
-    echo $o['observation'], ': k ', $o['pareto_k_initial'], ' -> ', $o['pareto_k'], ' (', $o['stop'], ")\n";
+    printf(
+        "%s: k %.2f -> %.2f (%s)\n",
+        $o['observation'],
+        $o['pareto_k_initial'],
+        $o['pareto_k'],
+        $o['stop'],
+    );
 }
 ```
 
-`momentMatch: true` applies importance-weighted moment matching (Paananen et al., 2021) to each observation whose Pareto k exceeds the threshold, as `loo::loo_moment_match()` does for CmdStanR. It needs model methods (FFI) and the posterior-draw kernels of the `phit` extension: `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`. CmdStanPHP checks for these functions by name and throws a `RuntimeException` naming any that are missing. The options `max_iters` (default 30), `k_threshold` (default `min(1 - 1/log10(S), 0.7)`), `split` (default true), and `cov` (default true) have loo's meanings. The covariance step runs only when there are at least ten draws per parameter.
+Requirements:
+
+- The FFI extension, for the model's log density and transforms.
+- The phit extension's `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`. A missing function throws a `RuntimeException` that names it.
+
+| Option | Meaning | Default |
+|---|---|---|
+| `max_iters` | Iterations per observation | 30 |
+| `k_threshold` | Pareto k to reach | min(1 − 1/log10(S), 0.7) |
+| `split` | Use the split importance sampling step | true |
+| `cov` | Try a covariance transformation. It runs only with at least ten draws per parameter. | true |
+
+The result keeps the shape of `loo()` with updated `pointwise`, `diagnostics`, `estimates`, flat keys, and `warnings`. `influence_pareto_k` keeps its PSIS value. The added `moment_match` key lists each matched observation, by name such as `log_lik[3]` and by zero-based `index`, with its initial and final Pareto k, the full-posterior k (`pareto_kf`), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. `stop` is one of:
+
+| `stop` | Meaning |
+|---|---|
+| `k_below_threshold` | Pareto k reached the threshold. |
+| `no_improvement` | No transformation lowered Pareto k. |
+| `max_iters` | The iteration limit was reached. |
+| `covariance_not_positive_definite` | A covariance could not be factorized, or the weighted covariance had fewer than two effective draws. |
+| `singular_transform`, `nonfinite_transform` | An affine map was numerically singular or produced nonfinite values. |
+| `model_error` | The model threw while evaluating transformed draws. |
+| `invalid_log_ratios` | The transformed importance ratios could not be Pareto smoothed. |
+
+In the last five cases the observation keeps its last accepted transformation, `message` records the failure, and a warning counts the affected observations. Covariances are never regularized. A failed weighted covariance uses loo's identity linear map instead, keeping the mean shift and recording the reason in `covariance_fallbacks`, and usually ends with `no_improvement`. A split that fails falls back to the unsplit estimate and is recorded in `message`.
+
+### Algorithm details
 
 The draws are the fit's post-warmup draws on the unconstrained scale, in chain-major order, so row s of the unconstrained draws, the log-likelihood draws, and the importance weights all refer to the same draw. Each iteration tries a shift to the weighted mean, a per-parameter rescaling, and a covariance map, and keeps the first one that lowers Pareto k. The proposal density of a transformed draw T(x) is p(x)/|det T|, where p is `logProb()` with `jacobian: true` and |det T| comes from the kernel's `log_abs_det`. The log-likelihood of a transformed draw is recomputed with `constrainVariables()`. The split step moves half of the draws by the accumulated transformation and weights all draws against the mixture of the posterior and the transformed posterior.
 
-The result keeps the shape of `loo()` and updates `pointwise`, `diagnostics`, `estimates`, the flat estimate keys, and `warnings`, as loo does. `influence_pareto_k` keeps its PSIS value. The added `moment_match` key lists each matched observation with its initial and final Pareto k, the full-posterior k (`pareto_kf`), the accepted transformations, their total log determinant, whether the split was used, and why the iterations ended. `stop` is one of these values:
-
-- `k_below_threshold`: Pareto k reached the threshold.
-- `no_improvement`: no transformation lowered Pareto k.
-- `max_iters`: the iteration limit was reached.
-- `covariance_not_positive_definite`: a covariance could not be factorized, or the weighted covariance had fewer than two effective draws.
-- `singular_transform` or `nonfinite_transform`: an affine map was numerically singular or produced nonfinite values.
-- `model_error`: the model threw while evaluating transformed draws.
-- `invalid_log_ratios`: the transformed importance ratios could not be Pareto smoothed.
-
-In the last five cases the observation keeps its last accepted transformation, `message` records the failure, and a warning counts the affected observations. Covariances are never regularized. A failed weighted covariance instead uses loo's identity linear map, retaining the mean shift and recording the reason in `covariance_fallbacks`. This normally repeats the rejected mean-shift step and ends with `no_improvement`. A split that fails falls back to the unsplit estimate and is recorded in `message`.
-
-The split step differs from loo 2.10.1 and from development builds before [stan-dev/loo#405](https://github.com/stan-dev/loo/pull/405) (merged on 2026-10-13) in two ways. That pull request made the same two split corrections in loo, and the compatibility suite checks that a corrected loo's split matches CmdStanPHP on its test designs. CmdStanPHP uses the exact inverse T⁻¹(y) = A⁻¹(y − m − t) + m of the accumulated map T(x) = A(x − m) + m + t. Accepted scale and covariance matrices are multiplied in acceptance order, so noncommuting transformations retain their original effect. loo uses A⁻¹(y − m) + m − t, which is not the inverse once a shift is combined with scaling or a covariance map, so loo evaluates part of the mixture density at the wrong points. CmdStanPHP also takes the split relative efficiency as the minimum over both halves of the draws, where loo uses the second half twice. Relative efficiencies are computed from exp(log_lik − max). loo exponentiates unshifted values, and posterior then reports NA when every value is tiny. Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match CmdStanR.
+The split step and the relative efficiencies differ from loo 2.10.1 in ways described in [Compatibility](compatibility.qmd#moment-matching-and-loo). Without the split, and with the split when only shifts are accepted, `elpd_loo` and Pareto k match CmdStanR.
 
 `CmdStan\MomentMatch::loo()` runs the same algorithm on any unconstrained draws with caller-supplied `logProbUpars` and `logLikIUpars` callbacks. `CmdStan\DrawKernels` wraps the three kernels.
