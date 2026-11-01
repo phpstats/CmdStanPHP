@@ -484,6 +484,292 @@
     ]
   },
   {
+    "objectID": "api-options.html",
+    "href": "api-options.html",
+    "title": "API: options",
+    "section": "",
+    "text": "Global options, the options every inference method takes, and each method’s own options. Options left out or null use the installed CmdStan’s default, and unknown options throw.",
+    "crumbs": [
+      "Reference",
+      "API: options"
+    ]
+  },
+  {
+    "objectID": "api-options.html#global-options",
+    "href": "api-options.html#global-options",
+    "title": "API: options",
+    "section": "Global options",
+    "text": "Global options\noptions(set: []) sets options and returns their previous values, and cmdstan_option(name, default: null) reads one. A null value unsets an option, and unknown names and values of the wrong type throw.\n\n\n\n\n\n\n\nOption\nEffect\n\n\n\n\ncmdstanr_output_dir\nDefault output_dir\n\n\ncmdstanr_write_stan_file_dir\nDefault directory for write_stan_file()\n\n\ncmdstanr_force_recompile\nDefault forceRecompile\n\n\ncmdstanr_draws_format\nDefault draws format: draws_array, draws_matrix, draws_df, or draws_list\n\n\ncmdstanr_compress\nDefault compress: 'none', 'gzip', or 'bzip2'\n\n\ncmdstanr_progress_bar\nDefault show_progress_bar for sample()\n\n\ncmdstanr_save_metric\nDefault save_metric for sample()\n\n\ncmdstanr_save_config\nDefault save_cmdstan_config\n\n\ncmdstanr_verbose\nReports whether and why a model compiles\n\n\ncmdstanr_warn_inits\nWarns when initial values cover only some parameters, and passes on warnings from initializing with a fit. On by default.\n\n\ncmdstanr_max_rows\nVariables printed by print() (default 10)\n\n\ncmdstanr_print_line_numbers\nDefault lineNumbers for print_stan_file() and print()\n\n\nmc.cores\nDefault parallel_chains and installer core count\n\n\ncmdstanphp_example_dir\nDirectory for compiled examples\n\n\ncmdstanr_no_ver_check, cmdstanr_spinner\nAccepted and ignored",
+    "crumbs": [
+      "Reference",
+      "API: options"
+    ]
+  },
+  {
+    "objectID": "api-options.html#shared-options",
+    "href": "api-options.html#shared-options",
+    "title": "API: options",
+    "section": "Shared options",
+    "text": "Shared options\n\n\n\nOption\nMeaning\nDefault\n\n\n\n\ndata\nAn array, a JSON file, a StanData, or a table\nNone\n\n\nseed\nRandom seed\nChosen by CmdStan\n\n\ninit\nInitial values: a radius, values, files, a callable, or a fit. See initial values.\nCmdStan’s radius of 2\n\n\nrefresh\nIterations between progress lines\nCmdStan’s\n\n\noutput_dir\nDirectory for output files\nThe cmdstanr_output_dir option, else a new temporary directory\n\n\noutput_basename\nFile name prefix: letters, numbers, dots, underscores, and hyphens. Files are then named &lt;output_basename&gt;-&lt;id&gt;.csv.\n&lt;model&gt;-&lt;YYYYmmddHHMM&gt;, with a random suffix after the chain id\n\n\nsig_figs\nSignificant figures in the CSV output, 1 to 18\nCmdStan’s\n\n\ncompress\n'none', 'gzip', or 'bzip2' for the output and latent-dynamics CSV files. Not for diagnose() or logProb().\nThe cmdstanr_compress option\n\n\nopencl_ids\nOpenCL platform and device IDs. Needs an OpenCL build.\nNone\n\n\nsave_cmdstan_config\nWrites CmdStan’s configuration JSON beside the CSV files\nThe cmdstanr_save_config option\n\n\nshow_messages, show_exceptions\nPrint CmdStan’s standard output and standard error\ntrue, and show_exceptions follows show_messages\n\n\ntimeout\nSeconds allowed per process\nNone\n\n\n\nThreads are threads_per_chain for sample() and generateQuantities(), and threads for optimize(), variational(), pathfinder(), and laplace(). pathfinder() still accepts num_threads with an E_USER_DEPRECATED notice. Asking for more than one thread from an executable built without threading is an error.\nCmdStanR 1.0’s removed names are unknown options here too: sample()’s cores, num_cores, num_chains, num_warmup, num_samples, max_depth, stepsize, save_extra_diagnostics, and validate_csv, and jacobian_adjustment.",
+    "crumbs": [
+      "Reference",
+      "API: options"
+    ]
+  },
+  {
+    "objectID": "api-options.html#method-specific-options",
+    "href": "api-options.html#method-specific-options",
+    "title": "API: options",
+    "section": "Method-specific options",
+    "text": "Method-specific options\n\n\n\nMethod\nOptions\n\n\n\n\nsample()\nthreads_per_chain, save_latent_dynamics, show_progress_bar, chains (default 4), parallel_chains (default: the mc.cores option, else 1), chain_ids, iter_warmup, iter_sampling, save_warmup, thin, max_treedepth, adapt_engaged, adapt_delta, step_size, metric, metric_file, inv_metric, init_buffer, term_buffer, window, fixed_param, save_metric, diagnostics. See MCMC sampling.\n\n\noptimize()\nthreads, algorithm, jacobian, init_alpha, iter, tol_obj, tol_rel_obj, tol_grad, tol_rel_grad, tol_param, history_size, save_iterations\n\n\nvariational()\nthreads, save_latent_dynamics, algorithm, iter, grad_samples, elbo_samples, eta, adapt_engaged, adapt_iter, tol_rel_obj, eval_elbo, draws (CmdStan’s output_samples)\n\n\npathfinder()\nthreads, init_alpha, tol_obj, tol_rel_obj, tol_grad, tol_rel_grad, tol_param, history_size, single_path_draws, draws, num_paths, max_lbfgs_iters, num_elbo_draws, save_single_paths, psis_resample, calculate_lp\n\n\nlaplace()\nthreads, mode, opt_args, jacobian (default true), draws, calculate_lp\n\n\ngenerateQuantities()\nfittedParams (required: a fit, a CSV file name, or a list of them), threads_per_chain, parallel_chains\n\n\ndiagnose()\nepsilon and error, for the finite-difference gradient check\n\n\nlogProb()\nExactly one of unconstrained_params and constrained_params, and jacobian\n\n\n\nsave_latent_dynamics writes auxiliary diagnostic CSV files.\nsampleMpi(mpiCmd: 'mpiexec', mpiArgs: [], ...options) takes the sampling options, defaults to one chain, and runs chains one after another. An associative argument such as ['n' =&gt; 4] becomes -n 4, and a list is passed as literal arguments. Compile with ['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc'] and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.",
+    "crumbs": [
+      "Reference",
+      "API: options"
+    ]
+  },
+  {
+    "objectID": "api-functions.html",
+    "href": "api-functions.html",
+    "title": "API: functions",
+    "section": "",
+    "text": "Standalone functions in the CmdStan namespace, which keep CmdStanR’s snake_case names.",
+    "crumbs": [
+      "Reference",
+      "API: functions"
+    ]
+  },
+  {
+    "objectID": "api-functions.html#models-and-stan-files",
+    "href": "api-functions.html#models-and-stan-files",
+    "title": "API: functions",
+    "section": "Models and Stan files",
+    "text": "Models and Stan files\n\n\n\n\n\n\n\nFunction\nResult\n\n\n\n\ncmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)\nA CmdStanModel, compiled or reusing an up-to-date executable\n\n\ncompile_stan_file(stanFile, ...)\nThe executable path, compiled with cmdstan_model()’s build arguments but without a model object\n\n\ncheck_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)\ntrue, or an exception for invalid Stan\n\n\nformat_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)\nThe formatted program. overwriteFile rewrites the file and keeps a .bak-YYYYMMDDHHMMSS copy unless backup: false.\n\n\nvariables_stan_file(stanFile, includePaths: null)\nThe program’s declarations, without compiling\n\n\nprint_stan_file(stanFile, lineNumbers: null)\nPrints the program\n\n\nstan_build_info(exeFile)\nHow an executable was built, from its build record and what it reports about itself\n\n\nwrite_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')\nThe path of model_&lt;hash&gt;.stan, or of basename. An identical existing file is left untouched.",
+    "crumbs": [
+      "Reference",
+      "API: functions"
+    ]
+  },
+  {
+    "objectID": "api-functions.html#cmdstan-installation",
+    "href": "api-functions.html#cmdstan-installation",
+    "title": "API: functions",
+    "section": "CmdStan installation",
+    "text": "CmdStan installation\n\n\n\nFunction\nResult\n\n\n\n\ninstall_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)\nDownloads or unpacks a release, builds it, and selects it. See Installation.\n\n\nset_cmdstan_path(path), cmdstan_path()\nSelects or returns the CmdStan installation\n\n\ncmdstan_version()\nThe selected CmdStan’s version\n\n\ncheck_cmdstan_toolchain()\nPaths and versions of make, CmdStan’s C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed.\n\n\ncmdstan_make_local(dir: null, cppOptions: [], append: true)\nReads or writes CmdStan’s make/local\n\n\nrebuild_cmdstan(cores: null, timeout: null)\nCleans and rebuilds the selected CmdStan\n\n\n\nCmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. set_cmdstan_path() refuses an older installation, discovery skips one, and install_cmdstan() rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan’s error message.",
+    "crumbs": [
+      "Reference",
+      "API: functions"
+    ]
+  },
+  {
+    "objectID": "api-functions.html#data-and-csv-files",
+    "href": "api-functions.html#data-and-csv-files",
+    "title": "API: functions",
+    "section": "Data and CSV files",
+    "text": "Data and CSV files\n\n\n\n\n\n\n\nFunction\nResult\n\n\n\n\nwrite_stan_json(data, file, alwaysDecimal: false, variables: null)\nWrites data, initial values, or a metric as JSON. data may be an array, a StanData, or a table. With variables (stanc’s declarations, such as $model-&gt;variables()['data']), int variables are written as integers and tuples as Stan’s {\"1\": ..., \"2\": ...} objects.\n\n\nread_cmdstan_csv(files)\nA fit from one or more CmdStan CSV files (.csv, .csv.gz, or .csv.bz2)\n\n\nas_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)\nThe same, reading only variables and with format as the fit’s default draws format\n\n\nread_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)\nCmdStanR’s read_cmdstan_csv() list shape\n\n\ndraws_to_csv(chains, dir)\nWrites [chain][iteration][variable] draw rows to one CSV file per chain\n\n\n\nData arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:\n\nMatrices are lists of rows, with no column-major conversion. Booleans become 0 and 1, complex numbers are [re, im] pairs, and a tuple is a list of its elements. Empty top-level data becomes {}.\nMissing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected, and the error names the variable.\nThe fitting methods write data with the model’s declarations. Every declared data variable is required, int variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.",
+    "crumbs": [
+      "Reference",
+      "API: functions"
+    ]
+  },
+  {
+    "objectID": "api-functions.html#figures-and-examples",
+    "href": "api-functions.html#figures-and-examples",
+    "title": "API: functions",
+    "section": "Figures and examples",
+    "text": "Figures and examples\n\n\n\nFunction\nResult\n\n\n\n\nmcmc_trace, mcmc_hist, mcmc_dens, mcmc_dens_overlay, mcmc_intervals, mcmc_rank_hist, mcmc_scatter, mcmc_acf, pareto_k_plot\nA Figure, named after its bayesplot or loo counterpart. See Figures.\n\n\ncmdstanr_example(example: 'logistic', method: 'sample', ...options)\nA fit of the logistic, schools, or schools_ncp example\n\n\nprint_example_program(example)\nPrints an example’s Stan program\n\n\n\nnum_threads() remains as a deprecated CmdStanR name. CmdStanR 1.0 removed read_sample_csv() and write_stan_tempfile(), and this package does not have them.",
+    "crumbs": [
+      "Reference",
+      "API: functions"
+    ]
+  },
+  {
+    "objectID": "api-errors.html",
+    "href": "api-errors.html",
+    "title": "API: errors",
+    "section": "",
+    "text": "Exceptions thrown by CmdStanPHP.\n\n\n\n\n\n\n\nException\nThrown when\n\n\n\n\nInvalidArgumentException\nData or options are invalid\n\n\nRuntimeException\nFiles or the toolchain are missing, a process times out, or a CSV file is malformed\n\n\nStaleExecutableException\nThe executable is out of date\n\n\nProcessException\nA CmdStan process exits with a nonzero status. Its readonly properties are command, exitCode, stdout, and stderr.\n\n\n\nStaleExecutableException and ProcessException extend RuntimeException. A failing chain stops the other running chains, and its partial output files stay on disk for inspection. Partial output is never returned as a successful fit. CmdStan processes still running when PHP shuts down are terminated.",
+    "crumbs": [
+      "Reference",
+      "API: errors"
+    ]
+  },
+  {
+    "objectID": "api-data-frames.html",
+    "href": "api-data-frames.html",
+    "title": "API: data frames and the phpstats family",
+    "section": "",
+    "text": "CmdStanPHP works with the phpstats family without depending on it. phibble is detected by method and class names. The phit extension is detected by function name.",
+    "crumbs": [
+      "Reference",
+      "API: data frames and the phpstats family"
+    ]
+  },
+  {
+    "objectID": "api-data-frames.html#data-in",
+    "href": "api-data-frames.html#data-in",
+    "title": "API: data frames and the phpstats family",
+    "section": "Data in",
+    "text": "Data in\nEvery data argument (sample(), sampleMpi(), optimize(), variational(), pathfinder(), laplace(), generateQuantities(), diagnose(), and logProb()) and write_stan_json() accept a plain array, a JSON file, a CmdStan\\StanData, or a table. A table is any object with toModelData() or toColumns(), such as a phibble Phibble\\DataFrame. toModelData() is used when both exist. StanData::fromTable($table, addN: true) performs the same conversion and keeps the factor labels.\n\n\n\n\n\n\n\nColumn\nStan data\n\n\n\n\nint or float\nThe list of values, unchanged\n\n\nbool\n0/1 integers\n\n\nlist cells\nNested arrays, which must be rectangular\n\n\nfactor\n1-based integer indices in level order, plus J_&lt;name&gt;, the number of levels\n\n\nstring\nRejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes\n\n\nnull, dates, other objects\nRejected with the column name and row, because Stan data has no missing values\n\n\n\nFactor levels come from a toModelData() descriptor (['levels' =&gt; list&lt;string&gt;, 'codes' =&gt; list&lt;?int&gt;, 'ordered' =&gt; bool], with 0-based codes, as phibble’s DataFrame::toModelData() returns them from phibble 0.1.0; add 'base' =&gt; 1 for 1-based codes) or, for a toColumns() table, from levels($name) when types() reports a factor. The ordered flag is ignored. Labels cannot be written to Stan JSON, so they are returned in StanData::$levels, keyed by data variable, where label i has index i + 1. The conversion adds N, the row count, unless the table has a column named N, and adds J_&lt;name&gt; unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.\nFit methods are camelCase, as are StanData‘s and Tables’ from...() constructors and the package’s other static helpers, such as CmdStanFit::fromCsv() and Inits::fromFit(). StanData is a value object with readonly data, levels, columns (the names of the columns of X), and meta. toArray() returns data, and with(['prior_scale' =&gt; 2.5]) adds or replaces variables.",
+    "crumbs": [
+      "Reference",
+      "API: data frames and the phpstats family"
+    ]
+  },
+  {
+    "objectID": "api-data-frames.html#regression-data",
+    "href": "api-data-frames.html#regression-data",
+    "title": "API: data frames and the phpstats family",
+    "section": "Regression data",
+    "text": "Regression data\nStanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false) builds the usual hierarchical regression data block from named columns or a table:\n\n\n\n\n\n\n\nVariable\nContents\n\n\n\n\nN\nNumber of rows\n\n\nK\nNumber of predictors (columns of X)\n\n\nX\nN rows of K floats, in the order of x\n\n\ny\nThe outcome, keeping integers as integers\n\n\n&lt;g&gt;_id\nFor each grouping column g, the 1-based group index of each row\n\n\nJ_&lt;g&gt;\nFor each grouping column, the number of groups\n\n\nJ\nThe number of groups, when there is exactly one grouping column\n\n\n\nGroups are numbered over sorted unique values (numbers numerically, otherwise in strcmp order) or over a factor’s levels, and the labels are in levels['&lt;g&gt;_id']. Predictors must be numeric. intercept: true prepends a column of ones named (Intercept). It is off by default because Stan programs usually give the intercept its own parameter.\n$data = CmdStan\\StanData::fromColumns($df, 'score', ['hours'], 'school');\n$fit = $model-&gt;sample(data: $data, seed: 1);\ndata {\n  int&lt;lower=0&gt; N;\n  int&lt;lower=0&gt; K;\n  matrix[N, K] X;\n  vector[N] y;\n  int&lt;lower=1&gt; J;\n  array[N] int&lt;lower=1, upper=J&gt; school_id;\n}\nStanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop') builds regression data from an R-style formula through Phit\\model_matrix() in the phit extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the (Intercept) column in X unless dropIntercept: true. $data can be columns, factor descriptors, or a table, whose toModelData() is passed unchanged. Without the function, fromFormula() throws a RuntimeException that names the requirement. StanData::fromModelMatrix($result) maps an existing Phit\\model_matrix() result and is the only code that depends on its shape.\n\n\n\n\n\n\n\nFormula part\nStan data\n\n\n\n\nDesign matrix\nN (retained rows), K, and X; the column names are in columns\n\n\nNumeric response\ny, as integers when every value is integral, so it suits int and real declarations\n\n\nFactor response\ny as 0/1 for two levels (Bernoulli), or 1..C with C levels (categorical); labels in levels['y']\n\n\ncbind(s, f) response\ny (successes) and trials (successes plus failures)\n\n\noffset()\noffset\n\n\n(... \\| g)\n&lt;g&gt;_id (1-based) and J_&lt;g&gt; per grouping factor, and J when there is one grouping factor\n\n\nRandom slopes, such as (1 + x \\| g)\nZ_&lt;g&gt; (N rows of the group’s columns, including the intercept column) and Q_&lt;g&gt;, the number of columns; omitted when every term on the group is intercept-only\n\n\n\nGroup names that are not Stan identifiers have other characters replaced by _, so the nested group g2:g1 gives g2_g1_id. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as Phit\\model_matrix() sorts levels). Terms on the same group are concatenated into one Z_&lt;g&gt;, intercept-only terms included, so (1 | g) + (0 + x | g) gives the same Z_g as (1 + x | g). Two groups whose names map to the same &lt;g&gt;, such as a.b and a_b, are rejected. Factors reach Phit\\model_matrix() as descriptors in the data’s level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. missing: 'drop' removes rows with missing values in any variable the formula uses, with one E_WARNING from Phit\\model_matrix(), and missing: 'raise' rejects them. The remaining result keys, including retained_rows, dropped_rows, n_input, n_dropped, terms, and assign, are kept in meta, and meta['random'][&lt;g&gt;] lists each group’s columns and terms.\ndata {\n  int&lt;lower=0&gt; N;\n  int&lt;lower=1&gt; K;\n  matrix[N, K] X;          // includes the intercept column\n  vector[N] y;\n  int&lt;lower=1&gt; J;\n  array[N] int&lt;lower=1, upper=J&gt; g_id;\n  int&lt;lower=1&gt; Q_g;\n  matrix[N, Q_g] Z_g;      // (1 + x1 | g)\n}",
+    "crumbs": [
+      "Reference",
+      "API: data frames and the phpstats family"
+    ]
+  },
+  {
+    "objectID": "api-data-frames.html#draws-and-summaries-out",
+    "href": "api-data-frames.html#draws-and-summaries-out",
+    "title": "API: data frames and the phpstats family",
+    "section": "Draws and summaries out",
+    "text": "Draws and summaries out\n\ndrawsColumns(variables: null, incWarmup: false) returns draws as columns, like posterior’s as_draws_df(): one list per variable element (such as beta[2]), then one-based .chain, .iteration, and .draw columns.\nsummaryColumns(variables: null, probs: [0.05, 0.95], measures: []) returns summary() as columns: variable and one column per measure.\ndrawsTable() and summaryTable() take the same arguments and return a Phibble\\DataFrame built with DataFrame::fromColumns(). They need phpstats/phibble, which requires PHP 8.3 or later, and throw a RuntimeException explaining this when it is not installed.\nCmdStan\\Tables::fromRows($rows) converts any list of associative rows, such as loo()['pointwise'], to columns.\n\nThe column arrays need no other package and suit any data frame library that accepts name-to-values columns.",
+    "crumbs": [
+      "Reference",
+      "API: data frames and the phpstats family"
+    ]
+  },
+  {
+    "objectID": "api-data-frames.html#part-of-the-phpstats-family",
+    "href": "api-data-frames.html#part-of-the-phpstats-family",
+    "title": "API: data frames and the phpstats family",
+    "section": "Part of the phpstats family",
+    "text": "Part of the phpstats family\nCmdStanPHP is part of the phpstats family of PHP statistics packages:\n\nphit: the phit native extension (Phit\\ functions), which provides the moment-matching draw kernels and, when available, Phit\\model_matrix().\nphibble: data frames (Phibble\\DataFrame).\nphplyr: dplyr-style verbs for phibble tables.\nphiz: a Vega-Lite grammar of graphics.\n\nCmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.",
+    "crumbs": [
+      "Reference",
+      "API: data frames and the phpstats family"
+    ]
+  },
+  {
+    "objectID": "api-fits.html",
+    "href": "api-fits.html",
+    "title": "API: fits",
+    "section": "",
+    "text": "Every fitting method returns a fit object. These methods read its draws, summaries, diagnostics, and files.\nDraws, summaries, and saving fits explains formats, summaries, and saving.",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#draws-and-summaries",
+    "href": "api-fits.html#draws-and-summaries",
+    "title": "API: fits",
+    "section": "Draws and summaries",
+    "text": "Draws and summaries\n\n\n\nMethod\nResult\n\n\n\n\ndraws(variables: null, format: null, incWarmup: false)\nDraws in draws_array, draws_matrix, draws_df, draws_list, or draws_rvars format\n\n\nsamplerDiagnostics(format: null, incWarmup: false)\nSampler columns ending in __, except lp__\n\n\nsummary(variables: null, probs: [0.05, 0.95], measures: [])\nOne row per variable\n\n\ndrawsColumns(variables: null, incWarmup: false), summaryColumns(...)\nThe same as column arrays. See data frames.\n\n\ndrawsTable(...), summaryTable(...)\nThe same as a Phibble\\DataFrame\n\n\nprint(variables: null, maxRows: null)\nPrints summary JSON for at most cmdstanr_max_rows variables\n\n\nlp()\nlp__ by iteration and chain\n\n\ncmdstanSummary()\nCmdStan’s stansummary text\n\n\n\nA fit reads its CSV metadata and checks every row when it is created, then reads only the columns that draws(), summary(), and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until materialize(), the fit needs its CSV files.",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#diagnostics-and-run-information",
+    "href": "api-fits.html#diagnostics-and-run-information",
+    "title": "API: fits",
+    "section": "Diagnostics and run information",
+    "text": "Diagnostics and run information\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\ndiagnosticSummary()\nPer-chain num_divergent, num_max_treedepth, and ebfmi\n\n\ncheckDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi']), diagnosticWarnings()\nRuns the checks, or returns their messages\n\n\ncmdstanDiagnose()\nThe text from CmdStan’s diagnose utility\n\n\nmetadata(), chainMetadata()\nCSV metadata, merged or per chain\n\n\nvariables(), numChains(), numDrawsSampling(), numDrawsWarmup(), numProcs()\nCounts and names from the CSV files\n\n\nstepSize(), invMetric(matrix: true)\nAdaptation results, one per chain\n\n\ntime()\nWarmup, sampling, and total time per chain, when available\n\n\ninit()\nThe initial values each process used\n\n\noutput(), returnCodes(), command()\nConsole output, exit status, and command line of each process. Imported fits have none of these. command() leaves out STAN_NUM_THREADS and an MPI launcher.\n\n\ncode()\nThe Stan program. Imported fits have none.",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#files-and-saving",
+    "href": "api-fits.html#files-and-saving",
+    "title": "API: fits",
+    "section": "Files and saving",
+    "text": "Files and saving\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\noutputFiles(), latentDynamicsFiles(), profileFiles()\nFile paths. The latent-dynamics and profile accessors throw when there are no such files. includeFailed is accepted for CmdStanR compatibility.\n\n\nprofiles()\nParsed profiling data\n\n\ndataFile(), configFiles(), metricFiles()\nPaths. An imported fit uses the data file recorded in the CSV when it still exists.\n\n\ncmdstanConfig(), metric()\nThe decoded configuration and metric JSON\n\n\nsaveOutputFiles(), saveLatentDynamicsFiles(), saveProfileFiles(), saveDataFile(), saveConfigFiles(), saveMetricFiles()\nSaved paths. Each takes dir: '.', basename: null, timestamp: true, random: true, and the first two also take compress.\n\n\nmaterialize()\nReads the draws, initial values, and profiles into memory\n\n\nsaveObject(file)\nMaterializes and serializes the fit, with MCMC summary statistics",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#model-methods-1",
+    "href": "api-fits.html#model-methods-1",
+    "title": "API: fits",
+    "section": "Model methods",
+    "text": "Model methods\nThese need PHP’s FFI extension. The first call compiles a shared library for the fit’s model and data, and initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null) does this explicitly. data binds other data, for example when a reloaded fit’s data file is gone, and dataFile() then points to it. Imported CSV fits must pass model:, and a model from exeFile alone has no program to build them from. See Log density and model methods.\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\nlogProb(unconstrainedVariables, jacobian: true)\nThe log density, with constants dropped\n\n\ngradLogProb(...)\n['log_prob' =&gt; float, 'gradient' =&gt; list]\n\n\nhessian(...)\n['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]\n\n\nunconstrainVariables(variables)\nA flat unconstrained list from parameter values keyed by name, shaped as constrainVariables() returns them\n\n\nunconstrainDraws(files: null, draws: null, format: null, incWarmup: false)\nThe fit’s draws, other CSV files, or draws_df rows on the unconstrained scale\n\n\nconstrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)\nVariables keyed by name as nested arrays, with tuples as lists and complex values as [re, im]\n\n\nexposeFunctions(timeout: null), functions()\nThe model’s user-defined functions\n\n\n\nCmdStan\\ModelMethods and CmdStan\\StanFunctions can also be used directly with a Stan file.",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#methods-of-specific-fit-types",
+    "href": "api-fits.html#methods-of-specific-fit-types",
+    "title": "API: fits",
+    "section": "Methods of specific fit types",
+    "text": "Methods of specific fit types\n\n\n\nFit\nMethods\n\n\n\n\nCmdStanMCMC\nloo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true) and waic(variables: 'log_lik'). See LOO and WAIC.\n\n\nCmdStanMLE\nmle() and optimizedParams() (the estimates without lp__), and lp(). Its summary() returns variable and estimate rows.\n\n\nCmdStanVB\nvariationalMean(), and lpApprox(), the approximation’s log density at each draw\n\n\nCmdStanLaplace\nmode() and lpApprox()\n\n\nCmdStanPathfinder\nlpApprox(), and singlePathFiles(), singlePathJsonFiles(), singlePathFits(), and singlePathDiagnostics() with save_single_paths: true. Its variables include lp_approx__ and path__.\n\n\nCmdStanGQ\nfittedParamsFiles()\n\n\nCmdStanDiagnose\ngradients(), the gradient check’s console output",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-fits.html#statistics-helpers",
+    "href": "api-fits.html#statistics-helpers",
+    "title": "API: fits",
+    "section": "Statistics helpers",
+    "text": "Statistics helpers\nThese classes work on plain draws arrays, and their docblocks describe the shapes.\n\n\n\n\n\n\n\nClass\nMethods\n\n\n\n\nFigure\nascii(), vegaLite(), json(), html(), svg(), png(). Casting to a string gives the ASCII form.\n\n\nPlot\nThe figures, plus bandwidth(), density(), autocorrelation(), and ranks()\n\n\nPsis\nparetoSmooth(), paretoKhat(), psis(), gpdfit()\n\n\nLoo\nloo(), waic(), relativeEff()\n\n\nMomentMatch\nloo() on unconstrained draws with log-density and log-likelihood callbacks, and fromFit()\n\n\nDrawKernels\nDetection of and wrappers for the phit draw kernels\n\n\nSummary\nsummarise() and each posterior measure\n\n\nRvars, Inits\ndraws_rvars helpers, and fromFit(), fromDraws(), nest(), and validate() for initial values",
+    "crumbs": [
+      "Reference",
+      "API: fits"
+    ]
+  },
+  {
+    "objectID": "api-models.html",
+    "href": "api-models.html",
+    "title": "API: models",
+    "section": "",
+    "text": "CmdStanModel compiles a Stan program and runs it.",
+    "crumbs": [
+      "Reference",
+      "API: models"
+    ]
+  },
+  {
+    "objectID": "api-models.html#model-methods",
+    "href": "api-models.html#model-methods",
+    "title": "API: models",
+    "section": "Creating a model",
+    "text": "Creating a model\ncmdstan_model() and new CmdStanModel() take the same arguments and compile the model, or reuse an up-to-date executable, before they return.\n\nGive stanFile, whose executable goes beside it or in dir, or exeFile alone to use an existing executable. A model from exeFile alone refuses the build arguments, because there is nothing to build.\ncppOptions are named make variables, such as ['STAN_THREADS' =&gt; true]. Names are uppercased, and false turns an option off even when make/local turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use cmdstan_make_local() for other make lines.\nstancOptions take flags and values, such as ['O1', 'canonicalize' =&gt; 'deprecations', 'max-line-length' =&gt; 78]. Flags with their own argument are rejected: use includePaths, pedantic, userHeader, or cppOptions: ['STAN_OPENCL' =&gt; true].\nquiet: false, or the cmdstanr_verbose option, reports whether and why the model compiles. forceRecompile: true rebuilds anyway.\n\nCompiling models covers when a model is rebuilt, StaleExecutableException, and concurrent builds.",
+    "crumbs": [
+      "Reference",
+      "API: models"
+    ]
+  },
+  {
+    "objectID": "api-models.html#inspecting-a-model",
+    "href": "api-models.html#inspecting-a-model",
+    "title": "API: models",
+    "section": "Inspecting a model",
+    "text": "Inspecting a model\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\nstanFile(), exeFile(), hppFile()\nPaths. hppFile() writes the generated C++ to a temporary file on first use.\n\n\ncode()\nThe program as it was when the model was created\n\n\nvariables()\nThe data, parameters, transformed_parameters, and generated_quantities declarations, from stanc\n\n\nmodelName(), hasStanFile(), includePaths(), userHeader(), stancOptions()\nThe model’s identity and recorded build settings\n\n\ncppOptions()\nMake variables and values, so ['stan_threads' =&gt; true] comes back as ['STAN_THREADS' =&gt; 'true']\n\n\ncmdstanVersion()\nThe CmdStan version that built the executable\n\n\nreportedFeatures()\nWhat the executable reports: stan_threads, stan_mpi, stan_opencl, stan_no_range_checks, and stan_version\n\n\nbuildInfo()\nThe build record and the reported features, as stan_build_info() returns them\n\n\nisCurrent()\nfalse when the executable is out of date\n\n\ncmdstanDefaults(method: 'sample')\nCmdStan’s default values for sample, optimize, variational, pathfinder, or laplace, under this package’s option names\n\n\nprint(lineNumbers: null), saveHppFile(dir)\nPrints the program, or copies the generated header\n\n\nformat(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)\nThe formatted program. Create the model again to use a rewritten file.\n\n\ncheckSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)\ntrue, or an exception for invalid Stan\n\n\nexposeFunctions(timeout: null, quiet: false), functions()\nThe model’s user-defined functions as a StanFunctions object\n\n\n\ncode() and hppFile() are null for a model from exeFile alone.",
+    "crumbs": [
+      "Reference",
+      "API: models"
+    ]
+  },
+  {
+    "objectID": "api-models.html#running-a-model",
+    "href": "api-models.html#running-a-model",
+    "title": "API: models",
+    "section": "Running a model",
+    "text": "Running a model\n\n\n\nMethod\nResult\n\n\n\n\nsample(), sampleMpi()\nCmdStanMCMC\n\n\noptimize()\nCmdStanMLE\n\n\nvariational()\nCmdStanVB\n\n\npathfinder()\nCmdStanPathfinder\n\n\nlaplace()\nCmdStanLaplace\n\n\ngenerateQuantities(fittedParams, ...)\nCmdStanGQ\n\n\ndiagnose()\nCmdStanDiagnose\n\n\nlogProb()\nCmdStanFit",
+    "crumbs": [
+      "Reference",
+      "API: models"
+    ]
+  },
+  {
     "objectID": "api.html",
     "href": "api.html",
     "title": "API reference",
@@ -495,55 +781,11 @@
     ]
   },
   {
-    "objectID": "api.html#functions",
-    "href": "api.html#functions",
+    "objectID": "api.html#sections",
+    "href": "api.html#sections",
     "title": "API reference",
-    "section": "Functions",
-    "text": "Functions\n\nModels and Stan files\n\n\n\n\n\n\n\nFunction\nResult\n\n\n\n\ncmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)\nA CmdStanModel, compiled or reusing an up-to-date executable\n\n\ncompile_stan_file(stanFile, ...)\nThe executable path, compiled with cmdstan_model()’s build arguments but without a model object\n\n\ncheck_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)\ntrue, or an exception for invalid Stan\n\n\nformat_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)\nThe formatted program. overwriteFile rewrites the file and keeps a .bak-YYYYMMDDHHMMSS copy unless backup: false.\n\n\nvariables_stan_file(stanFile, includePaths: null)\nThe program’s declarations, without compiling\n\n\nprint_stan_file(stanFile, lineNumbers: null)\nPrints the program\n\n\nstan_build_info(exeFile)\nHow an executable was built, from its build record and what it reports about itself\n\n\nwrite_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')\nThe path of model_&lt;hash&gt;.stan, or of basename. An identical existing file is left untouched.\n\n\n\n\n\nCmdStan installation\n\n\n\nFunction\nResult\n\n\n\n\ninstall_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)\nDownloads or unpacks a release, builds it, and selects it. See Installation.\n\n\nset_cmdstan_path(path), cmdstan_path()\nSelects or returns the CmdStan installation\n\n\ncmdstan_version()\nThe selected CmdStan’s version\n\n\ncheck_cmdstan_toolchain()\nPaths and versions of make, CmdStan’s C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed.\n\n\ncmdstan_make_local(dir: null, cppOptions: [], append: true)\nReads or writes CmdStan’s make/local\n\n\nrebuild_cmdstan(cores: null, timeout: null)\nCleans and rebuilds the selected CmdStan\n\n\n\nCmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. set_cmdstan_path() refuses an older installation, discovery skips one, and install_cmdstan() rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan’s error message.\n\n\nData and CSV files\n\n\n\n\n\n\n\nFunction\nResult\n\n\n\n\nwrite_stan_json(data, file, alwaysDecimal: false, variables: null)\nWrites data, initial values, or a metric as JSON. data may be an array, a StanData, or a table. With variables (stanc’s declarations, such as $model-&gt;variables()['data']), int variables are written as integers and tuples as Stan’s {\"1\": ..., \"2\": ...} objects.\n\n\nread_cmdstan_csv(files)\nA fit from one or more CmdStan CSV files (.csv, .csv.gz, or .csv.bz2)\n\n\nas_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)\nThe same, reading only variables and with format as the fit’s default draws format\n\n\nread_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)\nCmdStanR’s read_cmdstan_csv() list shape\n\n\ndraws_to_csv(chains, dir)\nWrites [chain][iteration][variable] draw rows to one CSV file per chain\n\n\n\nData arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:\n\nMatrices are lists of rows, with no column-major conversion. Booleans become 0 and 1, complex numbers are [re, im] pairs, and a tuple is a list of its elements. Empty top-level data becomes {}.\nMissing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected, and the error names the variable.\nThe fitting methods write data with the model’s declarations. Every declared data variable is required, int variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.\n\n\n\nFigures and examples\n\n\n\nFunction\nResult\n\n\n\n\nmcmc_trace, mcmc_hist, mcmc_dens, mcmc_dens_overlay, mcmc_intervals, mcmc_rank_hist, mcmc_scatter, mcmc_acf, pareto_k_plot\nA Figure, named after its bayesplot or loo counterpart. See Figures.\n\n\ncmdstanr_example(example: 'logistic', method: 'sample', ...options)\nA fit of the logistic, schools, or schools_ncp example\n\n\nprint_example_program(example)\nPrints an example’s Stan program\n\n\n\nnum_threads() remains as a deprecated CmdStanR name. CmdStanR 1.0 removed read_sample_csv() and write_stan_tempfile(), and this package does not have them.\n\n\nGlobal options\noptions(set: []) sets options and returns their previous values, and cmdstan_option(name, default: null) reads one. A null value unsets an option, and unknown names and values of the wrong type throw.\n\n\n\n\n\n\n\nOption\nEffect\n\n\n\n\ncmdstanr_output_dir\nDefault output_dir\n\n\ncmdstanr_write_stan_file_dir\nDefault directory for write_stan_file()\n\n\ncmdstanr_force_recompile\nDefault forceRecompile\n\n\ncmdstanr_draws_format\nDefault draws format: draws_array, draws_matrix, draws_df, or draws_list\n\n\ncmdstanr_compress\nDefault compress: 'none', 'gzip', or 'bzip2'\n\n\ncmdstanr_progress_bar\nDefault show_progress_bar for sample()\n\n\ncmdstanr_save_metric\nDefault save_metric for sample()\n\n\ncmdstanr_save_config\nDefault save_cmdstan_config\n\n\ncmdstanr_verbose\nReports whether and why a model compiles\n\n\ncmdstanr_warn_inits\nWarns when initial values cover only some parameters, and passes on warnings from initializing with a fit. On by default.\n\n\ncmdstanr_max_rows\nVariables printed by print() (default 10)\n\n\ncmdstanr_print_line_numbers\nDefault lineNumbers for print_stan_file() and print()\n\n\nmc.cores\nDefault parallel_chains and installer core count\n\n\ncmdstanphp_example_dir\nDirectory for compiled examples\n\n\ncmdstanr_no_ver_check, cmdstanr_spinner\nAccepted and ignored",
-    "crumbs": [
-      "Reference",
-      "API reference"
-    ]
-  },
-  {
-    "objectID": "api.html#model-methods",
-    "href": "api.html#model-methods",
-    "title": "API reference",
-    "section": "Models",
-    "text": "Models\ncmdstan_model() and new CmdStanModel() take the same arguments and compile the model, or reuse an up-to-date executable, before they return.\n\nGive stanFile, whose executable goes beside it or in dir, or exeFile alone to use an existing executable. A model from exeFile alone refuses the build arguments, because there is nothing to build.\ncppOptions are named make variables, such as ['STAN_THREADS' =&gt; true]. Names are uppercased, and false turns an option off even when make/local turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use cmdstan_make_local() for other make lines.\nstancOptions take flags and values, such as ['O1', 'canonicalize' =&gt; 'deprecations', 'max-line-length' =&gt; 78]. Flags with their own argument are rejected: use includePaths, pedantic, userHeader, or cppOptions: ['STAN_OPENCL' =&gt; true].\nquiet: false, or the cmdstanr_verbose option, reports whether and why the model compiles. forceRecompile: true rebuilds anyway.\n\nCompiling models covers when a model is rebuilt, StaleExecutableException, and concurrent builds.\n\nInspecting a model\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\nstanFile(), exeFile(), hppFile()\nPaths. hppFile() writes the generated C++ to a temporary file on first use.\n\n\ncode()\nThe program as it was when the model was created\n\n\nvariables()\nThe data, parameters, transformed_parameters, and generated_quantities declarations, from stanc\n\n\nmodelName(), hasStanFile(), includePaths(), userHeader(), stancOptions()\nThe model’s identity and recorded build settings\n\n\ncppOptions()\nMake variables and values, so ['stan_threads' =&gt; true] comes back as ['STAN_THREADS' =&gt; 'true']\n\n\ncmdstanVersion()\nThe CmdStan version that built the executable\n\n\nreportedFeatures()\nWhat the executable reports: stan_threads, stan_mpi, stan_opencl, stan_no_range_checks, and stan_version\n\n\nbuildInfo()\nThe build record and the reported features, as stan_build_info() returns them\n\n\nisCurrent()\nfalse when the executable is out of date\n\n\ncmdstanDefaults(method: 'sample')\nCmdStan’s default values for sample, optimize, variational, pathfinder, or laplace, under this package’s option names\n\n\nprint(lineNumbers: null), saveHppFile(dir)\nPrints the program, or copies the generated header\n\n\nformat(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)\nThe formatted program. Create the model again to use a rewritten file.\n\n\ncheckSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)\ntrue, or an exception for invalid Stan\n\n\nexposeFunctions(timeout: null, quiet: false), functions()\nThe model’s user-defined functions as a StanFunctions object\n\n\n\ncode() and hppFile() are null for a model from exeFile alone.\n\n\nRunning a model\n\n\n\nMethod\nResult\n\n\n\n\nsample(), sampleMpi()\nCmdStanMCMC\n\n\noptimize()\nCmdStanMLE\n\n\nvariational()\nCmdStanVB\n\n\npathfinder()\nCmdStanPathfinder\n\n\nlaplace()\nCmdStanLaplace\n\n\ngenerateQuantities(fittedParams, ...)\nCmdStanGQ\n\n\ndiagnose()\nCmdStanDiagnose\n\n\nlogProb()\nCmdStanFit\n\n\n\n\n\nShared options\n\n\n\nOption\nMeaning\nDefault\n\n\n\n\ndata\nAn array, a JSON file, a StanData, or a table\nNone\n\n\nseed\nRandom seed\nChosen by CmdStan\n\n\ninit\nInitial values: a radius, values, files, a callable, or a fit. See initial values.\nCmdStan’s radius of 2\n\n\nrefresh\nIterations between progress lines\nCmdStan’s\n\n\noutput_dir\nDirectory for output files\nThe cmdstanr_output_dir option, else a new temporary directory\n\n\noutput_basename\nFile name prefix: letters, numbers, dots, underscores, and hyphens. Files are then named &lt;output_basename&gt;-&lt;id&gt;.csv.\n&lt;model&gt;-&lt;YYYYmmddHHMM&gt;, with a random suffix after the chain id\n\n\nsig_figs\nSignificant figures in the CSV output, 1 to 18\nCmdStan’s\n\n\ncompress\n'none', 'gzip', or 'bzip2' for the output and latent-dynamics CSV files. Not for diagnose() or logProb().\nThe cmdstanr_compress option\n\n\nopencl_ids\nOpenCL platform and device IDs. Needs an OpenCL build.\nNone\n\n\nsave_cmdstan_config\nWrites CmdStan’s configuration JSON beside the CSV files\nThe cmdstanr_save_config option\n\n\nshow_messages, show_exceptions\nPrint CmdStan’s standard output and standard error\ntrue, and show_exceptions follows show_messages\n\n\ntimeout\nSeconds allowed per process\nNone\n\n\n\nThreads are threads_per_chain for sample() and generateQuantities(), and threads for optimize(), variational(), pathfinder(), and laplace(). pathfinder() still accepts num_threads with an E_USER_DEPRECATED notice. Asking for more than one thread from an executable built without threading is an error.\nCmdStanR 1.0’s removed names are unknown options here too: sample()’s cores, num_cores, num_chains, num_warmup, num_samples, max_depth, stepsize, save_extra_diagnostics, and validate_csv, and jacobian_adjustment.\n\n\nMethod-specific options\n\n\n\nMethod\nOptions\n\n\n\n\nsample()\nthreads_per_chain, save_latent_dynamics, show_progress_bar, chains (default 4), parallel_chains (default: the mc.cores option, else 1), chain_ids, iter_warmup, iter_sampling, save_warmup, thin, max_treedepth, adapt_engaged, adapt_delta, step_size, metric, metric_file, inv_metric, init_buffer, term_buffer, window, fixed_param, save_metric, diagnostics. See MCMC sampling.\n\n\noptimize()\nthreads, algorithm, jacobian, init_alpha, iter, tol_obj, tol_rel_obj, tol_grad, tol_rel_grad, tol_param, history_size, save_iterations\n\n\nvariational()\nthreads, save_latent_dynamics, algorithm, iter, grad_samples, elbo_samples, eta, adapt_engaged, adapt_iter, tol_rel_obj, eval_elbo, draws (CmdStan’s output_samples)\n\n\npathfinder()\nthreads, init_alpha, tol_obj, tol_rel_obj, tol_grad, tol_rel_grad, tol_param, history_size, single_path_draws, draws, num_paths, max_lbfgs_iters, num_elbo_draws, save_single_paths, psis_resample, calculate_lp\n\n\nlaplace()\nthreads, mode, opt_args, jacobian (default true), draws, calculate_lp\n\n\ngenerateQuantities()\nfittedParams (required: a fit, a CSV file name, or a list of them), threads_per_chain, parallel_chains\n\n\ndiagnose()\nepsilon and error, for the finite-difference gradient check\n\n\nlogProb()\nExactly one of unconstrained_params and constrained_params, and jacobian\n\n\n\nsave_latent_dynamics writes auxiliary diagnostic CSV files.\nsampleMpi(mpiCmd: 'mpiexec', mpiArgs: [], ...options) takes the sampling options, defaults to one chain, and runs chains one after another. An associative argument such as ['n' =&gt; 4] becomes -n 4, and a list is passed as literal arguments. Compile with ['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc'] and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.",
-    "crumbs": [
-      "Reference",
-      "API reference"
-    ]
-  },
-  {
-    "objectID": "api.html#fit-methods",
-    "href": "api.html#fit-methods",
-    "title": "API reference",
-    "section": "Fits",
-    "text": "Fits\nDraws, summaries, and saving fits explains formats, summaries, and saving.\n\nDraws and summaries\n\n\n\nMethod\nResult\n\n\n\n\ndraws(variables: null, format: null, incWarmup: false)\nDraws in draws_array, draws_matrix, draws_df, draws_list, or draws_rvars format\n\n\nsamplerDiagnostics(format: null, incWarmup: false)\nSampler columns ending in __, except lp__\n\n\nsummary(variables: null, probs: [0.05, 0.95], measures: [])\nOne row per variable\n\n\ndrawsColumns(variables: null, incWarmup: false), summaryColumns(...)\nThe same as column arrays. See data frames.\n\n\ndrawsTable(...), summaryTable(...)\nThe same as a Phibble\\DataFrame\n\n\nprint(variables: null, maxRows: null)\nPrints summary JSON for at most cmdstanr_max_rows variables\n\n\nlp()\nlp__ by iteration and chain\n\n\ncmdstanSummary()\nCmdStan’s stansummary text\n\n\n\nA fit reads its CSV metadata and checks every row when it is created, then reads only the columns that draws(), summary(), and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until materialize(), the fit needs its CSV files.\n\n\nDiagnostics and run information\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\ndiagnosticSummary()\nPer-chain num_divergent, num_max_treedepth, and ebfmi\n\n\ncheckDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi']), diagnosticWarnings()\nRuns the checks, or returns their messages\n\n\ncmdstanDiagnose()\nThe text from CmdStan’s diagnose utility\n\n\nmetadata(), chainMetadata()\nCSV metadata, merged or per chain\n\n\nvariables(), numChains(), numDrawsSampling(), numDrawsWarmup(), numProcs()\nCounts and names from the CSV files\n\n\nstepSize(), invMetric(matrix: true)\nAdaptation results, one per chain\n\n\ntime()\nWarmup, sampling, and total time per chain, when available\n\n\ninit()\nThe initial values each process used\n\n\noutput(), returnCodes(), command()\nConsole output, exit status, and command line of each process. Imported fits have none of these. command() leaves out STAN_NUM_THREADS and an MPI launcher.\n\n\ncode()\nThe Stan program. Imported fits have none.\n\n\n\n\n\nFiles and saving\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\noutputFiles(), latentDynamicsFiles(), profileFiles()\nFile paths. The latent-dynamics and profile accessors throw when there are no such files. includeFailed is accepted for CmdStanR compatibility.\n\n\nprofiles()\nParsed profiling data\n\n\ndataFile(), configFiles(), metricFiles()\nPaths. An imported fit uses the data file recorded in the CSV when it still exists.\n\n\ncmdstanConfig(), metric()\nThe decoded configuration and metric JSON\n\n\nsaveOutputFiles(), saveLatentDynamicsFiles(), saveProfileFiles(), saveDataFile(), saveConfigFiles(), saveMetricFiles()\nSaved paths. Each takes dir: '.', basename: null, timestamp: true, random: true, and the first two also take compress.\n\n\nmaterialize()\nReads the draws, initial values, and profiles into memory\n\n\nsaveObject(file)\nMaterializes and serializes the fit, with MCMC summary statistics\n\n\n\n\n\nModel methods\nThese need PHP’s FFI extension. The first call compiles a shared library for the fit’s model and data, and initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null) does this explicitly. data binds other data, for example when a reloaded fit’s data file is gone, and dataFile() then points to it. Imported CSV fits must pass model:, and a model from exeFile alone has no program to build them from. See Log density and model methods.\n\n\n\n\n\n\n\nMethod\nResult\n\n\n\n\nlogProb(unconstrainedVariables, jacobian: true)\nThe log density, with constants dropped\n\n\ngradLogProb(...)\n['log_prob' =&gt; float, 'gradient' =&gt; list]\n\n\nhessian(...)\n['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]\n\n\nunconstrainVariables(variables)\nA flat unconstrained list from parameter values keyed by name, shaped as constrainVariables() returns them\n\n\nunconstrainDraws(files: null, draws: null, format: null, incWarmup: false)\nThe fit’s draws, other CSV files, or draws_df rows on the unconstrained scale\n\n\nconstrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)\nVariables keyed by name as nested arrays, with tuples as lists and complex values as [re, im]\n\n\nexposeFunctions(timeout: null), functions()\nThe model’s user-defined functions\n\n\n\nCmdStan\\ModelMethods and CmdStan\\StanFunctions can also be used directly with a Stan file.\n\n\nMethods of specific fit types\n\n\n\nFit\nMethods\n\n\n\n\nCmdStanMCMC\nloo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true) and waic(variables: 'log_lik'). See LOO and WAIC.\n\n\nCmdStanMLE\nmle() and optimizedParams() (the estimates without lp__), and lp(). Its summary() returns variable and estimate rows.\n\n\nCmdStanVB\nvariationalMean(), and lpApprox(), the approximation’s log density at each draw\n\n\nCmdStanLaplace\nmode() and lpApprox()\n\n\nCmdStanPathfinder\nlpApprox(), and singlePathFiles(), singlePathJsonFiles(), singlePathFits(), and singlePathDiagnostics() with save_single_paths: true. Its variables include lp_approx__ and path__.\n\n\nCmdStanGQ\nfittedParamsFiles()\n\n\nCmdStanDiagnose\ngradients(), the gradient check’s console output\n\n\n\n\n\nStatistics helpers\nThese classes work on plain draws arrays, and their docblocks describe the shapes.\n\n\n\n\n\n\n\nClass\nMethods\n\n\n\n\nFigure\nascii(), vegaLite(), json(), html(), svg(), png(). Casting to a string gives the ASCII form.\n\n\nPlot\nThe figures, plus bandwidth(), density(), autocorrelation(), and ranks()\n\n\nPsis\nparetoSmooth(), paretoKhat(), psis(), gpdfit()\n\n\nLoo\nloo(), waic(), relativeEff()\n\n\nMomentMatch\nloo() on unconstrained draws with log-density and log-likelihood callbacks, and fromFit()\n\n\nDrawKernels\nDetection of and wrappers for the phit draw kernels\n\n\nSummary\nsummarise() and each posterior measure\n\n\nRvars, Inits\ndraws_rvars helpers, and fromFit(), fromDraws(), nest(), and validate() for initial values",
-    "crumbs": [
-      "Reference",
-      "API reference"
-    ]
-  },
-  {
-    "objectID": "api.html#data-frames-and-the-phpstats-family",
-    "href": "api.html#data-frames-and-the-phpstats-family",
-    "title": "API reference",
-    "section": "Data frames and the phpstats family",
-    "text": "Data frames and the phpstats family\nCmdStanPHP works with the phpstats family without depending on it. phibble is detected by method and class names. The phit extension is detected by function name.\n\nData in\nEvery data argument (sample(), sampleMpi(), optimize(), variational(), pathfinder(), laplace(), generateQuantities(), diagnose(), and logProb()) and write_stan_json() accept a plain array, a JSON file, a CmdStan\\StanData, or a table. A table is any object with toModelData() or toColumns(), such as a phibble Phibble\\DataFrame. toModelData() is used when both exist. StanData::fromTable($table, addN: true) performs the same conversion and keeps the factor labels.\n\n\n\n\n\n\n\nColumn\nStan data\n\n\n\n\nint or float\nThe list of values, unchanged\n\n\nbool\n0/1 integers\n\n\nlist cells\nNested arrays, which must be rectangular\n\n\nfactor\n1-based integer indices in level order, plus J_&lt;name&gt;, the number of levels\n\n\nstring\nRejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes\n\n\nnull, dates, other objects\nRejected with the column name and row, because Stan data has no missing values\n\n\n\nFactor levels come from a toModelData() descriptor (['levels' =&gt; list&lt;string&gt;, 'codes' =&gt; list&lt;?int&gt;, 'ordered' =&gt; bool], with 0-based codes, as phibble’s DataFrame::toModelData() returns them from phibble 0.1.0; add 'base' =&gt; 1 for 1-based codes) or, for a toColumns() table, from levels($name) when types() reports a factor. The ordered flag is ignored. Labels cannot be written to Stan JSON, so they are returned in StanData::$levels, keyed by data variable, where label i has index i + 1. The conversion adds N, the row count, unless the table has a column named N, and adds J_&lt;name&gt; unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.\nFit methods are camelCase, as are StanData‘s and Tables’ from...() constructors and the package’s other static helpers, such as CmdStanFit::fromCsv() and Inits::fromFit(). StanData is a value object with readonly data, levels, columns (the names of the columns of X), and meta. toArray() returns data, and with(['prior_scale' =&gt; 2.5]) adds or replaces variables.\n\n\nRegression data\nStanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false) builds the usual hierarchical regression data block from named columns or a table:\n\n\n\n\n\n\n\nVariable\nContents\n\n\n\n\nN\nNumber of rows\n\n\nK\nNumber of predictors (columns of X)\n\n\nX\nN rows of K floats, in the order of x\n\n\ny\nThe outcome, keeping integers as integers\n\n\n&lt;g&gt;_id\nFor each grouping column g, the 1-based group index of each row\n\n\nJ_&lt;g&gt;\nFor each grouping column, the number of groups\n\n\nJ\nThe number of groups, when there is exactly one grouping column\n\n\n\nGroups are numbered over sorted unique values (numbers numerically, otherwise in strcmp order) or over a factor’s levels, and the labels are in levels['&lt;g&gt;_id']. Predictors must be numeric. intercept: true prepends a column of ones named (Intercept). It is off by default because Stan programs usually give the intercept its own parameter.\n$data = CmdStan\\StanData::fromColumns($df, 'score', ['hours'], 'school');\n$fit = $model-&gt;sample(data: $data, seed: 1);\ndata {\n  int&lt;lower=0&gt; N;\n  int&lt;lower=0&gt; K;\n  matrix[N, K] X;\n  vector[N] y;\n  int&lt;lower=1&gt; J;\n  array[N] int&lt;lower=1, upper=J&gt; school_id;\n}\nStanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop') builds regression data from an R-style formula through Phit\\model_matrix() in the phit extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the (Intercept) column in X unless dropIntercept: true. $data can be columns, factor descriptors, or a table, whose toModelData() is passed unchanged. Without the function, fromFormula() throws a RuntimeException that names the requirement. StanData::fromModelMatrix($result) maps an existing Phit\\model_matrix() result and is the only code that depends on its shape.\n\n\n\n\n\n\n\nFormula part\nStan data\n\n\n\n\nDesign matrix\nN (retained rows), K, and X; the column names are in columns\n\n\nNumeric response\ny, as integers when every value is integral, so it suits int and real declarations\n\n\nFactor response\ny as 0/1 for two levels (Bernoulli), or 1..C with C levels (categorical); labels in levels['y']\n\n\ncbind(s, f) response\ny (successes) and trials (successes plus failures)\n\n\noffset()\noffset\n\n\n(... \\| g)\n&lt;g&gt;_id (1-based) and J_&lt;g&gt; per grouping factor, and J when there is one grouping factor\n\n\nRandom slopes, such as (1 + x \\| g)\nZ_&lt;g&gt; (N rows of the group’s columns, including the intercept column) and Q_&lt;g&gt;, the number of columns; omitted when every term on the group is intercept-only\n\n\n\nGroup names that are not Stan identifiers have other characters replaced by _, so the nested group g2:g1 gives g2_g1_id. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as Phit\\model_matrix() sorts levels). Terms on the same group are concatenated into one Z_&lt;g&gt;, intercept-only terms included, so (1 | g) + (0 + x | g) gives the same Z_g as (1 + x | g). Two groups whose names map to the same &lt;g&gt;, such as a.b and a_b, are rejected. Factors reach Phit\\model_matrix() as descriptors in the data’s level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. missing: 'drop' removes rows with missing values in any variable the formula uses, with one E_WARNING from Phit\\model_matrix(), and missing: 'raise' rejects them. The remaining result keys, including retained_rows, dropped_rows, n_input, n_dropped, terms, and assign, are kept in meta, and meta['random'][&lt;g&gt;] lists each group’s columns and terms.\ndata {\n  int&lt;lower=0&gt; N;\n  int&lt;lower=1&gt; K;\n  matrix[N, K] X;          // includes the intercept column\n  vector[N] y;\n  int&lt;lower=1&gt; J;\n  array[N] int&lt;lower=1, upper=J&gt; g_id;\n  int&lt;lower=1&gt; Q_g;\n  matrix[N, Q_g] Z_g;      // (1 + x1 | g)\n}\n\n\nDraws and summaries out\n\ndrawsColumns(variables: null, incWarmup: false) returns draws as columns, like posterior’s as_draws_df(): one list per variable element (such as beta[2]), then one-based .chain, .iteration, and .draw columns.\nsummaryColumns(variables: null, probs: [0.05, 0.95], measures: []) returns summary() as columns: variable and one column per measure.\ndrawsTable() and summaryTable() take the same arguments and return a Phibble\\DataFrame built with DataFrame::fromColumns(). They need phpstats/phibble, which requires PHP 8.3 or later, and throw a RuntimeException explaining this when it is not installed.\nCmdStan\\Tables::fromRows($rows) converts any list of associative rows, such as loo()['pointwise'], to columns.\n\nThe column arrays need no other package and suit any data frame library that accepts name-to-values columns.\n\n\nPart of the phpstats family\nCmdStanPHP is part of the phpstats family of PHP statistics packages:\n\nphit: the phit native extension (Phit\\ functions), which provides the moment-matching draw kernels and, when available, Phit\\model_matrix().\nphibble: data frames (Phibble\\DataFrame).\nphplyr: dplyr-style verbs for phibble tables.\nphiz: a Vega-Lite grammar of graphics.\n\nCmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.",
-    "crumbs": [
-      "Reference",
-      "API reference"
-    ]
-  },
-  {
-    "objectID": "api.html#errors",
-    "href": "api.html#errors",
-    "title": "API reference",
-    "section": "Errors",
-    "text": "Errors\n\n\n\n\n\n\n\nException\nThrown when\n\n\n\n\nInvalidArgumentException\nData or options are invalid\n\n\nRuntimeException\nFiles or the toolchain are missing, a process times out, or a CSV file is malformed\n\n\nStaleExecutableException\nThe executable is out of date\n\n\nProcessException\nA CmdStan process exits with a nonzero status. Its readonly properties are command, exitCode, stdout, and stderr.\n\n\n\nStaleExecutableException and ProcessException extend RuntimeException. A failing chain stops the other running chains, and its partial output files stay on disk for inspection. Partial output is never returned as a successful fit. CmdStan processes still running when PHP shuts down are terminated.",
+    "section": "Sections",
+    "text": "Sections\n\n\n\nSection\nPage\n\n\n\n\nFunctions\nFunctions\n\n\nModels and Stan files\nFunctions\n\n\nCmdStan installation\nFunctions\n\n\nData and CSV files\nFunctions\n\n\nFigures and examples\nFunctions\n\n\nGlobal options\nOptions\n\n\nShared options\nOptions\n\n\nMethod-specific options\nOptions\n\n\nCreating a model\nModels\n\n\nInspecting a model\nModels\n\n\nRunning a model\nModels\n\n\nFits\nFits\n\n\nDraws and summaries\nFits\n\n\nDiagnostics and run information\nFits\n\n\nFiles and saving\nFits\n\n\nModel methods on fits\nFits\n\n\nMethods of specific fit types\nFits\n\n\nStatistics helpers\nFits\n\n\nData frames and the phpstats family\nData frames\n\n\nData in\nData frames\n\n\nRegression data\nData frames\n\n\nDraws and summaries out\nData frames\n\n\nPart of the phpstats family\nData frames\n\n\nErrors\nErrors",
     "crumbs": [
       "Reference",
       "API reference"

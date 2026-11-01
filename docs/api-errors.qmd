@@ -1,0 +1,14 @@
+---
+title: "API: errors"
+---
+
+Exceptions thrown by CmdStanPHP.
+
+| Exception | Thrown when |
+| --- | --- |
+| `InvalidArgumentException` | Data or options are invalid |
+| `RuntimeException` | Files or the toolchain are missing, a process times out, or a CSV file is malformed |
+| `StaleExecutableException` | The executable is out of date |
+| `ProcessException` | A CmdStan process exits with a nonzero status. Its readonly properties are `command`, `exitCode`, `stdout`, and `stderr`. |
+
+`StaleExecutableException` and `ProcessException` extend `RuntimeException`. A failing chain stops the other running chains, and its partial output files stay on disk for inspection. Partial output is never returned as a successful fit. CmdStan processes still running when PHP shuts down are terminated.

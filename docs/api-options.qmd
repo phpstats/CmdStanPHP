@@ -1,0 +1,66 @@
+---
+title: "API: options"
+---
+
+Global options, the options every inference method takes, and each method's own options. Options left out or `null` use the installed CmdStan's default, and unknown options throw.
+
+## Global options {#global-options}
+
+`options(set: [])` sets options and returns their previous values, and `cmdstan_option(name, default: null)` reads one. A `null` value unsets an option, and unknown names and values of the wrong type throw.
+
+| Option | Effect |
+| --- | --- |
+| `cmdstanr_output_dir` | Default `output_dir` |
+| `cmdstanr_write_stan_file_dir` | Default directory for `write_stan_file()` |
+| `cmdstanr_force_recompile` | Default `forceRecompile` |
+| `cmdstanr_draws_format` | Default draws format: `draws_array`, `draws_matrix`, `draws_df`, or `draws_list` |
+| `cmdstanr_compress` | Default `compress`: `'none'`, `'gzip'`, or `'bzip2'` |
+| `cmdstanr_progress_bar` | Default `show_progress_bar` for `sample()` |
+| `cmdstanr_save_metric` | Default `save_metric` for `sample()` |
+| `cmdstanr_save_config` | Default `save_cmdstan_config` |
+| `cmdstanr_verbose` | Reports whether and why a model compiles |
+| `cmdstanr_warn_inits` | Warns when initial values cover only some parameters, and passes on warnings from initializing with a fit. On by default. |
+| `cmdstanr_max_rows` | Variables printed by `print()` (default 10) |
+| `cmdstanr_print_line_numbers` | Default `lineNumbers` for `print_stan_file()` and `print()` |
+| `mc.cores` | Default `parallel_chains` and installer core count |
+| `cmdstanphp_example_dir` | Directory for compiled examples |
+| `cmdstanr_no_ver_check`, `cmdstanr_spinner` | Accepted and ignored |
+
+
+## Shared options
+
+| Option | Meaning | Default |
+| --- | --- | --- |
+| `data` | An array, a JSON file, a `StanData`, or a [table](api-data-frames.qmd#data-in) | None |
+| `seed` | Random seed | Chosen by CmdStan |
+| `init` | Initial values: a radius, values, files, a callable, or a fit. See [initial values](mcmc.qmd#initial-values). | CmdStan's radius of 2 |
+| `refresh` | Iterations between progress lines | CmdStan's |
+| `output_dir` | Directory for output files | The `cmdstanr_output_dir` option, else a new temporary directory |
+| `output_basename` | File name prefix: letters, numbers, dots, underscores, and hyphens. Files are then named `<output_basename>-<id>.csv`. | `<model>-<YYYYmmddHHMM>`, with a random suffix after the chain id |
+| `sig_figs` | Significant figures in the CSV output, 1 to 18 | CmdStan's |
+| `compress` | `'none'`, `'gzip'`, or `'bzip2'` for the output and latent-dynamics CSV files. Not for `diagnose()` or `logProb()`. | The `cmdstanr_compress` option |
+| `opencl_ids` | OpenCL platform and device IDs. Needs an OpenCL build. | None |
+| `save_cmdstan_config` | Writes CmdStan's configuration JSON beside the CSV files | The `cmdstanr_save_config` option |
+| `show_messages`, `show_exceptions` | Print CmdStan's standard output and standard error | `true`, and `show_exceptions` follows `show_messages` |
+| `timeout` | Seconds allowed per process | None |
+
+Threads are `threads_per_chain` for `sample()` and `generateQuantities()`, and `threads` for `optimize()`, `variational()`, `pathfinder()`, and `laplace()`. `pathfinder()` still accepts `num_threads` with an `E_USER_DEPRECATED` notice. Asking for more than one thread from an executable built without threading is an error.
+
+CmdStanR 1.0's removed names are unknown options here too: `sample()`'s `cores`, `num_cores`, `num_chains`, `num_warmup`, `num_samples`, `max_depth`, `stepsize`, `save_extra_diagnostics`, and `validate_csv`, and `jacobian_adjustment`.
+
+## Method-specific options
+
+| Method | Options |
+| --- | --- |
+| `sample()` | `threads_per_chain`, `save_latent_dynamics`, `show_progress_bar`, `chains` (default 4), `parallel_chains` (default: the `mc.cores` option, else 1), `chain_ids`, `iter_warmup`, `iter_sampling`, `save_warmup`, `thin`, `max_treedepth`, `adapt_engaged`, `adapt_delta`, `step_size`, `metric`, `metric_file`, `inv_metric`, `init_buffer`, `term_buffer`, `window`, `fixed_param`, `save_metric`, `diagnostics`. See [MCMC sampling](mcmc.qmd). |
+| `optimize()` | `threads`, `algorithm`, `jacobian`, `init_alpha`, `iter`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `save_iterations` |
+| `variational()` | `threads`, `save_latent_dynamics`, `algorithm`, `iter`, `grad_samples`, `elbo_samples`, `eta`, `adapt_engaged`, `adapt_iter`, `tol_rel_obj`, `eval_elbo`, `draws` (CmdStan's `output_samples`) |
+| `pathfinder()` | `threads`, `init_alpha`, `tol_obj`, `tol_rel_obj`, `tol_grad`, `tol_rel_grad`, `tol_param`, `history_size`, `single_path_draws`, `draws`, `num_paths`, `max_lbfgs_iters`, `num_elbo_draws`, `save_single_paths`, `psis_resample`, `calculate_lp` |
+| `laplace()` | `threads`, `mode`, `opt_args`, `jacobian` (default true), `draws`, `calculate_lp` |
+| `generateQuantities()` | `fittedParams` (required: a fit, a CSV file name, or a list of them), `threads_per_chain`, `parallel_chains` |
+| `diagnose()` | `epsilon` and `error`, for the finite-difference gradient check |
+| `logProb()` | Exactly one of `unconstrained_params` and `constrained_params`, and `jacobian` |
+
+`save_latent_dynamics` writes auxiliary diagnostic CSV files.
+
+`sampleMpi(mpiCmd: 'mpiexec', mpiArgs: [], ...options)` takes the sampling options, defaults to one chain, and runs chains one after another. An associative argument such as `['n' => 4]` becomes `-n 4`, and a list is passed as literal arguments. Compile with `['STAN_MPI' => true, 'CXX' => 'mpicxx', 'TBB_CXX_TYPE' => 'gcc']` and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.

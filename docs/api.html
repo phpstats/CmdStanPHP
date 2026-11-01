@@ -26,41 +26,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -255,6 +220,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">API reference</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-options.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: options</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: fits</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: data frames and the phpstats family</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: errors</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -341,38 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a>
-  <ul class="collapse">
-  <li><a href="#models-and-stan-files" id="toc-models-and-stan-files" class="nav-link" data-scroll-target="#models-and-stan-files">Models and Stan files</a></li>
-  <li><a href="#cmdstan-installation" id="toc-cmdstan-installation" class="nav-link" data-scroll-target="#cmdstan-installation">CmdStan installation</a></li>
-  <li><a href="#data-and-csv-files" id="toc-data-and-csv-files" class="nav-link" data-scroll-target="#data-and-csv-files">Data and CSV files</a></li>
-  <li><a href="#figures-and-examples" id="toc-figures-and-examples" class="nav-link" data-scroll-target="#figures-and-examples">Figures and examples</a></li>
-  <li><a href="#global-options" id="toc-global-options" class="nav-link" data-scroll-target="#global-options">Global options</a></li>
-  </ul></li>
-  <li><a href="#model-methods" id="toc-model-methods" class="nav-link" data-scroll-target="#model-methods">Models</a>
-  <ul class="collapse">
-  <li><a href="#inspecting-a-model" id="toc-inspecting-a-model" class="nav-link" data-scroll-target="#inspecting-a-model">Inspecting a model</a></li>
-  <li><a href="#running-a-model" id="toc-running-a-model" class="nav-link" data-scroll-target="#running-a-model">Running a model</a></li>
-  <li><a href="#shared-options" id="toc-shared-options" class="nav-link" data-scroll-target="#shared-options">Shared options</a></li>
-  <li><a href="#method-specific-options" id="toc-method-specific-options" class="nav-link" data-scroll-target="#method-specific-options">Method-specific options</a></li>
-  </ul></li>
-  <li><a href="#fit-methods" id="toc-fit-methods" class="nav-link" data-scroll-target="#fit-methods">Fits</a>
-  <ul class="collapse">
-  <li><a href="#draws-and-summaries" id="toc-draws-and-summaries" class="nav-link" data-scroll-target="#draws-and-summaries">Draws and summaries</a></li>
-  <li><a href="#diagnostics-and-run-information" id="toc-diagnostics-and-run-information" class="nav-link" data-scroll-target="#diagnostics-and-run-information">Diagnostics and run information</a></li>
-  <li><a href="#files-and-saving" id="toc-files-and-saving" class="nav-link" data-scroll-target="#files-and-saving">Files and saving</a></li>
-  <li><a href="#model-methods-1" id="toc-model-methods-1" class="nav-link" data-scroll-target="#model-methods-1">Model methods</a></li>
-  <li><a href="#methods-of-specific-fit-types" id="toc-methods-of-specific-fit-types" class="nav-link" data-scroll-target="#methods-of-specific-fit-types">Methods of specific fit types</a></li>
-  <li><a href="#statistics-helpers" id="toc-statistics-helpers" class="nav-link" data-scroll-target="#statistics-helpers">Statistics helpers</a></li>
-  </ul></li>
-  <li><a href="#data-frames-and-the-phpstats-family" id="toc-data-frames-and-the-phpstats-family" class="nav-link" data-scroll-target="#data-frames-and-the-phpstats-family">Data frames and the phpstats family</a>
-  <ul class="collapse">
-  <li><a href="#data-in" id="toc-data-in" class="nav-link" data-scroll-target="#data-in">Data in</a></li>
-  <li><a href="#regression-data" id="toc-regression-data" class="nav-link" data-scroll-target="#regression-data">Regression data</a></li>
-  <li><a href="#draws-and-summaries-out" id="toc-draws-and-summaries-out" class="nav-link" data-scroll-target="#draws-and-summaries-out">Draws and summaries out</a></li>
-  <li><a href="#part-of-the-phpstats-family" id="toc-part-of-the-phpstats-family" class="nav-link" data-scroll-target="#part-of-the-phpstats-family">Part of the phpstats family</a></li>
-  </ul></li>
-  <li><a href="#errors" id="toc-errors" class="nav-link" data-scroll-target="#errors">Errors</a></li>
+  <li><a href="#sections" id="toc-sections" class="nav-link active" data-scroll-target="#sections">Sections</a></li>
   </ul>
 </nav>
     </div>
@@ -400,999 +370,148 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>All classes and functions are in the <code>CmdStan</code> namespace. Standalone functions keep CmdStanR’s snake_case names. Methods and their parameters are camelCase, so CmdStanR’s <code>fit$output_files()</code> is <code>$fit-&gt;outputFiles()</code>, and <a href="./compatibility.html#method-names">Compatibility</a> maps every renamed method. CmdStan’s option names are unchanged.</p>
 <p>Inference methods accept PHP named arguments or one associative options array, and they reject unknown options. An option left out or set to <code>null</code> uses the installed CmdStan’s default.</p>
-<section id="functions" class="level2">
-<h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<section id="models-and-stan-files" class="level3">
-<h3 class="anchored" data-anchor-id="models-and-stan-files">Models and Stan files</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)</code></td>
-<td>A <code>CmdStanModel</code>, compiled or reusing an up-to-date executable</td>
-</tr>
-<tr class="even">
-<td><code>compile_stan_file(stanFile, ...)</code></td>
-<td>The executable path, compiled with <code>cmdstan_model()</code>’s build arguments but without a model object</td>
-</tr>
-<tr class="odd">
-<td><code>check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)</code></td>
-<td><code>true</code>, or an exception for invalid Stan</td>
-</tr>
-<tr class="even">
-<td><code>format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code></td>
-<td>The formatted program. <code>overwriteFile</code> rewrites the file and keeps a <code>.bak-YYYYMMDDHHMMSS</code> copy unless <code>backup: false</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>variables_stan_file(stanFile, includePaths: null)</code></td>
-<td>The program’s declarations, without compiling</td>
-</tr>
-<tr class="even">
-<td><code>print_stan_file(stanFile, lineNumbers: null)</code></td>
-<td>Prints the program</td>
-</tr>
-<tr class="odd">
-<td><code>stan_build_info(exeFile)</code></td>
-<td>How an executable was built, from its build record and what it reports about itself</td>
-</tr>
-<tr class="even">
-<td><code>write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')</code></td>
-<td>The path of <code>model_&lt;hash&gt;.stan</code>, or of <code>basename</code>. An identical existing file is left untouched.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="cmdstan-installation" class="level3">
-<h3 class="anchored" data-anchor-id="cmdstan-installation">CmdStan installation</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)</code></td>
-<td>Downloads or unpacks a release, builds it, and selects it. See <a href="./installation.html#install-cmdstan">Installation</a>.</td>
-</tr>
-<tr class="even">
-<td><code>set_cmdstan_path(path)</code>, <code>cmdstan_path()</code></td>
-<td>Selects or returns the CmdStan installation</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstan_version()</code></td>
-<td>The selected CmdStan’s version</td>
-</tr>
-<tr class="even">
-<td><code>check_cmdstan_toolchain()</code></td>
-<td>Paths and versions of make, CmdStan’s C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed.</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstan_make_local(dir: null, cppOptions: [], append: true)</code></td>
-<td>Reads or writes CmdStan’s <code>make/local</code></td>
-</tr>
-<tr class="even">
-<td><code>rebuild_cmdstan(cores: null, timeout: null)</code></td>
-<td>Cleans and rebuilds the selected CmdStan</td>
-</tr>
-</tbody>
-</table>
-<p>CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. <code>set_cmdstan_path()</code> refuses an older installation, discovery skips one, and <code>install_cmdstan()</code> rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan’s error message.</p>
-</section>
-<section id="data-and-csv-files" class="level3">
-<h3 class="anchored" data-anchor-id="data-and-csv-files">Data and CSV files</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>write_stan_json(data, file, alwaysDecimal: false, variables: null)</code></td>
-<td>Writes data, initial values, or a metric as JSON. <code>data</code> may be an array, a <code>StanData</code>, or a table. With <code>variables</code> (stanc’s declarations, such as <code>$model-&gt;variables()['data']</code>), <code>int</code> variables are written as integers and tuples as Stan’s <code>{"1": ..., "2": ...}</code> objects.</td>
-</tr>
-<tr class="even">
-<td><code>read_cmdstan_csv(files)</code></td>
-<td>A fit from one or more CmdStan CSV files (<code>.csv</code>, <code>.csv.gz</code>, or <code>.csv.bz2</code>)</td>
-</tr>
-<tr class="odd">
-<td><code>as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)</code></td>
-<td>The same, reading only <code>variables</code> and with <code>format</code> as the fit’s default draws format</td>
-</tr>
-<tr class="even">
-<td><code>read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)</code></td>
-<td>CmdStanR’s <code>read_cmdstan_csv()</code> list shape</td>
-</tr>
-<tr class="odd">
-<td><code>draws_to_csv(chains, dir)</code></td>
-<td>Writes <code>[chain][iteration][variable]</code> draw rows to one CSV file per chain</td>
-</tr>
-</tbody>
-</table>
-<p>Data arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:</p>
-<ul>
-<li>Matrices are lists of rows, with no column-major conversion. Booleans become 0 and 1, complex numbers are <code>[re, im]</code> pairs, and a tuple is a list of its elements. Empty top-level data becomes <code>{}</code>.</li>
-<li>Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected, and the error names the variable.</li>
-<li>The fitting methods write data with the model’s declarations. Every declared data variable is required, <code>int</code> variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.</li>
-</ul>
-</section>
-<section id="figures-and-examples" class="level3">
-<h3 class="anchored" data-anchor-id="figures-and-examples">Figures and examples</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>mcmc_trace</code>, <code>mcmc_hist</code>, <code>mcmc_dens</code>, <code>mcmc_dens_overlay</code>, <code>mcmc_intervals</code>, <code>mcmc_rank_hist</code>, <code>mcmc_scatter</code>, <code>mcmc_acf</code>, <code>pareto_k_plot</code></td>
-<td>A <code>Figure</code>, named after its bayesplot or loo counterpart. See <a href="./figures.html">Figures</a>.</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_example(example: 'logistic', method: 'sample', ...options)</code></td>
-<td>A fit of the <code>logistic</code>, <code>schools</code>, or <code>schools_ncp</code> example</td>
-</tr>
-<tr class="odd">
-<td><code>print_example_program(example)</code></td>
-<td>Prints an example’s Stan program</td>
-</tr>
-</tbody>
-</table>
-<p><code>num_threads()</code> remains as a deprecated CmdStanR name. CmdStanR 1.0 removed <code>read_sample_csv()</code> and <code>write_stan_tempfile()</code>, and this package does not have them.</p>
-</section>
-<section id="global-options" class="level3">
-<h3 class="anchored" data-anchor-id="global-options">Global options</h3>
-<p><code>options(set: [])</code> sets options and returns their previous values, and <code>cmdstan_option(name, default: null)</code> reads one. A <code>null</code> value unsets an option, and unknown names and values of the wrong type throw.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Option</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cmdstanr_output_dir</code></td>
-<td>Default <code>output_dir</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_write_stan_file_dir</code></td>
-<td>Default directory for <code>write_stan_file()</code></td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_force_recompile</code></td>
-<td>Default <code>forceRecompile</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_draws_format</code></td>
-<td>Default draws format: <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, or <code>draws_list</code></td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_compress</code></td>
-<td>Default <code>compress</code>: <code>'none'</code>, <code>'gzip'</code>, or <code>'bzip2'</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_progress_bar</code></td>
-<td>Default <code>show_progress_bar</code> for <code>sample()</code></td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_save_metric</code></td>
-<td>Default <code>save_metric</code> for <code>sample()</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_save_config</code></td>
-<td>Default <code>save_cmdstan_config</code></td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_verbose</code></td>
-<td>Reports whether and why a model compiles</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_warn_inits</code></td>
-<td>Warns when initial values cover only some parameters, and passes on warnings from initializing with a fit. On by default.</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_max_rows</code></td>
-<td>Variables printed by <code>print()</code> (default 10)</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_print_line_numbers</code></td>
-<td>Default <code>lineNumbers</code> for <code>print_stan_file()</code> and <code>print()</code></td>
-</tr>
-<tr class="odd">
-<td><code>mc.cores</code></td>
-<td>Default <code>parallel_chains</code> and installer core count</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanphp_example_dir</code></td>
-<td>Directory for compiled examples</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanr_no_ver_check</code>, <code>cmdstanr_spinner</code></td>
-<td>Accepted and ignored</td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
-<section id="model-methods" class="level2">
-<h2 class="anchored" data-anchor-id="model-methods">Models</h2>
-<p><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> take the same arguments and compile the model, or reuse an up-to-date executable, before they return.</p>
-<ul>
-<li>Give <code>stanFile</code>, whose executable goes beside it or in <code>dir</code>, or <code>exeFile</code> alone to use an existing executable. A model from <code>exeFile</code> alone refuses the build arguments, because there is nothing to build.</li>
-<li><code>cppOptions</code> are named make variables, such as <code>['STAN_THREADS' =&gt; true]</code>. Names are uppercased, and <code>false</code> turns an option off even when <code>make/local</code> turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use <code>cmdstan_make_local()</code> for other make lines.</li>
-<li><code>stancOptions</code> take flags and values, such as <code>['O1', 'canonicalize' =&gt; 'deprecations', 'max-line-length' =&gt; 78]</code>. Flags with their own argument are rejected: use <code>includePaths</code>, <code>pedantic</code>, <code>userHeader</code>, or <code>cppOptions: ['STAN_OPENCL' =&gt; true]</code>.</li>
-<li><code>quiet: false</code>, or the <code>cmdstanr_verbose</code> option, reports whether and why the model compiles. <code>forceRecompile: true</code> rebuilds anyway.</li>
-</ul>
-<p><a href="./compiling.html">Compiling models</a> covers when a model is rebuilt, <code>StaleExecutableException</code>, and concurrent builds.</p>
-<section id="inspecting-a-model" class="level3">
-<h3 class="anchored" data-anchor-id="inspecting-a-model">Inspecting a model</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code></td>
-<td>Paths. <code>hppFile()</code> writes the generated C++ to a temporary file on first use.</td>
-</tr>
-<tr class="even">
-<td><code>code()</code></td>
-<td>The program as it was when the model was created</td>
-</tr>
-<tr class="odd">
-<td><code>variables()</code></td>
-<td>The <code>data</code>, <code>parameters</code>, <code>transformed_parameters</code>, and <code>generated_quantities</code> declarations, from stanc</td>
-</tr>
-<tr class="even">
-<td><code>modelName()</code>, <code>hasStanFile()</code>, <code>includePaths()</code>, <code>userHeader()</code>, <code>stancOptions()</code></td>
-<td>The model’s identity and recorded build settings</td>
-</tr>
-<tr class="odd">
-<td><code>cppOptions()</code></td>
-<td>Make variables and values, so <code>['stan_threads' =&gt; true]</code> comes back as <code>['STAN_THREADS' =&gt; 'true']</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanVersion()</code></td>
-<td>The CmdStan version that built the executable</td>
-</tr>
-<tr class="odd">
-<td><code>reportedFeatures()</code></td>
-<td>What the executable reports: <code>stan_threads</code>, <code>stan_mpi</code>, <code>stan_opencl</code>, <code>stan_no_range_checks</code>, and <code>stan_version</code></td>
-</tr>
-<tr class="even">
-<td><code>buildInfo()</code></td>
-<td>The build record and the reported features, as <code>stan_build_info()</code> returns them</td>
-</tr>
-<tr class="odd">
-<td><code>isCurrent()</code></td>
-<td><code>false</code> when the executable is out of date</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanDefaults(method: 'sample')</code></td>
-<td>CmdStan’s default values for <code>sample</code>, <code>optimize</code>, <code>variational</code>, <code>pathfinder</code>, or <code>laplace</code>, under this package’s option names</td>
-</tr>
-<tr class="odd">
-<td><code>print(lineNumbers: null)</code>, <code>saveHppFile(dir)</code></td>
-<td>Prints the program, or copies the generated header</td>
-</tr>
-<tr class="even">
-<td><code>format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code></td>
-<td>The formatted program. Create the model again to use a rewritten file.</td>
-</tr>
-<tr class="odd">
-<td><code>checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)</code></td>
-<td><code>true</code>, or an exception for invalid Stan</td>
-</tr>
-<tr class="even">
-<td><code>exposeFunctions(timeout: null, quiet: false)</code>, <code>functions()</code></td>
-<td>The model’s user-defined functions as a <code>StanFunctions</code> object</td>
-</tr>
-</tbody>
-</table>
-<p><code>code()</code> and <code>hppFile()</code> are <code>null</code> for a model from <code>exeFile</code> alone.</p>
-</section>
-<section id="running-a-model" class="level3">
-<h3 class="anchored" data-anchor-id="running-a-model">Running a model</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>sample()</code>, <code>sampleMpi()</code></td>
-<td><code>CmdStanMCMC</code></td>
-</tr>
-<tr class="even">
-<td><code>optimize()</code></td>
-<td><code>CmdStanMLE</code></td>
-</tr>
-<tr class="odd">
-<td><code>variational()</code></td>
-<td><code>CmdStanVB</code></td>
-</tr>
-<tr class="even">
-<td><code>pathfinder()</code></td>
-<td><code>CmdStanPathfinder</code></td>
-</tr>
-<tr class="odd">
-<td><code>laplace()</code></td>
-<td><code>CmdStanLaplace</code></td>
-</tr>
-<tr class="even">
-<td><code>generateQuantities(fittedParams, ...)</code></td>
-<td><code>CmdStanGQ</code></td>
-</tr>
-<tr class="odd">
-<td><code>diagnose()</code></td>
-<td><code>CmdStanDiagnose</code></td>
-</tr>
-<tr class="even">
-<td><code>logProb()</code></td>
-<td><code>CmdStanFit</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="shared-options" class="level3">
-<h3 class="anchored" data-anchor-id="shared-options">Shared options</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Option</th>
-<th>Meaning</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>data</code></td>
-<td>An array, a JSON file, a <code>StanData</code>, or a <a href="#data-in">table</a></td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td><code>seed</code></td>
-<td>Random seed</td>
-<td>Chosen by CmdStan</td>
-</tr>
-<tr class="odd">
-<td><code>init</code></td>
-<td>Initial values: a radius, values, files, a callable, or a fit. See <a href="./mcmc.html#initial-values">initial values</a>.</td>
-<td>CmdStan’s radius of 2</td>
-</tr>
-<tr class="even">
-<td><code>refresh</code></td>
-<td>Iterations between progress lines</td>
-<td>CmdStan’s</td>
-</tr>
-<tr class="odd">
-<td><code>output_dir</code></td>
-<td>Directory for output files</td>
-<td>The <code>cmdstanr_output_dir</code> option, else a new temporary directory</td>
-</tr>
-<tr class="even">
-<td><code>output_basename</code></td>
-<td>File name prefix: letters, numbers, dots, underscores, and hyphens. Files are then named <code>&lt;output_basename&gt;-&lt;id&gt;.csv</code>.</td>
-<td><code>&lt;model&gt;-&lt;YYYYmmddHHMM&gt;</code>, with a random suffix after the chain id</td>
-</tr>
-<tr class="odd">
-<td><code>sig_figs</code></td>
-<td>Significant figures in the CSV output, 1 to 18</td>
-<td>CmdStan’s</td>
-</tr>
-<tr class="even">
-<td><code>compress</code></td>
-<td><code>'none'</code>, <code>'gzip'</code>, or <code>'bzip2'</code> for the output and latent-dynamics CSV files. Not for <code>diagnose()</code> or <code>logProb()</code>.</td>
-<td>The <code>cmdstanr_compress</code> option</td>
-</tr>
-<tr class="odd">
-<td><code>opencl_ids</code></td>
-<td>OpenCL platform and device IDs. Needs an OpenCL build.</td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td><code>save_cmdstan_config</code></td>
-<td>Writes CmdStan’s configuration JSON beside the CSV files</td>
-<td>The <code>cmdstanr_save_config</code> option</td>
-</tr>
-<tr class="odd">
-<td><code>show_messages</code>, <code>show_exceptions</code></td>
-<td>Print CmdStan’s standard output and standard error</td>
-<td><code>true</code>, and <code>show_exceptions</code> follows <code>show_messages</code></td>
-</tr>
-<tr class="even">
-<td><code>timeout</code></td>
-<td>Seconds allowed per process</td>
-<td>None</td>
-</tr>
-</tbody>
-</table>
-<p>Threads are <code>threads_per_chain</code> for <code>sample()</code> and <code>generateQuantities()</code>, and <code>threads</code> for <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, and <code>laplace()</code>. <code>pathfinder()</code> still accepts <code>num_threads</code> with an <code>E_USER_DEPRECATED</code> notice. Asking for more than one thread from an executable built without threading is an error.</p>
-<p>CmdStanR 1.0’s removed names are unknown options here too: <code>sample()</code>’s <code>cores</code>, <code>num_cores</code>, <code>num_chains</code>, <code>num_warmup</code>, <code>num_samples</code>, <code>max_depth</code>, <code>stepsize</code>, <code>save_extra_diagnostics</code>, and <code>validate_csv</code>, and <code>jacobian_adjustment</code>.</p>
-</section>
-<section id="method-specific-options" class="level3">
-<h3 class="anchored" data-anchor-id="method-specific-options">Method-specific options</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Options</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>sample()</code></td>
-<td><code>threads_per_chain</code>, <code>save_latent_dynamics</code>, <code>show_progress_bar</code>, <code>chains</code> (default 4), <code>parallel_chains</code> (default: the <code>mc.cores</code> option, else 1), <code>chain_ids</code>, <code>iter_warmup</code>, <code>iter_sampling</code>, <code>save_warmup</code>, <code>thin</code>, <code>max_treedepth</code>, <code>adapt_engaged</code>, <code>adapt_delta</code>, <code>step_size</code>, <code>metric</code>, <code>metric_file</code>, <code>inv_metric</code>, <code>init_buffer</code>, <code>term_buffer</code>, <code>window</code>, <code>fixed_param</code>, <code>save_metric</code>, <code>diagnostics</code>. See <a href="./mcmc.html">MCMC sampling</a>.</td>
-</tr>
-<tr class="even">
-<td><code>optimize()</code></td>
-<td><code>threads</code>, <code>algorithm</code>, <code>jacobian</code>, <code>init_alpha</code>, <code>iter</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>save_iterations</code></td>
-</tr>
-<tr class="odd">
-<td><code>variational()</code></td>
-<td><code>threads</code>, <code>save_latent_dynamics</code>, <code>algorithm</code>, <code>iter</code>, <code>grad_samples</code>, <code>elbo_samples</code>, <code>eta</code>, <code>adapt_engaged</code>, <code>adapt_iter</code>, <code>tol_rel_obj</code>, <code>eval_elbo</code>, <code>draws</code> (CmdStan’s <code>output_samples</code>)</td>
-</tr>
-<tr class="even">
-<td><code>pathfinder()</code></td>
-<td><code>threads</code>, <code>init_alpha</code>, <code>tol_obj</code>, <code>tol_rel_obj</code>, <code>tol_grad</code>, <code>tol_rel_grad</code>, <code>tol_param</code>, <code>history_size</code>, <code>single_path_draws</code>, <code>draws</code>, <code>num_paths</code>, <code>max_lbfgs_iters</code>, <code>num_elbo_draws</code>, <code>save_single_paths</code>, <code>psis_resample</code>, <code>calculate_lp</code></td>
-</tr>
-<tr class="odd">
-<td><code>laplace()</code></td>
-<td><code>threads</code>, <code>mode</code>, <code>opt_args</code>, <code>jacobian</code> (default true), <code>draws</code>, <code>calculate_lp</code></td>
-</tr>
-<tr class="even">
-<td><code>generateQuantities()</code></td>
-<td><code>fittedParams</code> (required: a fit, a CSV file name, or a list of them), <code>threads_per_chain</code>, <code>parallel_chains</code></td>
-</tr>
-<tr class="odd">
-<td><code>diagnose()</code></td>
-<td><code>epsilon</code> and <code>error</code>, for the finite-difference gradient check</td>
-</tr>
-<tr class="even">
-<td><code>logProb()</code></td>
-<td>Exactly one of <code>unconstrained_params</code> and <code>constrained_params</code>, and <code>jacobian</code></td>
-</tr>
-</tbody>
-</table>
-<p><code>save_latent_dynamics</code> writes auxiliary diagnostic CSV files.</p>
-<p><code>sampleMpi(mpiCmd: 'mpiexec', mpiArgs: [], ...options)</code> takes the sampling options, defaults to one chain, and runs chains one after another. An associative argument such as <code>['n' =&gt; 4]</code> becomes <code>-n 4</code>, and a list is passed as literal arguments. Compile with <code>['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc']</code> and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.</p>
-</section>
-</section>
-<section id="fit-methods" class="level2">
-<h2 class="anchored" data-anchor-id="fit-methods">Fits</h2>
-<p><a href="./draws.html">Draws, summaries, and saving fits</a> explains formats, summaries, and saving.</p>
-<section id="draws-and-summaries" class="level3">
-<h3 class="anchored" data-anchor-id="draws-and-summaries">Draws and summaries</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>draws(variables: null, format: null, incWarmup: false)</code></td>
-<td>Draws in <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, <code>draws_list</code>, or <code>draws_rvars</code> format</td>
-</tr>
-<tr class="even">
-<td><code>samplerDiagnostics(format: null, incWarmup: false)</code></td>
-<td>Sampler columns ending in <code>__</code>, except <code>lp__</code></td>
-</tr>
-<tr class="odd">
-<td><code>summary(variables: null, probs: [0.05, 0.95], measures: [])</code></td>
-<td>One row per variable</td>
-</tr>
-<tr class="even">
-<td><code>drawsColumns(variables: null, incWarmup: false)</code>, <code>summaryColumns(...)</code></td>
-<td>The same as column arrays. See <a href="#draws-and-summaries-out">data frames</a>.</td>
-</tr>
-<tr class="odd">
-<td><code>drawsTable(...)</code>, <code>summaryTable(...)</code></td>
-<td>The same as a <code>Phibble\DataFrame</code></td>
-</tr>
-<tr class="even">
-<td><code>print(variables: null, maxRows: null)</code></td>
-<td>Prints summary JSON for at most <code>cmdstanr_max_rows</code> variables</td>
-</tr>
-<tr class="odd">
-<td><code>lp()</code></td>
-<td><code>lp__</code> by iteration and chain</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanSummary()</code></td>
-<td>CmdStan’s <code>stansummary</code> text</td>
-</tr>
-</tbody>
-</table>
-<p>A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that <code>draws()</code>, <code>summary()</code>, and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until <code>materialize()</code>, the fit needs its CSV files.</p>
-</section>
-<section id="diagnostics-and-run-information" class="level3">
-<h3 class="anchored" data-anchor-id="diagnostics-and-run-information">Diagnostics and run information</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>diagnosticSummary()</code></td>
-<td>Per-chain <code>num_divergent</code>, <code>num_max_treedepth</code>, and <code>ebfmi</code></td>
-</tr>
-<tr class="even">
-<td><code>checkDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])</code>, <code>diagnosticWarnings()</code></td>
-<td>Runs the checks, or returns their messages</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanDiagnose()</code></td>
-<td>The text from CmdStan’s <code>diagnose</code> utility</td>
-</tr>
-<tr class="even">
-<td><code>metadata()</code>, <code>chainMetadata()</code></td>
-<td>CSV metadata, merged or per chain</td>
-</tr>
-<tr class="odd">
-<td><code>variables()</code>, <code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>, <code>numProcs()</code></td>
-<td>Counts and names from the CSV files</td>
-</tr>
-<tr class="even">
-<td><code>stepSize()</code>, <code>invMetric(matrix: true)</code></td>
-<td>Adaptation results, one per chain</td>
-</tr>
-<tr class="odd">
-<td><code>time()</code></td>
-<td>Warmup, sampling, and total time per chain, when available</td>
-</tr>
-<tr class="even">
-<td><code>init()</code></td>
-<td>The initial values each process used</td>
-</tr>
-<tr class="odd">
-<td><code>output()</code>, <code>returnCodes()</code>, <code>command()</code></td>
-<td>Console output, exit status, and command line of each process. Imported fits have none of these. <code>command()</code> leaves out <code>STAN_NUM_THREADS</code> and an MPI launcher.</td>
-</tr>
-<tr class="even">
-<td><code>code()</code></td>
-<td>The Stan program. Imported fits have none.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="files-and-saving" class="level3">
-<h3 class="anchored" data-anchor-id="files-and-saving">Files and saving</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code></td>
-<td>File paths. The latent-dynamics and profile accessors throw when there are no such files. <code>includeFailed</code> is accepted for CmdStanR compatibility.</td>
-</tr>
-<tr class="even">
-<td><code>profiles()</code></td>
-<td>Parsed profiling data</td>
-</tr>
-<tr class="odd">
-<td><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code></td>
-<td>Paths. An imported fit uses the data file recorded in the CSV when it still exists.</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanConfig()</code>, <code>metric()</code></td>
-<td>The decoded configuration and metric JSON</td>
-</tr>
-<tr class="odd">
-<td><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code></td>
-<td>Saved paths. Each takes <code>dir: '.', basename: null, timestamp: true, random: true</code>, and the first two also take <code>compress</code>.</td>
-</tr>
-<tr class="even">
-<td><code>materialize()</code></td>
-<td>Reads the draws, initial values, and profiles into memory</td>
-</tr>
-<tr class="odd">
-<td><code>saveObject(file)</code></td>
-<td>Materializes and serializes the fit, with MCMC summary statistics</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="model-methods-1" class="level3">
-<h3 class="anchored" data-anchor-id="model-methods-1">Model methods</h3>
-<p>These need PHP’s FFI extension. The first call compiles a shared library for the fit’s model and data, and <code>initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)</code> does this explicitly. <code>data</code> binds other data, for example when a reloaded fit’s data file is gone, and <code>dataFile()</code> then points to it. Imported CSV fits must pass <code>model:</code>, and a model from <code>exeFile</code> alone has no program to build them from. See <a href="./log-density.html">Log density and model methods</a>.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>logProb(unconstrainedVariables, jacobian: true)</code></td>
-<td>The log density, with constants dropped</td>
-</tr>
-<tr class="even">
-<td><code>gradLogProb(...)</code></td>
-<td><code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code></td>
-</tr>
-<tr class="odd">
-<td><code>hessian(...)</code></td>
-<td><code>['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]</code></td>
-</tr>
-<tr class="even">
-<td><code>unconstrainVariables(variables)</code></td>
-<td>A flat unconstrained list from parameter values keyed by name, shaped as <code>constrainVariables()</code> returns them</td>
-</tr>
-<tr class="odd">
-<td><code>unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)</code></td>
-<td>The fit’s draws, other CSV files, or <code>draws_df</code> rows on the unconstrained scale</td>
-</tr>
-<tr class="even">
-<td><code>constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)</code></td>
-<td>Variables keyed by name as nested arrays, with tuples as lists and complex values as <code>[re, im]</code></td>
-</tr>
-<tr class="odd">
-<td><code>exposeFunctions(timeout: null)</code>, <code>functions()</code></td>
-<td>The model’s user-defined functions</td>
-</tr>
-</tbody>
-</table>
-<p><code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
-</section>
-<section id="methods-of-specific-fit-types" class="level3">
-<h3 class="anchored" data-anchor-id="methods-of-specific-fit-types">Methods of specific fit types</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Fit</th>
-<th>Methods</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>CmdStanMCMC</code></td>
-<td><code>loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. See <a href="./loo.html">LOO and WAIC</a>.</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanMLE</code></td>
-<td><code>mle()</code> and <code>optimizedParams()</code> (the estimates without <code>lp__</code>), and <code>lp()</code>. Its <code>summary()</code> returns <code>variable</code> and <code>estimate</code> rows.</td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanVB</code></td>
-<td><code>variationalMean()</code>, and <code>lpApprox()</code>, the approximation’s log density at each draw</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanLaplace</code></td>
-<td><code>mode()</code> and <code>lpApprox()</code></td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanPathfinder</code></td>
-<td><code>lpApprox()</code>, and <code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, and <code>singlePathDiagnostics()</code> with <code>save_single_paths: true</code>. Its variables include <code>lp_approx__</code> and <code>path__</code>.</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanGQ</code></td>
-<td><code>fittedParamsFiles()</code></td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanDiagnose</code></td>
-<td><code>gradients()</code>, the gradient check’s console output</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="statistics-helpers" class="level3">
-<h3 class="anchored" data-anchor-id="statistics-helpers">Statistics helpers</h3>
-<p>These classes work on plain draws arrays, and their docblocks describe the shapes.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Class</th>
-<th>Methods</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>Figure</code></td>
-<td><code>ascii()</code>, <code>vegaLite()</code>, <code>json()</code>, <code>html()</code>, <code>svg()</code>, <code>png()</code>. Casting to a string gives the ASCII form.</td>
-</tr>
-<tr class="even">
-<td><code>Plot</code></td>
-<td>The figures, plus <code>bandwidth()</code>, <code>density()</code>, <code>autocorrelation()</code>, and <code>ranks()</code></td>
-</tr>
-<tr class="odd">
-<td><code>Psis</code></td>
-<td><code>paretoSmooth()</code>, <code>paretoKhat()</code>, <code>psis()</code>, <code>gpdfit()</code></td>
-</tr>
-<tr class="even">
-<td><code>Loo</code></td>
-<td><code>loo()</code>, <code>waic()</code>, <code>relativeEff()</code></td>
-</tr>
-<tr class="odd">
-<td><code>MomentMatch</code></td>
-<td><code>loo()</code> on unconstrained draws with log-density and log-likelihood callbacks, and <code>fromFit()</code></td>
-</tr>
-<tr class="even">
-<td><code>DrawKernels</code></td>
-<td>Detection of and wrappers for the phit draw kernels</td>
-</tr>
-<tr class="odd">
-<td><code>Summary</code></td>
-<td><code>summarise()</code> and each posterior measure</td>
-</tr>
-<tr class="even">
-<td><code>Rvars</code>, <code>Inits</code></td>
-<td><code>draws_rvars</code> helpers, and <code>fromFit()</code>, <code>fromDraws()</code>, <code>nest()</code>, and <code>validate()</code> for initial values</td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
-<section id="data-frames-and-the-phpstats-family" class="level2">
-<h2 class="anchored" data-anchor-id="data-frames-and-the-phpstats-family">Data frames and the phpstats family</h2>
-<p>CmdStanPHP works with the <a href="#part-of-the-phpstats-family">phpstats family</a> without depending on it. phibble is detected by method and class names. The <code>phit</code> extension is detected by function name.</p>
-<section id="data-in" class="level3">
-<h3 class="anchored" data-anchor-id="data-in">Data in</h3>
-<p>Every <code>data</code> argument (<code>sample()</code>, <code>sampleMpi()</code>, <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, <code>laplace()</code>, <code>generateQuantities()</code>, <code>diagnose()</code>, and <code>logProb()</code>) and <code>write_stan_json()</code> accept a plain array, a JSON file, a <code>CmdStan\StanData</code>, or a table. A table is any object with <code>toModelData()</code> or <code>toColumns()</code>, such as a <a href="https://github.com/phpstats/phibble">phibble</a> <code>Phibble\DataFrame</code>. <code>toModelData()</code> is used when both exist. <code>StanData::fromTable($table, addN: true)</code> performs the same conversion and keeps the factor labels.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Column</th>
-<th>Stan data</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int or float</td>
-<td>The list of values, unchanged</td>
-</tr>
-<tr class="even">
-<td>bool</td>
-<td>0/1 integers</td>
-</tr>
-<tr class="odd">
-<td>list cells</td>
-<td>Nested arrays, which must be rectangular</td>
-</tr>
-<tr class="even">
-<td>factor</td>
-<td>1-based integer indices in level order, plus <code>J_&lt;name&gt;</code>, the number of levels</td>
-</tr>
-<tr class="odd">
-<td>string</td>
-<td>Rejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes</td>
-</tr>
-<tr class="even">
-<td>null, dates, other objects</td>
-<td>Rejected with the column name and row, because Stan data has no missing values</td>
-</tr>
-</tbody>
-</table>
-<p>Factor levels come from a <code>toModelData()</code> descriptor (<code>['levels' =&gt; list&lt;string&gt;, 'codes' =&gt; list&lt;?int&gt;, 'ordered' =&gt; bool]</code>, with 0-based codes, as phibble’s <code>DataFrame::toModelData()</code> returns them from phibble 0.1.0; add <code>'base' =&gt; 1</code> for 1-based codes) or, for a <code>toColumns()</code> table, from <code>levels($name)</code> when <code>types()</code> reports a factor. The <code>ordered</code> flag is ignored. Labels cannot be written to Stan JSON, so they are returned in <code>StanData::$levels</code>, keyed by data variable, where label <code>i</code> has index <code>i + 1</code>. The conversion adds <code>N</code>, the row count, unless the table has a column named <code>N</code>, and adds <code>J_&lt;name&gt;</code> unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.</p>
-<p>Fit methods are camelCase, as are <code>StanData</code>‘s and <code>Tables</code>’ <code>from...()</code> constructors and the package’s other static helpers, such as <code>CmdStanFit::fromCsv()</code> and <code>Inits::fromFit()</code>. <code>StanData</code> is a value object with readonly <code>data</code>, <code>levels</code>, <code>columns</code> (the names of the columns of <code>X</code>), and <code>meta</code>. <code>toArray()</code> returns <code>data</code>, and <code>with(['prior_scale' =&gt; 2.5])</code> adds or replaces variables.</p>
-</section>
-<section id="regression-data" class="level3">
-<h3 class="anchored" data-anchor-id="regression-data">Regression data</h3>
-<p><code>StanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false)</code> builds the usual hierarchical regression data block from named columns or a table:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Variable</th>
+<th>Page</th>
 <th>Contents</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>N</code></td>
-<td>Number of rows</td>
+<td><a href="./api-functions.html">Functions</a></td>
+<td>Models and Stan files, CmdStan installation, data and CSV files, figures, and examples</td>
 </tr>
 <tr class="even">
-<td><code>K</code></td>
-<td>Number of predictors (columns of <code>X</code>)</td>
+<td><a href="./api-options.html">Options</a></td>
+<td>Global options, shared options, and each method’s options</td>
 </tr>
 <tr class="odd">
-<td><code>X</code></td>
-<td>N rows of K floats, in the order of <code>x</code></td>
+<td><a href="./api-models.html">Models</a></td>
+<td>Creating, inspecting, and running a <code>CmdStanModel</code></td>
 </tr>
 <tr class="even">
-<td><code>y</code></td>
-<td>The outcome, keeping integers as integers</td>
+<td><a href="./api-fits.html">Fits</a></td>
+<td>Draws, summaries, diagnostics, files, model methods, and statistics helpers</td>
 </tr>
 <tr class="odd">
-<td><code>&lt;g&gt;_id</code></td>
-<td>For each grouping column <code>g</code>, the 1-based group index of each row</td>
+<td><a href="./api-data-frames.html">Data frames</a></td>
+<td>Table data, <code>StanData</code>, and the phpstats family</td>
 </tr>
 <tr class="even">
-<td><code>J_&lt;g&gt;</code></td>
-<td>For each grouping column, the number of groups</td>
-</tr>
-<tr class="odd">
-<td><code>J</code></td>
-<td>The number of groups, when there is exactly one grouping column</td>
+<td><a href="./api-errors.html">Errors</a></td>
+<td>Exceptions</td>
 </tr>
 </tbody>
 </table>
-<p>Groups are numbered over sorted unique values (numbers numerically, otherwise in <code>strcmp</code> order) or over a factor’s levels, and the labels are in <code>levels['&lt;g&gt;_id']</code>. Predictors must be numeric. <code>intercept: true</code> prepends a column of ones named <code>(Intercept)</code>. It is off by default because Stan programs usually give the intercept its own parameter.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> CmdStan\StanData::fromColumns(<span class="va">$df</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> [<span class="st">'hours'</span>]<span class="ot">,</span> <span class="st">'school'</span>)<span class="ot">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">1</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K;</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; school_id;</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')</code> builds regression data from an R-style formula through <code>Phit\model_matrix()</code> in the <a href="https://github.com/phpstats/phit"><code>phit</code></a> extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the <code>(Intercept)</code> column in <code>X</code> unless <code>dropIntercept: true</code>. <code>$data</code> can be columns, factor descriptors, or a table, whose <code>toModelData()</code> is passed unchanged. Without the function, <code>fromFormula()</code> throws a <code>RuntimeException</code> that names the requirement. <code>StanData::fromModelMatrix($result)</code> maps an existing <code>Phit\model_matrix()</code> result and is the only code that depends on its shape.</p>
+<section id="sections" class="level2">
+<h2 class="anchored" data-anchor-id="sections">Sections</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Formula part</th>
-<th>Stan data</th>
+<th>Section</th>
+<th>Page</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Design matrix</td>
-<td><code>N</code> (retained rows), <code>K</code>, and <code>X</code>; the column names are in <code>columns</code></td>
+<td><a href="./api-functions.html" id="functions">Functions</a></td>
+<td>Functions</td>
 </tr>
 <tr class="even">
-<td>Numeric response</td>
-<td><code>y</code>, as integers when every value is integral, so it suits <code>int</code> and <code>real</code> declarations</td>
+<td><a href="./api-functions.html#models-and-stan-files" id="models-and-stan-files">Models and Stan files</a></td>
+<td>Functions</td>
 </tr>
 <tr class="odd">
-<td>Factor response</td>
-<td><code>y</code> as 0/1 for two levels (Bernoulli), or 1..<code>C</code> with <code>C</code> levels (categorical); labels in <code>levels['y']</code></td>
+<td><a href="./api-functions.html#cmdstan-installation" id="cmdstan-installation">CmdStan installation</a></td>
+<td>Functions</td>
 </tr>
 <tr class="even">
-<td><code>cbind(s, f)</code> response</td>
-<td><code>y</code> (successes) and <code>trials</code> (successes plus failures)</td>
+<td><a href="./api-functions.html#data-and-csv-files" id="data-and-csv-files">Data and CSV files</a></td>
+<td>Functions</td>
 </tr>
 <tr class="odd">
-<td><code>offset()</code></td>
-<td><code>offset</code></td>
+<td><a href="./api-functions.html#figures-and-examples" id="figures-and-examples">Figures and examples</a></td>
+<td>Functions</td>
 </tr>
 <tr class="even">
-<td><code>(... \| g)</code></td>
-<td><code>&lt;g&gt;_id</code> (1-based) and <code>J_&lt;g&gt;</code> per grouping factor, and <code>J</code> when there is one grouping factor</td>
+<td><a href="./api-options.html#global-options" id="global-options">Global options</a></td>
+<td>Options</td>
 </tr>
 <tr class="odd">
-<td>Random slopes, such as <code>(1 + x \| g)</code></td>
-<td><code>Z_&lt;g&gt;</code> (N rows of the group’s columns, including the intercept column) and <code>Q_&lt;g&gt;</code>, the number of columns; omitted when every term on the group is intercept-only</td>
+<td><a href="./api-options.html#shared-options" id="shared-options">Shared options</a></td>
+<td>Options</td>
+</tr>
+<tr class="even">
+<td><a href="./api-options.html#method-specific-options" id="method-specific-options">Method-specific options</a></td>
+<td>Options</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#model-methods" id="model-methods">Creating a model</a></td>
+<td>Models</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#inspecting-a-model" id="inspecting-a-model">Inspecting a model</a></td>
+<td>Models</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#running-a-model" id="running-a-model">Running a model</a></td>
+<td>Models</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html" id="fit-methods">Fits</a></td>
+<td>Fits</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#draws-and-summaries" id="draws-and-summaries">Draws and summaries</a></td>
+<td>Fits</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#diagnostics-and-run-information" id="diagnostics-and-run-information">Diagnostics and run information</a></td>
+<td>Fits</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#files-and-saving" id="files-and-saving">Files and saving</a></td>
+<td>Fits</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#model-methods-1" id="model-methods-1">Model methods on fits</a></td>
+<td>Fits</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#methods-of-specific-fit-types" id="methods-of-specific-fit-types">Methods of specific fit types</a></td>
+<td>Fits</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#statistics-helpers" id="statistics-helpers">Statistics helpers</a></td>
+<td>Fits</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html" id="data-frames-and-the-phpstats-family">Data frames and the phpstats family</a></td>
+<td>Data frames</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#data-in" id="data-in">Data in</a></td>
+<td>Data frames</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#regression-data" id="regression-data">Regression data</a></td>
+<td>Data frames</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#draws-and-summaries-out" id="draws-and-summaries-out">Draws and summaries out</a></td>
+<td>Data frames</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#part-of-the-phpstats-family" id="part-of-the-phpstats-family">Part of the phpstats family</a></td>
+<td>Data frames</td>
+</tr>
+<tr class="even">
+<td><a href="./api-errors.html" id="errors">Errors</a></td>
+<td>Errors</td>
 </tr>
 </tbody>
 </table>
-<p>Group names that are not Stan identifiers have other characters replaced by <code>_</code>, so the nested group <code>g2:g1</code> gives <code>g2_g1_id</code>. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as <code>Phit\model_matrix()</code> sorts levels). Terms on the same group are concatenated into one <code>Z_&lt;g&gt;</code>, intercept-only terms included, so <code>(1 | g) + (0 + x | g)</code> gives the same <code>Z_g</code> as <code>(1 + x | g)</code>. Two groups whose names map to the same <code>&lt;g&gt;</code>, such as <code>a.b</code> and <code>a_b</code>, are rejected. Factors reach <code>Phit\model_matrix()</code> as descriptors in the data’s level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. <code>missing: 'drop'</code> removes rows with missing values in any variable the formula uses, with one <code>E_WARNING</code> from <code>Phit\model_matrix()</code>, and <code>missing: 'raise'</code> rejects them. The remaining result keys, including <code>retained_rows</code>, <code>dropped_rows</code>, <code>n_input</code>, <code>n_dropped</code>, <code>terms</code>, and <code>assign</code>, are kept in <code>meta</code>, and <code>meta['random'][&lt;g&gt;]</code> lists each group’s columns and terms.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;          <span class="co">// includes the intercept column</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; g_id;</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; Q_g;</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, Q_g] Z_g;      <span class="co">// (1 + x1 | g)</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="draws-and-summaries-out" class="level3">
-<h3 class="anchored" data-anchor-id="draws-and-summaries-out">Draws and summaries out</h3>
-<ul>
-<li><code>drawsColumns(variables: null, incWarmup: false)</code> returns draws as columns, like posterior’s <code>as_draws_df()</code>: one list per variable element (such as <code>beta[2]</code>), then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns.</li>
-<li><code>summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])</code> returns <code>summary()</code> as columns: <code>variable</code> and one column per measure.</li>
-<li><code>drawsTable()</code> and <code>summaryTable()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.3 or later, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
-<li><code>CmdStan\Tables::fromRows($rows)</code> converts any list of associative rows, such as <code>loo()['pointwise']</code>, to columns.</li>
-</ul>
-<p>The column arrays need no other package and suit any data frame library that accepts name-to-values columns.</p>
-</section>
-<section id="part-of-the-phpstats-family" class="level3">
-<h3 class="anchored" data-anchor-id="part-of-the-phpstats-family">Part of the phpstats family</h3>
-<p>CmdStanPHP is part of the phpstats family of PHP statistics packages:</p>
-<ul>
-<li><a href="https://github.com/phpstats/phit">phit</a>: the <code>phit</code> native extension (<code>Phit\</code> functions), which provides the moment-matching draw kernels and, when available, <code>Phit\model_matrix()</code>.</li>
-<li><a href="https://github.com/phpstats/phibble">phibble</a>: data frames (<code>Phibble\DataFrame</code>).</li>
-<li><a href="https://github.com/phpstats/phplyr">phplyr</a>: dplyr-style verbs for phibble tables.</li>
-<li><a href="https://github.com/phpstats/phiz">phiz</a>: a Vega-Lite grammar of graphics.</li>
-</ul>
-<p>CmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.</p>
-</section>
-</section>
-<section id="errors" class="level2">
-<h2 class="anchored" data-anchor-id="errors">Errors</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Exception</th>
-<th>Thrown when</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>InvalidArgumentException</code></td>
-<td>Data or options are invalid</td>
-</tr>
-<tr class="even">
-<td><code>RuntimeException</code></td>
-<td>Files or the toolchain are missing, a process times out, or a CSV file is malformed</td>
-</tr>
-<tr class="odd">
-<td><code>StaleExecutableException</code></td>
-<td>The executable is out of date</td>
-</tr>
-<tr class="even">
-<td><code>ProcessException</code></td>
-<td>A CmdStan process exits with a nonzero status. Its readonly properties are <code>command</code>, <code>exitCode</code>, <code>stdout</code>, and <code>stderr</code>.</td>
-</tr>
-</tbody>
-</table>
-<p><code>StaleExecutableException</code> and <code>ProcessException</code> extend <code>RuntimeException</code>. A failing chain stops the other running chains, and its partial output files stay on disk for inspection. Partial output is never returned as a successful fit. CmdStan processes still running when PHP shuts down are terminated.</p>
 
 
 </section>

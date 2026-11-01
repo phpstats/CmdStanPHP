@@ -32,6 +32,12 @@ website:
       - section: "Reference"
         contents:
           - api.qmd
+          - api-functions.qmd
+          - api-options.qmd
+          - api-models.qmd
+          - api-fits.qmd
+          - api-data-frames.qmd
+          - api-errors.qmd
       - section: "Examples"
         contents:
           - examples/sample.qmd

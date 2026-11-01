@@ -1,0 +1,92 @@
+---
+title: "API: fits"
+---
+
+Every fitting method returns a fit object. These methods read its draws, summaries, diagnostics, and files.
+
+[Draws, summaries, and saving fits](draws.qmd) explains formats, summaries, and saving.
+
+## Draws and summaries
+
+| Method | Result |
+| --- | --- |
+| `draws(variables: null, format: null, incWarmup: false)` | Draws in `draws_array`, `draws_matrix`, `draws_df`, `draws_list`, or `draws_rvars` format |
+| `samplerDiagnostics(format: null, incWarmup: false)` | Sampler columns ending in `__`, except `lp__` |
+| `summary(variables: null, probs: [0.05, 0.95], measures: [])` | One row per variable |
+| `drawsColumns(variables: null, incWarmup: false)`, `summaryColumns(...)` | The same as column arrays. See [data frames](api-data-frames.qmd#draws-and-summaries-out). |
+| `drawsTable(...)`, `summaryTable(...)` | The same as a `Phibble\DataFrame` |
+| `print(variables: null, maxRows: null)` | Prints summary JSON for at most `cmdstanr_max_rows` variables |
+| `lp()` | `lp__` by iteration and chain |
+| `cmdstanSummary()` | CmdStan's `stansummary` text |
+
+A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that `draws()`, `summary()`, and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until `materialize()`, the fit needs its CSV files.
+
+## Diagnostics and run information
+
+| Method | Result |
+| --- | --- |
+| `diagnosticSummary()` | Per-chain `num_divergent`, `num_max_treedepth`, and `ebfmi` |
+| `checkDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])`, `diagnosticWarnings()` | Runs the checks, or returns their messages |
+| `cmdstanDiagnose()` | The text from CmdStan's `diagnose` utility |
+| `metadata()`, `chainMetadata()` | CSV metadata, merged or per chain |
+| `variables()`, `numChains()`, `numDrawsSampling()`, `numDrawsWarmup()`, `numProcs()` | Counts and names from the CSV files |
+| `stepSize()`, `invMetric(matrix: true)` | Adaptation results, one per chain |
+| `time()` | Warmup, sampling, and total time per chain, when available |
+| `init()` | The initial values each process used |
+| `output()`, `returnCodes()`, `command()` | Console output, exit status, and command line of each process. Imported fits have none of these. `command()` leaves out `STAN_NUM_THREADS` and an MPI launcher. |
+| `code()` | The Stan program. Imported fits have none. |
+
+## Files and saving
+
+| Method | Result |
+| --- | --- |
+| `outputFiles()`, `latentDynamicsFiles()`, `profileFiles()` | File paths. The latent-dynamics and profile accessors throw when there are no such files. `includeFailed` is accepted for CmdStanR compatibility. |
+| `profiles()` | Parsed profiling data |
+| `dataFile()`, `configFiles()`, `metricFiles()` | Paths. An imported fit uses the data file recorded in the CSV when it still exists. |
+| `cmdstanConfig()`, `metric()` | The decoded configuration and metric JSON |
+| `saveOutputFiles()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveDataFile()`, `saveConfigFiles()`, `saveMetricFiles()` | Saved paths. Each takes `dir: '.', basename: null, timestamp: true, random: true`, and the first two also take `compress`. |
+| `materialize()` | Reads the draws, initial values, and profiles into memory |
+| `saveObject(file)` | Materializes and serializes the fit, with MCMC summary statistics |
+
+## Model methods {#model-methods-1}
+
+These need PHP's FFI extension. The first call compiles a shared library for the fit's model and data, and `initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)` does this explicitly. `data` binds other data, for example when a reloaded fit's data file is gone, and `dataFile()` then points to it. Imported CSV fits must pass `model:`, and a model from `exeFile` alone has no program to build them from. See [Log density and model methods](log-density.qmd).
+
+| Method | Result |
+| --- | --- |
+| `logProb(unconstrainedVariables, jacobian: true)` | The log density, with constants dropped |
+| `gradLogProb(...)` | `['log_prob' => float, 'gradient' => list]` |
+| `hessian(...)` | `['log_prob' => float, 'grad_log_prob' => list, 'hessian' => rows]` |
+| `unconstrainVariables(variables)` | A flat unconstrained list from parameter values keyed by name, shaped as `constrainVariables()` returns them |
+| `unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)` | The fit's draws, other CSV files, or `draws_df` rows on the unconstrained scale |
+| `constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)` | Variables keyed by name as nested arrays, with tuples as lists and complex values as `[re, im]` |
+| `exposeFunctions(timeout: null)`, `functions()` | The model's user-defined functions |
+
+`CmdStan\ModelMethods` and `CmdStan\StanFunctions` can also be used directly with a Stan file.
+
+## Methods of specific fit types
+
+| Fit | Methods |
+| --- | --- |
+| `CmdStanMCMC` | `loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. See [LOO and WAIC](loo.qmd). |
+| `CmdStanMLE` | `mle()` and `optimizedParams()` (the estimates without `lp__`), and `lp()`. Its `summary()` returns `variable` and `estimate` rows. |
+| `CmdStanVB` | `variationalMean()`, and `lpApprox()`, the approximation's log density at each draw |
+| `CmdStanLaplace` | `mode()` and `lpApprox()` |
+| `CmdStanPathfinder` | `lpApprox()`, and `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, and `singlePathDiagnostics()` with `save_single_paths: true`. Its variables include `lp_approx__` and `path__`. |
+| `CmdStanGQ` | `fittedParamsFiles()` |
+| `CmdStanDiagnose` | `gradients()`, the gradient check's console output |
+
+## Statistics helpers
+
+These classes work on plain draws arrays, and their docblocks describe the shapes.
+
+| Class | Methods |
+| --- | --- |
+| `Figure` | `ascii()`, `vegaLite()`, `json()`, `html()`, `svg()`, `png()`. Casting to a string gives the ASCII form. |
+| `Plot` | The figures, plus `bandwidth()`, `density()`, `autocorrelation()`, and `ranks()` |
+| `Psis` | `paretoSmooth()`, `paretoKhat()`, `psis()`, `gpdfit()` |
+| `Loo` | `loo()`, `waic()`, `relativeEff()` |
+| `MomentMatch` | `loo()` on unconstrained draws with log-density and log-likelihood callbacks, and `fromFit()` |
+| `DrawKernels` | Detection of and wrappers for the phit draw kernels |
+| `Summary` | `summarise()` and each posterior measure |
+| `Rvars`, `Inits` | `draws_rvars` helpers, and `fromFit()`, `fromDraws()`, `nest()`, and `validate()` for initial values |

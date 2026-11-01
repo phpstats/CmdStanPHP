@@ -1,6 +1,8 @@
 # CmdStanPHP
 
-CmdStanPHP fits [Stan](https://mc-stan.org) models from PHP through [CmdStan](https://mc-stan.org/users/interfaces/cmdstan). It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and keeps CmdStanR's function and option names. It compiles Stan programs, runs MCMC, optimization, Laplace, ADVI, Pathfinder, and standalone generated quantities, and returns draws, summaries, diagnostics, PSIS-LOO, and WAIC as PHP arrays. No R installation is needed.
+Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP.
+
+CmdStanPHP runs [Stan](https://mc-stan.org) programs through [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and keeps CmdStanR's function and option names.
 
 Documentation: <https://cmdstanphp.phpstats.org/docs>
 
@@ -10,19 +12,11 @@ Documentation: <https://cmdstanphp.phpstats.org/docs>
 composer require phpstats/cmdstanphp
 ```
 
-Requirements:
-
-- PHP 8.2, 8.3, 8.4, or 8.5
-- The JSON extension
-- PHP's `proc_open()` function
-- CmdStan 2.37 or later
-- make and a C++ compiler that CmdStan supports
-
-CmdStanPHP finds CmdStan through the `CMDSTAN` environment variable or under `~/.cmdstan`. `CmdStan\install_cmdstan('2.40.0', cores: 2)` downloads and builds an official release. The [installation guide](https://cmdstanphp.phpstats.org/docs/installation) covers the toolchain, the supported platforms, and the optional FFI extension, phit extension, phibble package, and vl-convert binary.
+CmdStanPHP needs PHP 8.2 to 8.5, CmdStan 2.37 or later, and a C++ toolchain, and does not need R. [Installation](https://cmdstanphp.phpstats.org/docs/installation) covers the requirements, CmdStan, and the optional extensions.
 
 ## Example
 
-`bernoulli.stan`:
+This Stan program estimates the probability `theta` of a success from `N` yes-or-no outcomes `y`. Save it as `bernoulli.stan`:
 
 ```stan
 data {
@@ -38,29 +32,47 @@ model {
 }
 ```
 
-`bernoulli.php`, in the same directory:
+Compile it, sample four chains, and summarize `theta`:
 
 ```php
-<?php
-require __DIR__.'/vendor/autoload.php';
-
 use function CmdStan\cmdstan_model;
 
 $model = cmdstan_model(__DIR__.'/bernoulli.stan');
 
+$data = [
+    'N' => 10,
+    'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+];
+
 $fit = $model->sample(
-    data: ['N' => 10, 'y' => [0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+    data: $data,
     seed: 123,
     chains: 4,
     parallel_chains: 4,
     show_messages: false,
 );
 
-print_r($fit->summary('theta'));
-print_r($fit->diagnosticSummary());
+echo "variable   mean    sd    q5   q95  rhat ess_bulk\n";
+foreach ($fit->summary('theta') as $r) {
+    printf(
+        "%-8s %6.3f %5.3f %5.3f %5.3f %5.3f %8.0f\n",
+        $r['variable'],
+        $r['mean'],
+        $r['sd'],
+        $r['q5'],
+        $r['q95'],
+        $r['rhat'],
+        $r['ess_bulk'],
+    );
+}
 ```
 
-[Getting started](https://cmdstanphp.phpstats.org/docs/getting-started) shows and explains the output.
+```text
+variable   mean    sd    q5   q95  rhat ess_bulk
+theta     0.257 0.124 0.080 0.485 1.001     1232
+```
+
+[Getting started](https://cmdstanphp.phpstats.org/docs/getting-started) explains the output and the convergence checks.
 
 ## Compatibility
 

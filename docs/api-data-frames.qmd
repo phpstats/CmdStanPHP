@@ -1,0 +1,101 @@
+---
+title: "API: data frames and the phpstats family"
+---
+
+CmdStanPHP works with the [phpstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `phit` extension is detected by function name.
+
+## Data in
+
+Every `data` argument (`sample()`, `sampleMpi()`, `optimize()`, `variational()`, `pathfinder()`, `laplace()`, `generateQuantities()`, `diagnose()`, and `logProb()`) and `write_stan_json()` accept a plain array, a JSON file, a `CmdStan\StanData`, or a table. A table is any object with `toModelData()` or `toColumns()`, such as a [phibble](https://github.com/phpstats/phibble) `Phibble\DataFrame`. `toModelData()` is used when both exist. `StanData::fromTable($table, addN: true)` performs the same conversion and keeps the factor labels.
+
+| Column | Stan data |
+| --- | --- |
+| int or float | The list of values, unchanged |
+| bool | 0/1 integers |
+| list cells | Nested arrays, which must be rectangular |
+| factor | 1-based integer indices in level order, plus `J_<name>`, the number of levels |
+| string | Rejected, as in CmdStanR 1.0; make the column a factor so its levels set the codes |
+| null, dates, other objects | Rejected with the column name and row, because Stan data has no missing values |
+
+Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them from phibble 0.1.0; add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
+
+Fit methods are camelCase, as are `StanData`'s and `Tables`' `from...()` constructors and the package's other static helpers, such as `CmdStanFit::fromCsv()` and `Inits::fromFit()`. `StanData` is a value object with readonly `data`, `levels`, `columns` (the names of the columns of `X`), and `meta`. `toArray()` returns `data`, and `with(['prior_scale' => 2.5])` adds or replaces variables.
+
+## Regression data
+
+`StanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false)` builds the usual hierarchical regression data block from named columns or a table:
+
+| Variable | Contents |
+| --- | --- |
+| `N` | Number of rows |
+| `K` | Number of predictors (columns of `X`) |
+| `X` | N rows of K floats, in the order of `x` |
+| `y` | The outcome, keeping integers as integers |
+| `<g>_id` | For each grouping column `g`, the 1-based group index of each row |
+| `J_<g>` | For each grouping column, the number of groups |
+| `J` | The number of groups, when there is exactly one grouping column |
+
+Groups are numbered over sorted unique values (numbers numerically, otherwise in `strcmp` order) or over a factor's levels, and the labels are in `levels['<g>_id']`. Predictors must be numeric. `intercept: true` prepends a column of ones named `(Intercept)`. It is off by default because Stan programs usually give the intercept its own parameter.
+
+```php
+$data = CmdStan\StanData::fromColumns($df, 'score', ['hours'], 'school');
+$fit = $model->sample(data: $data, seed: 1);
+```
+
+```stan
+data {
+  int<lower=0> N;
+  int<lower=0> K;
+  matrix[N, K] X;
+  vector[N] y;
+  int<lower=1> J;
+  array[N] int<lower=1, upper=J> school_id;
+}
+```
+
+`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `dropIntercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `Phit\model_matrix()` result and is the only code that depends on its shape.
+
+| Formula part | Stan data |
+| --- | --- |
+| Design matrix | `N` (retained rows), `K`, and `X`; the column names are in `columns` |
+| Numeric response | `y`, as integers when every value is integral, so it suits `int` and `real` declarations |
+| Factor response | `y` as 0/1 for two levels (Bernoulli), or 1..`C` with `C` levels (categorical); labels in `levels['y']` |
+| `cbind(s, f)` response | `y` (successes) and `trials` (successes plus failures) |
+| `offset()` | `offset` |
+| `(... \| g)` | `<g>_id` (1-based) and `J_<g>` per grouping factor, and `J` when there is one grouping factor |
+| Random slopes, such as `(1 + x \| g)` | `Z_<g>` (N rows of the group's columns, including the intercept column) and `Q_<g>`, the number of columns; omitted when every term on the group is intercept-only |
+
+Group names that are not Stan identifiers have other characters replaced by `_`, so the nested group `g2:g1` gives `g2_g1_id`. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as `Phit\model_matrix()` sorts levels). Terms on the same group are concatenated into one `Z_<g>`, intercept-only terms included, so `(1 | g) + (0 + x | g)` gives the same `Z_g` as `(1 + x | g)`. Two groups whose names map to the same `<g>`, such as `a.b` and `a_b`, are rejected. Factors reach `Phit\model_matrix()` as descriptors in the data's level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. `missing: 'drop'` removes rows with missing values in any variable the formula uses, with one `E_WARNING` from `Phit\model_matrix()`, and `missing: 'raise'` rejects them. The remaining result keys, including `retained_rows`, `dropped_rows`, `n_input`, `n_dropped`, `terms`, and `assign`, are kept in `meta`, and `meta['random'][<g>]` lists each group's columns and terms.
+
+```stan
+data {
+  int<lower=0> N;
+  int<lower=1> K;
+  matrix[N, K] X;          // includes the intercept column
+  vector[N] y;
+  int<lower=1> J;
+  array[N] int<lower=1, upper=J> g_id;
+  int<lower=1> Q_g;
+  matrix[N, Q_g] Z_g;      // (1 + x1 | g)
+}
+```
+
+## Draws and summaries out
+
+- `drawsColumns(variables: null, incWarmup: false)` returns draws as columns, like posterior's `as_draws_df()`: one list per variable element (such as `beta[2]`), then one-based `.chain`, `.iteration`, and `.draw` columns.
+- `summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])` returns `summary()` as columns: `variable` and one column per measure.
+- `drawsTable()` and `summaryTable()` take the same arguments and return a `Phibble\DataFrame` built with `DataFrame::fromColumns()`. They need `phpstats/phibble`, which requires PHP 8.3 or later, and throw a `RuntimeException` explaining this when it is not installed.
+- `CmdStan\Tables::fromRows($rows)` converts any list of associative rows, such as `loo()['pointwise']`, to columns.
+
+The column arrays need no other package and suit any data frame library that accepts name-to-values columns.
+
+## Part of the phpstats family
+
+CmdStanPHP is part of the phpstats family of PHP statistics packages:
+
+- [phit](https://github.com/phpstats/phit): the `phit` native extension (`Phit\` functions), which provides the moment-matching draw kernels and, when available, `Phit\model_matrix()`.
+- [phibble](https://github.com/phpstats/phibble): data frames (`Phibble\DataFrame`).
+- [phplyr](https://github.com/phpstats/phplyr): dplyr-style verbs for phibble tables.
+- [phiz](https://github.com/phpstats/phiz): a Vega-Lite grammar of graphics.
+
+CmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.

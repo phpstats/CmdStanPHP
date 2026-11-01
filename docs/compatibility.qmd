@@ -173,7 +173,7 @@ Every renamed method:
 
 - R named lists become associative PHP arrays, and numeric arrays must be rectangular lists. Complex numbers are `[re, im]` pairs, and tuples are lists of their elements.
 - R sparse matrices, `NA`, and automatic R object conversion have no PHP equivalent.
-- Data frames and factors can come from phibble or any object with `toModelData()` or `toColumns()`, as described in the [API reference](api.qmd#data-frames-and-the-phpstats-family). Table data with string columns is refused, as in CmdStanR 1.0.
+- Data frames and factors can come from phibble or any object with `toModelData()` or `toColumns()`, as described in the [API reference](api-data-frames.qmd). Table data with string columns is refused, as in CmdStanR 1.0.
 - `code()` returns one source string. Syntax errors throw exceptions instead of returning an R diagnostic list.
 
 ### Draws and summaries

@@ -1,0 +1,57 @@
+---
+title: "API: functions"
+---
+
+Standalone functions in the `CmdStan` namespace, which keep CmdStanR's snake_case names.
+
+## Models and Stan files
+
+| Function | Result |
+| --- | --- |
+| `cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)` | A `CmdStanModel`, compiled or reusing an up-to-date executable |
+| `compile_stan_file(stanFile, ...)` | The executable path, compiled with `cmdstan_model()`'s build arguments but without a model object |
+| `check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)` | `true`, or an exception for invalid Stan |
+| `format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` | The formatted program. `overwriteFile` rewrites the file and keeps a `.bak-YYYYMMDDHHMMSS` copy unless `backup: false`. |
+| `variables_stan_file(stanFile, includePaths: null)` | The program's declarations, without compiling |
+| `print_stan_file(stanFile, lineNumbers: null)` | Prints the program |
+| `stan_build_info(exeFile)` | How an executable was built, from its build record and what it reports about itself |
+| `write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')` | The path of `model_<hash>.stan`, or of `basename`. An identical existing file is left untouched. |
+
+## CmdStan installation
+
+| Function | Result |
+| --- | --- |
+| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)` | Downloads or unpacks a release, builds it, and selects it. See [Installation](installation.qmd#install-cmdstan). |
+| `set_cmdstan_path(path)`, `cmdstan_path()` | Selects or returns the CmdStan installation |
+| `cmdstan_version()` | The selected CmdStan's version |
+| `check_cmdstan_toolchain()` | Paths and versions of make, CmdStan's C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed. |
+| `cmdstan_make_local(dir: null, cppOptions: [], append: true)` | Reads or writes CmdStan's `make/local` |
+| `rebuild_cmdstan(cores: null, timeout: null)` | Cleans and rebuilds the selected CmdStan |
+
+CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. `set_cmdstan_path()` refuses an older installation, discovery skips one, and `install_cmdstan()` rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan's error message.
+
+## Data and CSV files
+
+| Function | Result |
+| --- | --- |
+| `write_stan_json(data, file, alwaysDecimal: false, variables: null)` | Writes data, initial values, or a metric as JSON. `data` may be an array, a `StanData`, or a table. With `variables` (stanc's declarations, such as `$model->variables()['data']`), `int` variables are written as integers and tuples as Stan's `{"1": ..., "2": ...}` objects. |
+| `read_cmdstan_csv(files)` | A fit from one or more CmdStan CSV files (`.csv`, `.csv.gz`, or `.csv.bz2`) |
+| `as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)` | The same, reading only `variables` and with `format` as the fit's default draws format |
+| `read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)` | CmdStanR's `read_cmdstan_csv()` list shape |
+| `draws_to_csv(chains, dir)` | Writes `[chain][iteration][variable]` draw rows to one CSV file per chain |
+
+Data arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:
+
+- Matrices are lists of rows, with no column-major conversion. Booleans become 0 and 1, complex numbers are `[re, im]` pairs, and a tuple is a list of its elements. Empty top-level data becomes `{}`.
+- Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected, and the error names the variable.
+- The fitting methods write data with the model's declarations. Every declared data variable is required, `int` variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.
+
+## Figures and examples
+
+| Function | Result |
+| --- | --- |
+| `mcmc_trace`, `mcmc_hist`, `mcmc_dens`, `mcmc_dens_overlay`, `mcmc_intervals`, `mcmc_rank_hist`, `mcmc_scatter`, `mcmc_acf`, `pareto_k_plot` | A `Figure`, named after its bayesplot or loo counterpart. See [Figures](figures.qmd). |
+| `cmdstanr_example(example: 'logistic', method: 'sample', ...options)` | A fit of the `logistic`, `schools`, or `schools_ncp` example |
+| `print_example_program(example)` | Prints an example's Stan program |
+
+`num_threads()` remains as a deprecated CmdStanR name. CmdStanR 1.0 removed `read_sample_csv()` and `write_stan_tempfile()`, and this package does not have them.

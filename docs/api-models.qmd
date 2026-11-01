@@ -1,0 +1,50 @@
+---
+title: "API: models"
+---
+
+`CmdStanModel` compiles a Stan program and runs it.
+
+## Creating a model {#model-methods}
+
+`cmdstan_model()` and `new CmdStanModel()` take the same arguments and compile the model, or reuse an up-to-date executable, before they return.
+
+- Give `stanFile`, whose executable goes beside it or in `dir`, or `exeFile` alone to use an existing executable. A model from `exeFile` alone refuses the build arguments, because there is nothing to build.
+- `cppOptions` are named make variables, such as `['STAN_THREADS' => true]`. Names are uppercased, and `false` turns an option off even when `make/local` turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use `cmdstan_make_local()` for other make lines.
+- `stancOptions` take flags and values, such as `['O1', 'canonicalize' => 'deprecations', 'max-line-length' => 78]`. Flags with their own argument are rejected: use `includePaths`, `pedantic`, `userHeader`, or `cppOptions: ['STAN_OPENCL' => true]`.
+- `quiet: false`, or the `cmdstanr_verbose` option, reports whether and why the model compiles. `forceRecompile: true` rebuilds anyway.
+
+[Compiling models](compiling.qmd) covers when a model is rebuilt, `StaleExecutableException`, and concurrent builds.
+
+## Inspecting a model
+
+| Method | Result |
+| --- | --- |
+| `stanFile()`, `exeFile()`, `hppFile()` | Paths. `hppFile()` writes the generated C++ to a temporary file on first use. |
+| `code()` | The program as it was when the model was created |
+| `variables()` | The `data`, `parameters`, `transformed_parameters`, and `generated_quantities` declarations, from stanc |
+| `modelName()`, `hasStanFile()`, `includePaths()`, `userHeader()`, `stancOptions()` | The model's identity and recorded build settings |
+| `cppOptions()` | Make variables and values, so `['stan_threads' => true]` comes back as `['STAN_THREADS' => 'true']` |
+| `cmdstanVersion()` | The CmdStan version that built the executable |
+| `reportedFeatures()` | What the executable reports: `stan_threads`, `stan_mpi`, `stan_opencl`, `stan_no_range_checks`, and `stan_version` |
+| `buildInfo()` | The build record and the reported features, as `stan_build_info()` returns them |
+| `isCurrent()` | `false` when the executable is out of date |
+| `cmdstanDefaults(method: 'sample')` | CmdStan's default values for `sample`, `optimize`, `variational`, `pathfinder`, or `laplace`, under this package's option names |
+| `print(lineNumbers: null)`, `saveHppFile(dir)` | Prints the program, or copies the generated header |
+| `format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` | The formatted program. Create the model again to use a rewritten file. |
+| `checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)` | `true`, or an exception for invalid Stan |
+| `exposeFunctions(timeout: null, quiet: false)`, `functions()` | The model's user-defined functions as a `StanFunctions` object |
+
+`code()` and `hppFile()` are `null` for a model from `exeFile` alone.
+
+## Running a model
+
+| Method | Result |
+| --- | --- |
+| `sample()`, `sampleMpi()` | `CmdStanMCMC` |
+| `optimize()` | `CmdStanMLE` |
+| `variational()` | `CmdStanVB` |
+| `pathfinder()` | `CmdStanPathfinder` |
+| `laplace()` | `CmdStanLaplace` |
+| `generateQuantities(fittedParams, ...)` | `CmdStanGQ` |
+| `diagnose()` | `CmdStanDiagnose` |
+| `logProb()` | `CmdStanFit` |

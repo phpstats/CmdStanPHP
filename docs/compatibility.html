@@ -220,6 +220,42 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">API reference</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-options.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: options</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: fits</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: data frames and the phpstats family</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API: errors</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -1127,7 +1163,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>R named lists become associative PHP arrays, and numeric arrays must be rectangular lists. Complex numbers are <code>[re, im]</code> pairs, and tuples are lists of their elements.</li>
 <li>R sparse matrices, <code>NA</code>, and automatic R object conversion have no PHP equivalent.</li>
-<li>Data frames and factors can come from phibble or any object with <code>toModelData()</code> or <code>toColumns()</code>, as described in the <a href="./api.html#data-frames-and-the-phpstats-family">API reference</a>. Table data with string columns is refused, as in CmdStanR 1.0.</li>
+<li>Data frames and factors can come from phibble or any object with <code>toModelData()</code> or <code>toColumns()</code>, as described in the <a href="./api-data-frames.html">API reference</a>. Table data with string columns is refused, as in CmdStanR 1.0.</li>
 <li><code>code()</code> returns one source string. Syntax errors throw exceptions instead of returning an R diagnostic list.</li>
 </ul>
 </section>

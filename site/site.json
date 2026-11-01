@@ -112,6 +112,30 @@
                 "path": "api.qmd"
             },
             {
+                "title": "API: functions",
+                "path": "api-functions.qmd"
+            },
+            {
+                "title": "API: options",
+                "path": "api-options.qmd"
+            },
+            {
+                "title": "API: models",
+                "path": "api-models.qmd"
+            },
+            {
+                "title": "API: fits",
+                "path": "api-fits.qmd"
+            },
+            {
+                "title": "API: data frames and the phpstats family",
+                "path": "api-data-frames.qmd"
+            },
+            {
+                "title": "API: errors",
+                "path": "api-errors.qmd"
+            },
+            {
                 "title": "Fit a Stan model with MCMC",
                 "path": "examples/sample.qmd"
             },
