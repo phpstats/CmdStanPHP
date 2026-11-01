@@ -1,10 +1,11 @@
 {
-    "title": "Fitting methods: agreement with CmdStanR",
-    "label": "Fitting methods",
+    "title": "CmdStanR methods",
+    "label": "CmdStanR methods",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "Draws, approximate log densities, summaries, and sampler diagnostics from sample(), optimize(), variational(), pathfinder(), and laplace(), against CmdStanR running the same executable with the same data, seed, and options.",
-    "reference": "cmdstanr 0.99.0 (commit 0a54123) with posterior 1.7.1, running CmdStanPHP's compiled executable through cmdstan_model(exe_file = ...)",
+    "checked": "Draws, approximate log densities, summaries, and sampler diagnostics from sample(), optimize(), variational(), pathfinder(), and laplace(). Identical executable, data, seed, and options in both interfaces.",
+    "description": "CmdStanPHP runs each method on examples/bernoulli.stan. CmdStanR runs the same compiled executable through cmdstan_model(exe_file = ...) with the same options, and the tests compare the two fits.",
+    "reference": "cmdstanr 0.99.0 (commit 0a54123) with posterior 1.7.1",
     "versions": {
         "PHP": "8.4.25",
         "CmdStan": "2.40.0",
@@ -16,18 +17,21 @@
     "comparison": [
         {
             "id": "abs-1e-13",
+            "applies_to": "Draws and approximate log densities",
             "kind": "tolerance",
             "atol": 1.0e-13,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-12",
+            "applies_to": "Summaries and sampler diagnostics",
             "kind": "tolerance",
             "atol": 1.0e-12,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-8",
+            "applies_to": "R-hat, bulk ESS, and tail ESS",
             "kind": "tolerance",
             "atol": 1.0e-8,
             "rel_floor": 1.0

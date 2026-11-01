@@ -1,6 +1,7 @@
 {
   "title": "Mixed Gaussian (Bayesian) workload: CmdStanPHP, CmdStanR, and CmdStanPy",
-  "description": "Elapsed time and peak memory to sample the non-centered eight schools model with 4 parallel chains of 1,000 warmup and 1,000 sampling iterations and summarize the draws, from CmdStanPHP, CmdStanR (cmdstanr), and CmdStanPy. All three run the same compiled CmdStan executable with the same arguments and produce identical draws, so the differences are interface overhead: starting the runtime, writing the data, launching and waiting for the chain processes, reading the CSV output, and computing the summary.",
+  "label": "Eight schools",
+  "description": "Sampling of the non-centered eight schools model with 4 parallel chains of 1,000 warmup and 1,000 sampling iterations, followed by a summary of the draws, in CmdStanPHP, CmdStanR, and CmdStanPy. All three run the same compiled CmdStan executable with the same arguments and produce identical draws.",
   "measure": "Elapsed time",
   "unit": "ms",
   "statistic": "median",
@@ -27,7 +28,7 @@
     "date": "2026-11-01",
     "commit": "7ddfe1c"
   },
-  "method": "Each run is a fresh process. Each interface runs once as a warm-up, then the three alternate for 7 rounds in a rotated order. The time runs from the interface call that loads the precompiled model to holding the summary: it covers loading the model, writing the data (held in memory in the runtime's usual structure) to JSON, running 4 chains in parallel as 4 CmdStan processes (parallel_chains 4 everywhere) with seed 20261101, reading the CSV output, and the summary (CmdStanPHP summary() and cmdstanr $summary() with mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta; CmdStanPy summary(), which runs CmdStan's stansummary for every column). Starting the runtime and loading the interface's libraries are outside the timing. Every process runs under bench/peakmem.c. Memory is the interface process's peak anonymous memory (RssAnon in /proc, sampled every millisecond): its own allocations, without the file pages it maps and without the CmdStan chain processes. peak_rss_mib gives the peak resident set size, which counts those pages.",
+  "method": "Each run is a fresh process. Each interface runs once as a warm-up, then the three alternate for 7 rounds in a rotated order. The time runs from the interface call that loads the precompiled model to holding the summary: it covers loading the model, writing the data (held in memory in the runtime's usual structure) to JSON, running 4 chains in parallel as 4 CmdStan processes (parallel_chains 4 everywhere) with seed 20261101, reading the CSV output, and the summary (CmdStanPHP summary() and cmdstanr $summary() with mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta; CmdStanPy summary(), which runs CmdStan's stansummary for every column). Starting the runtime and loading the interface's libraries are outside the timing. Every process runs under bench/peakmem.c. Memory is the interface process's peak anonymous memory (RssAnon in /proc, sampled every millisecond): its own allocations, without the file pages it maps and without the CmdStan chain processes. Peak resident set size, which counts those pages, is reported separately.",
   "code_commit": "7ddfe1c",
   "check": {
     "draws_identical": true,

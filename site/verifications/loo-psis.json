@@ -1,9 +1,10 @@
 {
-    "title": "PSIS, LOO, and WAIC: agreement with posterior and loo",
-    "label": "PSIS, LOO, and WAIC",
+    "title": "LOO and PSIS",
+    "label": "LOO and PSIS",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "Pareto smoothing and its diagnostics, Pareto k, the generalized Pareto fit, relative efficiency, PSIS weights, loo() with and without r_eff, and waic().",
+    "checked": "Pareto smoothing and its diagnostics, Pareto k, generalized Pareto fit, relative efficiency, PSIS weights, LOO with and without relative efficiency, and WAIC. Identical inputs in both implementations.",
+    "description": "PHP generates the inputs with a fixed seed and passes them to R as JSON. posterior and loo compute the reference values from the same inputs.",
     "reference": "posterior 1.7.1 pareto_smooth(), pareto_khat(), and gpdfit(), and loo 2.10.1.9000 relative_eff(), psis(), loo(), and waic()",
     "versions": {
         "PHP": "8.4.25",
@@ -16,6 +17,7 @@
     "comparison": [
         {
             "id": "rel-1e-8",
+            "applies_to": "Numerical results; R's NA must be NaN",
             "kind": "tolerance",
             "rtol": 1.0e-8,
             "rel_floor": 1.0

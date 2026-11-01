@@ -1,9 +1,10 @@
 {
-    "title": "Exposed Stan functions: agreement with CmdStanR",
-    "label": "Exposed functions",
+    "title": "Stan functions",
+    "label": "Stan functions",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "User-defined Stan functions called from PHP through exposeFunctions(): scalar, vector, matrix, array, integer, complex, RNG, and density functions.",
+    "checked": "Return values of exposed user-defined Stan functions: real, vector, matrix, array, integer, complex, RNG, and density functions. Identical arguments and seeds.",
+    "description": "CmdStanPHP and CmdStanR each compile the functions block of tests/fixtures/native.stan and call every function with the same arguments.",
     "reference": "cmdstanr 0.99.0 (commit 0a54123) expose_functions(), compiled with Rcpp 1.1.2 and RcppEigen 0.3.4.0.2",
     "versions": {
         "PHP": "8.4.25",
@@ -17,20 +18,22 @@
     "comparison": [
         {
             "id": "abs-1e-15",
+            "applies_to": "Real, vector, matrix, array, and complex results",
             "kind": "tolerance",
             "atol": 1.0e-15,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-14",
+            "applies_to": "RNG and density results",
             "kind": "tolerance",
             "atol": 1.0e-14,
             "rel_floor": 1.0
         },
         {
             "id": "exact",
-            "kind": "exact",
-            "applies_to": "integer array"
+            "applies_to": "Integer results",
+            "kind": "exact"
         }
     ],
     "cases": [

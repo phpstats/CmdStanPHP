@@ -1,9 +1,10 @@
 {
-    "title": "Moment matching: agreement with loo and CmdStanR",
+    "title": "Moment matching",
     "label": "Moment matching",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "loo(momentMatch: true), with and without the split step, against loo's moment matching on analytic posteriors and against CmdStanR's loo(moment_match = TRUE) on a same-seed fit.",
+    "checked": "LOO with moment matching, with and without the split step: pointwise values, Pareto k, effective sample sizes, and estimates. Analytic posteriors with identical draws, and a same-seed fit.",
+    "description": "For the analytic posteriors, loo's loo_moment_match.default() receives the same draws and exact log densities. For the fit, CmdStanR's loo(moment_match = TRUE) runs on a same-seed fit of the same program.",
     "reference": "loo 2.10.1.9000 loo_moment_match.default(), and cmdstanr 0.99.0 (commit 0a54123) loo(moment_match = TRUE)",
     "versions": {
         "PHP": "8.4.25",
@@ -26,27 +27,27 @@
     "cases": [
         {
             "name": "Analytic regressions, unsplit",
-            "quantity": "every comparison in MomentMatchCompatibilityTest::testUnsplitMomentMatchingMatchesLoo",
+            "quantity": "All comparisons",
             "status": "skipped",
-            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine; passed in CI (Linux) at commit 7391993, which records no per-quantity results."
         },
         {
             "name": "Analytic regressions, split",
-            "quantity": "every comparison in MomentMatchCompatibilityTest::testSplitMatchesLooWithTheExactInverse",
+            "quantity": "All comparisons",
             "status": "skipped",
-            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine; passed in CI (Linux) at commit 7391993, which records no per-quantity results."
         },
         {
             "name": "Analytic regressions, loo's own split",
-            "quantity": "every comparison in MomentMatchCompatibilityTest::testDifferencesFromLooSplitAreTheDocumentedOnes",
+            "quantity": "All comparisons",
             "status": "skipped",
-            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine; passed in CI (Linux) at commit 7391993, which records no per-quantity results."
         },
         {
             "name": "Regression fit",
-            "quantity": "every comparison in MomentMatchIntegrationTest::testSameSeedMomentMatchingMatchesCmdStanR",
+            "quantity": "All comparisons",
             "status": "skipped",
-            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine. It ran and passed in CI (Linux) at commit 7391993, which saves no per-quantity results."
+            "reason": "The phit posterior-draw kernels are required: Phit\\draws_moments, Phit\\draws_covariance_map, Phit\\draws_affine; passed in CI (Linux) at commit 7391993, which records no per-quantity results."
         }
     ],
     "known_differences": [

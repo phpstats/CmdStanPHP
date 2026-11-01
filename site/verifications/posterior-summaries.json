@@ -1,9 +1,10 @@
 {
-    "title": "Summaries: agreement with posterior",
-    "label": "Summaries",
+    "title": "Posterior summaries",
+    "label": "Posterior summaries",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "summary() by default (stansummary columns plus ess_tail) and with measures (the PHP port of summarise_draws()), every named posterior measure, custom quantile probabilities, and diagnosticSummary().",
+    "checked": "Default summaries, summaries with measures, every named posterior measure, custom quantile probabilities, and per-chain sampler diagnostics. Identical draws in both implementations.",
+    "description": "CmdStanPHP's draws are passed to R as binary doubles, so posterior summarizes the same values. Sampler diagnostics are compared with CmdStanR's diagnostic_summary() on the same CSV files.",
     "reference": "posterior 1.7.1 summarise_draws() on the same draws, and cmdstanr 0.99.0 (commit 0a54123) diagnostic_summary() on the same CSV files",
     "versions": {
         "PHP": "8.4.25",
@@ -25,26 +26,29 @@
     "comparison": [
         {
             "id": "rel-1e-13",
+            "applies_to": "Draws passed to R",
             "kind": "tolerance",
             "rtol": 1.0e-13,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-12",
+            "applies_to": "Sampler diagnostics",
             "kind": "tolerance",
             "atol": 1.0e-12,
             "rel_floor": 1.0
         },
         {
             "id": "rel-1e-8",
+            "applies_to": "Summary measures; R's NA must be NaN",
             "kind": "tolerance",
             "rtol": 1.0e-8,
             "rel_floor": 1.0
         },
         {
             "id": "exact",
-            "kind": "exact",
-            "applies_to": "variable names; column names and order"
+            "applies_to": "Variable and column names",
+            "kind": "exact"
         }
     ],
     "cases": [

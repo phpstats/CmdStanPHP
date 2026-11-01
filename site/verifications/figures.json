@@ -1,9 +1,10 @@
 {
-    "title": "Figure values: agreement with R and bayesplot",
-    "label": "Figure values",
+    "title": "Figures",
+    "label": "Figures",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "The values the figures draw: kernel density bandwidth and estimates, autocorrelations, ranks with ties, and interval quantiles.",
+    "checked": "Kernel density bandwidth and estimates, autocorrelations, ranks with ties, and interval quantiles. Identical inputs.",
+    "description": "PHP generates the inputs with a fixed seed. R computes the reference values with stats functions and bayesplot's mcmc_intervals_data().",
     "reference": "R 4.6.1 bw.nrd0(), dnorm(), acf(), and rank(), and bayesplot 1.16.0.9000 mcmc_intervals_data() with posterior 1.7.1",
     "versions": {
         "PHP": "8.4.25",
@@ -16,18 +17,21 @@
     "comparison": [
         {
             "id": "abs-1e-14",
+            "applies_to": "Bandwidth",
             "kind": "tolerance",
             "atol": 1.0e-14,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-13",
+            "applies_to": "Density estimates",
             "kind": "tolerance",
             "atol": 1.0e-13,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-12",
+            "applies_to": "Autocorrelations, ranks, and interval quantiles",
             "kind": "tolerance",
             "atol": 1.0e-12,
             "rel_floor": 1.0

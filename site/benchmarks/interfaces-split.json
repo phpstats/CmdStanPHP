@@ -1,7 +1,7 @@
 {
   "title": "Where the time goes: eight schools in CmdStanPHP, CmdStanR, and CmdStanPy",
   "label": "Time by phase",
-  "description": "The eight schools workload of the interface benchmark, timed in three phases inside each interface, beside the same 4 chains run by CmdStan's executable with no interface. The sample phase includes the chains, so the difference between an interface's sample phase and CmdStan alone is the time the interface spends writing the data, starting the processes, and waiting for them.",
+  "description": "The eight schools workload timed in three phases inside each interface: loading the model, sampling, and summarizing. The same 4 chains run by CmdStan's executable without an interface.",
   "workload": "Eight schools, 4 chains × 2,000 iterations",
   "implementations": {
     "CmdStan alone": "CmdStan's compiled executable, 4 processes started together from Python with the arguments CmdStanPHP passes",
@@ -14,7 +14,7 @@
   "statistic": "median",
   "time_spent_in": "Load and Summary: the interface process. Sample: CmdStan's executable, launched by the interface, plus the interface's own work. CmdStan alone: CmdStan's executable only. CmdStanPy's summary also runs CmdStan's stansummary executable.",
   "method": "Each run is a fresh process. Each runs once as a warm-up, then the four alternate for 7 rounds in a rotated order. Inside each interface the clock is read before loading the precompiled model, after it, after sample() returns, and after the summary; the phases are the differences, and Total runs from the first read to the last, as in the interface benchmark. Starting the runtime and loading libraries are outside the timing. CmdStan alone writes the data file before its clock starts and stops the clock when the last of the 4 chains exits. The summaries differ by interface as in the interface benchmark: CmdStanPy's runs CmdStan's stansummary.",
-  "memory_method": "child_peak_rss_mib, for CmdStan alone only: the largest peak resident set size among the 4 chain processes, from getrusage(RUSAGE_CHILDREN).",
+  "memory_method": "Largest peak resident set size among the 4 chain processes, from getrusage(RUSAGE_CHILDREN); CmdStan alone only.",
   "check": {
     "draws_identical": true
   },

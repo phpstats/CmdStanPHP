@@ -4,20 +4,20 @@
   "label": "Other interfaces",
   "kind": "reference",
   "group": "Comparisons with other interfaces",
-  "checked": "Draws from the same CmdStan run settings, compared exactly, and each interface's own summary of them (mean, sd, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta).",
+  "checked": "Draws from identical CmdStan settings, and each interface's own summary: mean, standard deviation, 5% and 95% quantiles, R-hat, and bulk ESS for mu, tau, and theta.",
   "reference": "cmdstanr 0.9.0 with posterior 1.7.0, and CmdStanPy 1.3.0 (summary at sig_figs 12), on CmdStan 2.40.0, R 4.6.2, Python 3.14.10, and PHP 8.5.12",
   "tolerance": "summaries: 1e-9 + 1e-9*|cmdstanr value|; draws: exact",
   "comparison": [
     {
       "id": "summary",
-      "applies_to": "each summary value, against cmdstanr's and against CmdStanPy's; the case's error is the larger",
+      "applies_to": "Summary values; larger error of cmdstanr and CmdStanPy",
       "kind": "tolerance",
       "atol": 1e-09,
       "rtol": 1e-09
     },
     {
       "id": "draws",
-      "applies_to": "every CSV column of every draw, against both peers",
+      "applies_to": "Draws; every CSV column",
       "kind": "exact"
     }
   ],

@@ -1,9 +1,10 @@
 {
-    "title": "Model methods: agreement with CmdStanR",
+    "title": "Model methods",
     "label": "Model methods",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "log_prob(), grad_log_prob(), hessian(), constrain_variables(), unconstrain_variables(), unconstrain_draws(), and the variable skeleton, called in process through FFI.",
+    "checked": "Log density, gradient, Hessian, constrained and unconstrained values, unconstrained draws, and variable dimensions, evaluated in process through FFI. Identical program, data, and evaluation points.",
+    "description": "CmdStanPHP and CmdStanR each compile tests/fixtures/native.stan with model methods and evaluate them at the same points.",
     "reference": "cmdstanr 0.99.0 (commit 0a54123) model methods, compiled with Rcpp 1.1.2 and RcppEigen 0.3.4.0.2",
     "versions": {
         "PHP": "8.4.25",
@@ -17,32 +18,36 @@
     "comparison": [
         {
             "id": "abs-1e-12",
+            "applies_to": "Constrained and unconstrained values",
             "kind": "tolerance",
             "atol": 1.0e-12,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-10",
+            "applies_to": "Log densities, gradients, and unconstrained draws",
             "kind": "tolerance",
             "atol": 1.0e-10,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-8",
+            "applies_to": "Hessian gradient",
             "kind": "tolerance",
             "atol": 1.0e-8,
             "rel_floor": 1.0
         },
         {
             "id": "abs-1e-6",
+            "applies_to": "Hessian matrix",
             "kind": "tolerance",
             "atol": 1.0e-6,
             "rel_floor": 1.0
         },
         {
             "id": "exact",
-            "kind": "exact",
-            "applies_to": "constrain_variables() names; variable_skeleton(); unconstrained parameter names"
+            "applies_to": "Names and dimensions",
+            "kind": "exact"
         }
     ],
     "cases": [

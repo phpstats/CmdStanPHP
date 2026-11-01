@@ -1,9 +1,10 @@
 {
-    "title": "CSV metadata and examples: agreement with CmdStanR",
-    "label": "Metadata and examples",
+    "title": "Metadata",
+    "label": "Metadata",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "The metadata read from CmdStan CSV files for each method, and the bundled example programs and data, against CmdStanR.",
+    "checked": "CSV metadata keys and values for five methods. Program text and data of three bundled examples.",
+    "description": "CmdStanR's read_cmdstan_csv() reads the CSV files that CmdStanPHP wrote, and the tests compare its metadata with CmdStanPHP's. The example programs and data come from CmdStanR's package files.",
     "reference": "cmdstanr 0.99.0 (commit 0a54123) read_cmdstan_csv(), print_example_program(), and its bundled example data",
     "versions": {
         "PHP": "8.4.25",
@@ -15,8 +16,8 @@
     "comparison": [
         {
             "id": "exact",
-            "kind": "exact",
-            "applies_to": "metadata keys present; metadata values; program text; data"
+            "applies_to": "Metadata, program text, and data",
+            "kind": "exact"
         }
     ],
     "cases": [

@@ -1,9 +1,10 @@
 {
-    "title": "draws_rvars and initial values: agreement with posterior and CmdStanR",
-    "label": "draws_rvars and inits",
+    "title": "rvars and inits",
+    "label": "rvars and inits",
     "kind": "reference",
     "group": "Comparisons with R",
-    "checked": "The names, dimensions, chain counts, and values of draws_rvars, and initial values built from draws and matched to parameter dimensions.",
+    "checked": "draws_rvars names, dimensions, chain counts, and values. Initial values from draws: names, shapes, and values.",
+    "description": "posterior's as_draws_rvars() and CmdStanR's initial-value handling receive the same draws as CmdStanPHP.",
     "reference": "posterior 1.7.1 as_draws_rvars(), and the initial values cmdstanr 0.99.0 (commit 0a54123) writes from draws",
     "versions": {
         "PHP": "8.4.25",
@@ -16,20 +17,22 @@
     "comparison": [
         {
             "id": "rel-1e-15",
+            "applies_to": "Initial values",
             "kind": "tolerance",
             "rtol": 1.0e-15,
             "rel_floor": 1.0
         },
         {
             "id": "rel-1e-8",
+            "applies_to": "draws_rvars values",
             "kind": "tolerance",
             "rtol": 1.0e-8,
             "rel_floor": 1.0
         },
         {
             "id": "exact",
-            "kind": "exact",
-            "applies_to": "variable names; dimensions; chain count; parameter names; shapes"
+            "applies_to": "Names, dimensions, shapes, and chain counts",
+            "kind": "exact"
         }
     ],
     "cases": [

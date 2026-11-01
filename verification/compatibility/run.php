@@ -106,9 +106,9 @@ function record(string $id, array $topic, array $lines, array $tests, array $env
             $rules[$ruleId] ??= ['id' => $ruleId, 'kind' => 'tolerance'] + (isset($rule['rtol']) ? ['rtol' => $rule['rtol'], 'rel_floor' => 1.0] : ['atol' => $rule['atol'], 'rel_floor' => 1.0]);
         } elseif ($rule['kind'] === 'exact') {
             $ruleId = 'exact';
-            $rules['exact'] ??= ['id' => 'exact', 'kind' => 'exact', 'applies_to' => []];
-            $rules['exact']['applies_to'][$line['quantity']] = true;
+            $rules['exact'] ??= ['id' => 'exact', 'kind' => 'exact'];
         }
+        if ($ruleId !== null) { $rules[$ruleId]['quantities'][$line['quantity']] = true; }
         $key = $line['case']."\0".$line['quantity'];
         $case = $cases[$key] ?? ['name' => $line['case'], 'quantity' => $line['quantity'], 'status' => 'pass', 'rule' => $ruleId, 'n_compared' => 0, 'max_abs_error' => null, 'max_rel_error' => null, 'tests' => []];
         $case['n_compared'] += $line['n_compared'];
@@ -127,8 +127,8 @@ function record(string $id, array $topic, array $lines, array $tests, array $env
             continue;
         }
         $reason = $outcome['reason'] ?? ($outcome['status'] === 'fail' ? 'The test failed.' : 'The test was skipped.');
-        if ($outcome['status'] === 'skipped' && getenv('CI_PASS_COMMIT')) { $reason = rtrim($reason, '.').'. It ran and passed in CI (Linux) at commit '.substr(getenv('CI_PASS_COMMIT'), 0, 7).', which saves no per-quantity results.'; }
-        $cases["\0".$test] = ['name' => $what, 'quantity' => 'every comparison in '.$test, 'status' => $outcome['status'], 'reason' => $reason];
+        if ($outcome['status'] === 'skipped' && getenv('CI_PASS_COMMIT')) { $reason = rtrim($reason, '.').'; passed in CI (Linux) at commit '.substr(getenv('CI_PASS_COMMIT'), 0, 7).', which records no per-quantity results.'; }
+        $cases["\0".$test] = ['name' => $what, 'quantity' => 'All comparisons', 'status' => $outcome['status'], 'reason' => $reason];
     }
     $cases = array_values(array_map(function (array $case) {
         unset($case['tests']);
@@ -136,9 +136,11 @@ function record(string $id, array $topic, array $lines, array $tests, array $env
         if (isset($case['n_compared']) && ($case['rule'] ?? null) === 'exact') { unset($case['max_abs_error'], $case['max_rel_error']); }
         return array_filter($case, fn($v) => $v !== null);
     }, $cases));
-    $rules = array_values(array_map(function (array $rule) {
-        if (isset($rule['applies_to'])) { $rule['applies_to'] = implode('; ', array_keys($rule['applies_to'])); }
-        return $rule;
+    // applies_to is the Tolerances row label: the topic's own label for the rule, or else the quantities it covers.
+    $rules = array_values(array_map(function (array $rule) use ($topic) {
+        $applies = $topic['rules'][$rule['id']] ?? implode(', ', array_keys($rule['quantities']));
+        unset($rule['quantities']);
+        return ['id' => $rule['id'], 'applies_to' => $applies] + $rule;
     }, $rules));
     usort($rules, fn($a, $b) => [$a['kind'] === 'exact', $a['atol'] ?? $a['rtol'] ?? 0] <=> [$b['kind'] === 'exact', $b['atol'] ?? $b['rtol'] ?? 0]);
     return array_filter([
@@ -147,6 +149,7 @@ function record(string $id, array $topic, array $lines, array $tests, array $env
         'kind' => 'reference',
         'group' => 'Comparisons with R',
         'checked' => $topic['checked'],
+        'description' => $topic['description'],
         'reference' => $topic['reference'],
         'versions' => array_intersect_key($environment['versions'], array_flip(array_merge(['PHP', 'CmdStan', 'R'], $topic['versions']))),
         'inputs' => $topic['inputs'],
@@ -168,50 +171,59 @@ function topics(array $v): array
     $at = fn(string $package) => $package.' '.($v[$package] ?? '(not installed)');
     return [
         'cmdstanr-methods' => [
-            'title' => 'Fitting methods: agreement with CmdStanR',
-            'label' => 'Fitting methods',
-            'checked' => 'Draws, approximate log densities, summaries, and sampler diagnostics from sample(), optimize(), variational(), pathfinder(), and laplace(), against CmdStanR running the same executable with the same data, seed, and options.',
-            'reference' => $at('cmdstanr').' with '.$at('posterior').', running CmdStanPHP\'s compiled executable through cmdstan_model(exe_file = ...)',
+            'title' => 'CmdStanR methods',
+            'label' => 'CmdStanR methods',
+            'checked' => 'Draws, approximate log densities, summaries, and sampler diagnostics from sample(), optimize(), variational(), pathfinder(), and laplace(). Identical executable, data, seed, and options in both interfaces.',
+            'description' => 'CmdStanPHP runs each method on examples/bernoulli.stan. CmdStanR runs the same compiled executable through cmdstan_model(exe_file = ...) with the same options, and the tests compare the two fits.',
+            'reference' => $at('cmdstanr').' with '.$at('posterior'),
             'versions' => ['cmdstanr', 'posterior'],
             'inputs' => 'examples/bernoulli.stan with N = 10 and y = [0,1,0,0,0,0,0,0,0,1], seed 123, output at 18 significant figures. MCMC runs 2 chains of 200 warmup and 100 or 101 sampling iterations; the approximations take 100 draws.',
             'exclusions' => ['Draws and summary values that CmdStanR reports as missing are not compared.'],
+            'rules' => ['abs-1e-13' => 'Draws and approximate log densities', 'abs-1e-12' => 'Summaries and sampler diagnostics', 'abs-1e-8' => 'R-hat, bulk ESS, and tail ESS'],
             'tests' => ['CompatibilityTest::testSameSeedDrawsAndDescriptiveSummariesAsCmdStanR' => 'Fitting methods'],
         ],
         'cmdstanr-metadata' => [
-            'title' => 'CSV metadata and examples: agreement with CmdStanR',
-            'label' => 'Metadata and examples',
-            'checked' => 'The metadata read from CmdStan CSV files for each method, and the bundled example programs and data, against CmdStanR.',
+            'title' => 'Metadata',
+            'label' => 'Metadata',
+            'checked' => 'CSV metadata keys and values for five methods. Program text and data of three bundled examples.',
+            'description' => 'CmdStanR\'s read_cmdstan_csv() reads the CSV files that CmdStanPHP wrote, and the tests compare its metadata with CmdStanPHP\'s. The example programs and data come from CmdStanR\'s package files.',
             'reference' => $at('cmdstanr').' read_cmdstan_csv(), print_example_program(), and its bundled example data',
             'versions' => ['cmdstanr'],
             'inputs' => 'CSV files from examples/bernoulli.stan for each method (MCMC: 2 chains, 50 warmup and 20 sampling iterations, warmup saved), and the logistic, schools, and schools_ncp examples.',
             'exclusions' => ['The metadata entries time, init, fitted_params, profile_file, file, data_file, diagnostic_file, and start_datetime are not compared: they hold timings, paths, or the run\'s start time.'],
+            'rules' => ['exact' => 'Metadata, program text, and data'],
             'tests' => ['CompatibilityTest::testMetadataStructureMatchesCmdStanR' => 'Metadata', 'CompatibilityTest::testExampleProgramsAndDataMatchCmdStanR' => 'Example programs and data'],
         ],
         'posterior-summaries' => [
-            'title' => 'Summaries: agreement with posterior',
-            'label' => 'Summaries',
-            'checked' => 'summary() by default (stansummary columns plus ess_tail) and with measures (the PHP port of summarise_draws()), every named posterior measure, custom quantile probabilities, and diagnosticSummary().',
+            'title' => 'Posterior summaries',
+            'label' => 'Posterior summaries',
+            'checked' => 'Default summaries, summaries with measures, every named posterior measure, custom quantile probabilities, and per-chain sampler diagnostics. Identical draws in both implementations.',
+            'description' => 'CmdStanPHP\'s draws are passed to R as binary doubles, so posterior summarizes the same values. Sampler diagnostics are compared with CmdStanR\'s diagnostic_summary() on the same CSV files.',
             'reference' => $at('posterior').' summarise_draws() on the same draws, and '.$at('cmdstanr').' diagnostic_summary() on the same CSV files',
             'versions' => ['posterior', 'cmdstanr'],
             'inputs' => [
                 ['name' => 'shoe_latent model', 'detail' => 'tests/fixtures/latent.stan, 60 observations in 12 groups, 4 chains of 1,000 warmup and 1,000 sampling iterations, seed 20260831. R reads CmdStanPHP\'s draws as binary doubles.'],
                 ['name' => 'Fixed draws', 'detail' => 'Six variables (autoregressive, heavy-tailed, tied, constant, skewed, and shifted between chains), 4 chains × 101 draws, generated with seed 20240607.'],
             ],
+            'rules' => ['rel-1e-13' => 'Draws passed to R', 'abs-1e-12' => 'Sampler diagnostics', 'rel-1e-8' => 'Summary measures; R\'s NA must be NaN', 'exact' => 'Variable and column names'],
             'tests' => ['CompatibilityTest::testIndexedParameterSummariesMatchPosteriorOnTheSameDraws' => 'shoe_latent model', 'StatisticsCompatibilityTest::testSummaryMeasuresMatchPosterior' => 'Fixed draws'],
         ],
         'loo-psis' => [
-            'title' => 'PSIS, LOO, and WAIC: agreement with posterior and loo',
-            'label' => 'PSIS, LOO, and WAIC',
-            'checked' => 'Pareto smoothing and its diagnostics, Pareto k, the generalized Pareto fit, relative efficiency, PSIS weights, loo() with and without r_eff, and waic().',
+            'title' => 'LOO and PSIS',
+            'label' => 'LOO and PSIS',
+            'checked' => 'Pareto smoothing and its diagnostics, Pareto k, generalized Pareto fit, relative efficiency, PSIS weights, LOO with and without relative efficiency, and WAIC. Identical inputs in both implementations.',
+            'description' => 'PHP generates the inputs with a fixed seed and passes them to R as JSON. posterior and loo compute the reference values from the same inputs.',
             'reference' => $at('posterior').' pareto_smooth(), pareto_khat(), and gpdfit(), and '.$at('loo').' relative_eff(), psis(), loo(), and waic()',
             'versions' => ['posterior', 'loo'],
             'inputs' => 'Generated with seed 20240607: 1,000 and 100 lognormal values, 1,000 normal log weights, 50 generalized Pareto values, and log-likelihoods of 12 observations (one an outlier) over 4 chains × 250 draws.',
+            'rules' => ['rel-1e-8' => 'Numerical results; R\'s NA must be NaN'],
             'tests' => ['StatisticsCompatibilityTest::testParetoSmoothingMatchesPosterior' => 'Pareto smoothing', 'StatisticsCompatibilityTest::testPsisRelativeEfficiencyLooAndWaicMatchLoo' => 'PSIS, LOO, and WAIC'],
         ],
         'moment-matching' => [
-            'title' => 'Moment matching: agreement with loo and CmdStanR',
+            'title' => 'Moment matching',
             'label' => 'Moment matching',
-            'checked' => 'loo(momentMatch: true), with and without the split step, against loo\'s moment matching on analytic posteriors and against CmdStanR\'s loo(moment_match = TRUE) on a same-seed fit.',
+            'checked' => 'LOO with moment matching, with and without the split step: pointwise values, Pareto k, effective sample sizes, and estimates. Analytic posteriors with identical draws, and a same-seed fit.',
+            'description' => 'For the analytic posteriors, loo\'s loo_moment_match.default() receives the same draws and exact log densities. For the fit, CmdStanR\'s loo(moment_match = TRUE) runs on a same-seed fit of the same program.',
             'reference' => $at('loo').' loo_moment_match.default(), and '.$at('cmdstanr').' loo(moment_match = TRUE)',
             'versions' => ['phit', 'loo', 'cmdstanr'],
             'inputs' => [
@@ -224,42 +236,51 @@ function topics(array $v): array
                 'Relative efficiencies are computed from exp(log_lik − max). Where loo reports NA because every likelihood value is tiny, CmdStanPHP must report a finite value.',
             ],
             'reproduce' => 'PHIT_LIBRARY=/path/to/phit.so php verification/compatibility/run.php',
+            'rules' => ['rel-1e-8' => 'Pointwise values, diagnostics, and estimates', 'abs-1e-8' => 'Pareto k of the fit', 'abs-1e-12' => 'lp__ draws of the fit'],
             'tests' => ['MomentMatchCompatibilityTest::testUnsplitMomentMatchingMatchesLoo' => 'Analytic regressions, unsplit', 'MomentMatchCompatibilityTest::testSplitMatchesLooWithTheExactInverse' => 'Analytic regressions, split', 'MomentMatchCompatibilityTest::testDifferencesFromLooSplitAreTheDocumentedOnes' => 'Analytic regressions, loo\'s own split', 'MomentMatchIntegrationTest::testSameSeedMomentMatchingMatchesCmdStanR' => 'Regression fit'],
         ],
         'model-methods' => [
-            'title' => 'Model methods: agreement with CmdStanR',
+            'title' => 'Model methods',
             'label' => 'Model methods',
-            'checked' => 'log_prob(), grad_log_prob(), hessian(), constrain_variables(), unconstrain_variables(), unconstrain_draws(), and the variable skeleton, called in process through FFI.',
+            'checked' => 'Log density, gradient, Hessian, constrained and unconstrained values, unconstrained draws, and variable dimensions, evaluated in process through FFI. Identical program, data, and evaluation points.',
+            'description' => 'CmdStanPHP and CmdStanR each compile tests/fixtures/native.stan with model methods and evaluate them at the same points.',
             'reference' => $at('cmdstanr').' model methods, compiled with '.$at('Rcpp').' and '.$at('RcppEigen'),
             'versions' => ['cmdstanr', 'Rcpp', 'RcppEigen'],
             'inputs' => 'tests/fixtures/native.stan (constrained scalars, a matrix, a simplex, and a covariance matrix) with N = 4, at one point of 19 unconstrained values, and at draws from CmdStanR.',
+            'rules' => ['abs-1e-12' => 'Constrained and unconstrained values', 'abs-1e-10' => 'Log densities, gradients, and unconstrained draws', 'abs-1e-8' => 'Hessian gradient', 'abs-1e-6' => 'Hessian matrix', 'exact' => 'Names and dimensions'],
             'tests' => ['NativeCompatibilityTest::testModelMethodsAndFunctionsMatchCmdStanR' => 'Model methods and exposed functions'],
         ],
         'stan-functions' => [
-            'title' => 'Exposed Stan functions: agreement with CmdStanR',
-            'label' => 'Exposed functions',
-            'checked' => 'User-defined Stan functions called from PHP through exposeFunctions(): scalar, vector, matrix, array, integer, complex, RNG, and density functions.',
+            'title' => 'Stan functions',
+            'label' => 'Stan functions',
+            'checked' => 'Return values of exposed user-defined Stan functions: real, vector, matrix, array, integer, complex, RNG, and density functions. Identical arguments and seeds.',
+            'description' => 'CmdStanPHP and CmdStanR each compile the functions block of tests/fixtures/native.stan and call every function with the same arguments.',
             'reference' => $at('cmdstanr').' expose_functions(), compiled with '.$at('Rcpp').' and '.$at('RcppEigen'),
             'versions' => ['cmdstanr', 'Rcpp', 'RcppEigen'],
             'inputs' => 'The functions block of tests/fixtures/native.stan, with the arguments shown in each case.',
+            'rules' => ['abs-1e-15' => 'Real, vector, matrix, array, and complex results', 'abs-1e-14' => 'RNG and density results', 'exact' => 'Integer results'],
             'tests' => ['NativeCompatibilityTest::testModelMethodsAndFunctionsMatchCmdStanR' => 'Model methods and exposed functions'],
         ],
         'figures' => [
-            'title' => 'Figure values: agreement with R and bayesplot',
-            'label' => 'Figure values',
-            'checked' => 'The values the figures draw: kernel density bandwidth and estimates, autocorrelations, ranks with ties, and interval quantiles.',
+            'title' => 'Figures',
+            'label' => 'Figures',
+            'checked' => 'Kernel density bandwidth and estimates, autocorrelations, ranks with ties, and interval quantiles. Identical inputs.',
+            'description' => 'PHP generates the inputs with a fixed seed. R computes the reference values with stats functions and bayesplot\'s mcmc_intervals_data().',
             'reference' => 'R '.($v['R'] ?? '').' bw.nrd0(), dnorm(), acf(), and rank(), and '.$at('bayesplot').' mcmc_intervals_data() with '.$at('posterior'),
             'versions' => ['bayesplot', 'posterior'],
             'inputs' => '400 draws of an AR(1) series and 400 integers from 0 to 9, generated with seed 7; density evaluated at 41 points from −2 to 2.',
+            'rules' => ['abs-1e-14' => 'Bandwidth', 'abs-1e-13' => 'Density estimates', 'abs-1e-12' => 'Autocorrelations, ranks, and interval quantiles'],
             'tests' => ['PlotCompatibilityTest::testPlottedValuesMatchR' => 'Figure values'],
         ],
         'rvars-inits' => [
-            'title' => 'draws_rvars and initial values: agreement with posterior and CmdStanR',
-            'label' => 'draws_rvars and inits',
-            'checked' => 'The names, dimensions, chain counts, and values of draws_rvars, and initial values built from draws and matched to parameter dimensions.',
+            'title' => 'rvars and inits',
+            'label' => 'rvars and inits',
+            'checked' => 'draws_rvars names, dimensions, chain counts, and values. Initial values from draws: names, shapes, and values.',
+            'description' => 'posterior\'s as_draws_rvars() and CmdStanR\'s initial-value handling receive the same draws as CmdStanPHP.',
             'reference' => $at('posterior').' as_draws_rvars(), and the initial values '.$at('cmdstanr').' writes from draws',
             'versions' => ['posterior', 'cmdstanr'],
             'inputs' => 'Draws of a scalar, a 2 × 3 matrix with missing cells, and a vector over 2 chains × 3 iterations; initial values from 2 draws for 2 chains and from 1 draw recycled for 3 chains.',
+            'rules' => ['rel-1e-15' => 'Initial values', 'rel-1e-8' => 'draws_rvars values', 'exact' => 'Names, dimensions, shapes, and chain counts'],
             'tests' => ['StatisticsCompatibilityTest::testRvarsShapesMatchPosterior' => 'draws_rvars', 'StatisticsCompatibilityTest::testInitDimensionMatchingMatchesCmdStanR' => 'Initial values'],
         ],
     ];
