@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Helper classes – CmdStanPHP</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-helpers.html">Helper classes</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">CmdStanPHP</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compiling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compiling models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MCMC sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Optimization and Laplace</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./variational.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ADVI and Pathfinder</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./generated-quantities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generated quantities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./draws.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Draws, summaries, and saving fits</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./log-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Log density and model methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./loo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">LOO and WAIC</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./figures.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Figures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functions and methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions and methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-options.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Options</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CmdStanModel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fits</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Helper classes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Errors</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/sample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fit a Stan model with MCMC</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Examples</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contributing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#figures" id="toc-figures" class="nav-link active" data-scroll-target="#figures">Figures</a>
+  <ul class="collapse">
+  <li><a href="#Figure" id="toc-Figure" class="nav-link" data-scroll-target="#Figure"><code>Figure</code></a></li>
+  <li><a href="#Plot" id="toc-Plot" class="nav-link" data-scroll-target="#Plot"><code>Plot</code></a></li>
+  </ul></li>
+  <li><a href="#model-methods-and-stan-functions" id="toc-model-methods-and-stan-functions" class="nav-link" data-scroll-target="#model-methods-and-stan-functions">Model methods and Stan functions</a>
+  <ul class="collapse">
+  <li><a href="#StanFunctions" id="toc-StanFunctions" class="nav-link" data-scroll-target="#StanFunctions"><code>StanFunctions</code></a></li>
+  <li><a href="#ModelMethods" id="toc-ModelMethods" class="nav-link" data-scroll-target="#ModelMethods"><code>ModelMethods</code></a></li>
+  </ul></li>
+  <li><a href="#summaries-and-diagnostics" id="toc-summaries-and-diagnostics" class="nav-link" data-scroll-target="#summaries-and-diagnostics">Summaries and diagnostics</a>
+  <ul class="collapse">
+  <li><a href="#Summary" id="toc-Summary" class="nav-link" data-scroll-target="#Summary"><code>Summary</code></a></li>
+  <li><a href="#Psis" id="toc-Psis" class="nav-link" data-scroll-target="#Psis"><code>Psis</code></a></li>
+  <li><a href="#Loo" id="toc-Loo" class="nav-link" data-scroll-target="#Loo"><code>Loo</code></a></li>
+  <li><a href="#MomentMatch" id="toc-MomentMatch" class="nav-link" data-scroll-target="#MomentMatch"><code>MomentMatch</code></a></li>
+  <li><a href="#DrawKernels" id="toc-DrawKernels" class="nav-link" data-scroll-target="#DrawKernels"><code>DrawKernels</code></a></li>
+  </ul></li>
+  <li><a href="#draws-and-initial-values" id="toc-draws-and-initial-values" class="nav-link" data-scroll-target="#draws-and-initial-values">Draws and initial values</a>
+  <ul class="collapse">
+  <li><a href="#Rvars" id="toc-Rvars" class="nav-link" data-scroll-target="#Rvars"><code>Rvars</code></a></li>
+  <li><a href="#Inits" id="toc-Inits" class="nav-link" data-scroll-target="#Inits"><code>Inits</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-helpers.html">Helper classes</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Helper classes</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Classes for figures, in-process model code, and statistics on plain arrays. Their methods are camelCase.</p>
+<section id="figures" class="level2">
+<h2 class="anchored" data-anchor-id="figures">Figures</h2>
+<section id="Figure" class="level3">
+<h3 class="anchored" data-anchor-id="Figure"><code>Figure</code></h3>
+<p>Returned by the <a href="./api-functions.html#figures-and-examples">figure functions</a> and <code>Plot</code>. The statistics are computed once, so every rendering shows the same numbers. Casting a figure to a string gives <code>ascii()</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Figure-ascii"><code>-&gt;ascii()</code></span></td>
+<td>Text rendering. <code>null</code> sizes use per-kind defaults.</td>
+</tr>
+<tr class="even">
+<td><span id="Figure-vegaLite"><code>-&gt;vegaLite()</code></span></td>
+<td>Vega-Lite spec with the data inlined. Sizes are in pixels, per facet for per-chain figures. <code>maxRows</code> thins trace and scatter data by keeping every k-th row.</td>
+</tr>
+<tr class="odd">
+<td><span id="Figure-json"><code>-&gt;json()</code></span></td>
+<td>The spec as JSON, safe to embed in an HTML <code>script</code> element.</td>
+</tr>
+<tr class="even">
+<td><span id="Figure-html"><code>-&gt;html()</code></span></td>
+<td>A standalone HTML page that renders the spec with vega-embed from the jsDelivr CDN.</td>
+</tr>
+<tr class="odd">
+<td><span id="Figure-svg"><code>-&gt;svg()</code></span></td>
+<td>SVG through the vl-convert binary, found through <code>VL_CONVERT</code> or <code>PATH</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="Figure-png"><code>-&gt;png()</code></span></td>
+<td>PNG bytes through vl-convert at <code>scale</code>.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ascii(<span class="ot">?</span><span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>vegaLite(<span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="dv">480</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="dv">240</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>json(<span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="dv">480</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="dv">240</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>html(<span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="dv">480</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="dv">240</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>svg(<span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="dv">480</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="dv">240</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="fl">60.0</span>)<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>png(<span class="dt">int</span> <span class="va">$width</span> <span class="op">=</span> <span class="dv">480</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$height</span> <span class="op">=</span> <span class="dv">240</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$scale</span> <span class="op">=</span> <span class="fl">2.0</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="fl">60.0</span>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="Plot" class="level3">
+<h3 class="anchored" data-anchor-id="Plot"><code>Plot</code></h3>
+<p>Static methods. Draws come from a fit or a <code>draws_array</code>. Densities use a Gaussian kernel with R’s <code>bw.nrd0</code> bandwidth on 512 points, quantiles use R’s type 7 rule, and ranks average ties.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Plot-trace"><code>Plot::trace()</code></span></td>
+<td>Chains overlaid by iteration (<code>mcmc_trace()</code>).</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-hist"><code>Plot::hist()</code></span></td>
+<td>Histogram of all draws (<code>mcmc_hist()</code>).</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-dens"><code>Plot::dens()</code></span></td>
+<td>Kernel density of all draws, or of each chain with <code>byChain</code> (<code>mcmc_dens()</code>, <code>mcmc_dens_overlay()</code>).</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-intervals"><code>Plot::intervals()</code></span></td>
+<td>Inner and outer intervals with a point estimate (<code>mcmc_intervals()</code>).</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-rankHist"><code>Plot::rankHist()</code></span></td>
+<td>Rank histogram of each chain (<code>mcmc_rank_hist()</code>).</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-scatter"><code>Plot::scatter()</code></span></td>
+<td>Joint draws of two variables (<code>mcmc_scatter()</code>).</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-acf"><code>Plot::acf()</code></span></td>
+<td>Autocorrelation of each chain (<code>mcmc_acf()</code>).</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-paretoK"><code>Plot::paretoK()</code></span></td>
+<td>Pareto k by observation (<code>pareto_k_plot()</code>).</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-bandwidth"><code>Plot::bandwidth()</code></span></td>
+<td>R’s <code>bw.nrd0</code> bandwidth.</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-density"><code>Plot::density()</code></span></td>
+<td>Gaussian kernel density of <code>x</code> at each point of <code>at</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-autocorrelation"><code>Plot::autocorrelation()</code></span></td>
+<td>Autocorrelations for lags 0 to <code>lags</code>, as R’s <code>acf()</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="Plot-ranks"><code>Plot::ranks()</code></span></td>
+<td>One-based ranks with ties averaged, as R’s <code>rank()</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Plot-range"><code>Plot::range()</code></span></td>
+<td>The data range, padded when every value is equal.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>trace(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>hist(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$bins</span> <span class="op">=</span> <span class="dv">30</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dens(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$byChain</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>intervals(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$prob</span> <span class="op">=</span> <span class="fl">0.5</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$probOuter</span> <span class="op">=</span> <span class="fl">0.9</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$pointEst</span> <span class="op">=</span> <span class="st">'median'</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>rankHist(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$bins</span> <span class="op">=</span> <span class="dv">20</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>scatter(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$xVariable</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$yVariable</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>acf(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$lags</span> <span class="op">=</span> <span class="dv">20</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>paretoK(<span class="dt">array</span> <span class="va">$loo</span>)<span class="ot">:</span> Figure</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>bandwidth(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>density(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$at</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$bw</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>autocorrelation(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$lags</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>ranks(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(<span class="dt">array</span> <span class="va">$values</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+</section>
+<section id="model-methods-and-stan-functions" class="level2">
+<h2 class="anchored" data-anchor-id="model-methods-and-stan-functions">Model methods and Stan functions</h2>
+<section id="StanFunctions" class="level3">
+<h3 class="anchored" data-anchor-id="StanFunctions"><code>StanFunctions</code></h3>
+<p>Returned by <code>exposeFunctions()</code>. Arguments and results use PHP numbers and zero-indexed lists: vectors and arrays are lists, matrices are lists of rows, complex numbers are <code>[re, im]</code>, and tuples are lists. Call a function as a method, such as <code>$f-&gt;add(1.5, 2)</code>. Needs the FFI extension.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="StanFunctions-compile"><code>StanFunctions::compile()</code></span></td>
+<td>Compile, or reuse, the functions library for a Stan file. Libraries are cached beside the file.</td>
+</tr>
+<tr class="even">
+<td><span id="StanFunctions-functions"><code>-&gt;functions()</code></span></td>
+<td>Each function’s <code>return_type</code>, <code>arguments</code>, <code>rng</code>, <code>supported</code>, and <code>reason</code>, with Stan type names.</td>
+</tr>
+<tr class="odd">
+<td><span id="StanFunctions-call"><code>-&gt;call()</code></span></td>
+<td>Call a function with positional or named arguments. <code>_rng</code> functions also accept <code>seed</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="StanFunctions-library"><code>-&gt;library()</code></span></td>
+<td>The compiled library path.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>compile(<span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> []<span class="ot">,</span> <span class="ot">?</span><span class="dt">string</span> <span class="va">$outputDir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="kw">self</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>functions()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>call(<span class="dt">string</span> <span class="va">$function</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$arguments</span>)<span class="ot">:</span> <span class="dt">mixed</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>library()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="ModelMethods" class="level3">
+<h3 class="anchored" data-anchor-id="ModelMethods"><code>ModelMethods</code></h3>
+<p>What a fit’s <a href="./api-fits.html#model-methods-1">model methods</a> use, without a fit. Densities drop constants, as in CmdStanR. Named variables are nested zero-indexed lists, and unconstrained vectors are flat lists. Needs the FFI extension.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="ModelMethods-compile"><code>ModelMethods::compile()</code></span></td>
+<td>Build, or reuse, the library for a Stan file and bind it to data.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-build"><code>ModelMethods::build()</code></span></td>
+<td>Build, or reuse, the library and return its path.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-construct"><code>new ModelMethods()</code></span></td>
+<td>Bind a built library to data: an array, a <code>StanData</code>, a table, or a JSON file.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-logProb"><code>-&gt;logProb()</code></span></td>
+<td>Log density at unconstrained values.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-gradLogProb"><code>-&gt;gradLogProb()</code></span></td>
+<td><code>log_prob</code> and <code>gradient</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-hessian"><code>-&gt;hessian()</code></span></td>
+<td><code>log_prob</code>, <code>grad_log_prob</code>, and <code>hessian</code>, by finite differences of autodiff gradients.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-unconstrainVariables"><code>-&gt;unconstrainVariables()</code></span></td>
+<td>A flat unconstrained list from values keyed by parameter name.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-unconstrainDraws"><code>-&gt;unconstrainDraws()</code></span></td>
+<td>Unconstrained rows from draw rows keyed by names such as <code>x[1,2]</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-constrainVariables"><code>-&gt;constrainVariables()</code></span></td>
+<td>Constrained values keyed by variable.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-unconstrainedParamNames"><code>-&gt;unconstrainedParamNames()</code></span></td>
+<td>Unconstrained parameter names, such as <code>s[1]</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-constrainedParamNames"><code>-&gt;constrainedParamNames()</code></span></td>
+<td>Constrained names in CmdStan CSV column order.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-variableSkeleton"><code>-&gt;variableSkeleton()</code></span></td>
+<td>Each variable’s dimensions: <code>[]</code> for scalars, a trailing 2 for complex values.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-numUnconstrained"><code>-&gt;numUnconstrained()</code></span></td>
+<td>The number of unconstrained parameters.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-seedRng"><code>-&gt;seedRng()</code></span></td>
+<td>Reseed the generator that <code>constrainVariables()</code> uses for generated quantities.</td>
+</tr>
+<tr class="odd">
+<td><span id="ModelMethods-seed"><code>-&gt;seed()</code></span></td>
+<td>The current seed.</td>
+</tr>
+<tr class="even">
+<td><span id="ModelMethods-library"><code>-&gt;library()</code></span></td>
+<td>The library path.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>compile(<span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span> <span class="dt">object</span><span class="op">|</span><span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$data</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$seed</span> <span class="op">=</span> <span class="dv">1</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> []<span class="ot">,</span> <span class="ot">?</span><span class="dt">string</span> <span class="va">$outputDir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="kw">self</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>build(<span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> []<span class="ot">,</span> <span class="ot">?</span><span class="dt">string</span> <span class="va">$outputDir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> ModelMethods(<span class="dt">string</span> <span class="va">$library</span><span class="ot">,</span> <span class="dt">object</span><span class="op">|</span><span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$data</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$seed</span> <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>logProb(<span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>gradLogProb(<span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>hessian(<span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>unconstrainVariables(<span class="dt">array</span> <span class="va">$variables</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>unconstrainDraws(<span class="dt">array</span> <span class="va">$draws</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>constrainVariables(<span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$transformedParameters</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$generatedQuantities</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>unconstrainedParamNames()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>constrainedParamNames(<span class="dt">bool</span> <span class="va">$transformedParameters</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$generatedQuantities</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>variableSkeleton(<span class="dt">bool</span> <span class="va">$transformedParameters</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$generatedQuantities</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>numUnconstrained()<span class="ot">:</span> <span class="dt">int</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>seedRng(<span class="dt">int</span> <span class="va">$seed</span>)<span class="ot">:</span> <span class="dt">void</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>seed()<span class="ot">:</span> <span class="dt">int</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>library()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+</section>
+<section id="summaries-and-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="summaries-and-diagnostics">Summaries and diagnostics</h2>
+<section id="Summary" class="level3">
+<h3 class="anchored" data-anchor-id="Summary"><code>Summary</code></h3>
+<p>Static methods on a <code>draws_list</code> (<code>[chain][variable =&gt; list]</code>) or, for single measures, a list of chains. <code>CmdStanFit::summary()</code> with <code>measures</code> uses these.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Summary-summarise"><code>Summary::summarise()</code></span></td>
+<td>One row per variable, with posterior’s <code>summarise_draws()</code> semantics.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-fromDrawsArray"><code>Summary::fromDrawsArray()</code></span></td>
+<td>A <code>draws_list</code> from a <code>draws_array</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-measure"><code>Summary::measure()</code></span></td>
+<td>One named measure. Quantile measures return named arrays such as <code>q5</code> and <code>ess_q5</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-defaultSummaryMeasures"><code>Summary::defaultSummaryMeasures()</code></span></td>
+<td>The names in <code>default_summary_measures</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-defaultConvergenceMeasures"><code>Summary::defaultConvergenceMeasures()</code></span></td>
+<td>The names in <code>default_convergence_measures</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-defaultMcseMeasures"><code>Summary::defaultMcseMeasures()</code></span></td>
+<td>The names in <code>default_mcse_measures</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-mean"><code>Summary::mean()</code></span></td>
+<td>Mean.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-median"><code>Summary::median()</code></span></td>
+<td>Median.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-var"><code>Summary::var()</code></span></td>
+<td>Variance.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-sd"><code>Summary::sd()</code></span></td>
+<td>Standard deviation.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-mad"><code>Summary::mad()</code></span></td>
+<td>Median absolute deviation, scaled by 1.4826.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-quantile2"><code>Summary::quantile2()</code></span></td>
+<td>Quantiles keyed <code>q5</code>, <code>q95</code>, and so on. All <code>NAN</code> when draws contain NaN.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-rhat"><code>Summary::rhat()</code></span></td>
+<td>Rank-normalized split R-hat.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-rhatBasic"><code>Summary::rhatBasic()</code></span></td>
+<td>Basic R-hat, split by default.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-essBulk"><code>Summary::essBulk()</code></span></td>
+<td>Bulk ESS.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-essTail"><code>Summary::essTail()</code></span></td>
+<td>Tail ESS.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-essBasic"><code>Summary::essBasic()</code></span></td>
+<td>Basic ESS, split by default.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-essMean"><code>Summary::essMean()</code></span></td>
+<td>ESS of the mean.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-essSd"><code>Summary::essSd()</code></span></td>
+<td>ESS of the standard deviation.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-essMedian"><code>Summary::essMedian()</code></span></td>
+<td>ESS of the median.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-essQuantile"><code>Summary::essQuantile()</code></span></td>
+<td>ESS of quantiles, keyed <code>ess_q5</code> and so on.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-mcseMean"><code>Summary::mcseMean()</code></span></td>
+<td>Monte Carlo standard error of the mean.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-mcseSd"><code>Summary::mcseSd()</code></span></td>
+<td>MCSE of the standard deviation.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-mcseMedian"><code>Summary::mcseMedian()</code></span></td>
+<td>MCSE of the median.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-mcseQuantile"><code>Summary::mcseQuantile()</code></span></td>
+<td>MCSE of quantiles, keyed <code>mcse_q5</code> and so on.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-chains"><code>Summary::chains()</code></span></td>
+<td>Draws as a list of float chains.</td>
+</tr>
+<tr class="odd">
+<td><span id="Summary-splitChains"><code>Summary::splitChains()</code></span></td>
+<td>Each chain halved, dropping the middle draw of odd-length chains.</td>
+</tr>
+<tr class="even">
+<td><span id="Summary-percent"><code>Summary::percent()</code></span></td>
+<td>A probability formatted as posterior names quantiles, such as <code>5</code> for 0.05.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>summarise(<span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$measures</span> <span class="op">=</span> []<span class="ot">,</span> <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>])<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fromDrawsArray(<span class="dt">array</span> <span class="va">$draws</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>measure(<span class="dt">string</span> <span class="va">$name</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>])<span class="ot">:</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>defaultSummaryMeasures()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>defaultConvergenceMeasures()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>defaultMcseMeasures()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>mean(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>median(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span>(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>sd(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>mad(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>quantile2(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>])<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>rhat(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>rhatBasic(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$split</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>essBulk(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>essTail(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>essBasic(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$split</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>essMean(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>essSd(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>essMedian(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>essQuantile(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>])<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>mcseMean(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>mcseSd(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>mcseMedian(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>mcseQuantile(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>])<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>chains(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>splitChains(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>percent(<span class="dt">float</span> <span class="va">$p</span>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="Psis" class="level3">
+<h3 class="anchored" data-anchor-id="Psis"><code>Psis</code></h3>
+<p>Static methods following posterior and loo.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Psis-paretoSmooth"><code>Psis::paretoSmooth()</code></span></td>
+<td>posterior’s <code>pareto_smooth()</code> with <code>return_k</code> and <code>extra_diags</code>: smoothed values, diagnostics, and warnings.</td>
+</tr>
+<tr class="even">
+<td><span id="Psis-paretoKhat"><code>Psis::paretoKhat()</code></span></td>
+<td>The Pareto k diagnostic without smoothing.</td>
+</tr>
+<tr class="odd">
+<td><span id="Psis-paretoSmoothLogWeights"><code>Psis::paretoSmoothLogWeights()</code></span></td>
+<td>Right-tail smoothing of log weights.</td>
+</tr>
+<tr class="even">
+<td><span id="Psis-psis"><code>Psis::psis()</code></span></td>
+<td>loo’s <code>psis()</code> for a vector or a draws-by-observations matrix of log ratios.</td>
+</tr>
+<tr class="odd">
+<td><span id="Psis-gpdfit"><code>Psis::gpdfit()</code></span></td>
+<td>Zhang and Stephens’ generalized Pareto fit: <code>k</code> and <code>sigma</code>, <code>NAN</code> when undefined.</td>
+</tr>
+<tr class="even">
+<td><span id="Psis-qgeneralizedPareto"><code>Psis::qgeneralizedPareto()</code></span></td>
+<td>The generalized Pareto quantile function.</td>
+</tr>
+<tr class="odd">
+<td><span id="Psis-psTailLength"><code>Psis::psTailLength()</code></span></td>
+<td>The tail length for a number of draws and relative efficiency.</td>
+</tr>
+<tr class="even">
+<td><span id="Psis-psKhatThreshold"><code>Psis::psKhatThreshold()</code></span></td>
+<td>The Pareto k threshold for a number of draws.</td>
+</tr>
+<tr class="odd">
+<td><span id="Psis-psMinSs"><code>Psis::psMinSs()</code></span></td>
+<td>The minimum sample size for a Pareto k.</td>
+</tr>
+<tr class="even">
+<td><span id="Psis-psConvergenceRate"><code>Psis::psConvergenceRate()</code></span></td>
+<td>The convergence rate for a Pareto k and number of draws.</td>
+</tr>
+<tr class="odd">
+<td><span id="Psis-prepareReff"><code>Psis::prepareReff()</code></span></td>
+<td>loo’s preparation of relative efficiencies for PSIS.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>paretoSmooth(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$tail</span> <span class="op">=</span> <span class="st">'both'</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$ndrawsTail</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$areLogWeights</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$smoothDraws</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>paretoKhat(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$tail</span> <span class="op">=</span> <span class="st">'both'</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$ndrawsTail</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$areLogWeights</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>paretoSmoothLogWeights(<span class="dt">array</span> <span class="va">$logWeights</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>psis(<span class="dt">array</span> <span class="va">$logRatios</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="fl">1.0</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>gpdfit(<span class="dt">array</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$wip</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$minGridPts</span> <span class="op">=</span> <span class="dv">30</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$sortX</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>qgeneralizedPareto(<span class="dt">array</span><span class="op">|</span><span class="dt">float</span> <span class="va">$p</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$mu</span> <span class="op">=</span> <span class="fl">0.0</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$sigma</span> <span class="op">=</span> <span class="fl">1.0</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$k</span> <span class="op">=</span> <span class="fl">0.0</span>)<span class="ot">:</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>psTailLength(<span class="dt">int</span> <span class="va">$ndraws</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$rEff</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>psKhatThreshold(<span class="dt">int</span> <span class="va">$ndraws</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>psMinSs(<span class="dt">float</span> <span class="va">$k</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>psConvergenceRate(<span class="dt">float</span> <span class="va">$k</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$ndraws</span>)<span class="ot">:</span> <span class="dt">float</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>prepareReff(<span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$len</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="Loo" class="level3">
+<h3 class="anchored" data-anchor-id="Loo"><code>Loo</code></h3>
+<p>Static methods on a <code>draws_array</code> or <code>draws_matrix</code> of log-likelihood values. <code>CmdStanMCMC::loo()</code> and <code>waic()</code> use these.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Loo-loo"><code>Loo::loo()</code></span></td>
+<td>PSIS-LOO: estimates, pointwise rows, diagnostics, and warnings. <code>rEff: true</code> computes relative efficiencies as CmdStanR does.</td>
+</tr>
+<tr class="even">
+<td><span id="Loo-fromFit"><code>Loo::fromFit()</code></span></td>
+<td>PSIS-LOO for a fit’s variable, as <code>CmdStanMCMC::loo()</code>.</td>
+</tr>
+<tr class="odd">
+<td><span id="Loo-waic"><code>Loo::waic()</code></span></td>
+<td>WAIC: estimates, pointwise rows, and warnings.</td>
+</tr>
+<tr class="even">
+<td><span id="Loo-waicFromFit"><code>Loo::waicFromFit()</code></span></td>
+<td>WAIC for a fit’s variable.</td>
+</tr>
+<tr class="odd">
+<td><span id="Loo-relativeEff"><code>Loo::relativeEff()</code></span></td>
+<td>loo’s <code>relative_eff()</code> for likelihood values.</td>
+</tr>
+<tr class="even">
+<td><span id="Loo-relativeEffLogLik"><code>Loo::relativeEffLogLik()</code></span></td>
+<td>Relative efficiencies from log-likelihood values, as CmdStanR computes them.</td>
+</tr>
+<tr class="odd">
+<td><span id="Loo-paretoKTable"><code>Loo::paretoKTable()</code></span></td>
+<td>Counts, proportions, and minimum n_eff per Pareto k interval.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>loo(<span class="dt">array</span> <span class="va">$logLik</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="dt">bool</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fromFit(CmdStanFit <span class="va">$fit</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variables</span> <span class="op">=</span> <span class="st">'log_lik'</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="dt">bool</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>waic(<span class="dt">array</span> <span class="va">$logLik</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>waicFromFit(CmdStanFit <span class="va">$fit</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variables</span> <span class="op">=</span> <span class="st">'log_lik'</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>relativeEff(<span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>relativeEffLogLik(<span class="dt">array</span> <span class="va">$logLik</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>paretoKTable(<span class="dt">array</span> <span class="va">$loo</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="MomentMatch" class="level3">
+<h3 class="anchored" data-anchor-id="MomentMatch"><code>MomentMatch</code></h3>
+<p>Static methods. Needs the phit draw kernels. <a href="./compatibility.html#moment-matching-and-loo">Compatibility</a> lists the differences from loo.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="MomentMatch-loo"><code>MomentMatch::loo()</code></span></td>
+<td>Moment matching on unconstrained draws, with log-density and log-likelihood callbacks. Returns the <code>loo()</code> result with updated rows and a <code>moment_match</code> key.</td>
+</tr>
+<tr class="even">
+<td><span id="MomentMatch-fromFit"><code>MomentMatch::fromFit()</code></span></td>
+<td>PSIS-LOO, then moment matching with the fit’s model methods.</td>
+</tr>
+<tr class="odd">
+<td><span id="MomentMatch-transform"><code>MomentMatch::transform()</code></span></td>
+<td>One shift, scale, or covariance step.</td>
+</tr>
+<tr class="even">
+<td><span id="MomentMatch-splitTransform"><code>MomentMatch::splitTransform()</code></span></td>
+<td>The split proposal’s affine map and its exact inverse.</td>
+</tr>
+<tr class="odd">
+<td><span id="MomentMatch-splitLogRatios"><code>MomentMatch::splitLogRatios()</code></span></td>
+<td>Split-proposal log importance ratios.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>loo(<span class="dt">array</span> <span class="va">$loo</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$upars</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$logLik</span><span class="ot">,</span> <span class="kw">callable</span> <span class="va">$logProbUpars</span><span class="ot">,</span> <span class="kw">callable</span> <span class="va">$logLikIUpars</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$maxIters</span> <span class="op">=</span> <span class="dv">30</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$kThreshold</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$split</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$cov</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fromFit(CmdStanFit <span class="va">$fit</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variables</span> <span class="op">=</span> <span class="st">'log_lik'</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="dt">bool</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$maxIters</span> <span class="op">=</span> <span class="dv">30</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$kThreshold</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$split</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$cov</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>transform(<span class="dt">string</span> <span class="va">$kind</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$upars</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$lwi</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>splitTransform(<span class="dt">array</span> <span class="va">$upars</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$shift</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$scaling</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$maps</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$steps</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>splitLogRatios(<span class="dt">array</span> <span class="va">$lpZ</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$lpInverse</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$llZ</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$logAbsDet</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="DrawKernels" class="level3">
+<h3 class="anchored" data-anchor-id="DrawKernels"><code>DrawKernels</code></h3>
+<p>Static methods around <code>Phit\draws_moments()</code>, <code>Phit\draws_covariance_map()</code>, and <code>Phit\draws_affine()</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="DrawKernels-available"><code>DrawKernels::available()</code></span></td>
+<td>Whether the three kernels are available.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-missing"><code>DrawKernels::missing()</code></span></td>
+<td>The kernel functions that are not available.</td>
+</tr>
+<tr class="odd">
+<td><span id="DrawKernels-require"><code>DrawKernels::require()</code></span></td>
+<td>Throw a <code>RuntimeException</code> naming the missing kernels.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-moments"><code>DrawKernels::moments()</code></span></td>
+<td>Weighted mean and covariance.</td>
+</tr>
+<tr class="odd">
+<td><span id="DrawKernels-covarianceMap"><code>DrawKernels::covarianceMap()</code></span></td>
+<td>The map <code>A</code> with <code>A · source · Aᵀ = target</code>, and its log absolute determinant.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-affine"><code>DrawKernels::affine()</code></span></td>
+<td><code>y = A x + b</code> for every draw.</td>
+</tr>
+<tr class="odd">
+<td><span id="DrawKernels-affineAbout"><code>DrawKernels::affineAbout()</code></span></td>
+<td><code>y = A (x − from) + to</code> for every draw.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-isNumericalFailure"><code>DrawKernels::isNumericalFailure()</code></span></td>
+<td>Whether a kernel exception reports a numerical failure.</td>
+</tr>
+<tr class="odd">
+<td><span id="DrawKernels-apply"><code>DrawKernels::apply()</code></span></td>
+<td>Matrix-vector product.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-multiply"><code>DrawKernels::multiply()</code></span></td>
+<td>Product of square matrices.</td>
+</tr>
+<tr class="odd">
+<td><span id="DrawKernels-diagonal"><code>DrawKernels::diagonal()</code></span></td>
+<td>A diagonal matrix.</td>
+</tr>
+<tr class="even">
+<td><span id="DrawKernels-identity"><code>DrawKernels::identity()</code></span></td>
+<td>An identity matrix.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>available()<span class="ot">:</span> <span class="dt">bool</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>missing(<span class="dt">array</span> <span class="va">$functions</span> <span class="op">=</span> <span class="kw">self</span>::<span class="cn">FUNCTIONS</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span>()<span class="ot">:</span> <span class="dt">void</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>moments(<span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$weights</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$normalization</span> <span class="op">=</span> <span class="st">'population'</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>covarianceMap(<span class="dt">array</span> <span class="va">$source</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$target</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>affine(<span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$matrix</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$shift</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>affineAbout(<span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$matrix</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$from</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$to</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>isNumericalFailure(<span class="bu">Throwable</span> <span class="va">$e</span>)<span class="ot">:</span> <span class="dt">bool</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>apply(<span class="dt">array</span> <span class="va">$matrix</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$x</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>multiply(<span class="dt">array</span> <span class="va">$a</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$b</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>diagonal(<span class="dt">array</span> <span class="va">$diagonal</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>identity(<span class="dt">int</span> <span class="va">$n</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+</section>
+<section id="draws-and-initial-values" class="level2">
+<h2 class="anchored" data-anchor-id="draws-and-initial-values">Draws and initial values</h2>
+<section id="Rvars" class="level3">
+<h3 class="anchored" data-anchor-id="Rvars"><code>Rvars</code></h3>
+<p>Static methods. <code>draws(format: 'draws_rvars')</code> uses these.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Rvars-fromFit"><code>Rvars::fromFit()</code></span></td>
+<td><code>draws_rvars</code> for a fit’s variables.</td>
+</tr>
+<tr class="even">
+<td><span id="Rvars-fromDrawsDf"><code>Rvars::fromDrawsDf()</code></span></td>
+<td><code>draws_rvars</code> from <code>draws_df</code> rows.</td>
+</tr>
+<tr class="odd">
+<td><span id="Rvars-fromDrawsArray"><code>Rvars::fromDrawsArray()</code></span></td>
+<td><code>draws_rvars</code> from a <code>draws_array</code>.</td>
+</tr>
+<tr class="even">
+<td><span id="Rvars-draw"><code>Rvars::draw()</code></span></td>
+<td>The values of one zero-based draw, nested by dimensions.</td>
+</tr>
+<tr class="odd">
+<td><span id="Rvars-parseName"><code>Rvars::parseName()</code></span></td>
+<td>Split <code>x[1,2]</code> into <code>['x', [1, 2]]</code>.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fromFit(CmdStanFit <span class="va">$fit</span><span class="ot">,</span> <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fromDrawsDf(<span class="dt">array</span> <span class="va">$rows</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>fromDrawsArray(<span class="dt">array</span> <span class="va">$draws</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>draw(<span class="dt">array</span> <span class="va">$rvar</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$draw</span>)<span class="ot">:</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>parseName(<span class="dt">string</span> <span class="va">$name</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</section>
+<section id="Inits" class="level3">
+<h3 class="anchored" data-anchor-id="Inits"><code>Inits</code></h3>
+<p>Static methods. The <code>init</code> option uses these when given a fit or draws.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span id="Inits-fromFit"><code>Inits::fromFit()</code></span></td>
+<td>One set of initial values per process from a fit’s draws.</td>
+</tr>
+<tr class="even">
+<td><span id="Inits-fromDraws"><code>Inits::fromDraws()</code></span></td>
+<td>The same from draw rows or a <code>draws_array</code>. Fewer draws than processes are recycled, and more are resampled without replacement.</td>
+</tr>
+<tr class="odd">
+<td><span id="Inits-nest"><code>Inits::nest()</code></span></td>
+<td>One draw’s flat columns as nested arrays sized by the largest index, keeping only model parameters.</td>
+</tr>
+<tr class="even">
+<td><span id="Inits-validate"><code>Inits::validate()</code></span></td>
+<td>Check a list of per-process initial values.</td>
+</tr>
+<tr class="odd">
+<td><span id="Inits-sampleNoReplace"><code>Inits::sampleNoReplace()</code></span></td>
+<td>Weighted sampling without replacement, returning zero-based indices.</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Signatures
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fromFit(CmdStanFit <span class="va">$fit</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$numProcs</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$parameters</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$seed</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$warnPartial</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fromDraws(<span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$numProcs</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$parameters</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$seed</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$warnPartial</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>nest(<span class="dt">array</span> <span class="va">$row</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$parameters</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>validate(<span class="dt">array</span> <span class="va">$inits</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$numProcs</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">array</span> <span class="va">$parameters</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$warnPartial</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>sampleNoReplace(<span class="dt">array</span> <span class="va">$weights</span><span class="ot">,</span> <span class="dt">int</span> <span class="va">$size</span><span class="ot">,</span> Random\<span class="bu">Randomizer</span> <span class="va">$rng</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/cmdstanphp\.phpstats\.org\/docs");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

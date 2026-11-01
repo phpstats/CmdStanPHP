@@ -106,31 +106,39 @@
                 "path": "figures.qmd"
             },
             {
-                "title": "API reference",
+                "title": "Compatibility with CmdStanR",
+                "path": "compatibility.qmd"
+            },
+            {
+                "title": "Functions and methods",
                 "path": "api.qmd"
             },
             {
-                "title": "API: functions",
+                "title": "Functions",
                 "path": "api-functions.qmd"
             },
             {
-                "title": "API: options",
+                "title": "Options",
                 "path": "api-options.qmd"
             },
             {
-                "title": "API: models",
+                "title": "CmdStanModel",
                 "path": "api-models.qmd"
             },
             {
-                "title": "API: fits",
+                "title": "Fits",
                 "path": "api-fits.qmd"
             },
             {
-                "title": "API: data frames and the phpstats family",
+                "title": "Data frames",
                 "path": "api-data-frames.qmd"
             },
             {
-                "title": "API: errors",
+                "title": "Helper classes",
+                "path": "api-helpers.qmd"
+            },
+            {
+                "title": "Errors",
                 "path": "api-errors.qmd"
             },
             {
@@ -140,10 +148,6 @@
             {
                 "title": "Examples",
                 "path": "examples.qmd"
-            },
-            {
-                "title": "Compatibility with CmdStanR",
-                "path": "compatibility.qmd"
             },
             {
                 "title": "Contributing",

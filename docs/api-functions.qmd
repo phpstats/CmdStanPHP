@@ -1,44 +1,213 @@
 ---
-title: "API: functions"
+title: "Functions"
 ---
 
-Standalone functions in the `CmdStan` namespace, which keep CmdStanR's snake_case names.
+Standalone functions in the `CmdStan` namespace. They keep CmdStanR's snake_case names. [`options()` and `cmdstan_option()`](api-options.qmd#global-options) are on the options page.
 
-## Models and Stan files
+## Models and Stan files {#models-and-stan-files}
 
-| Function | Result |
-| --- | --- |
-| `cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)` | A `CmdStanModel`, compiled or reusing an up-to-date executable |
-| `compile_stan_file(stanFile, ...)` | The executable path, compiled with `cmdstan_model()`'s build arguments but without a model object |
-| `check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)` | `true`, or an exception for invalid Stan |
-| `format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` | The formatted program. `overwriteFile` rewrites the file and keeps a `.bak-YYYYMMDDHHMMSS` copy unless `backup: false`. |
-| `variables_stan_file(stanFile, includePaths: null)` | The program's declarations, without compiling |
-| `print_stan_file(stanFile, lineNumbers: null)` | Prints the program |
-| `stan_build_info(exeFile)` | How an executable was built, from its build record and what it reports about itself |
-| `write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')` | The path of `model_<hash>.stan`, or of `basename`. An identical existing file is left untouched. |
+### `cmdstan_model()` {#cmdstan_model}
 
-## CmdStan installation
+```php
+cmdstan_model(
+    ?string $stanFile = null,
+    ?string $exeFile = null,
+    bool $quiet = true,
+    ?string $dir = null,
+    bool $pedantic = false,
+    ?array $includePaths = null,
+    ?string $userHeader = null,
+    ?array $cppOptions = null,
+    ?array $stancOptions = null,
+    ?bool $forceRecompile = null,
+): CmdStanModel
+```
 
-| Function | Result |
-| --- | --- |
-| `install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)` | Downloads or unpacks a release, builds it, and selects it. See [Installation](installation.qmd#install-cmdstan). |
-| `set_cmdstan_path(path)`, `cmdstan_path()` | Selects or returns the CmdStan installation |
-| `cmdstan_version()` | The selected CmdStan's version |
-| `check_cmdstan_toolchain()` | Paths and versions of make, CmdStan's C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed. |
-| `cmdstan_make_local(dir: null, cppOptions: [], append: true)` | Reads or writes CmdStan's `make/local` |
-| `rebuild_cmdstan(cores: null, timeout: null)` | Cleans and rebuilds the selected CmdStan |
+Returns a `CmdStanModel`. Give `stanFile`, whose executable is built beside it or in `dir`, or `exeFile` alone to use an existing executable without building. The arguments are those of [`new CmdStanModel()`](api-models.qmd#constructor), which describes them.
 
-CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. `set_cmdstan_path()` refuses an older installation, discovery skips one, and `install_cmdstan()` rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan's error message.
+```php
+$model = CmdStan\cmdstan_model('bernoulli.stan');
+```
 
-## Data and CSV files
+### `compile_stan_file()` {#compile_stan_file}
 
-| Function | Result |
-| --- | --- |
-| `write_stan_json(data, file, alwaysDecimal: false, variables: null)` | Writes data, initial values, or a metric as JSON. `data` may be an array, a `StanData`, or a table. With `variables` (stanc's declarations, such as `$model->variables()['data']`), `int` variables are written as integers and tuples as Stan's `{"1": ..., "2": ...}` objects. |
-| `read_cmdstan_csv(files)` | A fit from one or more CmdStan CSV files (`.csv`, `.csv.gz`, or `.csv.bz2`) |
-| `as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)` | The same, reading only `variables` and with `format` as the fit's default draws format |
-| `read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)` | CmdStanR's `read_cmdstan_csv()` list shape |
-| `draws_to_csv(chains, dir)` | Writes `[chain][iteration][variable]` draw rows to one CSV file per chain |
+```php
+compile_stan_file(
+    string $stanFile,
+    bool $quiet = true,
+    ?string $dir = null,
+    bool $pedantic = false,
+    ?array $includePaths = null,
+    ?string $userHeader = null,
+    ?array $cppOptions = null,
+    ?array $stancOptions = null,
+    ?bool $forceRecompile = null,
+): string
+```
+
+Returns the executable path. Takes `cmdstan_model()`'s build arguments and reuses an up-to-date executable in the same way.
+
+### `check_syntax_stan_file()` {#check_syntax_stan_file}
+
+```php
+check_syntax_stan_file(
+    string $stanFile,
+    ?array $includePaths = null,
+    bool $pedantic = false,
+    array $stancOptions = [],
+    bool $quiet = false,
+): bool
+```
+
+Returns `true`. Throws a `RuntimeException` with stanc's message for invalid Stan. `pedantic: true` adds stanc's pedantic warnings, and `quiet: true` suppresses stanc's output.
+
+### `format_stan_file()` {#format_stan_file}
+
+```php
+format_stan_file(
+    string $stanFile,
+    ?array $includePaths = null,
+    bool $overwriteFile = false,
+    array|bool $canonicalize = false,
+    bool $backup = true,
+    ?int $maxLineLength = null,
+    bool $quiet = false,
+): string
+```
+
+Returns the formatted program. `canonicalize` is `true` for every canonicalization or a list such as `['deprecations', 'braces']`. `overwriteFile: true` rewrites the file and keeps a `.bak-YYYYMMDDHHMMSS` copy unless `backup: false`.
+
+### `variables_stan_file()` {#variables_stan_file}
+
+```php
+variables_stan_file(
+    string $stanFile,
+    ?array $includePaths = null,
+): array
+```
+
+Returns the `data`, `parameters`, `transformed_parameters`, and `generated_quantities` declarations from `stanc --info`, each keyed by variable name with its type and number of dimensions.
+
+### `print_stan_file()` {#print_stan_file}
+
+```php
+print_stan_file(string $stanFile, ?bool $lineNumbers = null): void
+```
+
+Prints with line numbers when `lineNumbers` is `true`. The default comes from the `cmdstanr_print_line_numbers` option.
+
+### `write_stan_file()` {#write_stan_file}
+
+```php
+write_stan_file(
+    array|string $code,
+    ?string $file = null,
+    ?string $dir = null,
+    ?string $basename = null,
+    bool $forceOverwrite = false,
+    string $hashSalt = '',
+): string
+```
+
+Returns the path. `code` is a string or a list of lines. Without `file`, the file is `dir/basename`, where `dir` defaults to the `cmdstanr_write_stan_file_dir` option or the system temporary directory and `basename` to `model_<hash>.stan`. An identical existing file is left untouched, so its executable stays current, unless `forceOverwrite: true`.
+
+### `stan_build_info()` {#stan_build_info}
+
+```php
+stan_build_info(string $exeFile): array
+```
+
+Returns the executable's build record and the features it reports about itself (`stan_threads`, `stan_mpi`, `stan_opencl`, `stan_no_range_checks`, and `stan_version`). The same as [`CmdStanModel::stanBuildInfo()`](api-models.qmd#stanBuildInfo).
+
+## CmdStan installation {#cmdstan-installation}
+
+CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. `set_cmdstan_path()` refuses an older installation, discovery skips one, and `install_cmdstan()` rejects older versions. Options added in newer CmdStan releases fail on older ones with CmdStan's error message.
+
+### `install_cmdstan()` {#install_cmdstan}
+
+```php
+install_cmdstan(
+    ?string $version = null,
+    ?string $dir = null,
+    ?int $cores = null,
+    ?float $timeout = null,
+    bool $overwrite = false,
+    ?string $releaseUrl = null,
+    ?string $releaseFile = null,
+    array $cppOptions = [],
+    bool $checkToolchain = true,
+    ?bool $copyMakeLocal = null,
+): string
+```
+
+Returns the installation directory, `~/.cmdstan/cmdstan-<version>` unless `dir` is given. Without a version, installs the latest release. Versions before 2.37 are rejected. `cores` sets the parallel make jobs (default: the `mc.cores` option, else 1), and `timeout` is in seconds. `releaseFile` is a local `.tar.gz` and `releaseUrl` an HTTPS `.tar.gz` URL. `cppOptions` are written to `make/local` before the build. An existing installation is replaced only with `overwrite: true`, and it is restored if the new build fails. [Installation](installation.qmd#install-cmdstan) gives examples.
+
+### `set_cmdstan_path()` {#set_cmdstan_path}
+
+```php
+set_cmdstan_path(string $path): void
+```
+
+The path must contain CmdStan's makefile and `bin/stanc`. Throws for a missing installation or a version before 2.37. The selection lasts for the PHP process.
+
+### `cmdstan_path()` {#cmdstan_path}
+
+```php
+cmdstan_path(): string
+```
+
+Without a selection, uses the `CMDSTAN` environment variable, then the highest supported version under `~/.cmdstan/cmdstan-*`. Throws a `RuntimeException` when none is found.
+
+### `cmdstan_version()` {#cmdstan_version}
+
+```php
+cmdstan_version(): string
+```
+
+Returns a version string such as `2.40.0`.
+
+### `check_cmdstan_toolchain()` {#check_cmdstan_toolchain}
+
+```php
+check_cmdstan_toolchain(): array
+```
+
+Returns the path and version of `make`, CmdStan's C++ compiler, and `stanc` when CmdStan is installed. Throws a `RuntimeException` when make or the compiler is missing. A successful check does not prove that a compilation will succeed.
+
+### `cmdstan_make_local()` {#cmdstan_make_local}
+
+```php
+cmdstan_make_local(
+    ?string $dir = null,
+    array $cppOptions = [],
+    bool $append = true,
+): array
+```
+
+Returns the current `make/local` lines. Named `cppOptions` entries are written as `NAME=value`, with booleans as `true` and `false`, and list entries as raw lines. Appends unless `append: false`. `dir` defaults to the selected CmdStan.
+
+### `rebuild_cmdstan()` {#rebuild_cmdstan}
+
+```php
+rebuild_cmdstan(?int $cores = null, ?float $timeout = null): void
+```
+
+Runs `make clean-all` and `make build`. `cores` sets the parallel make jobs, and `timeout` is in seconds.
+
+## Data and CSV files {#data-and-csv-files}
+
+### `write_stan_json()` {#write_stan_json}
+
+```php
+write_stan_json(
+    object|array $data,
+    string $file,
+    bool $alwaysDecimal = false,
+    ?array $variables = null,
+): string
+```
+
+Returns the file path. `data` is an array, a `StanData`, or a [table](api-data-frames.qmd#data-in). With `variables` (stanc's declarations, such as `$model->variables()['data']`), `int` variables are written as integers and tuples as Stan's `{"1": ..., "2": ...}` objects. `alwaysDecimal: true` writes every value of a non-`int` variable as a floating-point number.
 
 Data arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:
 
@@ -46,12 +215,168 @@ Data arrays are named PHP arrays at the top level, with lists for Stan arrays, v
 - Missing values, strings, objects, nonfinite numbers, sparse indices, invalid variable names, and ragged arrays are rejected, and the error names the variable.
 - The fitting methods write data with the model's declarations. Every declared data variable is required, `int` variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.
 
-## Figures and examples
+### `read_cmdstan_csv()` {#read_cmdstan_csv}
 
-| Function | Result |
-| --- | --- |
-| `mcmc_trace`, `mcmc_hist`, `mcmc_dens`, `mcmc_dens_overlay`, `mcmc_intervals`, `mcmc_rank_hist`, `mcmc_scatter`, `mcmc_acf`, `pareto_k_plot` | A `Figure`, named after its bayesplot or loo counterpart. See [Figures](figures.qmd). |
-| `cmdstanr_example(example: 'logistic', method: 'sample', ...options)` | A fit of the `logistic`, `schools`, or `schools_ncp` example |
-| `print_example_program(example)` | Prints an example's Stan program |
+```php
+read_cmdstan_csv(array|string $files): CmdStanFit
+```
 
-`num_threads()` is deprecated, as in CmdStanR.
+Returns the fit class for the files' method, such as `CmdStanMCMC`. Accepts `.csv`, `.csv.gz`, and `.csv.bz2` files.
+
+### `as_cmdstan_fit()` {#as_cmdstan_fit}
+
+```php
+as_cmdstan_fit(
+    array|string $files,
+    array|string|null $variables = null,
+    bool $checkDiagnostics = true,
+    ?string $format = null,
+): CmdStanFit
+```
+
+With `variables`, only those variables are read and listed in `metadata()['variables']` and `draws()`. `checkDiagnostics: false` also skips the sampler diagnostics. `format` sets the fit's default draws format.
+
+### `read_cmdstan_csv_list()` {#read_cmdstan_csv_list}
+
+```php
+read_cmdstan_csv_list(
+    array|string $files,
+    array|string|null $variables = null,
+    array|string|null $samplerDiagnostics = null,
+    ?string $format = null,
+): array
+```
+
+Returns `metadata` plus, by method: `time`, `inv_metric`, `step_size`, `warmup_draws`, `post_warmup_draws`, `warmup_sampler_diagnostics`, and `post_warmup_sampler_diagnostics` (sample); `draws` (variational, laplace, pathfinder); `point_estimates` (optimize); `generated_quantities`; or `gradients` and `lp` (diagnose). An empty `variables` or `samplerDiagnostics` selects none.
+
+### `draws_to_csv()` {#draws_to_csv}
+
+```php
+draws_to_csv(array $chains, string $dir): array
+```
+
+`chains` is `[chain][iteration][variable => value]`. Returns the file paths. Column names follow CmdStan's naming.
+
+## Figures and examples {#figures-and-examples}
+
+### `mcmc_trace()` {#mcmc_trace}
+
+```php
+mcmc_trace(CmdStanFit|array $draws, string $variable): Figure
+```
+
+Each figure function returns a [`Figure`](api-helpers.qmd#Figure), named after its bayesplot or loo counterpart. Echo it for ASCII text, or call `vegaLite()`, `html()`, `svg()`, or `png()`. `draws` is a fit or a `draws_array`, and a variable names one column, such as `theta` or `beta[2]`. [Figures](figures.qmd) shows each one.
+
+### `mcmc_hist()` {#mcmc_hist}
+
+```php
+mcmc_hist(
+    CmdStanFit|array $draws,
+    string $variable,
+    int $bins = 30,
+): Figure
+```
+
+Bins have equal width over the observed range.
+
+### `mcmc_dens()` {#mcmc_dens}
+
+```php
+mcmc_dens(CmdStanFit|array $draws, string $variable): Figure
+```
+
+Gaussian kernel with R's `bw.nrd0` bandwidth, as R's `density()`.
+
+### `mcmc_dens_overlay()` {#mcmc_dens_overlay}
+
+```php
+mcmc_dens_overlay(CmdStanFit|array $draws, string $variable): Figure
+```
+
+One curve per chain, with the same kernel and bandwidth rule as `mcmc_dens()`.
+
+### `mcmc_intervals()` {#mcmc_intervals}
+
+```php
+mcmc_intervals(
+    CmdStanFit|array $draws,
+    array|string|null $variables = null,
+    float $prob = 0.5,
+    float $probOuter = 0.9,
+    string $pointEst = 'median',
+): Figure
+```
+
+`null` selects every variable except `lp__` and other names ending in `__`. Base names select all their elements. `pointEst` is `'median'`, `'mean'`, or `'none'`.
+
+### `mcmc_rank_hist()` {#mcmc_rank_hist}
+
+```php
+mcmc_rank_hist(
+    CmdStanFit|array $draws,
+    string $variable,
+    int $bins = 20,
+): Figure
+```
+
+Ranks are pooled over chains, and each panel shows the count expected under uniform ranks.
+
+### `mcmc_scatter()` {#mcmc_scatter}
+
+```php
+mcmc_scatter(
+    CmdStanFit|array $draws,
+    string $xVariable,
+    string $yVariable,
+): Figure
+```
+
+For MCMC fits, divergent transitions are flagged.
+
+### `mcmc_acf()` {#mcmc_acf}
+
+```php
+mcmc_acf(
+    CmdStanFit|array $draws,
+    string $variable,
+    int $lags = 20,
+): Figure
+```
+
+Lags 0 to `lags`, as bayesplot's `mcmc_acf_bar()`.
+
+### `pareto_k_plot()` {#pareto_k_plot}
+
+```php
+pareto_k_plot(array $loo): Figure
+```
+
+Takes a `CmdStanMCMC::loo()` or `Loo::loo()` result.
+
+### `cmdstanr_example()` {#cmdstanr_example}
+
+```php
+cmdstanr_example(
+    string $example = 'logistic',
+    string $method = 'sample',
+    mixed ...$options,
+): CmdStanFit
+```
+
+`example` is `logistic`, `schools`, or `schools_ncp`, and `method` is any fitting method. The model is compiled in the `cmdstanphp_example_dir` option's directory, else `<tmp>/cmdstanphp-examples`, and fitted with its bundled data. Other options go to the method. `quiet` (default `true`) discards console output.
+
+### `print_example_program()` {#print_example_program}
+
+```php
+print_example_program(string $example = 'logistic'): void
+```
+
+`example` is `logistic`, `schools`, or `schools_ncp`.
+
+### `num_threads()` {#num_threads}
+
+```php
+num_threads(): ?int
+```
+
+Returns the `STAN_NUM_THREADS` environment variable as an integer, or `null` when unset. Deprecated, as in CmdStanR. Use the fit's `metadata()`.

@@ -19,7 +19,7 @@ To run an executable without its Stan program, pass `exeFile` alone, as in `cmds
 
 ## Build options
 
-`cppOptions` are make variables for this model's build, such as `['STAN_THREADS' => true]` for within-chain threading. `false` turns an option off even when CmdStan's `make/local` turns it on. `stancOptions` are stanc flags, such as `['O1']`. `includePaths` lists directories searched by `#include`, and `userHeader` names a C++ header with external function definitions. The [API reference](api-models.qmd#model-methods) lists the accepted values.
+`cppOptions` are make variables for this model's build, such as `['STAN_THREADS' => true]` for within-chain threading. `false` turns an option off even when CmdStan's `make/local` turns it on. `stancOptions` are stanc flags, such as `['O1']`. `includePaths` lists directories searched by `#include`, and `userHeader` names a C++ header with external function definitions. [`new CmdStanModel()`](api-models.qmd#constructor) lists the accepted values.
 
 ## When a model is rebuilt
 

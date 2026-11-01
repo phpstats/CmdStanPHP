@@ -1,5 +1,5 @@
 ---
-title: "API reference"
+title: "Functions and methods"
 ---
 
 All classes and functions are in the `CmdStan` namespace. Standalone functions keep CmdStanR's snake_case names. Methods and their parameters are camelCase, so CmdStanR's `fit$output_files()` is `$fit->outputFiles()`, and [Compatibility](compatibility.qmd#method-names) maps every renamed method. CmdStan's option names are unchanged.
@@ -8,38 +8,273 @@ Inference methods accept PHP named arguments or one associative options array, a
 
 | Page | Contents |
 |---|---|
-| [Functions](api-functions.qmd) | Models and Stan files, CmdStan installation, data and CSV files, figures, and examples |
-| [Options](api-options.qmd) | Global options, shared options, and each method's options |
-| [Models](api-models.qmd) | Creating, inspecting, and running a `CmdStanModel` |
-| [Fits](api-fits.qmd) | Draws, summaries, diagnostics, files, model methods, and statistics helpers |
-| [Data frames](api-data-frames.qmd) | Table data, `StanData`, and the phpstats family |
+| [Functions](api-functions.qmd) | Standalone functions: models and Stan files, CmdStan installation, data and CSV files, figures, and examples |
+| [Options](api-options.qmd) | Session options, shared options, and each method's options |
+| [CmdStanModel](api-models.qmd) | Creating, inspecting, and running a model |
+| [Fits](api-fits.qmd) | Draws, summaries, diagnostics, files, and model methods of fits |
+| [Data frames](api-data-frames.qmd) | Table data, `StanData`, and `Tables` |
+| [Helper classes](api-helpers.qmd) | `Figure`, `Plot`, `StanFunctions`, `ModelMethods`, and the statistics classes |
 | [Errors](api-errors.qmd) | Exceptions |
 
-## Sections
+## Functions {#functions}
 
-| Section | Page |
+### Models and Stan files {#models-and-stan-files}
+
+| Function or method | Purpose |
 |---|---|
-| [Functions](api-functions.qmd){#functions} | Functions |
-| [Models and Stan files](api-functions.qmd#models-and-stan-files){#models-and-stan-files} | Functions |
-| [CmdStan installation](api-functions.qmd#cmdstan-installation){#cmdstan-installation} | Functions |
-| [Data and CSV files](api-functions.qmd#data-and-csv-files){#data-and-csv-files} | Functions |
-| [Figures and examples](api-functions.qmd#figures-and-examples){#figures-and-examples} | Functions |
-| [Global options](api-options.qmd#global-options){#global-options} | Options |
-| [Shared options](api-options.qmd#shared-options){#shared-options} | Options |
-| [Method-specific options](api-options.qmd#method-specific-options){#method-specific-options} | Options |
-| [Creating a model](api-models.qmd#model-methods){#model-methods} | Models |
-| [Inspecting a model](api-models.qmd#inspecting-a-model){#inspecting-a-model} | Models |
-| [Running a model](api-models.qmd#running-a-model){#running-a-model} | Models |
-| [Fits](api-fits.qmd){#fit-methods} | Fits |
-| [Draws and summaries](api-fits.qmd#draws-and-summaries){#draws-and-summaries} | Fits |
-| [Diagnostics and run information](api-fits.qmd#diagnostics-and-run-information){#diagnostics-and-run-information} | Fits |
-| [Files and saving](api-fits.qmd#files-and-saving){#files-and-saving} | Fits |
-| [Model methods on fits](api-fits.qmd#model-methods-1){#model-methods-1} | Fits |
-| [Methods of specific fit types](api-fits.qmd#methods-of-specific-fit-types){#methods-of-specific-fit-types} | Fits |
-| [Statistics helpers](api-fits.qmd#statistics-helpers){#statistics-helpers} | Fits |
-| [Data frames and the phpstats family](api-data-frames.qmd){#data-frames-and-the-phpstats-family} | Data frames |
-| [Data in](api-data-frames.qmd#data-in){#data-in} | Data frames |
-| [Regression data](api-data-frames.qmd#regression-data){#regression-data} | Data frames |
-| [Draws and summaries out](api-data-frames.qmd#draws-and-summaries-out){#draws-and-summaries-out} | Data frames |
-| [Part of the phpstats family](api-data-frames.qmd#part-of-the-phpstats-family){#part-of-the-phpstats-family} | Data frames |
-| [Errors](api-errors.qmd){#errors} | Errors |
+| [`cmdstan_model()`](api-functions.qmd#cmdstan_model) | Compile a Stan program, or reuse its up-to-date executable, and return a model. |
+| [`compile_stan_file()`](api-functions.qmd#compile_stan_file) | Compile a Stan file without creating a model object. |
+| [`check_syntax_stan_file()`](api-functions.qmd#check_syntax_stan_file) | Check a Stan file with stanc, without compiling. |
+| [`format_stan_file()`](api-functions.qmd#format_stan_file) | Format a Stan file with stanc. |
+| [`variables_stan_file()`](api-functions.qmd#variables_stan_file) | List a Stan file's declarations without compiling. |
+| [`print_stan_file()`](api-functions.qmd#print_stan_file) | Print a Stan file. |
+| [`write_stan_file()`](api-functions.qmd#write_stan_file) | Write Stan code to a file named after its hash. |
+| [`stan_build_info()`](api-functions.qmd#stan_build_info) | Report how an executable was built. |
+
+### CmdStan installation {#cmdstan-installation}
+
+| Function or method | Purpose |
+|---|---|
+| [`install_cmdstan()`](api-functions.qmd#install_cmdstan) | Download or unpack a CmdStan release, build it, and select it. |
+| [`set_cmdstan_path()`](api-functions.qmd#set_cmdstan_path) | Select a CmdStan installation. |
+| [`cmdstan_path()`](api-functions.qmd#cmdstan_path) | Return the selected CmdStan installation. |
+| [`cmdstan_version()`](api-functions.qmd#cmdstan_version) | Return the selected CmdStan's version. |
+| [`check_cmdstan_toolchain()`](api-functions.qmd#check_cmdstan_toolchain) | Check for make, the C++ compiler, and stanc. |
+| [`cmdstan_make_local()`](api-functions.qmd#cmdstan_make_local) | Read or write CmdStan's make/local. |
+| [`rebuild_cmdstan()`](api-functions.qmd#rebuild_cmdstan) | Clean and rebuild the selected CmdStan. |
+
+### Data and CSV files {#data-and-csv-files}
+
+| Function or method | Purpose |
+|---|---|
+| [`write_stan_json()`](api-functions.qmd#write_stan_json) | Write data, initial values, or a metric as Stan JSON. |
+| [`read_cmdstan_csv()`](api-functions.qmd#read_cmdstan_csv) | Read CmdStan CSV files into a fit. |
+| [`as_cmdstan_fit()`](api-functions.qmd#as_cmdstan_fit) | Read CmdStan CSV files into a fit, optionally selecting variables. |
+| [`read_cmdstan_csv_list()`](api-functions.qmd#read_cmdstan_csv_list) | Read CmdStan CSV files into CmdStanR's read_cmdstan_csv() list. |
+| [`draws_to_csv()`](api-functions.qmd#draws_to_csv) | Write draw rows to one CSV file per chain. |
+
+### Figures and examples {#figures-and-examples}
+
+| Function or method | Purpose |
+|---|---|
+| [`mcmc_trace()`](api-functions.qmd#mcmc_trace) | Trace plot: chains overlaid by iteration. |
+| [`mcmc_hist()`](api-functions.qmd#mcmc_hist) | Histogram of all draws. |
+| [`mcmc_dens()`](api-functions.qmd#mcmc_dens) | Kernel density of all draws. |
+| [`mcmc_dens_overlay()`](api-functions.qmd#mcmc_dens_overlay) | Kernel density of each chain. |
+| [`mcmc_intervals()`](api-functions.qmd#mcmc_intervals) | Inner and outer posterior intervals with a point estimate. |
+| [`mcmc_rank_hist()`](api-functions.qmd#mcmc_rank_hist) | Rank histogram of each chain. |
+| [`mcmc_scatter()`](api-functions.qmd#mcmc_scatter) | Joint draws of two variables. |
+| [`mcmc_acf()`](api-functions.qmd#mcmc_acf) | Autocorrelation of each chain. |
+| [`pareto_k_plot()`](api-functions.qmd#pareto_k_plot) | Pareto k by observation. |
+| [`cmdstanr_example()`](api-functions.qmd#cmdstanr_example) | Compile and fit a bundled example. |
+| [`print_example_program()`](api-functions.qmd#print_example_program) | Print a bundled example's Stan program. |
+| [`num_threads()`](api-functions.qmd#num_threads) | Deprecated: return STAN_NUM_THREADS. |
+
+## Options {#options-index}
+
+### Global options {#global-options}
+
+| Function or method | Purpose |
+|---|---|
+| [`options()`](api-options.qmd#options) | Set session options and return their previous values. |
+| [`cmdstan_option()`](api-options.qmd#cmdstan_option) | Read one session option. |
+
+Option names and defaults: [shared options](api-options.qmd#shared-options){#shared-options}, taken by every inference method, and [method-specific options](api-options.qmd#method-specific-options){#method-specific-options}.
+
+## CmdStanModel {#cmdstanmodel}
+
+### Creating a model {#model-methods}
+
+| Function or method | Purpose |
+|---|---|
+| [`new CmdStanModel()`](api-models.qmd#constructor) | Compile a program, or reuse its executable, and return a model. |
+
+### Inspecting a model {#inspecting-a-model}
+
+| Function or method | Purpose |
+|---|---|
+| [`stanFile()`](api-models.qmd#stanFile), [`exeFile()`](api-models.qmd#exeFile), [`hppFile()`](api-models.qmd#hppFile) | Paths of the Stan file, executable, and generated C++. |
+| [`saveHppFile()`](api-models.qmd#saveHppFile) | Copy the generated C++ header to a directory. |
+| [`code()`](api-models.qmd#code) | The program as it was when the model was created. |
+| [`print()`](api-models.qmd#print) | Print the program. |
+| [`variables()`](api-models.qmd#variables) | The program's declarations. |
+| [`modelName()`](api-models.qmd#modelName), [`hasStanFile()`](api-models.qmd#hasStanFile) | The model's name, and whether it has a Stan file. |
+| [`includePaths()`](api-models.qmd#includePaths), [`userHeader()`](api-models.qmd#userHeader), [`stancOptions()`](api-models.qmd#stancOptions), [`cppOptions()`](api-models.qmd#cppOptions) | The build settings recorded for the executable. |
+| [`nativeStancOptions()`](api-models.qmd#nativeStancOptions) | Stan options for the in-process builds. |
+| [`cmdstanVersion()`](api-models.qmd#cmdstanVersion) | The CmdStan version that built the executable. |
+| [`reportedFeatures()`](api-models.qmd#reportedFeatures) | What the executable reports about its build. |
+| [`buildInfo()`](api-models.qmd#buildInfo) | The build record and reported features. |
+| [`isCurrent()`](api-models.qmd#isCurrent) | Whether the executable is up to date. |
+| [`cmdstanDefaults()`](api-models.qmd#cmdstanDefaults) | CmdStan's default values for a method. |
+| [`checkSyntax()`](api-models.qmd#checkSyntax) | Check the model's program with stanc. |
+| [`format()`](api-models.qmd#format) | Format the model's program with stanc. |
+| [`exposeFunctions()`](api-models.qmd#exposeFunctions), [`functions()`](api-models.qmd#functions) | The program's user-defined functions as a StanFunctions object. |
+| [`CmdStanModel::stanBuildInfo()`](api-models.qmd#stanBuildInfo) | Report how any executable was built. |
+
+### Running a model {#running-a-model}
+
+| Function or method | Purpose |
+|---|---|
+| [`sample()`](api-models.qmd#sample) | Run MCMC with the NUTS sampler. |
+| [`sampleMpi()`](api-models.qmd#sampleMpi) | Run MCMC under an MPI launcher. |
+| [`optimize()`](api-models.qmd#optimize) | Find a posterior mode or maximum likelihood estimate. |
+| [`laplace()`](api-models.qmd#laplace) | Draw from a Laplace approximation at the mode. |
+| [`variational()`](api-models.qmd#variational) | Fit an ADVI approximation. |
+| [`pathfinder()`](api-models.qmd#pathfinder) | Fit a Pathfinder approximation. |
+| [`generateQuantities()`](api-models.qmd#generateQuantities) | Run generated quantities for existing draws. |
+| [`diagnose()`](api-models.qmd#diagnose) | Check gradients against finite differences. |
+| [`logProb()`](api-models.qmd#logProb) | Run CmdStan's log_prob method. |
+
+## Fits {#fit-methods}
+
+### Draws and summaries {#draws-and-summaries}
+
+| Function or method | Purpose |
+|---|---|
+| [`draws()`](api-fits.qmd#draws) | Draws in one of posterior's formats. |
+| [`samplerDiagnostics()`](api-fits.qmd#samplerDiagnostics) | Sampler columns, such as divergent__ and treedepth__. |
+| [`summary()`](api-fits.qmd#summary) | One summary row per variable. |
+| [`drawsColumns()`](api-fits.qmd#drawsColumns), [`summaryColumns()`](api-fits.qmd#summaryColumns) | Draws or the summary as column arrays. |
+| [`drawsTable()`](api-fits.qmd#drawsTable), [`summaryTable()`](api-fits.qmd#summaryTable) | Draws or the summary as a Phibble\DataFrame. |
+| [`print()`](api-fits.qmd#print) | Print the summary as JSON. |
+| [`lp()`](api-fits.qmd#lp) | lp__ by iteration and chain. |
+| [`cmdstanSummary()`](api-fits.qmd#cmdstanSummary) | CmdStan's stansummary output. |
+
+### Diagnostics and run information {#diagnostics-and-run-information}
+
+| Function or method | Purpose |
+|---|---|
+| [`diagnosticSummary()`](api-fits.qmd#diagnosticSummary) | Per-chain divergences, maximum tree depth hits, and E-BFMI. |
+| [`checkDiagnostics()`](api-fits.qmd#checkDiagnostics), [`diagnosticWarnings()`](api-fits.qmd#diagnosticWarnings) | Run the sampler checks, or return their messages. |
+| [`cmdstanDiagnose()`](api-fits.qmd#cmdstanDiagnose) | CmdStan's diagnose utility output. |
+| [`metadata()`](api-fits.qmd#metadata), [`chainMetadata()`](api-fits.qmd#chainMetadata) | CSV metadata, merged or per chain. |
+| [`variables()`](api-fits.qmd#variables) | Variable names in the CSV files. |
+| [`numChains()`](api-fits.qmd#numChains), [`numDrawsSampling()`](api-fits.qmd#numDrawsSampling), [`numDrawsWarmup()`](api-fits.qmd#numDrawsWarmup), [`numProcs()`](api-fits.qmd#numProcs) | Counts of chains, draws, and processes. |
+| [`stepSize()`](api-fits.qmd#stepSize), [`invMetric()`](api-fits.qmd#invMetric), [`metric()`](api-fits.qmd#metric) | Adaptation results by chain. |
+| [`cmdstanConfig()`](api-fits.qmd#cmdstanConfig) | CmdStan's configuration JSON. |
+| [`time()`](api-fits.qmd#time) | Warmup, sampling, and total time per chain. |
+| [`init()`](api-fits.qmd#init) | The initial values each process used. |
+| [`output()`](api-fits.qmd#output), [`returnCodes()`](api-fits.qmd#returnCodes), [`command()`](api-fits.qmd#command) | Console output, exit status, and command line of each process. |
+| [`code()`](api-fits.qmd#code) | The Stan program. |
+| [`profiles()`](api-fits.qmd#profiles) | Parsed profiling data. |
+
+### Files and saving {#files-and-saving}
+
+| Function or method | Purpose |
+|---|---|
+| [`outputFiles()`](api-fits.qmd#outputFiles), [`latentDynamicsFiles()`](api-fits.qmd#latentDynamicsFiles), [`profileFiles()`](api-fits.qmd#profileFiles) | Paths of the output, latent-dynamics, and profile files. |
+| [`dataFile()`](api-fits.qmd#dataFile), [`configFiles()`](api-fits.qmd#configFiles), [`metricFiles()`](api-fits.qmd#metricFiles) | Paths of the data, configuration, and metric files. |
+| [`saveOutputFiles()`](api-fits.qmd#saveOutputFiles), [`saveLatentDynamicsFiles()`](api-fits.qmd#saveLatentDynamicsFiles), [`saveProfileFiles()`](api-fits.qmd#saveProfileFiles), [`saveDataFile()`](api-fits.qmd#saveDataFile), [`saveConfigFiles()`](api-fits.qmd#saveConfigFiles), [`saveMetricFiles()`](api-fits.qmd#saveMetricFiles) | Save the run's files to a directory. |
+| [`materialize()`](api-fits.qmd#materialize) | Read draws, initial values, and profiles into memory. |
+| [`saveObject()`](api-fits.qmd#saveObject) | Serialize the fit to a file. |
+
+### Model methods {#model-methods-1}
+
+| Function or method | Purpose |
+|---|---|
+| [`initModelMethods()`](api-fits.qmd#initModelMethods) | Compile and bind the in-process model methods. |
+| [`logProb()`](api-fits.qmd#logProb) | Log density at unconstrained values. |
+| [`gradLogProb()`](api-fits.qmd#gradLogProb) | Log density and gradient. |
+| [`hessian()`](api-fits.qmd#hessian) | Log density, gradient, and Hessian. |
+| [`unconstrainVariables()`](api-fits.qmd#unconstrainVariables) | Unconstrained values from parameter values. |
+| [`unconstrainDraws()`](api-fits.qmd#unconstrainDraws) | Draws on the unconstrained scale. |
+| [`constrainVariables()`](api-fits.qmd#constrainVariables) | Constrained values from unconstrained values. |
+| [`exposeFunctions()`](api-fits.qmd#exposeFunctions), [`functions()`](api-fits.qmd#functions) | The fit's user-defined Stan functions. |
+
+### Methods of specific fit types {#methods-of-specific-fit-types}
+
+| Function or method | Purpose |
+|---|---|
+| [`CmdStanMCMC::loo()`](api-fits.qmd#loo) | PSIS-LOO cross-validation. |
+| [`CmdStanMCMC::waic()`](api-fits.qmd#waic) | WAIC. |
+| [`CmdStanMLE::mle()`](api-fits.qmd#mle), [`CmdStanMLE::optimizedParams()`](api-fits.qmd#optimizedParams) | The optimization estimates without lp__. |
+| [`CmdStanVB::variationalMean()`](api-fits.qmd#variationalMean) | The mean of the ADVI approximation. |
+| [`CmdStanLaplace::mode()`](api-fits.qmd#mode) | The mode the Laplace approximation used. |
+| [`CmdStanPathfinder::singlePathFiles()`](api-fits.qmd#singlePathFiles), [`CmdStanPathfinder::singlePathJsonFiles()`](api-fits.qmd#singlePathJsonFiles), [`CmdStanPathfinder::singlePathFits()`](api-fits.qmd#singlePathFits), [`CmdStanPathfinder::singlePathDiagnostics()`](api-fits.qmd#singlePathDiagnostics) | Per-path Pathfinder output. |
+| [`CmdStanGQ::fittedParamsFiles()`](api-fits.qmd#fittedParamsFiles) | The CSV files of the fitted parameters. |
+| [`CmdStanDiagnose::gradients()`](api-fits.qmd#gradients) | The gradient check output. |
+| [`CmdStanMLE::lp()`](api-fits.qmd#mle-lp) | The log density at the optimum. |
+| [`lpApprox()`](api-fits.qmd#lpApprox) | The approximation's log density at each draw (CmdStanVB, CmdStanLaplace, and CmdStanPathfinder). |
+| [`CmdStanDiagnose::lp()`](api-fits.qmd#diagnose-lp) | The log density at the checked point. |
+
+### Reading CSV files {#reading-csv-files}
+
+| Function or method | Purpose |
+|---|---|
+| [`CmdStanFit::fromCsv()`](api-fits.qmd#fromCsv) | A fit from CmdStan CSV files. |
+| [`CmdStanFit::readCmdStanCsv()`](api-fits.qmd#readCmdStanCsv) | CmdStanR's read_cmdstan_csv() list. |
+| [`CmdStanFit::classForMethod()`](api-fits.qmd#classForMethod) | The fit class for a method name. |
+| [`CmdStanFit::quantile()`](api-fits.qmd#quantile) | A quantile with R's type 7 rule. |
+
+## Data frames {#data-frames-and-the-phpstats-family}
+
+### Data in {#data-in}
+
+| Function or method | Purpose |
+|---|---|
+| [`StanData::fromTable()`](api-data-frames.qmd#StanData-fromTable) | Convert a table to Stan data, keeping factor labels. |
+| [`new StanData()`](api-data-frames.qmd#StanData-construct) | A Stan data value object with levels, columns, and metadata. |
+| [`StanData::with()`](api-data-frames.qmd#StanData-with) | A copy with variables added or replaced. |
+| [`StanData::toArray()`](api-data-frames.qmd#StanData-toArray) | The Stan data array. |
+| [`StanData::isTable()`](api-data-frames.qmd#StanData-isTable) | Whether a value can be converted to Stan data. |
+| [`StanData::normalize()`](api-data-frames.qmd#StanData-normalize) | Normalize a data argument to a Stan data array. |
+| [`StanData::columnsOf()`](api-data-frames.qmd#StanData-columnsOf) | A table's columns, with factors as 1-based indices. |
+
+### Regression data {#regression-data}
+
+| Function or method | Purpose |
+|---|---|
+| [`StanData::fromColumns()`](api-data-frames.qmd#StanData-fromColumns) | Hierarchical regression data from named columns. |
+| [`StanData::fromFormula()`](api-data-frames.qmd#StanData-fromFormula) | Regression data from an R-style formula. |
+| [`StanData::fromModelMatrix()`](api-data-frames.qmd#StanData-fromModelMatrix) | Stan data from a Phit\model_matrix() result. |
+
+### Draws and summaries out {#draws-and-summaries-out}
+
+| Function or method | Purpose |
+|---|---|
+| [`Tables::fromRows()`](api-data-frames.qmd#Tables-fromRows) | Convert associative rows to columns. |
+| [`Tables::dataFrame()`](api-data-frames.qmd#Tables-dataFrame) | A Phibble\DataFrame from columns. |
+
+CmdStanPHP works with the [phpstats family](api-data-frames.qmd#part-of-the-phpstats-family){#part-of-the-phpstats-family} without depending on it.
+
+## Helper classes {#statistics-helpers}
+
+### Figures {#helpers-figures}
+
+| Class | Purpose |
+|---|---|
+| [`Figure`](api-helpers.qmd#Figure) | A computed figure, rendered as text, Vega-Lite, HTML, SVG, or PNG. |
+| [`Plot`](api-helpers.qmd#Plot) | The figure computations, and the statistics behind them. |
+
+### Model methods and Stan functions {#helpers-model-methods}
+
+| Class | Purpose |
+|---|---|
+| [`StanFunctions`](api-helpers.qmd#StanFunctions) | A Stan program's user-defined functions, called through FFI. |
+| [`ModelMethods`](api-helpers.qmd#ModelMethods) | In-process log density, gradient, Hessian, and transforms for a Stan file. |
+
+### Summaries and diagnostics {#helpers-summaries}
+
+| Class | Purpose |
+|---|---|
+| [`Summary`](api-helpers.qmd#Summary) | posterior's summary measures on plain draws. |
+| [`Psis`](api-helpers.qmd#Psis) | Pareto smoothing and PSIS. |
+| [`Loo`](api-helpers.qmd#Loo) | PSIS-LOO and WAIC on log-likelihood draws. |
+| [`MomentMatch`](api-helpers.qmd#MomentMatch) | Moment matching for PSIS-LOO. |
+| [`DrawKernels`](api-helpers.qmd#DrawKernels) | Detection of and wrappers for the phit draw kernels. |
+
+### Draws and initial values {#helpers-draws}
+
+| Class | Purpose |
+|---|---|
+| [`Rvars`](api-helpers.qmd#Rvars) | draws_rvars conversions. |
+| [`Inits`](api-helpers.qmd#Inits) | Initial values from fits and draws. |
+
+## Errors {#errors}
+
+| Exception | Purpose |
+|---|---|
+| [`InvalidArgumentException`](api-errors.qmd#InvalidArgumentException) | Invalid data or options. |
+| [`RuntimeException`](api-errors.qmd#RuntimeException) | Missing files or toolchain, a timeout, or a malformed CSV file. |
+| [`StaleExecutableException`](api-errors.qmd#StaleExecutableException) | An out-of-date executable. |
+| [`ProcessException`](api-errors.qmd#ProcessException) | A CmdStan process exited with a nonzero status. |

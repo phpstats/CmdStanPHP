@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API: models – CmdStanPHP</title>
+<title>CmdStanModel – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -86,7 +121,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-models.html">API: models</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-models.html">CmdStanModel</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -111,12 +146,6 @@ ul.task-list li input[type="checkbox"] {
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -126,6 +155,12 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./installation.html" class="sidebar-item-text sidebar-link">
@@ -203,12 +238,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Figures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -217,43 +258,49 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: functions</span></a>
+ <span class="menu-text">Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-options.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: options</span></a>
+ <span class="menu-text">Options</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-models.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">API: models</span></a>
+ <span class="menu-text">CmdStanModel</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: fits</span></a>
+ <span class="menu-text">Fits</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: data frames and the phpstats family</span></a>
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Helper classes</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: errors</span></a>
+ <span class="menu-text">Errors</span></a>
   </div>
 </li>
       </ul>
@@ -284,29 +331,12 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Compatibility and limitations</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Compatibility with CmdStanR</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link">
@@ -325,18 +355,51 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#model-methods" id="toc-model-methods" class="nav-link active" data-scroll-target="#model-methods">Creating a model</a></li>
-  <li><a href="#inspecting-a-model" id="toc-inspecting-a-model" class="nav-link" data-scroll-target="#inspecting-a-model">Inspecting a model</a></li>
-  <li><a href="#running-a-model" id="toc-running-a-model" class="nav-link" data-scroll-target="#running-a-model">Running a model</a></li>
+  <li><a href="#model-methods" id="toc-model-methods" class="nav-link active" data-scroll-target="#model-methods">Creating a model</a>
+  <ul class="collapse">
+  <li><a href="#constructor" id="toc-constructor" class="nav-link" data-scroll-target="#constructor"><code>new CmdStanModel()</code></a></li>
+  </ul></li>
+  <li><a href="#inspecting-a-model" id="toc-inspecting-a-model" class="nav-link" data-scroll-target="#inspecting-a-model">Inspecting a model</a>
+  <ul class="collapse">
+  <li><a href="#stanFile" id="toc-stanFile" class="nav-link" data-scroll-target="#stanFile"><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code></a></li>
+  <li><a href="#saveHppFile" id="toc-saveHppFile" class="nav-link" data-scroll-target="#saveHppFile"><code>saveHppFile()</code></a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><code>code()</code></a></li>
+  <li><a href="#print" id="toc-print" class="nav-link" data-scroll-target="#print"><code>print()</code></a></li>
+  <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables"><code>variables()</code></a></li>
+  <li><a href="#modelName" id="toc-modelName" class="nav-link" data-scroll-target="#modelName"><code>modelName()</code>, <code>hasStanFile()</code></a></li>
+  <li><a href="#includePaths" id="toc-includePaths" class="nav-link" data-scroll-target="#includePaths"><code>includePaths()</code>, <code>userHeader()</code>, <code>stancOptions()</code>, <code>cppOptions()</code></a></li>
+  <li><a href="#nativeStancOptions" id="toc-nativeStancOptions" class="nav-link" data-scroll-target="#nativeStancOptions"><code>nativeStancOptions()</code></a></li>
+  <li><a href="#cmdstanVersion" id="toc-cmdstanVersion" class="nav-link" data-scroll-target="#cmdstanVersion"><code>cmdstanVersion()</code></a></li>
+  <li><a href="#reportedFeatures" id="toc-reportedFeatures" class="nav-link" data-scroll-target="#reportedFeatures"><code>reportedFeatures()</code></a></li>
+  <li><a href="#buildInfo" id="toc-buildInfo" class="nav-link" data-scroll-target="#buildInfo"><code>buildInfo()</code></a></li>
+  <li><a href="#stanBuildInfo" id="toc-stanBuildInfo" class="nav-link" data-scroll-target="#stanBuildInfo"><code>CmdStanModel::stanBuildInfo()</code></a></li>
+  <li><a href="#isCurrent" id="toc-isCurrent" class="nav-link" data-scroll-target="#isCurrent"><code>isCurrent()</code></a></li>
+  <li><a href="#cmdstanDefaults" id="toc-cmdstanDefaults" class="nav-link" data-scroll-target="#cmdstanDefaults"><code>cmdstanDefaults()</code></a></li>
+  <li><a href="#checkSyntax" id="toc-checkSyntax" class="nav-link" data-scroll-target="#checkSyntax"><code>checkSyntax()</code></a></li>
+  <li><a href="#format" id="toc-format" class="nav-link" data-scroll-target="#format"><code>format()</code></a></li>
+  <li><a href="#exposeFunctions" id="toc-exposeFunctions" class="nav-link" data-scroll-target="#exposeFunctions"><code>exposeFunctions()</code>, <code>functions()</code></a></li>
+  </ul></li>
+  <li><a href="#running-a-model" id="toc-running-a-model" class="nav-link" data-scroll-target="#running-a-model">Running a model</a>
+  <ul class="collapse">
+  <li><a href="#sample" id="toc-sample" class="nav-link" data-scroll-target="#sample"><code>sample()</code></a></li>
+  <li><a href="#sampleMpi" id="toc-sampleMpi" class="nav-link" data-scroll-target="#sampleMpi"><code>sampleMpi()</code></a></li>
+  <li><a href="#optimize" id="toc-optimize" class="nav-link" data-scroll-target="#optimize"><code>optimize()</code></a></li>
+  <li><a href="#laplace" id="toc-laplace" class="nav-link" data-scroll-target="#laplace"><code>laplace()</code></a></li>
+  <li><a href="#variational" id="toc-variational" class="nav-link" data-scroll-target="#variational"><code>variational()</code></a></li>
+  <li><a href="#pathfinder" id="toc-pathfinder" class="nav-link" data-scroll-target="#pathfinder"><code>pathfinder()</code></a></li>
+  <li><a href="#generateQuantities" id="toc-generateQuantities" class="nav-link" data-scroll-target="#generateQuantities"><code>generateQuantities()</code></a></li>
+  <li><a href="#diagnose" id="toc-diagnose" class="nav-link" data-scroll-target="#diagnose"><code>diagnose()</code></a></li>
+  <li><a href="#logProb" id="toc-logProb" class="nav-link" data-scroll-target="#logProb"><code>logProb()</code></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-models.html">API: models</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-models.html">CmdStanModel</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API: models</h1>
+<h1 class="title">CmdStanModel</h1>
 </div>
 
 
@@ -353,138 +416,207 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><code>CmdStanModel</code> compiles a Stan program and runs it.</p>
+<p><code>CmdStanModel</code> compiles a Stan program and runs CmdStan’s methods on it. Method names are camelCase versions of CmdStanR’s.</p>
 <section id="model-methods" class="level2">
 <h2 class="anchored" data-anchor-id="model-methods">Creating a model</h2>
-<p><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> take the same arguments and compile the model, or reuse an up-to-date executable, before they return.</p>
+<p><code>cmdstan_model()</code> and <code>new CmdStanModel()</code> return a model.</p>
+<section id="constructor" class="level3">
+<h3 class="anchored" data-anchor-id="constructor"><code>new CmdStanModel()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> CmdStanModel(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$stanFile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$exeFile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$pedantic</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$userHeader</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$cppOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">bool</span> <span class="va">$forceRecompile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compiles the program, or reuses an up-to-date executable, before it returns. <code>cmdstan_model()</code> takes the same arguments except <code>timeout</code>, the compile limit in seconds.</p>
 <ul>
 <li>Give <code>stanFile</code>, whose executable goes beside it or in <code>dir</code>, or <code>exeFile</code> alone to use an existing executable. A model from <code>exeFile</code> alone refuses the build arguments, because there is nothing to build.</li>
 <li><code>cppOptions</code> are named make variables, such as <code>['STAN_THREADS' =&gt; true]</code>. Names are uppercased, and <code>false</code> turns an option off even when <code>make/local</code> turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use <code>cmdstan_make_local()</code> for other make lines.</li>
 <li><code>stancOptions</code> take flags and values, such as <code>['O1', 'canonicalize' =&gt; 'deprecations', 'max-line-length' =&gt; 78]</code>. Flags with their own argument are rejected: use <code>includePaths</code>, <code>pedantic</code>, <code>userHeader</code>, or <code>cppOptions: ['STAN_OPENCL' =&gt; true]</code>.</li>
-<li><code>quiet: false</code>, or the <code>cmdstanr_verbose</code> option, reports whether and why the model compiles. <code>forceRecompile: true</code> rebuilds anyway.</li>
+<li>A rebuild happens when the build record shows that the program, its <code>#include</code> files, the user header, <code>cppOptions</code>, <code>stancOptions</code>, <code>make/local</code>, or the selected CmdStan changed. <code>forceRecompile: true</code> rebuilds anyway, and its default comes from the <code>cmdstanr_force_recompile</code> option.</li>
+<li><code>quiet: false</code>, or the <code>cmdstanr_verbose</code> option, reports whether and why the model compiles.</li>
 </ul>
-<p><a href="./compiling.html">Compiling models</a> covers when a model is rebuilt, <code>StaleExecutableException</code>, and concurrent builds.</p>
+<p><a href="./compiling.html">Compiling models</a> covers rebuilds, <code>StaleExecutableException</code>, and concurrent builds.</p>
+</section>
 </section>
 <section id="inspecting-a-model" class="level2">
 <h2 class="anchored" data-anchor-id="inspecting-a-model">Inspecting a model</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code></td>
-<td>Paths. <code>hppFile()</code> writes the generated C++ to a temporary file on first use.</td>
-</tr>
-<tr class="even">
-<td><code>code()</code></td>
-<td>The program as it was when the model was created</td>
-</tr>
-<tr class="odd">
-<td><code>variables()</code></td>
-<td>The <code>data</code>, <code>parameters</code>, <code>transformed_parameters</code>, and <code>generated_quantities</code> declarations, from stanc</td>
-</tr>
-<tr class="even">
-<td><code>modelName()</code>, <code>hasStanFile()</code>, <code>includePaths()</code>, <code>userHeader()</code>, <code>stancOptions()</code></td>
-<td>The model’s identity and recorded build settings</td>
-</tr>
-<tr class="odd">
-<td><code>cppOptions()</code></td>
-<td>Make variables and values, so <code>['stan_threads' =&gt; true]</code> comes back as <code>['STAN_THREADS' =&gt; 'true']</code></td>
-</tr>
-<tr class="even">
-<td><code>cmdstanVersion()</code></td>
-<td>The CmdStan version that built the executable</td>
-</tr>
-<tr class="odd">
-<td><code>reportedFeatures()</code></td>
-<td>What the executable reports: <code>stan_threads</code>, <code>stan_mpi</code>, <code>stan_opencl</code>, <code>stan_no_range_checks</code>, and <code>stan_version</code></td>
-</tr>
-<tr class="even">
-<td><code>buildInfo()</code></td>
-<td>The build record and the reported features, as <code>stan_build_info()</code> returns them</td>
-</tr>
-<tr class="odd">
-<td><code>isCurrent()</code></td>
-<td><code>false</code> when the executable is out of date</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanDefaults(method: 'sample')</code></td>
-<td>CmdStan’s default values for <code>sample</code>, <code>optimize</code>, <code>variational</code>, <code>pathfinder</code>, or <code>laplace</code>, under this package’s option names</td>
-</tr>
-<tr class="odd">
-<td><code>print(lineNumbers: null)</code>, <code>saveHppFile(dir)</code></td>
-<td>Prints the program, or copies the generated header</td>
-</tr>
-<tr class="even">
-<td><code>format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code></td>
-<td>The formatted program. Create the model again to use a rewritten file.</td>
-</tr>
-<tr class="odd">
-<td><code>checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)</code></td>
-<td><code>true</code>, or an exception for invalid Stan</td>
-</tr>
-<tr class="even">
-<td><code>exposeFunctions(timeout: null, quiet: false)</code>, <code>functions()</code></td>
-<td>The model’s user-defined functions as a <code>StanFunctions</code> object</td>
-</tr>
-</tbody>
-</table>
-<p><code>code()</code> and <code>hppFile()</code> are <code>null</code> for a model from <code>exeFile</code> alone.</p>
+<section id="stanFile" class="level3">
+<h3 class="anchored" data-anchor-id="stanFile"><code>stanFile()</code>, <code>exeFile()</code>, <code>hppFile()</code></h3>
+<p><span id="exeFile"></span> <span id="hppFile"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;stanFile()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;exeFile()<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;hppFile()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>stanFile()</code> and <code>hppFile()</code> are <code>null</code> for a model from <code>exeFile</code> alone. <code>hppFile()</code> writes the generated C++ to a temporary file on first use.</p>
+</section>
+<section id="saveHppFile" class="level3">
+<h3 class="anchored" data-anchor-id="saveHppFile"><code>saveHppFile()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;saveHppFile(<span class="dt">string</span> <span class="va">$dir</span>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the copied path. The directory must exist. Throws for a model from <code>exeFile</code> alone.</p>
+</section>
+<section id="code" class="level3">
+<h3 class="anchored" data-anchor-id="code"><code>code()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;code()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>null</code>, with a warning, for a model from <code>exeFile</code> alone.</p>
+</section>
+<section id="print" class="level3">
+<h3 class="anchored" data-anchor-id="print"><code>print()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;<span class="kw">print</span>(<span class="ot">?</span><span class="dt">bool</span> <span class="va">$lineNumbers</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With line numbers when <code>lineNumbers</code> is <code>true</code>, or when the <code>cmdstanr_print_line_numbers</code> option is set.</p>
+</section>
+<section id="variables" class="level3">
+<h3 class="anchored" data-anchor-id="variables"><code>variables()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;variables()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>data</code>, <code>parameters</code>, <code>transformed_parameters</code>, and <code>generated_quantities</code>, each keyed by variable name with its type and dimensions, from <code>stanc --info</code>.</p>
+</section>
+<section id="modelName" class="level3">
+<h3 class="anchored" data-anchor-id="modelName"><code>modelName()</code>, <code>hasStanFile()</code></h3>
+<p><span id="hasStanFile"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;modelName()<span class="ot">:</span> <span class="dt">string</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;hasStanFile()<span class="ot">:</span> <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The name is the Stan file’s or executable’s base name.</p>
+</section>
+<section id="includePaths" class="level3">
+<h3 class="anchored" data-anchor-id="includePaths"><code>includePaths()</code>, <code>userHeader()</code>, <code>stancOptions()</code>, <code>cppOptions()</code></h3>
+<p><span id="userHeader"></span> <span id="stancOptions"></span> <span id="cppOptions"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;includePaths()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;userHeader()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;stancOptions()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;cppOptions()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>cppOptions()</code> returns make variables and values, so <code>['stan_threads' =&gt; true]</code> comes back as <code>['STAN_THREADS' =&gt; 'true']</code>. <code>stancOptions()</code> returns the stanc arguments given as <code>stancOptions</code>.</p>
+</section>
+<section id="nativeStancOptions" class="level3">
+<h3 class="anchored" data-anchor-id="nativeStancOptions"><code>nativeStancOptions()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;nativeStancOptions()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The stanc options used when building exposed functions and model methods.</p>
+</section>
+<section id="cmdstanVersion" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanVersion"><code>cmdstanVersion()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;cmdstanVersion()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>From the build record, else the Stan version the executable reports. <code>null</code> when neither is known.</p>
+</section>
+<section id="reportedFeatures" class="level3">
+<h3 class="anchored" data-anchor-id="reportedFeatures"><code>reportedFeatures()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;reportedFeatures()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>stan_threads</code>, <code>stan_mpi</code>, <code>stan_opencl</code>, <code>stan_no_range_checks</code>, and <code>stan_version</code>, from <code>&lt;exe&gt; info</code>.</p>
+</section>
+<section id="buildInfo" class="level3">
+<h3 class="anchored" data-anchor-id="buildInfo"><code>buildInfo()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;buildInfo()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The same as <code>stan_build_info()</code> for this model’s executable.</p>
+</section>
+<section id="stanBuildInfo" class="level3">
+<h3 class="anchored" data-anchor-id="stanBuildInfo"><code>CmdStanModel::stanBuildInfo()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>CmdStanModel::stanBuildInfo(<span class="dt">string</span> <span class="va">$exeFile</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Static form of <a href="./api-functions.html#stan_build_info"><code>stan_build_info()</code></a> for any executable.</p>
+</section>
+<section id="isCurrent" class="level3">
+<h3 class="anchored" data-anchor-id="isCurrent"><code>isCurrent()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;isCurrent()<span class="ot">:</span> <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>false</code> when the program or its build settings changed after the build. Other failures, such as a stanc error, throw.</p>
+</section>
+<section id="cmdstanDefaults" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanDefaults"><code>cmdstanDefaults()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;cmdstanDefaults(<span class="dt">string</span> <span class="va">$method</span> <span class="op">=</span> <span class="st">'sample'</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>method</code> is <code>sample</code>, <code>optimize</code>, <code>variational</code>, <code>pathfinder</code>, or <code>laplace</code>. Returns the defaults from <code>&lt;exe&gt; &lt;method&gt; help-all</code>, under this package’s option names (such as <code>iter_sampling</code> and <code>adapt_delta</code>), in help order.</p>
+</section>
+<section id="checkSyntax" class="level3">
+<h3 class="anchored" data-anchor-id="checkSyntax"><code>checkSyntax()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;checkSyntax(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$pedantic</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>true</code>, or throws for invalid Stan. Include paths default to the model’s.</p>
+</section>
+<section id="format" class="level3">
+<h3 class="anchored" data-anchor-id="format"><code>format()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;format(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$overwriteFile</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">bool</span> <span class="va">$canonicalize</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$backup</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxLineLength</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the formatted program, with <code>format_stan_file()</code>’s options. After <code>overwriteFile: true</code>, create the model again to use the rewritten file.</p>
+</section>
+<section id="exposeFunctions" class="level3">
+<h3 class="anchored" data-anchor-id="exposeFunctions"><code>exposeFunctions()</code>, <code>functions()</code></h3>
+<p><span id="functions"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;exposeFunctions(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> StanFunctions</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;functions()<span class="ot">:</span> StanFunctions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>exposeFunctions()</code> compiles the functions into a library called through PHP FFI and returns a <a href="./api-helpers.html#StanFunctions"><code>StanFunctions</code></a>. <code>functions()</code> returns it afterwards and throws before <code>exposeFunctions()</code>. Needs the FFI extension. <a href="./log-density.html">Log density and model methods</a> gives examples.</p>
+</section>
 </section>
 <section id="running-a-model" class="level2">
 <h2 class="anchored" data-anchor-id="running-a-model">Running a model</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>sample()</code>, <code>sampleMpi()</code></td>
-<td><code>CmdStanMCMC</code></td>
-</tr>
-<tr class="even">
-<td><code>optimize()</code></td>
-<td><code>CmdStanMLE</code></td>
-</tr>
-<tr class="odd">
-<td><code>variational()</code></td>
-<td><code>CmdStanVB</code></td>
-</tr>
-<tr class="even">
-<td><code>pathfinder()</code></td>
-<td><code>CmdStanPathfinder</code></td>
-</tr>
-<tr class="odd">
-<td><code>laplace()</code></td>
-<td><code>CmdStanLaplace</code></td>
-</tr>
-<tr class="even">
-<td><code>generateQuantities(fittedParams, ...)</code></td>
-<td><code>CmdStanGQ</code></td>
-</tr>
-<tr class="odd">
-<td><code>diagnose()</code></td>
-<td><code>CmdStanDiagnose</code></td>
-</tr>
-<tr class="even">
-<td><code>logProb()</code></td>
-<td><code>CmdStanFit</code></td>
-</tr>
-</tbody>
-</table>
+<p>Each method takes PHP named arguments or one associative options array. An option left out or <code>null</code> uses the installed CmdStan’s default. Every <code>data</code> option accepts an array, a JSON file, a <code>StanData</code>, or a <a href="./api-data-frames.html#data-in">table</a>.</p>
+<section id="sample" class="level3">
+<h3 class="anchored" data-anchor-id="sample"><code>sample()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;sample(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanMCMC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanMCMC</code>. Options are named arguments or one associative array, and unknown options throw. <a href="./api-options.html#method-specific-options">Options</a> lists them, and <a href="./mcmc.html">MCMC sampling</a> explains them.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">123</span><span class="ot">,</span> chains<span class="ot">:</span> <span class="dv">4</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sampleMpi" class="level3">
+<h3 class="anchored" data-anchor-id="sampleMpi"><code>sampleMpi()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;sampleMpi(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$mpiCmd</span> <span class="op">=</span> <span class="st">'mpiexec'</span><span class="ot">,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$mpiArgs</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> CmdStanMCMC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanMCMC</code>. Takes the sampling options, defaults to one chain, and runs chains one after another. An associative <code>mpiArgs</code> such as <code>['n' =&gt; 4]</code> becomes <code>-n 4</code>, and a list is passed as literal arguments. Compile with <code>['STAN_MPI' =&gt; true, 'CXX' =&gt; 'mpicxx', 'TBB_CXX_TYPE' =&gt; 'gcc']</code> and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.</p>
+</section>
+<section id="optimize" class="level3">
+<h3 class="anchored" data-anchor-id="optimize"><code>optimize()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;optimize(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanMLE</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanMLE</code>. <a href="./optimization.html">Optimization</a> explains the options.</p>
+</section>
+<section id="laplace" class="level3">
+<h3 class="anchored" data-anchor-id="laplace"><code>laplace()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;laplace(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanLaplace</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanLaplace</code>. <code>mode</code> is an optimization fit, a CSV or JSON file, or <code>null</code> to run <code>optimize()</code> first with <code>opt_args</code>. <code>jacobian</code> defaults to <code>true</code>.</p>
+</section>
+<section id="variational" class="level3">
+<h3 class="anchored" data-anchor-id="variational"><code>variational()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;variational(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanVB</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanVB</code>. <a href="./variational.html">Variational inference</a> explains the options.</p>
+</section>
+<section id="pathfinder" class="level3">
+<h3 class="anchored" data-anchor-id="pathfinder"><code>pathfinder()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;pathfinder(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanPathfinder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanPathfinder</code>.</p>
+</section>
+<section id="generateQuantities" class="level3">
+<h3 class="anchored" data-anchor-id="generateQuantities"><code>generateQuantities()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;generateQuantities(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$fittedParams</span><span class="ot">,</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> CmdStanGQ</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanGQ</code>. <code>fittedParams</code> is an MCMC fit, an optimization, Laplace, variational, or Pathfinder fit (its draws are written as one sample-style CSV file, as in CmdStanR 1.0), or a list of CmdStan CSV files. <a href="./generated-quantities.html">Generated quantities</a> gives examples.</p>
+</section>
+<section id="diagnose" class="level3">
+<h3 class="anchored" data-anchor-id="diagnose"><code>diagnose()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;diagnose(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanDiagnose</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanDiagnose</code>. <code>epsilon</code> and <code>error</code> set the finite-difference step and tolerance.</p>
+</section>
+<section id="logProb" class="level3">
+<h3 class="anchored" data-anchor-id="logProb"><code>logProb()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span>-&gt;logProb(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> CmdStanFit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanFit</code> with the log density and gradient at the given parameter values. Give exactly one of <code>unconstrained_params</code> and <code>constrained_params</code>, and optionally <code>jacobian</code>. For in-process evaluation, use the fit’s <a href="./api-fits.html#model-methods-1">model methods</a>.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

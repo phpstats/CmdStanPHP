@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API: fits – CmdStanPHP</title>
+<title>Fits – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -86,7 +121,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-fits.html">API: fits</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-fits.html">Fits</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -111,12 +146,6 @@ ul.task-list li input[type="checkbox"] {
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -126,6 +155,12 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./installation.html" class="sidebar-item-text sidebar-link">
@@ -203,12 +238,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Figures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -217,43 +258,49 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: functions</span></a>
+ <span class="menu-text">Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-options.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: options</span></a>
+ <span class="menu-text">Options</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: models</span></a>
+ <span class="menu-text">CmdStanModel</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-fits.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">API: fits</span></a>
+ <span class="menu-text">Fits</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: data frames and the phpstats family</span></a>
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Helper classes</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: errors</span></a>
+ <span class="menu-text">Errors</span></a>
   </div>
 </li>
       </ul>
@@ -284,29 +331,12 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Compatibility and limitations</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Compatibility with CmdStanR</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link">
@@ -325,11 +355,73 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#draws-and-summaries" id="toc-draws-and-summaries" class="nav-link active" data-scroll-target="#draws-and-summaries">Draws and summaries</a></li>
-  <li><a href="#diagnostics-and-run-information" id="toc-diagnostics-and-run-information" class="nav-link" data-scroll-target="#diagnostics-and-run-information">Diagnostics and run information</a></li>
-  <li><a href="#files-and-saving" id="toc-files-and-saving" class="nav-link" data-scroll-target="#files-and-saving">Files and saving</a></li>
-  <li><a href="#model-methods-1" id="toc-model-methods-1" class="nav-link" data-scroll-target="#model-methods-1">Model methods</a></li>
-  <li><a href="#methods-of-specific-fit-types" id="toc-methods-of-specific-fit-types" class="nav-link" data-scroll-target="#methods-of-specific-fit-types">Methods of specific fit types</a></li>
+  <li><a href="#draws-and-summaries" id="toc-draws-and-summaries" class="nav-link active" data-scroll-target="#draws-and-summaries">Draws and summaries</a>
+  <ul class="collapse">
+  <li><a href="#draws" id="toc-draws" class="nav-link" data-scroll-target="#draws"><code>draws()</code></a></li>
+  <li><a href="#samplerDiagnostics" id="toc-samplerDiagnostics" class="nav-link" data-scroll-target="#samplerDiagnostics"><code>samplerDiagnostics()</code></a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><code>summary()</code></a></li>
+  <li><a href="#drawsColumns" id="toc-drawsColumns" class="nav-link" data-scroll-target="#drawsColumns"><code>drawsColumns()</code>, <code>summaryColumns()</code></a></li>
+  <li><a href="#drawsTable" id="toc-drawsTable" class="nav-link" data-scroll-target="#drawsTable"><code>drawsTable()</code>, <code>summaryTable()</code></a></li>
+  <li><a href="#print" id="toc-print" class="nav-link" data-scroll-target="#print"><code>print()</code></a></li>
+  <li><a href="#lp" id="toc-lp" class="nav-link" data-scroll-target="#lp"><code>lp()</code></a></li>
+  <li><a href="#cmdstanSummary" id="toc-cmdstanSummary" class="nav-link" data-scroll-target="#cmdstanSummary"><code>cmdstanSummary()</code></a></li>
+  </ul></li>
+  <li><a href="#diagnostics-and-run-information" id="toc-diagnostics-and-run-information" class="nav-link" data-scroll-target="#diagnostics-and-run-information">Diagnostics and run information</a>
+  <ul class="collapse">
+  <li><a href="#diagnosticSummary" id="toc-diagnosticSummary" class="nav-link" data-scroll-target="#diagnosticSummary"><code>diagnosticSummary()</code></a></li>
+  <li><a href="#checkDiagnostics" id="toc-checkDiagnostics" class="nav-link" data-scroll-target="#checkDiagnostics"><code>checkDiagnostics()</code>, <code>diagnosticWarnings()</code></a></li>
+  <li><a href="#cmdstanDiagnose" id="toc-cmdstanDiagnose" class="nav-link" data-scroll-target="#cmdstanDiagnose"><code>cmdstanDiagnose()</code></a></li>
+  <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata"><code>metadata()</code>, <code>chainMetadata()</code></a></li>
+  <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables"><code>variables()</code></a></li>
+  <li><a href="#numChains" id="toc-numChains" class="nav-link" data-scroll-target="#numChains"><code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>, <code>numProcs()</code></a></li>
+  <li><a href="#stepSize" id="toc-stepSize" class="nav-link" data-scroll-target="#stepSize"><code>stepSize()</code>, <code>invMetric()</code>, <code>metric()</code></a></li>
+  <li><a href="#cmdstanConfig" id="toc-cmdstanConfig" class="nav-link" data-scroll-target="#cmdstanConfig"><code>cmdstanConfig()</code></a></li>
+  <li><a href="#time" id="toc-time" class="nav-link" data-scroll-target="#time"><code>time()</code></a></li>
+  <li><a href="#init" id="toc-init" class="nav-link" data-scroll-target="#init"><code>init()</code></a></li>
+  <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output"><code>output()</code>, <code>returnCodes()</code>, <code>command()</code></a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><code>code()</code></a></li>
+  <li><a href="#profiles" id="toc-profiles" class="nav-link" data-scroll-target="#profiles"><code>profiles()</code></a></li>
+  </ul></li>
+  <li><a href="#files-and-saving" id="toc-files-and-saving" class="nav-link" data-scroll-target="#files-and-saving">Files and saving</a>
+  <ul class="collapse">
+  <li><a href="#outputFiles" id="toc-outputFiles" class="nav-link" data-scroll-target="#outputFiles"><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code></a></li>
+  <li><a href="#dataFile" id="toc-dataFile" class="nav-link" data-scroll-target="#dataFile"><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code></a></li>
+  <li><a href="#saveOutputFiles" id="toc-saveOutputFiles" class="nav-link" data-scroll-target="#saveOutputFiles"><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code></a></li>
+  <li><a href="#materialize" id="toc-materialize" class="nav-link" data-scroll-target="#materialize"><code>materialize()</code></a></li>
+  <li><a href="#saveObject" id="toc-saveObject" class="nav-link" data-scroll-target="#saveObject"><code>saveObject()</code></a></li>
+  </ul></li>
+  <li><a href="#model-methods-1" id="toc-model-methods-1" class="nav-link" data-scroll-target="#model-methods-1">Model methods</a>
+  <ul class="collapse">
+  <li><a href="#initModelMethods" id="toc-initModelMethods" class="nav-link" data-scroll-target="#initModelMethods"><code>initModelMethods()</code></a></li>
+  <li><a href="#logProb" id="toc-logProb" class="nav-link" data-scroll-target="#logProb"><code>logProb()</code></a></li>
+  <li><a href="#gradLogProb" id="toc-gradLogProb" class="nav-link" data-scroll-target="#gradLogProb"><code>gradLogProb()</code></a></li>
+  <li><a href="#hessian" id="toc-hessian" class="nav-link" data-scroll-target="#hessian"><code>hessian()</code></a></li>
+  <li><a href="#unconstrainVariables" id="toc-unconstrainVariables" class="nav-link" data-scroll-target="#unconstrainVariables"><code>unconstrainVariables()</code></a></li>
+  <li><a href="#unconstrainDraws" id="toc-unconstrainDraws" class="nav-link" data-scroll-target="#unconstrainDraws"><code>unconstrainDraws()</code></a></li>
+  <li><a href="#constrainVariables" id="toc-constrainVariables" class="nav-link" data-scroll-target="#constrainVariables"><code>constrainVariables()</code></a></li>
+  <li><a href="#exposeFunctions" id="toc-exposeFunctions" class="nav-link" data-scroll-target="#exposeFunctions"><code>exposeFunctions()</code>, <code>functions()</code></a></li>
+  </ul></li>
+  <li><a href="#methods-of-specific-fit-types" id="toc-methods-of-specific-fit-types" class="nav-link" data-scroll-target="#methods-of-specific-fit-types">Methods of specific fit types</a>
+  <ul class="collapse">
+  <li><a href="#loo" id="toc-loo" class="nav-link" data-scroll-target="#loo"><code>loo()</code></a></li>
+  <li><a href="#waic" id="toc-waic" class="nav-link" data-scroll-target="#waic"><code>waic()</code></a></li>
+  <li><a href="#mle" id="toc-mle" class="nav-link" data-scroll-target="#mle"><code>mle()</code>, <code>optimizedParams()</code></a></li>
+  <li><a href="#mle-lp" id="toc-mle-lp" class="nav-link" data-scroll-target="#mle-lp"><code>lp()</code></a></li>
+  <li><a href="#variationalMean" id="toc-variationalMean" class="nav-link" data-scroll-target="#variationalMean"><code>variationalMean()</code></a></li>
+  <li><a href="#lpApprox" id="toc-lpApprox" class="nav-link" data-scroll-target="#lpApprox"><code>lpApprox()</code></a></li>
+  <li><a href="#mode" id="toc-mode" class="nav-link" data-scroll-target="#mode"><code>mode()</code></a></li>
+  <li><a href="#singlePathFiles" id="toc-singlePathFiles" class="nav-link" data-scroll-target="#singlePathFiles"><code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, <code>singlePathDiagnostics()</code></a></li>
+  <li><a href="#fittedParamsFiles" id="toc-fittedParamsFiles" class="nav-link" data-scroll-target="#fittedParamsFiles"><code>fittedParamsFiles()</code></a></li>
+  <li><a href="#gradients" id="toc-gradients" class="nav-link" data-scroll-target="#gradients"><code>gradients()</code></a></li>
+  <li><a href="#diagnose-lp" id="toc-diagnose-lp" class="nav-link" data-scroll-target="#diagnose-lp"><code>lp()</code></a></li>
+  </ul></li>
+  <li><a href="#reading-csv-files" id="toc-reading-csv-files" class="nav-link" data-scroll-target="#reading-csv-files">Reading CSV files</a>
+  <ul class="collapse">
+  <li><a href="#fromCsv" id="toc-fromCsv" class="nav-link" data-scroll-target="#fromCsv"><code>CmdStanFit::fromCsv()</code></a></li>
+  <li><a href="#readCmdStanCsv" id="toc-readCmdStanCsv" class="nav-link" data-scroll-target="#readCmdStanCsv"><code>CmdStanFit::readCmdStanCsv()</code></a></li>
+  <li><a href="#classForMethod" id="toc-classForMethod" class="nav-link" data-scroll-target="#classForMethod"><code>CmdStanFit::classForMethod()</code></a></li>
+  <li><a href="#quantile" id="toc-quantile" class="nav-link" data-scroll-target="#quantile"><code>CmdStanFit::quantile()</code></a></li>
+  </ul></li>
   <li><a href="#statistics-helpers" id="toc-statistics-helpers" class="nav-link" data-scroll-target="#statistics-helpers">Statistics helpers</a></li>
   </ul>
 </nav>
@@ -337,9 +429,9 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-fits.html">API: fits</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-fits.html">Fits</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API: fits</h1>
+<h1 class="title">Fits</h1>
 </div>
 
 
@@ -356,293 +448,452 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Every fitting method returns a fit object. These methods read its draws, summaries, diagnostics, and files.</p>
-<p><a href="./draws.html">Draws, summaries, and saving fits</a> explains formats, summaries, and saving.</p>
+<p>Every fitting method returns a fit: <code>CmdStanMCMC</code>, <code>CmdStanMLE</code>, <code>CmdStanVB</code>, <code>CmdStanLaplace</code>, <code>CmdStanPathfinder</code>, <code>CmdStanGQ</code>, or <code>CmdStanDiagnose</code>, all extending <code>CmdStanFit</code>. Methods are camelCase versions of CmdStanR’s.</p>
+<p>A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that <code>draws()</code>, <code>summary()</code>, and the diagnostics use. Each read of new columns passes over the files again, so request variables together. Until <code>materialize()</code>, the fit needs its CSV files.</p>
 <section id="draws-and-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="draws-and-summaries">Draws and summaries</h2>
+<section id="draws" class="level3">
+<h3 class="anchored" data-anchor-id="draws"><code>draws()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;draws(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$incWarmup</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Method</th>
-<th>Result</th>
+<th>Format</th>
+<th>Shape</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>draws(variables: null, format: null, incWarmup: false)</code></td>
-<td>Draws in <code>draws_array</code>, <code>draws_matrix</code>, <code>draws_df</code>, <code>draws_list</code>, or <code>draws_rvars</code> format</td>
+<td><code>draws_array</code></td>
+<td><code>[iteration][chain][variable =&gt; value]</code>. Default for MCMC and generated quantities fits. Chains must have equal lengths.</td>
 </tr>
 <tr class="even">
-<td><code>samplerDiagnostics(format: null, incWarmup: false)</code></td>
-<td>Sampler columns ending in <code>__</code>, except <code>lp__</code></td>
+<td><code>draws_matrix</code></td>
+<td><code>[draw][variable =&gt; value]</code>, chain after chain. Default for other fits.</td>
 </tr>
 <tr class="odd">
-<td><code>summary(variables: null, probs: [0.05, 0.95], measures: [])</code></td>
-<td>One row per variable</td>
+<td><code>draws_df</code></td>
+<td><code>draws_matrix</code> rows plus one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code></td>
 </tr>
 <tr class="even">
-<td><code>drawsColumns(variables: null, incWarmup: false)</code>, <code>summaryColumns(...)</code></td>
-<td>The same as column arrays. See <a href="./api-data-frames.html#draws-and-summaries-out">data frames</a>.</td>
+<td><code>draws_list</code></td>
+<td><code>[chain][variable =&gt; list of values]</code>, in the requested variable order</td>
 </tr>
 <tr class="odd">
-<td><code>drawsTable(...)</code>, <code>summaryTable(...)</code></td>
-<td>The same as a <code>Phibble\DataFrame</code></td>
-</tr>
-<tr class="even">
-<td><code>print(variables: null, maxRows: null)</code></td>
-<td>Prints summary JSON for at most <code>cmdstanr_max_rows</code> variables</td>
-</tr>
-<tr class="odd">
-<td><code>lp()</code></td>
-<td><code>lp__</code> by iteration and chain</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanSummary()</code></td>
-<td>CmdStan’s <code>stansummary</code> text</td>
+<td><code>draws_rvars</code></td>
+<td><code>[base name =&gt; ['dims', 'nchains', 'ndraws', 'draws']]</code></td>
 </tr>
 </tbody>
 </table>
-<p>A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that <code>draws()</code>, <code>summary()</code>, and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until <code>materialize()</code>, the fit needs its CSV files.</p>
+<p>A base name such as <code>beta</code> selects every element, and <code>null</code> selects every variable except sampler columns ending in <code>__</code>. Unknown names throw. A <code>null</code> format uses the <code>cmdstanr_draws_format</code> option, else the default above. Warmup draws need <code>save_warmup: true</code> and <code>incWarmup: true</code>. <a href="./draws.html">Draws, summaries, and saving fits</a> gives examples.</p>
+</section>
+<section id="samplerDiagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="samplerDiagnostics"><code>samplerDiagnostics()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;samplerDiagnostics(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$incWarmup</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The columns ending in <code>__</code> other than <code>lp__</code>, in the same formats as <code>draws()</code>.</p>
+</section>
+<section id="summary" class="level3">
+<h3 class="anchored" data-anchor-id="summary"><code>summary()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summary(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>]<span class="ot">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$measures</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Without <code>measures</code>, returns <code>mean</code>, <code>median</code>, <code>sd</code>, <code>mad</code>, the quantiles named after <code>probs</code> (<code>q5</code> and <code>q95</code> by default), <code>rhat</code>, <code>ess_bulk</code>, <code>ess_tail</code>, and <code>mcse_mean</code>. CmdStan’s <code>stansummary</code> computes <code>rhat</code>, <code>ess_bulk</code>, and <code>mcse_mean</code>, and <code>ess_tail</code> is computed in PHP. With <code>measures</code>, the summary follows posterior’s <code>summarise_draws()</code> and is computed in PHP: named measures, the groups <code>default_summary_measures</code>, <code>default_convergence_measures</code>, and <code>default_mcse_measures</code>, or callables with string keys. Convergence columns are <code>NAN</code> for fits other than MCMC and for chains with fewer than four draws. <a href="./draws.html#summaries">Summaries</a> lists the measures.</p>
+</section>
+<section id="drawsColumns" class="level3">
+<h3 class="anchored" data-anchor-id="drawsColumns"><code>drawsColumns()</code>, <code>summaryColumns()</code></h3>
+<p><span id="summaryColumns"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;drawsColumns(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$incWarmup</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summaryColumns(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>]<span class="ot">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$measures</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>drawsColumns()</code> returns one list per variable element, such as <code>beta[2]</code>, then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns, like posterior’s <code>as_draws_df()</code>. <code>summaryColumns()</code> returns <code>variable</code> and one column per measure. Neither needs another package.</p>
+</section>
+<section id="drawsTable" class="level3">
+<h3 class="anchored" data-anchor-id="drawsTable"><code>drawsTable()</code>, <code>summaryTable()</code></h3>
+<p><span id="summaryTable"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;drawsTable(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$incWarmup</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">object</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;summaryTable(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$probs</span> <span class="op">=</span> [<span class="fl">0.05</span><span class="ot">,</span> <span class="fl">0.95</span>]<span class="ot">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$measures</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">object</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The column arrays above as a <code>Phibble\DataFrame</code>. Needs <code>phpstats/phibble</code>, which requires PHP 8.3 or later, and throws a <code>RuntimeException</code> when it is not installed.</p>
+</section>
+<section id="print" class="level3">
+<h3 class="anchored" data-anchor-id="print"><code>print()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;<span class="kw">print</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxRows</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Prints at most <code>maxRows</code> variables, by default the <code>cmdstanr_max_rows</code> option, else 10.</p>
+</section>
+<section id="lp" class="level3">
+<h3 class="anchored" data-anchor-id="lp"><code>lp()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;lp()<span class="ot">:</span> <span class="dt">array</span><span class="op">|</span><span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>[iteration][chain]</code> values of <code>lp__</code>. Optimization and diagnose fits return one float: see <a href="#mle-lp"><code>CmdStanMLE::lp()</code></a> and <a href="#diagnose-lp"><code>CmdStanDiagnose::lp()</code></a>.</p>
+</section>
+<section id="cmdstanSummary" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanSummary"><code>cmdstanSummary()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;cmdstanSummary()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>stansummary</code>’s text for the output files. Compressed files are decompressed to temporary copies first.</p>
+</section>
 </section>
 <section id="diagnostics-and-run-information" class="level2">
 <h2 class="anchored" data-anchor-id="diagnostics-and-run-information">Diagnostics and run information</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>diagnosticSummary()</code></td>
-<td>Per-chain <code>num_divergent</code>, <code>num_max_treedepth</code>, and <code>ebfmi</code></td>
-</tr>
-<tr class="even">
-<td><code>checkDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])</code>, <code>diagnosticWarnings()</code></td>
-<td>Runs the checks, or returns their messages</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstanDiagnose()</code></td>
-<td>The text from CmdStan’s <code>diagnose</code> utility</td>
-</tr>
-<tr class="even">
-<td><code>metadata()</code>, <code>chainMetadata()</code></td>
-<td>CSV metadata, merged or per chain</td>
-</tr>
-<tr class="odd">
-<td><code>variables()</code>, <code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>, <code>numProcs()</code></td>
-<td>Counts and names from the CSV files</td>
-</tr>
-<tr class="even">
-<td><code>stepSize()</code>, <code>invMetric(matrix: true)</code></td>
-<td>Adaptation results, one per chain</td>
-</tr>
-<tr class="odd">
-<td><code>time()</code></td>
-<td>Warmup, sampling, and total time per chain, when available</td>
-</tr>
-<tr class="even">
-<td><code>init()</code></td>
-<td>The initial values each process used</td>
-</tr>
-<tr class="odd">
-<td><code>output()</code>, <code>returnCodes()</code>, <code>command()</code></td>
-<td>Console output, exit status, and command line of each process. Imported fits have none of these. <code>command()</code> leaves out <code>STAN_NUM_THREADS</code> and an MPI launcher.</td>
-</tr>
-<tr class="even">
-<td><code>code()</code></td>
-<td>The Stan program. Imported fits have none.</td>
-</tr>
-</tbody>
-</table>
+<section id="diagnosticSummary" class="level3">
+<h3 class="anchored" data-anchor-id="diagnosticSummary"><code>diagnosticSummary()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;diagnosticSummary()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>num_divergent</code>, <code>num_max_treedepth</code>, and <code>ebfmi</code>, each with one value per chain.</p>
+</section>
+<section id="checkDiagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="checkDiagnostics"><code>checkDiagnostics()</code>, <code>diagnosticWarnings()</code></h3>
+<p><span id="diagnosticWarnings"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;checkDiagnostics(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$checks</span> <span class="op">=</span> [<span class="st">'divergences'</span><span class="ot">,</span> <span class="st">'treedepth'</span><span class="ot">,</span> <span class="st">'ebfmi'</span>]<span class="ot">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;diagnosticWarnings()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>checkDiagnostics()</code> runs the named checks (<code>divergences</code>, <code>treedepth</code>, and <code>ebfmi</code>) and returns their messages. <code>diagnosticWarnings()</code> returns the messages from the checks run when the fit was created. Messages are returned, not raised as PHP warnings.</p>
+</section>
+<section id="cmdstanDiagnose" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanDiagnose"><code>cmdstanDiagnose()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;cmdstanDiagnose()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the text of CmdStan’s <code>bin/diagnose</code> for the output files.</p>
+</section>
+<section id="metadata" class="level3">
+<h3 class="anchored" data-anchor-id="metadata"><code>metadata()</code>, <code>chainMetadata()</code></h3>
+<p><span id="chainMetadata"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;metadata()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;chainMetadata()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>metadata()</code> returns the first chain’s metadata with <code>id</code>, <code>seed</code>, <code>init</code>, <code>step_size</code>, <code>step_size_adaptation</code>, and <code>fitted_params</code> collected across chains (<code>seed</code> is a scalar when shared), <code>time</code> as per-chain rows, and missing keys filled from the configuration JSON. <code>chainMetadata()</code> returns each chain’s metadata, including CmdStan’s raw argument keys.</p>
+</section>
+<section id="variables" class="level3">
+<h3 class="anchored" data-anchor-id="variables"><code>variables()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;variables()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the column names, in CSV order.</p>
+</section>
+<section id="numChains" class="level3">
+<h3 class="anchored" data-anchor-id="numChains"><code>numChains()</code>, <code>numDrawsSampling()</code>, <code>numDrawsWarmup()</code>, <code>numProcs()</code></h3>
+<p><span id="numDrawsSampling"></span> <span id="numDrawsWarmup"></span> <span id="numProcs"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;numChains()<span class="ot">:</span> <span class="dt">int</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;numDrawsSampling()<span class="ot">:</span> <span class="dt">int</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;numDrawsWarmup()<span class="ot">:</span> <span class="dt">int</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;numProcs()<span class="ot">:</span> <span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>numDrawsWarmup()</code> is 0 unless warmup was saved. <code>numProcs()</code> counts CmdStan processes, one per output file.</p>
+</section>
+<section id="stepSize" class="level3">
+<h3 class="anchored" data-anchor-id="stepSize"><code>stepSize()</code>, <code>invMetric()</code>, <code>metric()</code></h3>
+<p><span id="invMetric"></span> <span id="metric"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;stepSize()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;invMetric(<span class="dt">bool</span> <span class="va">$matrix</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;metric()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>stepSize()</code> returns one step size per chain. <code>invMetric()</code> returns each chain’s inverse metric, from <code>save_metric</code> JSON when every chain has it, else from the CSV comments. With <code>matrix: true</code>, CmdStanR’s default, diagonal metrics are expanded to matrices. <code>metric()</code> returns the decoded <code>save_metric</code> JSON (<code>stepsize</code>, <code>metric_type</code>, and <code>inv_metric</code>) per chain.</p>
+</section>
+<section id="cmdstanConfig" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanConfig"><code>cmdstanConfig()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;cmdstanConfig()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the decoded <code>save_cmdstan_config</code> JSON, one array per process.</p>
+</section>
+<section id="time" class="level3">
+<h3 class="anchored" data-anchor-id="time"><code>time()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;<span class="fu">time</span>()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns rows with <code>chain</code>, <code>warmup</code>, <code>sampling</code>, and <code>total</code> in seconds. <code>total</code> is the process’s elapsed time, <code>null</code> for imported fits.</p>
+</section>
+<section id="init" class="level3">
+<h3 class="anchored" data-anchor-id="init"><code>init()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;init()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read from the init files named in the metadata.</p>
+</section>
+<section id="output" class="level3">
+<h3 class="anchored" data-anchor-id="output"><code>output()</code>, <code>returnCodes()</code>, <code>command()</code></h3>
+<p><span id="returnCodes"></span> <span id="command"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;output()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;returnCodes()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;command()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Imported fits have none of these. <code>command()</code> returns shell-quoted command lines and leaves out <code>STAN_NUM_THREADS</code> and an MPI launcher.</p>
+</section>
+<section id="code" class="level3">
+<h3 class="anchored" data-anchor-id="code"><code>code()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;code()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Throws a <code>RuntimeException</code> for fits imported from CSV files.</p>
+</section>
+<section id="profiles" class="level3">
+<h3 class="anchored" data-anchor-id="profiles"><code>profiles()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;profiles()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns one list of rows per profile CSV file, with numeric values as floats.</p>
+</section>
 </section>
 <section id="files-and-saving" class="level2">
 <h2 class="anchored" data-anchor-id="files-and-saving">Files and saving</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code></td>
-<td>File paths. The latent-dynamics and profile accessors throw when there are no such files. <code>includeFailed</code> is accepted for CmdStanR compatibility.</td>
-</tr>
-<tr class="even">
-<td><code>profiles()</code></td>
-<td>Parsed profiling data</td>
-</tr>
-<tr class="odd">
-<td><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code></td>
-<td>Paths. An imported fit uses the data file recorded in the CSV when it still exists.</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanConfig()</code>, <code>metric()</code></td>
-<td>The decoded configuration and metric JSON</td>
-</tr>
-<tr class="odd">
-<td><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code></td>
-<td>Saved paths. Each takes <code>dir: '.', basename: null, timestamp: true, random: true</code>, and the first two also take <code>compress</code>.</td>
-</tr>
-<tr class="even">
-<td><code>materialize()</code></td>
-<td>Reads the draws, initial values, and profiles into memory</td>
-</tr>
-<tr class="odd">
-<td><code>saveObject(file)</code></td>
-<td>Materializes and serializes the fit, with MCMC summary statistics</td>
-</tr>
-</tbody>
-</table>
+<section id="outputFiles" class="level3">
+<h3 class="anchored" data-anchor-id="outputFiles"><code>outputFiles()</code>, <code>latentDynamicsFiles()</code>, <code>profileFiles()</code></h3>
+<p><span id="latentDynamicsFiles"></span> <span id="profileFiles"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;outputFiles(<span class="dt">bool</span> <span class="va">$includeFailed</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;latentDynamicsFiles(<span class="dt">bool</span> <span class="va">$includeFailed</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;profileFiles(<span class="dt">bool</span> <span class="va">$includeFailed</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The latent-dynamics and profile accessors throw when there are no such files. <code>includeFailed</code> is accepted for CmdStanR compatibility and adds nothing, because a failing process throws.</p>
+</section>
+<section id="dataFile" class="level3">
+<h3 class="anchored" data-anchor-id="dataFile"><code>dataFile()</code>, <code>configFiles()</code>, <code>metricFiles()</code></h3>
+<p><span id="configFiles"></span> <span id="metricFiles"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;dataFile()<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;configFiles(<span class="dt">bool</span> <span class="va">$includeFailed</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;metricFiles(<span class="dt">bool</span> <span class="va">$includeFailed</span> <span class="op">=</span> <span class="kw">false</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An imported fit uses the data file recorded in the CSV header when it still exists.</p>
+</section>
+<section id="saveOutputFiles" class="level3">
+<h3 class="anchored" data-anchor-id="saveOutputFiles"><code>saveOutputFiles()</code>, <code>saveLatentDynamicsFiles()</code>, <code>saveProfileFiles()</code>, <code>saveDataFile()</code>, <code>saveConfigFiles()</code>, <code>saveMetricFiles()</code></h3>
+<p><span id="saveLatentDynamicsFiles"></span> <span id="saveProfileFiles"></span> <span id="saveDataFile"></span> <span id="saveConfigFiles"></span> <span id="saveMetricFiles"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveOutputFiles(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$compress</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveLatentDynamicsFiles(</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$compress</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveProfileFiles(</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveDataFile(</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="ot">?</span><span class="dt">string</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveConfigFiles(</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveMetricFiles(</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="st">'.'</span><span class="ot">,</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$timestamp</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$random</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the saved paths and points the fit at them. Files are named <code>&lt;basename&gt;[-&lt;YYYYmmddHHMM&gt;][-&lt;id&gt;][-&lt;hex&gt;]</code>, where <code>basename</code> defaults to the model name, <code>timestamp</code> adds the date, and <code>random</code> adds the suffix. Files the run created are moved. Imported CSV files and the data file are copied. An existing destination throws. <code>compress</code> recompresses output and latent-dynamics files.</p>
+</section>
+<section id="materialize" class="level3">
+<h3 class="anchored" data-anchor-id="materialize"><code>materialize()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;materialize()<span class="ot">:</span> <span class="kw">static</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the fit. Afterwards it no longer needs its files.</p>
+</section>
+<section id="saveObject" class="level3">
+<h3 class="anchored" data-anchor-id="saveObject"><code>saveObject()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;saveObject(<span class="dt">string</span> <span class="va">$file</span>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Materializes the fit, computes MCMC summary statistics, and writes <code>serialize($fit)</code>. Returns the file path. Read it with <code>unserialize(file_get_contents($file))</code>, and unserialize only files you trust. Running generated quantities from a restored fit still needs its CSV files.</p>
+</section>
 </section>
 <section id="model-methods-1" class="level2">
 <h2 class="anchored" data-anchor-id="model-methods-1">Model methods</h2>
-<p>These need PHP’s FFI extension. The first call compiles a shared library for the fit’s model and data, and <code>initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)</code> does this explicitly. <code>data</code> binds other data, for example when a reloaded fit’s data file is gone, and <code>dataFile()</code> then points to it. Imported CSV fits must pass <code>model:</code>, and a model from <code>exeFile</code> alone has no program to build them from. See <a href="./log-density.html">Log density and model methods</a>.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>logProb(unconstrainedVariables, jacobian: true)</code></td>
-<td>The log density, with constants dropped</td>
-</tr>
-<tr class="even">
-<td><code>gradLogProb(...)</code></td>
-<td><code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code></td>
-</tr>
-<tr class="odd">
-<td><code>hessian(...)</code></td>
-<td><code>['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]</code></td>
-</tr>
-<tr class="even">
-<td><code>unconstrainVariables(variables)</code></td>
-<td>A flat unconstrained list from parameter values keyed by name, shaped as <code>constrainVariables()</code> returns them</td>
-</tr>
-<tr class="odd">
-<td><code>unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)</code></td>
-<td>The fit’s draws, other CSV files, or <code>draws_df</code> rows on the unconstrained scale</td>
-</tr>
-<tr class="even">
-<td><code>constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)</code></td>
-<td>Variables keyed by name as nested arrays, with tuples as lists and complex values as <code>[re, im]</code></td>
-</tr>
-<tr class="odd">
-<td><code>exposeFunctions(timeout: null)</code>, <code>functions()</code></td>
-<td>The model’s user-defined functions</td>
-</tr>
-</tbody>
-</table>
-<p><code>CmdStan\ModelMethods</code> and <code>CmdStan\StanFunctions</code> can also be used directly with a Stan file.</p>
+<p>These need PHP’s FFI extension. The first call compiles a shared library for the fit’s model and data. A model from <code>exeFile</code> alone has no program to build them from. <a href="./log-density.html">Log density and model methods</a> gives examples. <code>ModelMethods</code> and <code>StanFunctions</code> can also be used directly with a Stan file: see <a href="./api-helpers.html">Helper classes</a>.</p>
+<section id="initModelMethods" class="level3">
+<h3 class="anchored" data-anchor-id="initModelMethods"><code>initModelMethods()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;initModelMethods(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">|</span><span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$data</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$seed</span> <span class="op">=</span> <span class="dv">1</span><span class="ot">,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$verbose</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span>CmdStanModel <span class="va">$model</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compiles (or reuses) a shared library for the model and binds it to <code>data</code>, by default the fit’s data. The first model-method call does this implicitly. Pass <code>data</code> when a reloaded fit’s data file is gone, and <code>dataFile()</code> then points to it. Imported CSV fits must pass <code>model</code>.</p>
+</section>
+<section id="logProb" class="level3">
+<h3 class="anchored" data-anchor-id="logProb"><code>logProb()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;logProb(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Constants are dropped. <code>jacobian: false</code> leaves out the Jacobian adjustment.</p>
+</section>
+<section id="gradLogProb" class="level3">
+<h3 class="anchored" data-anchor-id="gradLogProb"><code>gradLogProb()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;gradLogProb(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>['log_prob' =&gt; float, 'gradient' =&gt; list]</code>.</p>
+</section>
+<section id="hessian" class="level3">
+<h3 class="anchored" data-anchor-id="hessian"><code>hessian()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;hessian(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$jacobian</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>['log_prob' =&gt; float, 'grad_log_prob' =&gt; list, 'hessian' =&gt; rows]</code>. The Hessian uses finite differences of autodiff gradients, as in CmdStanR.</p>
+</section>
+<section id="unconstrainVariables" class="level3">
+<h3 class="anchored" data-anchor-id="unconstrainVariables"><code>unconstrainVariables()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;unconstrainVariables(<span class="dt">array</span> <span class="va">$variables</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>variables</code> is keyed by parameter name and shaped as <code>constrainVariables()</code> returns them. Returns a flat list.</p>
+</section>
+<section id="unconstrainDraws" class="level3">
+<h3 class="anchored" data-anchor-id="unconstrainDraws"><code>unconstrainDraws()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;unconstrainDraws(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$files</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$draws</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$incWarmup</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Unconstrains the fit’s draws, the draws in other CmdStan CSV <code>files</code>, or <code>draws_df</code> or <code>draws_matrix</code> rows given as <code>draws</code>, in a draws format.</p>
+</section>
+<section id="constrainVariables" class="level3">
+<h3 class="anchored" data-anchor-id="constrainVariables"><code>constrainVariables()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;constrainVariables(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$unconstrainedVariables</span><span class="ot">,</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$transformedParameters</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$generatedQuantities</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns variables keyed by name as nested arrays, with tuples as lists and complex values as <code>[re, im]</code>. Transformed parameters and generated quantities are included unless turned off.</p>
+</section>
+<section id="exposeFunctions" class="level3">
+<h3 class="anchored" data-anchor-id="exposeFunctions"><code>exposeFunctions()</code>, <code>functions()</code></h3>
+<p><span id="functions"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;exposeFunctions(<span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> StanFunctions</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;functions()<span class="ot">:</span> StanFunctions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>As <a href="./api-models.html#exposeFunctions"><code>CmdStanModel::exposeFunctions()</code></a> for the model that produced the fit.</p>
+</section>
 </section>
 <section id="methods-of-specific-fit-types" class="level2">
 <h2 class="anchored" data-anchor-id="methods-of-specific-fit-types">Methods of specific fit types</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Fit</th>
-<th>Methods</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>CmdStanMCMC</code></td>
-<td><code>loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)</code> and <code>waic(variables: 'log_lik')</code>. See <a href="./loo.html">LOO and WAIC</a>.</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanMLE</code></td>
-<td><code>mle()</code> and <code>optimizedParams()</code> (the estimates without <code>lp__</code>), and <code>lp()</code>. Its <code>summary()</code> returns <code>variable</code> and <code>estimate</code> rows.</td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanVB</code></td>
-<td><code>variationalMean()</code>, and <code>lpApprox()</code>, the approximation’s log density at each draw</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanLaplace</code></td>
-<td><code>mode()</code> and <code>lpApprox()</code></td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanPathfinder</code></td>
-<td><code>lpApprox()</code>, and <code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, and <code>singlePathDiagnostics()</code> with <code>save_single_paths: true</code>. Its variables include <code>lp_approx__</code> and <code>path__</code>.</td>
-</tr>
-<tr class="even">
-<td><code>CmdStanGQ</code></td>
-<td><code>fittedParamsFiles()</code></td>
-</tr>
-<tr class="odd">
-<td><code>CmdStanDiagnose</code></td>
-<td><code>gradients()</code>, the gradient check’s console output</td>
-</tr>
-</tbody>
-</table>
+<section id="loo" class="level3">
+<h3 class="anchored" data-anchor-id="loo"><code>loo()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;loo(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$variables</span> <span class="op">=</span> <span class="st">'log_lik'</span><span class="ot">,</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">float</span><span class="op">|</span><span class="dt">bool</span><span class="op">|</span><span class="kw">null</span> <span class="va">$rEff</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$momentMatch</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$maxIters</span> <span class="op">=</span> <span class="dv">30</span><span class="ot">,</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">float</span> <span class="va">$kThreshold</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$split</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$cov</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanMCMC</code> only. Uses the <code>log_lik</code> variable by default. <code>rEff: true</code> computes relative efficiencies as CmdStanR does. <code>momentMatch: true</code> needs the phit extension and model methods, and <code>maxIters</code>, <code>kThreshold</code>, <code>split</code>, and <code>cov</code> are <code>loo_moment_match()</code>’s options. <a href="./loo.html">LOO and WAIC</a> describes the result.</p>
+</section>
+<section id="waic" class="level3">
+<h3 class="anchored" data-anchor-id="waic"><code>waic()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;waic(<span class="dt">string</span> <span class="va">$variables</span> <span class="op">=</span> <span class="st">'log_lik'</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanMCMC</code> only. Uses the <code>log_lik</code> variable by default. Adds a message to <code>warnings</code> when any pointwise <code>p_waic</code> exceeds 0.4.</p>
+</section>
+<section id="mle" class="level3">
+<h3 class="anchored" data-anchor-id="mle"><code>mle()</code>, <code>optimizedParams()</code></h3>
+<p><span id="optimizedParams"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;mle()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;optimizedParams()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanMLE</code> only. Returns the estimates keyed by variable name. <code>summary()</code> on this fit returns <code>variable</code> and <code>estimate</code> rows and rejects <code>measures</code>.</p>
+</section>
+<section id="mle-lp" class="level3">
+<h3 class="anchored" data-anchor-id="mle-lp"><code>lp()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;lp()<span class="ot">:</span> <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanMLE</code> only. The log density at the optimum, <code>NAN</code> when missing.</p>
+</section>
+<section id="variationalMean" class="level3">
+<h3 class="anchored" data-anchor-id="variationalMean"><code>variationalMean()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;variationalMean()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanVB</code> only. Returns values keyed by variable name.</p>
+</section>
+<section id="lpApprox" class="level3">
+<h3 class="anchored" data-anchor-id="lpApprox"><code>lpApprox()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;lpApprox()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanVB</code>, <code>CmdStanLaplace</code>, and <code>CmdStanPathfinder</code>. The approximation’s log density at each draw, as one list in draw order.</p>
+</section>
+<section id="mode" class="level3">
+<h3 class="anchored" data-anchor-id="mode"><code>mode()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;mode()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanLaplace</code> only. Returns values keyed by variable name.</p>
+</section>
+<section id="singlePathFiles" class="level3">
+<h3 class="anchored" data-anchor-id="singlePathFiles"><code>singlePathFiles()</code>, <code>singlePathJsonFiles()</code>, <code>singlePathFits()</code>, <code>singlePathDiagnostics()</code></h3>
+<p><span id="singlePathJsonFiles"></span> <span id="singlePathFits"></span> <span id="singlePathDiagnostics"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;singlePathFiles()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;singlePathJsonFiles()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;singlePathFits()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;singlePathDiagnostics()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanPathfinder</code> only. Available with <code>save_single_paths: true</code>. The files are CmdStan’s <code>&lt;output&gt;_path_&lt;n&gt;.csv</code> and <code>.json</code>, in path order. <code>singlePathFits()</code> returns one <code>CmdStanPathfinder</code> per path, and <code>singlePathDiagnostics()</code> the decoded JSON. The fit’s variables include <code>lp_approx__</code> and <code>path__</code>.</p>
+</section>
+<section id="fittedParamsFiles" class="level3">
+<h3 class="anchored" data-anchor-id="fittedParamsFiles"><code>fittedParamsFiles()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;fittedParamsFiles()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanGQ</code> only. The files generated quantities ran on.</p>
+</section>
+<section id="gradients" class="level3">
+<h3 class="anchored" data-anchor-id="gradients"><code>gradients()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;gradients()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanDiagnose</code> only. The console output of CmdStan’s <code>diagnose</code> method.</p>
+</section>
+<section id="diagnose-lp" class="level3">
+<h3 class="anchored" data-anchor-id="diagnose-lp"><code>lp()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span>-&gt;lp()<span class="ot">:</span> <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>CmdStanDiagnose</code> only. The log density at the checked point.</p>
+</section>
+</section>
+<section id="reading-csv-files" class="level2">
+<h2 class="anchored" data-anchor-id="reading-csv-files">Reading CSV files</h2>
+<p>Static methods of <code>CmdStanFit</code>.</p>
+<section id="fromCsv" class="level3">
+<h3 class="anchored" data-anchor-id="fromCsv"><code>CmdStanFit::fromCsv()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>CmdStanFit::fromCsv(</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$files</span><span class="ot">,</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$checkDiagnostics</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The static form of <a href="./api-functions.html#as_cmdstan_fit"><code>as_cmdstan_fit()</code></a>. Returns the fit class for the files’ method.</p>
+</section>
+<section id="readCmdStanCsv" class="level3">
+<h3 class="anchored" data-anchor-id="readCmdStanCsv"><code>CmdStanFit::readCmdStanCsv()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>CmdStanFit::readCmdStanCsv(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$files</span><span class="ot">,</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$samplerDiagnostics</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The static form of <a href="./api-functions.html#read_cmdstan_csv_list"><code>read_cmdstan_csv_list()</code></a>.</p>
+</section>
+<section id="classForMethod" class="level3">
+<h3 class="anchored" data-anchor-id="classForMethod"><code>CmdStanFit::classForMethod()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>CmdStanFit::classForMethod(<span class="dt">string</span> <span class="va">$method</span>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The fit class name for a CmdStan method name, such as <code>CmdStanMCMC</code> for <code>sample</code>.</p>
+</section>
+<section id="quantile" class="level3">
+<h3 class="anchored" data-anchor-id="quantile"><code>CmdStanFit::quantile()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>CmdStanFit::quantile(<span class="dt">array</span> <span class="va">$values</span><span class="ot">,</span> <span class="dt">float</span> <span class="va">$p</span>)<span class="ot">:</span> <span class="dt">float</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>p</code> quantile of <code>values</code> with R’s type 7 rule. <code>NAN</code> for an empty list.</p>
+</section>
 </section>
 <section id="statistics-helpers" class="level2">
 <h2 class="anchored" data-anchor-id="statistics-helpers">Statistics helpers</h2>
-<p>These classes work on plain draws arrays, and their docblocks describe the shapes.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Class</th>
-<th>Methods</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>Figure</code></td>
-<td><code>ascii()</code>, <code>vegaLite()</code>, <code>json()</code>, <code>html()</code>, <code>svg()</code>, <code>png()</code>. Casting to a string gives the ASCII form.</td>
-</tr>
-<tr class="even">
-<td><code>Plot</code></td>
-<td>The figures, plus <code>bandwidth()</code>, <code>density()</code>, <code>autocorrelation()</code>, and <code>ranks()</code></td>
-</tr>
-<tr class="odd">
-<td><code>Psis</code></td>
-<td><code>paretoSmooth()</code>, <code>paretoKhat()</code>, <code>psis()</code>, <code>gpdfit()</code></td>
-</tr>
-<tr class="even">
-<td><code>Loo</code></td>
-<td><code>loo()</code>, <code>waic()</code>, <code>relativeEff()</code></td>
-</tr>
-<tr class="odd">
-<td><code>MomentMatch</code></td>
-<td><code>loo()</code> on unconstrained draws with log-density and log-likelihood callbacks, and <code>fromFit()</code></td>
-</tr>
-<tr class="even">
-<td><code>DrawKernels</code></td>
-<td>Detection of and wrappers for the phit draw kernels</td>
-</tr>
-<tr class="odd">
-<td><code>Summary</code></td>
-<td><code>summarise()</code> and each posterior measure</td>
-</tr>
-<tr class="even">
-<td><code>Rvars</code>, <code>Inits</code></td>
-<td><code>draws_rvars</code> helpers, and <code>fromFit()</code>, <code>fromDraws()</code>, <code>nest()</code>, and <code>validate()</code> for initial values</td>
-</tr>
-</tbody>
-</table>
+<p><code>Figure</code>, <code>Plot</code>, <code>Psis</code>, <code>Loo</code>, <code>MomentMatch</code>, <code>DrawKernels</code>, <code>Summary</code>, <code>Rvars</code>, <code>Inits</code>, <code>ModelMethods</code>, and <code>StanFunctions</code> are on <a href="./api-helpers.html">Helper classes</a>.</p>
 
 
 </section>

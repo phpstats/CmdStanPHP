@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API: data frames and the phpstats family – CmdStanPHP</title>
+<title>Data frames – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -121,7 +121,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-data-frames.html">API: data frames and the phpstats family</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-data-frames.html">Data frames</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -146,12 +146,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -161,6 +155,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./installation.html" class="sidebar-item-text sidebar-link">
@@ -238,12 +238,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Figures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -252,43 +258,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: functions</span></a>
+ <span class="menu-text">Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-options.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: options</span></a>
+ <span class="menu-text">Options</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: models</span></a>
+ <span class="menu-text">CmdStanModel</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: fits</span></a>
+ <span class="menu-text">Fits</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">API: data frames and the phpstats family</span></a>
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Helper classes</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: errors</span></a>
+ <span class="menu-text">Errors</span></a>
   </div>
 </li>
       </ul>
@@ -319,29 +331,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Compatibility and limitations</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Compatibility with CmdStanR</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link">
@@ -360,9 +355,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#data-in" id="toc-data-in" class="nav-link active" data-scroll-target="#data-in">Data in</a></li>
-  <li><a href="#regression-data" id="toc-regression-data" class="nav-link" data-scroll-target="#regression-data">Regression data</a></li>
-  <li><a href="#draws-and-summaries-out" id="toc-draws-and-summaries-out" class="nav-link" data-scroll-target="#draws-and-summaries-out">Draws and summaries out</a></li>
+  <li><a href="#data-in" id="toc-data-in" class="nav-link active" data-scroll-target="#data-in">Data in</a>
+  <ul class="collapse">
+  <li><a href="#StanData-fromTable" id="toc-StanData-fromTable" class="nav-link" data-scroll-target="#StanData-fromTable"><code>StanData::fromTable()</code></a></li>
+  <li><a href="#StanData-construct" id="toc-StanData-construct" class="nav-link" data-scroll-target="#StanData-construct"><code>new StanData()</code>, <code>toArray()</code>, <code>with()</code></a></li>
+  <li><a href="#StanData-isTable" id="toc-StanData-isTable" class="nav-link" data-scroll-target="#StanData-isTable"><code>StanData::isTable()</code>, <code>normalize()</code>, <code>columnsOf()</code></a></li>
+  </ul></li>
+  <li><a href="#regression-data" id="toc-regression-data" class="nav-link" data-scroll-target="#regression-data">Regression data</a>
+  <ul class="collapse">
+  <li><a href="#StanData-fromColumns" id="toc-StanData-fromColumns" class="nav-link" data-scroll-target="#StanData-fromColumns"><code>StanData::fromColumns()</code></a></li>
+  <li><a href="#StanData-fromFormula" id="toc-StanData-fromFormula" class="nav-link" data-scroll-target="#StanData-fromFormula"><code>StanData::fromFormula()</code></a></li>
+  <li><a href="#StanData-fromModelMatrix" id="toc-StanData-fromModelMatrix" class="nav-link" data-scroll-target="#StanData-fromModelMatrix"><code>StanData::fromModelMatrix()</code></a></li>
+  </ul></li>
+  <li><a href="#draws-and-summaries-out" id="toc-draws-and-summaries-out" class="nav-link" data-scroll-target="#draws-and-summaries-out">Draws and summaries out</a>
+  <ul class="collapse">
+  <li><a href="#Tables-fromRows" id="toc-Tables-fromRows" class="nav-link" data-scroll-target="#Tables-fromRows"><code>Tables::fromRows()</code></a></li>
+  <li><a href="#Tables-dataFrame" id="toc-Tables-dataFrame" class="nav-link" data-scroll-target="#Tables-dataFrame"><code>Tables::dataFrame()</code></a></li>
+  </ul></li>
   <li><a href="#part-of-the-phpstats-family" id="toc-part-of-the-phpstats-family" class="nav-link" data-scroll-target="#part-of-the-phpstats-family">Part of the phpstats family</a></li>
   </ul>
 </nav>
@@ -370,9 +379,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-data-frames.html">API: data frames and the phpstats family</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-data-frames.html">Data frames</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API: data frames and the phpstats family</h1>
+<h1 class="title">Data frames</h1>
 </div>
 
 
@@ -432,11 +441,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Factor levels come from a <code>toModelData()</code> descriptor (<code>['levels' =&gt; list&lt;string&gt;, 'codes' =&gt; list&lt;?int&gt;, 'ordered' =&gt; bool]</code>, with 0-based codes, as phibble’s <code>DataFrame::toModelData()</code> returns them from phibble 0.1.0; add <code>'base' =&gt; 1</code> for 1-based codes) or, for a <code>toColumns()</code> table, from <code>levels($name)</code> when <code>types()</code> reports a factor. The <code>ordered</code> flag is ignored. Labels cannot be written to Stan JSON, so they are returned in <code>StanData::$levels</code>, keyed by data variable, where label <code>i</code> has index <code>i + 1</code>. The conversion adds <code>N</code>, the row count, unless the table has a column named <code>N</code>, and adds <code>J_&lt;name&gt;</code> unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.</p>
-<p>Fit methods are camelCase, as are <code>StanData</code>‘s and <code>Tables</code>’ <code>from...()</code> constructors and the package’s other static helpers, such as <code>CmdStanFit::fromCsv()</code> and <code>Inits::fromFit()</code>. <code>StanData</code> is a value object with readonly <code>data</code>, <code>levels</code>, <code>columns</code> (the names of the columns of <code>X</code>), and <code>meta</code>. <code>toArray()</code> returns <code>data</code>, and <code>with(['prior_scale' =&gt; 2.5])</code> adds or replaces variables.</p>
+<section id="StanData-fromTable" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-fromTable"><code>StanData::fromTable()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>StanData::fromTable(<span class="dt">object</span> <span class="va">$table</span><span class="ot">,</span> <span class="dt">bool</span> <span class="va">$addN</span> <span class="op">=</span> <span class="kw">true</span>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Converts a table to Stan data with the conventions above. Returns a <code>StanData</code> whose <code>levels</code> hold the factor labels. <code>addN: false</code> leaves out <code>N</code>.</p>
+</section>
+<section id="StanData-construct" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-construct"><code>new StanData()</code>, <code>toArray()</code>, <code>with()</code></h3>
+<p><span id="StanData-toArray"></span> <span id="StanData-with"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">new</span> StanData(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$levels</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$columns</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$meta</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span>-&gt;toArray()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span>-&gt;with(<span class="dt">array</span> <span class="va">$data</span>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>StanData</code> is a value object with readonly <code>data</code>, <code>levels</code> (labels by data variable, where label <code>i</code> has index <code>i + 1</code>), <code>columns</code> (the names of the columns of <code>X</code>), and <code>meta</code>. <code>toArray()</code> returns <code>data</code>. <code>with(['prior_scale' =&gt; 2.5])</code> returns a copy with variables added or replaced. A <code>StanData</code> can be passed wherever data is accepted.</p>
+</section>
+<section id="StanData-isTable" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-isTable"><code>StanData::isTable()</code>, <code>normalize()</code>, <code>columnsOf()</code></h3>
+<p><span id="StanData-normalize"></span> <span id="StanData-columnsOf"></span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>StanData::isTable(<span class="dt">mixed</span> <span class="va">$value</span>)<span class="ot">:</span> <span class="dt">bool</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>StanData::normalize(<span class="dt">mixed</span> <span class="va">$data</span>)<span class="ot">:</span> <span class="dt">mixed</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>StanData::columnsOf(<span class="dt">object</span> <span class="va">$table</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>isTable()</code> is true for a <code>StanData</code> or an object with <code>toModelData()</code> or <code>toColumns()</code>. <code>normalize()</code> passes <code>null</code> and arrays through and converts a <code>StanData</code> or table to a Stan data array, as every <code>data</code> argument does. <code>columnsOf()</code> returns a table’s columns, with factors as 1-based indices and their levels.</p>
+</section>
 </section>
 <section id="regression-data" class="level2">
 <h2 class="anchored" data-anchor-id="regression-data">Regression data</h2>
-<p><code>StanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false)</code> builds the usual hierarchical regression data block from named columns or a table:</p>
+<section id="StanData-fromColumns" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-fromColumns"><code>StanData::fromColumns()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>StanData::fromColumns(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">|</span><span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$y</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$x</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$groups</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$intercept</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Builds the usual hierarchical regression data block from named columns or a table:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -480,17 +523,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Groups are numbered over sorted unique values (numbers numerically, otherwise in <code>strcmp</code> order) or over a factor’s levels, and the labels are in <code>levels['&lt;g&gt;_id']</code>. Predictors must be numeric. <code>intercept: true</code> prepends a column of ones named <code>(Intercept)</code>. It is off by default because Stan programs usually give the intercept its own parameter.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> CmdStan\StanData::fromColumns(<span class="va">$df</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> [<span class="st">'hours'</span>]<span class="ot">,</span> <span class="st">'school'</span>)<span class="ot">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">1</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K;</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; school_id;</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')</code> builds regression data from an R-style formula through <code>Phit\model_matrix()</code> in the <a href="https://github.com/phpstats/phit"><code>phit</code></a> extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the <code>(Intercept)</code> column in <code>X</code> unless <code>dropIntercept: true</code>. <code>$data</code> can be columns, factor descriptors, or a table, whose <code>toModelData()</code> is passed unchanged. Without the function, <code>fromFormula()</code> throws a <code>RuntimeException</code> that names the requirement. <code>StanData::fromModelMatrix($result)</code> maps an existing <code>Phit\model_matrix()</code> result and is the only code that depends on its shape.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> CmdStan\StanData::fromColumns(<span class="va">$df</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> [<span class="st">'hours'</span>]<span class="ot">,</span> <span class="st">'school'</span>)<span class="ot">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">$fit</span> <span class="op">=</span> <span class="va">$model</span>-&gt;sample(data<span class="ot">:</span> <span class="va">$data</span><span class="ot">,</span> seed<span class="ot">:</span> <span class="dv">1</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; K;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; school_id;</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="StanData-fromFormula" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-fromFormula"><code>StanData::fromFormula()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>StanData::fromFormula(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$formula</span><span class="ot">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">|</span><span class="dt">array</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$dropIntercept</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$missing</span> <span class="op">=</span> <span class="st">'drop'</span><span class="ot">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data)</code> builds regression data from an R-style formula through <code>Phit\model_matrix()</code> in the <a href="https://github.com/phpstats/phit"><code>phit</code></a> extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the <code>(Intercept)</code> column in <code>X</code> unless <code>dropIntercept: true</code>. <code>$data</code> can be columns, factor descriptors, or a table, whose <code>toModelData()</code> is passed unchanged. Without the function, <code>fromFormula()</code> throws a <code>RuntimeException</code> that names the requirement.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -534,26 +586,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Group names that are not Stan identifiers have other characters replaced by <code>_</code>, so the nested group <code>g2:g1</code> gives <code>g2_g1_id</code>. Groups are numbered in factor level order when the data has descriptors or table factors, and otherwise over sorted labels (numbers numerically, otherwise byte order, as <code>Phit\model_matrix()</code> sorts levels). Terms on the same group are concatenated into one <code>Z_&lt;g&gt;</code>, intercept-only terms included, so <code>(1 | g) + (0 + x | g)</code> gives the same <code>Z_g</code> as <code>(1 + x | g)</code>. Two groups whose names map to the same <code>&lt;g&gt;</code>, such as <code>a.b</code> and <code>a_b</code>, are rejected. Factors reach <code>Phit\model_matrix()</code> as descriptors in the data’s level order, so the first level is the reference level and a factor response is coded in that order, while plain string columns use sorted levels. <code>missing: 'drop'</code> removes rows with missing values in any variable the formula uses, with one <code>E_WARNING</code> from <code>Phit\model_matrix()</code>, and <code>missing: 'raise'</code> rejects them. The remaining result keys, including <code>retained_rows</code>, <code>dropped_rows</code>, <code>n_input</code>, <code>n_dropped</code>, <code>terms</code>, and <code>assign</code>, are kept in <code>meta</code>, and <code>meta['random'][&lt;g&gt;]</code> lists each group’s columns and terms.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;          <span class="co">// includes the intercept column</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; g_id;</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; Q_g;</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, Q_g] Z_g;      <span class="co">// (1 + x1 | g)</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;          <span class="co">// includes the intercept column</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J;</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; g_id;</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; Q_g;</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, Q_g] Z_g;      <span class="co">// (1 + x1 | g)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="StanData-fromModelMatrix" class="level3">
+<h3 class="anchored" data-anchor-id="StanData-fromModelMatrix"><code>StanData::fromModelMatrix()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>StanData::fromModelMatrix(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$mm</span><span class="ot">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$dropIntercept</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$groupLevels</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="kw">self</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Maps an existing <code>Phit\model_matrix()</code> result to Stan data, as <code>fromFormula()</code> does. It is the only code that depends on the result’s shape. <code>groupLevels</code> gives the level order of grouping factors.</p>
+</section>
 </section>
 <section id="draws-and-summaries-out" class="level2">
 <h2 class="anchored" data-anchor-id="draws-and-summaries-out">Draws and summaries out</h2>
-<ul>
-<li><code>drawsColumns(variables: null, incWarmup: false)</code> returns draws as columns, like posterior’s <code>as_draws_df()</code>: one list per variable element (such as <code>beta[2]</code>), then one-based <code>.chain</code>, <code>.iteration</code>, and <code>.draw</code> columns.</li>
-<li><code>summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])</code> returns <code>summary()</code> as columns: <code>variable</code> and one column per measure.</li>
-<li><code>drawsTable()</code> and <code>summaryTable()</code> take the same arguments and return a <code>Phibble\DataFrame</code> built with <code>DataFrame::fromColumns()</code>. They need <code>phpstats/phibble</code>, which requires PHP 8.3 or later, and throw a <code>RuntimeException</code> explaining this when it is not installed.</li>
-<li><code>CmdStan\Tables::fromRows($rows)</code> converts any list of associative rows, such as <code>loo()['pointwise']</code>, to columns.</li>
-</ul>
-<p>The column arrays need no other package and suit any data frame library that accepts name-to-values columns.</p>
+<p>Fits return draws and summaries as columns with <a href="./api-fits.html#drawsColumns"><code>drawsColumns()</code> and <code>summaryColumns()</code></a>, and as a <code>Phibble\DataFrame</code> with <a href="./api-fits.html#drawsTable"><code>drawsTable()</code> and <code>summaryTable()</code></a>. The column arrays need no other package and suit any data frame library that accepts name-to-values columns.</p>
+<section id="Tables-fromRows" class="level3">
+<h3 class="anchored" data-anchor-id="Tables-fromRows"><code>Tables::fromRows()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Tables::fromRows(<span class="dt">array</span> <span class="va">$rows</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Converts a list of associative rows, such as <code>loo()['pointwise']</code>, to columns. Columns appear in first-seen order, and a row without a column holds <code>null</code> there.</p>
+</section>
+<section id="Tables-dataFrame" class="level3">
+<h3 class="anchored" data-anchor-id="Tables-dataFrame"><code>Tables::dataFrame()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Tables::dataFrame(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$method</span> <span class="op">=</span> <span class="st">'drawsTable()'</span><span class="ot">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">object</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A <code>Phibble\DataFrame</code> from columns, built with <code>DataFrame::fromColumns()</code>. Throws a <code>RuntimeException</code> with installation advice when phibble is not installed. <code>method</code> names the caller in that message.</p>
+</section>
 </section>
 <section id="part-of-the-phpstats-family" class="level2">
 <h2 class="anchored" data-anchor-id="part-of-the-phpstats-family">Part of the phpstats family</h2>
@@ -561,7 +630,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><a href="https://github.com/phpstats/phit">phit</a>: the <code>phit</code> native extension (<code>Phit\</code> functions), which provides the moment-matching draw kernels and, when available, <code>Phit\model_matrix()</code>.</li>
 <li><a href="https://github.com/phpstats/phibble">phibble</a>: data frames (<code>Phibble\DataFrame</code>).</li>
-<li><a href="https://github.com/phpstats/phplyr">phplyr</a>: dplyr-style verbs for phibble tables.</li>
+<li><a href="https://github.com/phpstats/phplyr">phplyr</a>: dplyr-style functions for phibble tables.</li>
 <li><a href="https://github.com/phpstats/phiz">phiz</a>: a Vega-Lite grammar of graphics.</li>
 </ul>
 <p>CmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.</p>

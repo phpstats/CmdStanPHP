@@ -12,10 +12,10 @@ website:
     style: docked
     search: true
     contents:
-      - text: "Overview"
-        href: index.qmd
       - section: "Getting started"
         contents:
+          - text: "Overview"
+            href: index.qmd
           - installation.qmd
           - getting-started.qmd
       - section: "Guides"
@@ -29,7 +29,8 @@ website:
           - log-density.qmd
           - loo.qmd
           - figures.qmd
-      - section: "Reference"
+          - compatibility.qmd
+      - section: "Functions and methods"
         contents:
           - api.qmd
           - api-functions.qmd
@@ -37,14 +38,12 @@ website:
           - api-models.qmd
           - api-fits.qmd
           - api-data-frames.qmd
+          - api-helpers.qmd
           - api-errors.qmd
       - section: "Examples"
         contents:
           - examples/sample.qmd
           - examples.qmd
-      - section: "Compatibility and limitations"
-        contents:
-          - compatibility.qmd
       - section: "Contributing"
         contents:
           - contributing.qmd

@@ -6,7 +6,7 @@
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/mcmc.html</loc>
-    <lastmod>2026-11-01T19:13:00.117Z</lastmod>
+    <lastmod>2026-11-01T23:12:01.798Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/log-density.html</loc>
@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/index.html</loc>
-    <lastmod>2026-11-01T19:01:48.314Z</lastmod>
+    <lastmod>2026-11-01T23:12:01.798Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/generated-quantities.html</loc>
@@ -30,39 +30,43 @@
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/compiling.html</loc>
-    <lastmod>2026-11-01T19:13:00.117Z</lastmod>
+    <lastmod>2026-11-01T23:12:01.797Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/api.html</loc>
-    <lastmod>2026-11-01T19:12:50.109Z</lastmod>
+    <lastmod>2026-11-01T23:10:52.029Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/api-models.html</loc>
-    <lastmod>2026-11-01T19:12:50.108Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cmdstanphp.phpstats.org/docs/api-fits.html</loc>
-    <lastmod>2026-11-01T19:12:50.109Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cmdstanphp.phpstats.org/docs/api-data-frames.html</loc>
-    <lastmod>2026-11-01T19:12:50.109Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cmdstanphp.phpstats.org/docs/api-errors.html</loc>
-    <lastmod>2026-11-01T19:12:50.109Z</lastmod>
+    <lastmod>2026-11-01T23:10:52.028Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/api-functions.html</loc>
-    <lastmod>2026-11-01T19:19:10.237Z</lastmod>
+    <lastmod>2026-11-01T23:10:52.028Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cmdstanphp.phpstats.org/docs/api-errors.html</loc>
+    <lastmod>2026-11-01T23:11:30.111Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cmdstanphp.phpstats.org/docs/api-data-frames.html</loc>
+    <lastmod>2026-11-01T23:11:30.102Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cmdstanphp.phpstats.org/docs/api-fits.html</loc>
+    <lastmod>2026-11-01T23:10:52.029Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cmdstanphp.phpstats.org/docs/api-helpers.html</loc>
+    <lastmod>2026-11-01T23:10:52.029Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/api-options.html</loc>
-    <lastmod>2026-11-01T19:12:50.108Z</lastmod>
+    <lastmod>2026-11-01T23:11:30.110Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/compatibility.html</loc>
-    <lastmod>2026-11-01T19:19:10.236Z</lastmod>
+    <lastmod>2026-11-01T23:12:01.798Z</lastmod>
   </url>
   <url>
     <loc>https://cmdstanphp.phpstats.org/docs/contributing.html</loc>

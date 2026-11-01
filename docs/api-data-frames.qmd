@@ -1,5 +1,5 @@
 ---
-title: "API: data frames and the phpstats family"
+title: "Data frames"
 ---
 
 CmdStanPHP works with the [phpstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `phit` extension is detected by function name.
@@ -19,11 +19,58 @@ Every `data` argument (`sample()`, `sampleMpi()`, `optimize()`, `variational()`,
 
 Factor levels come from a `toModelData()` descriptor (`['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool]`, with 0-based codes, as phibble's `DataFrame::toModelData()` returns them from phibble 0.1.0; add `'base' => 1` for 1-based codes) or, for a `toColumns()` table, from `levels($name)` when `types()` reports a factor. The `ordered` flag is ignored. Labels cannot be written to Stan JSON, so they are returned in `StanData::$levels`, keyed by data variable, where label `i` has index `i + 1`. The conversion adds `N`, the row count, unless the table has a column named `N`, and adds `J_<name>` unless a column already has that name. CmdStan ignores data variables that the program does not declare. Column names must be valid Stan identifiers.
 
-Fit methods are camelCase, as are `StanData`'s and `Tables`' `from...()` constructors and the package's other static helpers, such as `CmdStanFit::fromCsv()` and `Inits::fromFit()`. `StanData` is a value object with readonly `data`, `levels`, `columns` (the names of the columns of `X`), and `meta`. `toArray()` returns `data`, and `with(['prior_scale' => 2.5])` adds or replaces variables.
+### `StanData::fromTable()` {#StanData-fromTable}
+
+```php
+StanData::fromTable(object $table, bool $addN = true): self
+```
+
+Converts a table to Stan data with the conventions above. Returns a `StanData` whose `levels` hold the factor labels. `addN: false` leaves out `N`.
+
+### `new StanData()`, `toArray()`, `with()` {#StanData-construct}
+
+[]{#StanData-toArray} []{#StanData-with}
+
+```php
+new StanData(
+    array $data,
+    array $levels = [],
+    array $columns = [],
+    array $meta = [],
+)
+$data->toArray(): array
+$data->with(array $data): self
+```
+
+`StanData` is a value object with readonly `data`, `levels` (labels by data variable, where label `i` has index `i + 1`), `columns` (the names of the columns of `X`), and `meta`. `toArray()` returns `data`. `with(['prior_scale' => 2.5])` returns a copy with variables added or replaced. A `StanData` can be passed wherever data is accepted.
+
+### `StanData::isTable()`, `normalize()`, `columnsOf()` {#StanData-isTable}
+
+[]{#StanData-normalize} []{#StanData-columnsOf}
+
+```php
+StanData::isTable(mixed $value): bool
+StanData::normalize(mixed $data): mixed
+StanData::columnsOf(object $table): array
+```
+
+`isTable()` is true for a `StanData` or an object with `toModelData()` or `toColumns()`. `normalize()` passes `null` and arrays through and converts a `StanData` or table to a Stan data array, as every `data` argument does. `columnsOf()` returns a table's columns, with factors as 1-based indices and their levels.
 
 ## Regression data
 
-`StanData::fromColumns($columns, y: 'y', x: ['x1', 'x2'], groups: 'school', intercept: false)` builds the usual hierarchical regression data block from named columns or a table:
+### `StanData::fromColumns()` {#StanData-fromColumns}
+
+```php
+StanData::fromColumns(
+    object|array $columns,
+    string $y,
+    array|string $x = [],
+    array|string $groups = [],
+    bool $intercept = false,
+): self
+```
+
+Builds the usual hierarchical regression data block from named columns or a table:
 
 | Variable | Contents |
 | --- | --- |
@@ -53,7 +100,18 @@ data {
 }
 ```
 
-`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data, dropIntercept: false, missing: 'drop')` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `dropIntercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement. `StanData::fromModelMatrix($result)` maps an existing `Phit\model_matrix()` result and is the only code that depends on its shape.
+### `StanData::fromFormula()` {#StanData-fromFormula}
+
+```php
+StanData::fromFormula(
+    string $formula,
+    object|array $data,
+    bool $dropIntercept = false,
+    string $missing = 'drop',
+): self
+```
+
+`StanData::fromFormula('y ~ x1 + f + (1 + x1 | g)', $data)` builds regression data from an R-style formula through `Phit\model_matrix()` in the [`phit`](https://github.com/phpstats/phit) extension (phit 0.1.0 and later). The function handles factor predictors (treatment contrasts), interactions, transforms, and offsets, and keeps the `(Intercept)` column in `X` unless `dropIntercept: true`. `$data` can be columns, factor descriptors, or a table, whose `toModelData()` is passed unchanged. Without the function, `fromFormula()` throws a `RuntimeException` that names the requirement.
 
 | Formula part | Stan data |
 | --- | --- |
@@ -80,14 +138,40 @@ data {
 }
 ```
 
+### `StanData::fromModelMatrix()` {#StanData-fromModelMatrix}
+
+```php
+StanData::fromModelMatrix(
+    array $mm,
+    bool $dropIntercept = false,
+    array $groupLevels = [],
+): self
+```
+
+Maps an existing `Phit\model_matrix()` result to Stan data, as `fromFormula()` does. It is the only code that depends on the result's shape. `groupLevels` gives the level order of grouping factors.
+
 ## Draws and summaries out
 
-- `drawsColumns(variables: null, incWarmup: false)` returns draws as columns, like posterior's `as_draws_df()`: one list per variable element (such as `beta[2]`), then one-based `.chain`, `.iteration`, and `.draw` columns.
-- `summaryColumns(variables: null, probs: [0.05, 0.95], measures: [])` returns `summary()` as columns: `variable` and one column per measure.
-- `drawsTable()` and `summaryTable()` take the same arguments and return a `Phibble\DataFrame` built with `DataFrame::fromColumns()`. They need `phpstats/phibble`, which requires PHP 8.3 or later, and throw a `RuntimeException` explaining this when it is not installed.
-- `CmdStan\Tables::fromRows($rows)` converts any list of associative rows, such as `loo()['pointwise']`, to columns.
+Fits return draws and summaries as columns with [`drawsColumns()` and `summaryColumns()`](api-fits.qmd#drawsColumns), and as a `Phibble\DataFrame` with [`drawsTable()` and `summaryTable()`](api-fits.qmd#drawsTable). The column arrays need no other package and suit any data frame library that accepts name-to-values columns.
 
-The column arrays need no other package and suit any data frame library that accepts name-to-values columns.
+### `Tables::fromRows()` {#Tables-fromRows}
+
+```php
+Tables::fromRows(array $rows): array
+```
+
+Converts a list of associative rows, such as `loo()['pointwise']`, to columns. Columns appear in first-seen order, and a row without a column holds `null` there.
+
+### `Tables::dataFrame()` {#Tables-dataFrame}
+
+```php
+Tables::dataFrame(
+    array $columns,
+    string $method = 'drawsTable()',
+): object
+```
+
+A `Phibble\DataFrame` from columns, built with `DataFrame::fromColumns()`. Throws a `RuntimeException` with installation advice when phibble is not installed. `method` names the caller in that message.
 
 ## Part of the phpstats family
 
@@ -95,7 +179,7 @@ CmdStanPHP is part of the phpstats family of PHP statistics packages:
 
 - [phit](https://github.com/phpstats/phit): the `phit` native extension (`Phit\` functions), which provides the moment-matching draw kernels and, when available, `Phit\model_matrix()`.
 - [phibble](https://github.com/phpstats/phibble): data frames (`Phibble\DataFrame`).
-- [phplyr](https://github.com/phpstats/phplyr): dplyr-style verbs for phibble tables.
+- [phplyr](https://github.com/phpstats/phplyr): dplyr-style functions for phibble tables.
 - [phiz](https://github.com/phpstats/phiz): a Vega-Lite grammar of graphics.
 
 CmdStanPHP requires none of them. phibble, phplyr, and phiz require PHP 8.3 or later, and the phit extension supports PHP 8.3, 8.4, and 8.5.

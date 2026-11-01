@@ -40,7 +40,7 @@ print_r($fit->diagnosticWarnings());
 | `max_treedepth` | Limits each iteration to 2 to this power leapfrog steps | 10 |
 | `output_dir` | Directory for the CSV files | The `cmdstanr_output_dir` option, else a new temporary directory, which is not deleted |
 
-Options left out use CmdStan's defaults, and an unknown option throws. The [API reference](api-options.qmd#method-specific-options) lists every option.
+Options left out use CmdStan's defaults, and an unknown option throws. [Options](api-options.qmd#method-specific-options) lists every option.
 
 ## Check convergence
 

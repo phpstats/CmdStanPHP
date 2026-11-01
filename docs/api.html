@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API reference – CmdStanPHP</title>
+<title>Functions and methods – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -86,7 +86,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -111,12 +111,6 @@ ul.task-list li input[type="checkbox"] {
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -126,6 +120,12 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./installation.html" class="sidebar-item-text sidebar-link">
@@ -203,12 +203,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Figures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -217,43 +223,49 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-functions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: functions</span></a>
+ <span class="menu-text">Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-options.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: options</span></a>
+ <span class="menu-text">Options</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: models</span></a>
+ <span class="menu-text">CmdStanModel</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: fits</span></a>
+ <span class="menu-text">Fits</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: data frames and the phpstats family</span></a>
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Helper classes</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: errors</span></a>
+ <span class="menu-text">Errors</span></a>
   </div>
 </li>
       </ul>
@@ -284,29 +296,12 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Compatibility and limitations</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Compatibility with CmdStanR</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link">
@@ -325,16 +320,55 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#sections" id="toc-sections" class="nav-link active" data-scroll-target="#sections">Sections</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a>
+  <ul class="collapse">
+  <li><a href="#models-and-stan-files" id="toc-models-and-stan-files" class="nav-link" data-scroll-target="#models-and-stan-files">Models and Stan files</a></li>
+  <li><a href="#cmdstan-installation" id="toc-cmdstan-installation" class="nav-link" data-scroll-target="#cmdstan-installation">CmdStan installation</a></li>
+  <li><a href="#data-and-csv-files" id="toc-data-and-csv-files" class="nav-link" data-scroll-target="#data-and-csv-files">Data and CSV files</a></li>
+  <li><a href="#figures-and-examples" id="toc-figures-and-examples" class="nav-link" data-scroll-target="#figures-and-examples">Figures and examples</a></li>
+  </ul></li>
+  <li><a href="#options-index" id="toc-options-index" class="nav-link" data-scroll-target="#options-index">Options</a>
+  <ul class="collapse">
+  <li><a href="#global-options" id="toc-global-options" class="nav-link" data-scroll-target="#global-options">Global options</a></li>
+  </ul></li>
+  <li><a href="#cmdstanmodel" id="toc-cmdstanmodel" class="nav-link" data-scroll-target="#cmdstanmodel">CmdStanModel</a>
+  <ul class="collapse">
+  <li><a href="#model-methods" id="toc-model-methods" class="nav-link" data-scroll-target="#model-methods">Creating a model</a></li>
+  <li><a href="#inspecting-a-model" id="toc-inspecting-a-model" class="nav-link" data-scroll-target="#inspecting-a-model">Inspecting a model</a></li>
+  <li><a href="#running-a-model" id="toc-running-a-model" class="nav-link" data-scroll-target="#running-a-model">Running a model</a></li>
+  </ul></li>
+  <li><a href="#fit-methods" id="toc-fit-methods" class="nav-link" data-scroll-target="#fit-methods">Fits</a>
+  <ul class="collapse">
+  <li><a href="#draws-and-summaries" id="toc-draws-and-summaries" class="nav-link" data-scroll-target="#draws-and-summaries">Draws and summaries</a></li>
+  <li><a href="#diagnostics-and-run-information" id="toc-diagnostics-and-run-information" class="nav-link" data-scroll-target="#diagnostics-and-run-information">Diagnostics and run information</a></li>
+  <li><a href="#files-and-saving" id="toc-files-and-saving" class="nav-link" data-scroll-target="#files-and-saving">Files and saving</a></li>
+  <li><a href="#model-methods-1" id="toc-model-methods-1" class="nav-link" data-scroll-target="#model-methods-1">Model methods</a></li>
+  <li><a href="#methods-of-specific-fit-types" id="toc-methods-of-specific-fit-types" class="nav-link" data-scroll-target="#methods-of-specific-fit-types">Methods of specific fit types</a></li>
+  <li><a href="#reading-csv-files" id="toc-reading-csv-files" class="nav-link" data-scroll-target="#reading-csv-files">Reading CSV files</a></li>
+  </ul></li>
+  <li><a href="#data-frames-and-the-phpstats-family" id="toc-data-frames-and-the-phpstats-family" class="nav-link" data-scroll-target="#data-frames-and-the-phpstats-family">Data frames</a>
+  <ul class="collapse">
+  <li><a href="#data-in" id="toc-data-in" class="nav-link" data-scroll-target="#data-in">Data in</a></li>
+  <li><a href="#regression-data" id="toc-regression-data" class="nav-link" data-scroll-target="#regression-data">Regression data</a></li>
+  <li><a href="#draws-and-summaries-out" id="toc-draws-and-summaries-out" class="nav-link" data-scroll-target="#draws-and-summaries-out">Draws and summaries out</a></li>
+  </ul></li>
+  <li><a href="#statistics-helpers" id="toc-statistics-helpers" class="nav-link" data-scroll-target="#statistics-helpers">Helper classes</a>
+  <ul class="collapse">
+  <li><a href="#helpers-figures" id="toc-helpers-figures" class="nav-link" data-scroll-target="#helpers-figures">Figures</a></li>
+  <li><a href="#helpers-model-methods" id="toc-helpers-model-methods" class="nav-link" data-scroll-target="#helpers-model-methods">Model methods and Stan functions</a></li>
+  <li><a href="#helpers-summaries" id="toc-helpers-summaries" class="nav-link" data-scroll-target="#helpers-summaries">Summaries and diagnostics</a></li>
+  <li><a href="#helpers-draws" id="toc-helpers-draws" class="nav-link" data-scroll-target="#helpers-draws">Draws and initial values</a></li>
+  </ul></li>
+  <li><a href="#errors" id="toc-errors" class="nav-link" data-scroll-target="#errors">Errors</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API reference</h1>
+<h1 class="title">Functions and methods</h1>
 </div>
 
 
@@ -363,135 +397,884 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><a href="./api-functions.html">Functions</a></td>
-<td>Models and Stan files, CmdStan installation, data and CSV files, figures, and examples</td>
+<td>Standalone functions: models and Stan files, CmdStan installation, data and CSV files, figures, and examples</td>
 </tr>
 <tr class="even">
 <td><a href="./api-options.html">Options</a></td>
-<td>Global options, shared options, and each method’s options</td>
+<td>Session options, shared options, and each method’s options</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-models.html">Models</a></td>
-<td>Creating, inspecting, and running a <code>CmdStanModel</code></td>
+<td><a href="./api-models.html">CmdStanModel</a></td>
+<td>Creating, inspecting, and running a model</td>
 </tr>
 <tr class="even">
 <td><a href="./api-fits.html">Fits</a></td>
-<td>Draws, summaries, diagnostics, files, model methods, and statistics helpers</td>
+<td>Draws, summaries, diagnostics, files, and model methods of fits</td>
 </tr>
 <tr class="odd">
 <td><a href="./api-data-frames.html">Data frames</a></td>
-<td>Table data, <code>StanData</code>, and the phpstats family</td>
+<td>Table data, <code>StanData</code>, and <code>Tables</code></td>
 </tr>
 <tr class="even">
+<td><a href="./api-helpers.html">Helper classes</a></td>
+<td><code>Figure</code>, <code>Plot</code>, <code>StanFunctions</code>, <code>ModelMethods</code>, and the statistics classes</td>
+</tr>
+<tr class="odd">
 <td><a href="./api-errors.html">Errors</a></td>
 <td>Exceptions</td>
 </tr>
 </tbody>
 </table>
-<section id="sections" class="level2">
-<h2 class="anchored" data-anchor-id="sections">Sections</h2>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<section id="models-and-stan-files" class="level3">
+<h3 class="anchored" data-anchor-id="models-and-stan-files">Models and Stan files</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Section</th>
-<th>Page</th>
+<th>Function or method</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="./api-functions.html" id="functions">Functions</a></td>
-<td>Functions</td>
+<td><a href="./api-functions.html#cmdstan_model"><code>cmdstan_model()</code></a></td>
+<td>Compile a Stan program, or reuse its up-to-date executable, and return a model.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-functions.html#models-and-stan-files" id="models-and-stan-files">Models and Stan files</a></td>
-<td>Functions</td>
+<td><a href="./api-functions.html#compile_stan_file"><code>compile_stan_file()</code></a></td>
+<td>Compile a Stan file without creating a model object.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-functions.html#cmdstan-installation" id="cmdstan-installation">CmdStan installation</a></td>
-<td>Functions</td>
+<td><a href="./api-functions.html#check_syntax_stan_file"><code>check_syntax_stan_file()</code></a></td>
+<td>Check a Stan file with stanc, without compiling.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-functions.html#data-and-csv-files" id="data-and-csv-files">Data and CSV files</a></td>
-<td>Functions</td>
+<td><a href="./api-functions.html#format_stan_file"><code>format_stan_file()</code></a></td>
+<td>Format a Stan file with stanc.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-functions.html#figures-and-examples" id="figures-and-examples">Figures and examples</a></td>
-<td>Functions</td>
+<td><a href="./api-functions.html#variables_stan_file"><code>variables_stan_file()</code></a></td>
+<td>List a Stan file’s declarations without compiling.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-options.html#global-options" id="global-options">Global options</a></td>
-<td>Options</td>
+<td><a href="./api-functions.html#print_stan_file"><code>print_stan_file()</code></a></td>
+<td>Print a Stan file.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-options.html#shared-options" id="shared-options">Shared options</a></td>
-<td>Options</td>
+<td><a href="./api-functions.html#write_stan_file"><code>write_stan_file()</code></a></td>
+<td>Write Stan code to a file named after its hash.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-options.html#method-specific-options" id="method-specific-options">Method-specific options</a></td>
-<td>Options</td>
+<td><a href="./api-functions.html#stan_build_info"><code>stan_build_info()</code></a></td>
+<td>Report how an executable was built.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cmdstan-installation" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstan-installation">CmdStan installation</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-functions.html#install_cmdstan"><code>install_cmdstan()</code></a></td>
+<td>Download or unpack a CmdStan release, build it, and select it.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-functions.html#set_cmdstan_path"><code>set_cmdstan_path()</code></a></td>
+<td>Select a CmdStan installation.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-models.html#model-methods" id="model-methods">Creating a model</a></td>
-<td>Models</td>
+<td><a href="./api-functions.html#cmdstan_path"><code>cmdstan_path()</code></a></td>
+<td>Return the selected CmdStan installation.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-models.html#inspecting-a-model" id="inspecting-a-model">Inspecting a model</a></td>
-<td>Models</td>
+<td><a href="./api-functions.html#cmdstan_version"><code>cmdstan_version()</code></a></td>
+<td>Return the selected CmdStan’s version.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-models.html#running-a-model" id="running-a-model">Running a model</a></td>
-<td>Models</td>
+<td><a href="./api-functions.html#check_cmdstan_toolchain"><code>check_cmdstan_toolchain()</code></a></td>
+<td>Check for make, the C++ compiler, and stanc.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-fits.html" id="fit-methods">Fits</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#cmdstan_make_local"><code>cmdstan_make_local()</code></a></td>
+<td>Read or write CmdStan’s make/local.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-fits.html#draws-and-summaries" id="draws-and-summaries">Draws and summaries</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#rebuild_cmdstan"><code>rebuild_cmdstan()</code></a></td>
+<td>Clean and rebuild the selected CmdStan.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data-and-csv-files" class="level3">
+<h3 class="anchored" data-anchor-id="data-and-csv-files">Data and CSV files</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-functions.html#write_stan_json"><code>write_stan_json()</code></a></td>
+<td>Write data, initial values, or a metric as Stan JSON.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-fits.html#diagnostics-and-run-information" id="diagnostics-and-run-information">Diagnostics and run information</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#read_cmdstan_csv"><code>read_cmdstan_csv()</code></a></td>
+<td>Read CmdStan CSV files into a fit.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-fits.html#files-and-saving" id="files-and-saving">Files and saving</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#as_cmdstan_fit"><code>as_cmdstan_fit()</code></a></td>
+<td>Read CmdStan CSV files into a fit, optionally selecting variables.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-fits.html#model-methods-1" id="model-methods-1">Model methods on fits</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#read_cmdstan_csv_list"><code>read_cmdstan_csv_list()</code></a></td>
+<td>Read CmdStan CSV files into CmdStanR’s read_cmdstan_csv() list.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-fits.html#methods-of-specific-fit-types" id="methods-of-specific-fit-types">Methods of specific fit types</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#draws_to_csv"><code>draws_to_csv()</code></a></td>
+<td>Write draw rows to one CSV file per chain.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="figures-and-examples" class="level3">
+<h3 class="anchored" data-anchor-id="figures-and-examples">Figures and examples</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-functions.html#mcmc_trace"><code>mcmc_trace()</code></a></td>
+<td>Trace plot: chains overlaid by iteration.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-fits.html#statistics-helpers" id="statistics-helpers">Statistics helpers</a></td>
-<td>Fits</td>
+<td><a href="./api-functions.html#mcmc_hist"><code>mcmc_hist()</code></a></td>
+<td>Histogram of all draws.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-data-frames.html" id="data-frames-and-the-phpstats-family">Data frames and the phpstats family</a></td>
-<td>Data frames</td>
+<td><a href="./api-functions.html#mcmc_dens"><code>mcmc_dens()</code></a></td>
+<td>Kernel density of all draws.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-data-frames.html#data-in" id="data-in">Data in</a></td>
-<td>Data frames</td>
+<td><a href="./api-functions.html#mcmc_dens_overlay"><code>mcmc_dens_overlay()</code></a></td>
+<td>Kernel density of each chain.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-data-frames.html#regression-data" id="regression-data">Regression data</a></td>
-<td>Data frames</td>
+<td><a href="./api-functions.html#mcmc_intervals"><code>mcmc_intervals()</code></a></td>
+<td>Inner and outer posterior intervals with a point estimate.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-data-frames.html#draws-and-summaries-out" id="draws-and-summaries-out">Draws and summaries out</a></td>
-<td>Data frames</td>
+<td><a href="./api-functions.html#mcmc_rank_hist"><code>mcmc_rank_hist()</code></a></td>
+<td>Rank histogram of each chain.</td>
 </tr>
 <tr class="odd">
-<td><a href="./api-data-frames.html#part-of-the-phpstats-family" id="part-of-the-phpstats-family">Part of the phpstats family</a></td>
-<td>Data frames</td>
+<td><a href="./api-functions.html#mcmc_scatter"><code>mcmc_scatter()</code></a></td>
+<td>Joint draws of two variables.</td>
 </tr>
 <tr class="even">
-<td><a href="./api-errors.html" id="errors">Errors</a></td>
-<td>Errors</td>
+<td><a href="./api-functions.html#mcmc_acf"><code>mcmc_acf()</code></a></td>
+<td>Autocorrelation of each chain.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-functions.html#pareto_k_plot"><code>pareto_k_plot()</code></a></td>
+<td>Pareto k by observation.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-functions.html#cmdstanr_example"><code>cmdstanr_example()</code></a></td>
+<td>Compile and fit a bundled example.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-functions.html#print_example_program"><code>print_example_program()</code></a></td>
+<td>Print a bundled example’s Stan program.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-functions.html#num_threads"><code>num_threads()</code></a></td>
+<td>Deprecated: return STAN_NUM_THREADS.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="options-index" class="level2">
+<h2 class="anchored" data-anchor-id="options-index">Options</h2>
+<section id="global-options" class="level3">
+<h3 class="anchored" data-anchor-id="global-options">Global options</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-options.html#options"><code>options()</code></a></td>
+<td>Set session options and return their previous values.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-options.html#cmdstan_option"><code>cmdstan_option()</code></a></td>
+<td>Read one session option.</td>
+</tr>
+</tbody>
+</table>
+<p>Option names and defaults: <a href="./api-options.html#shared-options" id="shared-options">shared options</a>, taken by every inference method, and <a href="./api-options.html#method-specific-options" id="method-specific-options">method-specific options</a>.</p>
+</section>
+</section>
+<section id="cmdstanmodel" class="level2">
+<h2 class="anchored" data-anchor-id="cmdstanmodel">CmdStanModel</h2>
+<section id="model-methods" class="level3">
+<h3 class="anchored" data-anchor-id="model-methods">Creating a model</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-models.html#constructor"><code>new CmdStanModel()</code></a></td>
+<td>Compile a program, or reuse its executable, and return a model.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="inspecting-a-model" class="level3">
+<h3 class="anchored" data-anchor-id="inspecting-a-model">Inspecting a model</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-models.html#stanFile"><code>stanFile()</code></a>, <a href="./api-models.html#exeFile"><code>exeFile()</code></a>, <a href="./api-models.html#hppFile"><code>hppFile()</code></a></td>
+<td>Paths of the Stan file, executable, and generated C++.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#saveHppFile"><code>saveHppFile()</code></a></td>
+<td>Copy the generated C++ header to a directory.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#code"><code>code()</code></a></td>
+<td>The program as it was when the model was created.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#print"><code>print()</code></a></td>
+<td>Print the program.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#variables"><code>variables()</code></a></td>
+<td>The program’s declarations.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#modelName"><code>modelName()</code></a>, <a href="./api-models.html#hasStanFile"><code>hasStanFile()</code></a></td>
+<td>The model’s name, and whether it has a Stan file.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#includePaths"><code>includePaths()</code></a>, <a href="./api-models.html#userHeader"><code>userHeader()</code></a>, <a href="./api-models.html#stancOptions"><code>stancOptions()</code></a>, <a href="./api-models.html#cppOptions"><code>cppOptions()</code></a></td>
+<td>The build settings recorded for the executable.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#nativeStancOptions"><code>nativeStancOptions()</code></a></td>
+<td>Stan options for the in-process builds.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#cmdstanVersion"><code>cmdstanVersion()</code></a></td>
+<td>The CmdStan version that built the executable.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#reportedFeatures"><code>reportedFeatures()</code></a></td>
+<td>What the executable reports about its build.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#buildInfo"><code>buildInfo()</code></a></td>
+<td>The build record and reported features.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#isCurrent"><code>isCurrent()</code></a></td>
+<td>Whether the executable is up to date.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#cmdstanDefaults"><code>cmdstanDefaults()</code></a></td>
+<td>CmdStan’s default values for a method.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#checkSyntax"><code>checkSyntax()</code></a></td>
+<td>Check the model’s program with stanc.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#format"><code>format()</code></a></td>
+<td>Format the model’s program with stanc.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#exposeFunctions"><code>exposeFunctions()</code></a>, <a href="./api-models.html#functions"><code>functions()</code></a></td>
+<td>The program’s user-defined functions as a StanFunctions object.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#stanBuildInfo"><code>CmdStanModel::stanBuildInfo()</code></a></td>
+<td>Report how any executable was built.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="running-a-model" class="level3">
+<h3 class="anchored" data-anchor-id="running-a-model">Running a model</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-models.html#sample"><code>sample()</code></a></td>
+<td>Run MCMC with the NUTS sampler.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#sampleMpi"><code>sampleMpi()</code></a></td>
+<td>Run MCMC under an MPI launcher.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#optimize"><code>optimize()</code></a></td>
+<td>Find a posterior mode or maximum likelihood estimate.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#laplace"><code>laplace()</code></a></td>
+<td>Draw from a Laplace approximation at the mode.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#variational"><code>variational()</code></a></td>
+<td>Fit an ADVI approximation.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#pathfinder"><code>pathfinder()</code></a></td>
+<td>Fit a Pathfinder approximation.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#generateQuantities"><code>generateQuantities()</code></a></td>
+<td>Run generated quantities for existing draws.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-models.html#diagnose"><code>diagnose()</code></a></td>
+<td>Check gradients against finite differences.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-models.html#logProb"><code>logProb()</code></a></td>
+<td>Run CmdStan’s log_prob method.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="fit-methods" class="level2">
+<h2 class="anchored" data-anchor-id="fit-methods">Fits</h2>
+<section id="draws-and-summaries" class="level3">
+<h3 class="anchored" data-anchor-id="draws-and-summaries">Draws and summaries</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#draws"><code>draws()</code></a></td>
+<td>Draws in one of posterior’s formats.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#samplerDiagnostics"><code>samplerDiagnostics()</code></a></td>
+<td>Sampler columns, such as divergent__ and treedepth__.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#summary"><code>summary()</code></a></td>
+<td>One summary row per variable.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#drawsColumns"><code>drawsColumns()</code></a>, <a href="./api-fits.html#summaryColumns"><code>summaryColumns()</code></a></td>
+<td>Draws or the summary as column arrays.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#drawsTable"><code>drawsTable()</code></a>, <a href="./api-fits.html#summaryTable"><code>summaryTable()</code></a></td>
+<td>Draws or the summary as a Phibble.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#print"><code>print()</code></a></td>
+<td>Print the summary as JSON.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#lp"><code>lp()</code></a></td>
+<td>lp__ by iteration and chain.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#cmdstanSummary"><code>cmdstanSummary()</code></a></td>
+<td>CmdStan’s stansummary output.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="diagnostics-and-run-information" class="level3">
+<h3 class="anchored" data-anchor-id="diagnostics-and-run-information">Diagnostics and run information</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#diagnosticSummary"><code>diagnosticSummary()</code></a></td>
+<td>Per-chain divergences, maximum tree depth hits, and E-BFMI.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#checkDiagnostics"><code>checkDiagnostics()</code></a>, <a href="./api-fits.html#diagnosticWarnings"><code>diagnosticWarnings()</code></a></td>
+<td>Run the sampler checks, or return their messages.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#cmdstanDiagnose"><code>cmdstanDiagnose()</code></a></td>
+<td>CmdStan’s diagnose utility output.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#metadata"><code>metadata()</code></a>, <a href="./api-fits.html#chainMetadata"><code>chainMetadata()</code></a></td>
+<td>CSV metadata, merged or per chain.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#variables"><code>variables()</code></a></td>
+<td>Variable names in the CSV files.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#numChains"><code>numChains()</code></a>, <a href="./api-fits.html#numDrawsSampling"><code>numDrawsSampling()</code></a>, <a href="./api-fits.html#numDrawsWarmup"><code>numDrawsWarmup()</code></a>, <a href="./api-fits.html#numProcs"><code>numProcs()</code></a></td>
+<td>Counts of chains, draws, and processes.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#stepSize"><code>stepSize()</code></a>, <a href="./api-fits.html#invMetric"><code>invMetric()</code></a>, <a href="./api-fits.html#metric"><code>metric()</code></a></td>
+<td>Adaptation results by chain.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#cmdstanConfig"><code>cmdstanConfig()</code></a></td>
+<td>CmdStan’s configuration JSON.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#time"><code>time()</code></a></td>
+<td>Warmup, sampling, and total time per chain.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#init"><code>init()</code></a></td>
+<td>The initial values each process used.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#output"><code>output()</code></a>, <a href="./api-fits.html#returnCodes"><code>returnCodes()</code></a>, <a href="./api-fits.html#command"><code>command()</code></a></td>
+<td>Console output, exit status, and command line of each process.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#code"><code>code()</code></a></td>
+<td>The Stan program.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#profiles"><code>profiles()</code></a></td>
+<td>Parsed profiling data.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="files-and-saving" class="level3">
+<h3 class="anchored" data-anchor-id="files-and-saving">Files and saving</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#outputFiles"><code>outputFiles()</code></a>, <a href="./api-fits.html#latentDynamicsFiles"><code>latentDynamicsFiles()</code></a>, <a href="./api-fits.html#profileFiles"><code>profileFiles()</code></a></td>
+<td>Paths of the output, latent-dynamics, and profile files.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#dataFile"><code>dataFile()</code></a>, <a href="./api-fits.html#configFiles"><code>configFiles()</code></a>, <a href="./api-fits.html#metricFiles"><code>metricFiles()</code></a></td>
+<td>Paths of the data, configuration, and metric files.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#saveOutputFiles"><code>saveOutputFiles()</code></a>, <a href="./api-fits.html#saveLatentDynamicsFiles"><code>saveLatentDynamicsFiles()</code></a>, <a href="./api-fits.html#saveProfileFiles"><code>saveProfileFiles()</code></a>, <a href="./api-fits.html#saveDataFile"><code>saveDataFile()</code></a>, <a href="./api-fits.html#saveConfigFiles"><code>saveConfigFiles()</code></a>, <a href="./api-fits.html#saveMetricFiles"><code>saveMetricFiles()</code></a></td>
+<td>Save the run’s files to a directory.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#materialize"><code>materialize()</code></a></td>
+<td>Read draws, initial values, and profiles into memory.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#saveObject"><code>saveObject()</code></a></td>
+<td>Serialize the fit to a file.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="model-methods-1" class="level3">
+<h3 class="anchored" data-anchor-id="model-methods-1">Model methods</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#initModelMethods"><code>initModelMethods()</code></a></td>
+<td>Compile and bind the in-process model methods.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#logProb"><code>logProb()</code></a></td>
+<td>Log density at unconstrained values.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#gradLogProb"><code>gradLogProb()</code></a></td>
+<td>Log density and gradient.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#hessian"><code>hessian()</code></a></td>
+<td>Log density, gradient, and Hessian.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#unconstrainVariables"><code>unconstrainVariables()</code></a></td>
+<td>Unconstrained values from parameter values.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#unconstrainDraws"><code>unconstrainDraws()</code></a></td>
+<td>Draws on the unconstrained scale.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#constrainVariables"><code>constrainVariables()</code></a></td>
+<td>Constrained values from unconstrained values.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#exposeFunctions"><code>exposeFunctions()</code></a>, <a href="./api-fits.html#functions"><code>functions()</code></a></td>
+<td>The fit’s user-defined Stan functions.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="methods-of-specific-fit-types" class="level3">
+<h3 class="anchored" data-anchor-id="methods-of-specific-fit-types">Methods of specific fit types</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#loo"><code>CmdStanMCMC::loo()</code></a></td>
+<td>PSIS-LOO cross-validation.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#waic"><code>CmdStanMCMC::waic()</code></a></td>
+<td>WAIC.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#mle"><code>CmdStanMLE::mle()</code></a>, <a href="./api-fits.html#optimizedParams"><code>CmdStanMLE::optimizedParams()</code></a></td>
+<td>The optimization estimates without lp__.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#variationalMean"><code>CmdStanVB::variationalMean()</code></a></td>
+<td>The mean of the ADVI approximation.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#mode"><code>CmdStanLaplace::mode()</code></a></td>
+<td>The mode the Laplace approximation used.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#singlePathFiles"><code>CmdStanPathfinder::singlePathFiles()</code></a>, <a href="./api-fits.html#singlePathJsonFiles"><code>CmdStanPathfinder::singlePathJsonFiles()</code></a>, <a href="./api-fits.html#singlePathFits"><code>CmdStanPathfinder::singlePathFits()</code></a>, <a href="./api-fits.html#singlePathDiagnostics"><code>CmdStanPathfinder::singlePathDiagnostics()</code></a></td>
+<td>Per-path Pathfinder output.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#fittedParamsFiles"><code>CmdStanGQ::fittedParamsFiles()</code></a></td>
+<td>The CSV files of the fitted parameters.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#gradients"><code>CmdStanDiagnose::gradients()</code></a></td>
+<td>The gradient check output.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#mle-lp"><code>CmdStanMLE::lp()</code></a></td>
+<td>The log density at the optimum.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#lpApprox"><code>lpApprox()</code></a></td>
+<td>The approximation’s log density at each draw (CmdStanVB, CmdStanLaplace, and CmdStanPathfinder).</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#diagnose-lp"><code>CmdStanDiagnose::lp()</code></a></td>
+<td>The log density at the checked point.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reading-csv-files" class="level3">
+<h3 class="anchored" data-anchor-id="reading-csv-files">Reading CSV files</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-fits.html#fromCsv"><code>CmdStanFit::fromCsv()</code></a></td>
+<td>A fit from CmdStan CSV files.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#readCmdStanCsv"><code>CmdStanFit::readCmdStanCsv()</code></a></td>
+<td>CmdStanR’s read_cmdstan_csv() list.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-fits.html#classForMethod"><code>CmdStanFit::classForMethod()</code></a></td>
+<td>The fit class for a method name.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-fits.html#quantile"><code>CmdStanFit::quantile()</code></a></td>
+<td>A quantile with R’s type 7 rule.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="data-frames-and-the-phpstats-family" class="level2">
+<h2 class="anchored" data-anchor-id="data-frames-and-the-phpstats-family">Data frames</h2>
+<section id="data-in" class="level3">
+<h3 class="anchored" data-anchor-id="data-in">Data in</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-fromTable"><code>StanData::fromTable()</code></a></td>
+<td>Convert a table to Stan data, keeping factor labels.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#StanData-construct"><code>new StanData()</code></a></td>
+<td>A Stan data value object with levels, columns, and metadata.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-with"><code>StanData::with()</code></a></td>
+<td>A copy with variables added or replaced.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#StanData-toArray"><code>StanData::toArray()</code></a></td>
+<td>The Stan data array.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-isTable"><code>StanData::isTable()</code></a></td>
+<td>Whether a value can be converted to Stan data.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#StanData-normalize"><code>StanData::normalize()</code></a></td>
+<td>Normalize a data argument to a Stan data array.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-columnsOf"><code>StanData::columnsOf()</code></a></td>
+<td>A table’s columns, with factors as 1-based indices.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="regression-data" class="level3">
+<h3 class="anchored" data-anchor-id="regression-data">Regression data</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-fromColumns"><code>StanData::fromColumns()</code></a></td>
+<td>Hierarchical regression data from named columns.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#StanData-fromFormula"><code>StanData::fromFormula()</code></a></td>
+<td>Regression data from an R-style formula.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-data-frames.html#StanData-fromModelMatrix"><code>StanData::fromModelMatrix()</code></a></td>
+<td>Stan data from a Phit_matrix() result.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="draws-and-summaries-out" class="level3">
+<h3 class="anchored" data-anchor-id="draws-and-summaries-out">Draws and summaries out</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-data-frames.html#Tables-fromRows"><code>Tables::fromRows()</code></a></td>
+<td>Convert associative rows to columns.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-data-frames.html#Tables-dataFrame"><code>Tables::dataFrame()</code></a></td>
+<td>A Phibblefrom columns.</td>
+</tr>
+</tbody>
+</table>
+<p>CmdStanPHP works with the <a href="./api-data-frames.html#part-of-the-phpstats-family" id="part-of-the-phpstats-family">phpstats family</a> without depending on it.</p>
+</section>
+</section>
+<section id="statistics-helpers" class="level2">
+<h2 class="anchored" data-anchor-id="statistics-helpers">Helper classes</h2>
+<section id="helpers-figures" class="level3">
+<h3 class="anchored" data-anchor-id="helpers-figures">Figures</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-helpers.html#Figure"><code>Figure</code></a></td>
+<td>A computed figure, rendered as text, Vega-Lite, HTML, SVG, or PNG.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-helpers.html#Plot"><code>Plot</code></a></td>
+<td>The figure computations, and the statistics behind them.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="helpers-model-methods" class="level3">
+<h3 class="anchored" data-anchor-id="helpers-model-methods">Model methods and Stan functions</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-helpers.html#StanFunctions"><code>StanFunctions</code></a></td>
+<td>A Stan program’s user-defined functions, called through FFI.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-helpers.html#ModelMethods"><code>ModelMethods</code></a></td>
+<td>In-process log density, gradient, Hessian, and transforms for a Stan file.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="helpers-summaries" class="level3">
+<h3 class="anchored" data-anchor-id="helpers-summaries">Summaries and diagnostics</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-helpers.html#Summary"><code>Summary</code></a></td>
+<td>posterior’s summary measures on plain draws.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-helpers.html#Psis"><code>Psis</code></a></td>
+<td>Pareto smoothing and PSIS.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-helpers.html#Loo"><code>Loo</code></a></td>
+<td>PSIS-LOO and WAIC on log-likelihood draws.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-helpers.html#MomentMatch"><code>MomentMatch</code></a></td>
+<td>Moment matching for PSIS-LOO.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-helpers.html#DrawKernels"><code>DrawKernels</code></a></td>
+<td>Detection of and wrappers for the phit draw kernels.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="helpers-draws" class="level3">
+<h3 class="anchored" data-anchor-id="helpers-draws">Draws and initial values</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-helpers.html#Rvars"><code>Rvars</code></a></td>
+<td>draws_rvars conversions.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-helpers.html#Inits"><code>Inits</code></a></td>
+<td>Initial values from fits and draws.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="errors" class="level2">
+<h2 class="anchored" data-anchor-id="errors">Errors</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Exception</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="./api-errors.html#InvalidArgumentException"><code>InvalidArgumentException</code></a></td>
+<td>Invalid data or options.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-errors.html#RuntimeException"><code>RuntimeException</code></a></td>
+<td>Missing files or toolchain, a timeout, or a malformed CSV file.</td>
+</tr>
+<tr class="odd">
+<td><a href="./api-errors.html#StaleExecutableException"><code>StaleExecutableException</code></a></td>
+<td>An out-of-date executable.</td>
+</tr>
+<tr class="even">
+<td><a href="./api-errors.html#ProcessException"><code>ProcessException</code></a></td>
+<td>A CmdStan process exited with a nonzero status.</td>
 </tr>
 </tbody>
 </table>

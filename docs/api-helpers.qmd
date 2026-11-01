@@ -1,0 +1,391 @@
+---
+title: "Helper classes"
+---
+
+Classes for figures, in-process model code, and statistics on plain arrays. Their methods are camelCase.
+
+## Figures {#figures}
+
+### `Figure` {#Figure}
+
+Returned by the [figure functions](api-functions.qmd#figures-and-examples) and `Plot`. The statistics are computed once, so every rendering shows the same numbers. Casting a figure to a string gives `ascii()`.
+
+| Method | Purpose |
+|---|---|
+| [`->ascii()`]{#Figure-ascii} | Text rendering. `null` sizes use per-kind defaults. |
+| [`->vegaLite()`]{#Figure-vegaLite} | Vega-Lite spec with the data inlined. Sizes are in pixels, per facet for per-chain figures. `maxRows` thins trace and scatter data by keeping every k-th row. |
+| [`->json()`]{#Figure-json} | The spec as JSON, safe to embed in an HTML `script` element. |
+| [`->html()`]{#Figure-html} | A standalone HTML page that renders the spec with vega-embed from the jsDelivr CDN. |
+| [`->svg()`]{#Figure-svg} | SVG through the vl-convert binary, found through `VL_CONVERT` or `PATH`. |
+| [`->png()`]{#Figure-png} | PNG bytes through vl-convert at `scale`. |
+
+<details><summary>Signatures</summary>
+
+```php
+ascii(?int $width = null, ?int $height = null): string
+vegaLite(int $width = 480, int $height = 240, ?int $maxRows = null): array
+json(int $width = 480, int $height = 240, ?int $maxRows = null): string
+html(int $width = 480, int $height = 240, ?int $maxRows = null): string
+svg(int $width = 480, int $height = 240, ?int $maxRows = null, ?float $timeout = 60.0): string
+png(int $width = 480, int $height = 240, ?int $maxRows = null, float $scale = 2.0, ?float $timeout = 60.0): string
+```
+
+</details>
+
+### `Plot` {#Plot}
+
+Static methods. Draws come from a fit or a `draws_array`. Densities use a Gaussian kernel with R's `bw.nrd0` bandwidth on 512 points, quantiles use R's type 7 rule, and ranks average ties.
+
+| Method | Purpose |
+|---|---|
+| [`Plot::trace()`]{#Plot-trace} | Chains overlaid by iteration (`mcmc_trace()`). |
+| [`Plot::hist()`]{#Plot-hist} | Histogram of all draws (`mcmc_hist()`). |
+| [`Plot::dens()`]{#Plot-dens} | Kernel density of all draws, or of each chain with `byChain` (`mcmc_dens()`, `mcmc_dens_overlay()`). |
+| [`Plot::intervals()`]{#Plot-intervals} | Inner and outer intervals with a point estimate (`mcmc_intervals()`). |
+| [`Plot::rankHist()`]{#Plot-rankHist} | Rank histogram of each chain (`mcmc_rank_hist()`). |
+| [`Plot::scatter()`]{#Plot-scatter} | Joint draws of two variables (`mcmc_scatter()`). |
+| [`Plot::acf()`]{#Plot-acf} | Autocorrelation of each chain (`mcmc_acf()`). |
+| [`Plot::paretoK()`]{#Plot-paretoK} | Pareto k by observation (`pareto_k_plot()`). |
+| [`Plot::bandwidth()`]{#Plot-bandwidth} | R's `bw.nrd0` bandwidth. |
+| [`Plot::density()`]{#Plot-density} | Gaussian kernel density of `x` at each point of `at`. |
+| [`Plot::autocorrelation()`]{#Plot-autocorrelation} | Autocorrelations for lags 0 to `lags`, as R's `acf()`. |
+| [`Plot::ranks()`]{#Plot-ranks} | One-based ranks with ties averaged, as R's `rank()`. |
+| [`Plot::range()`]{#Plot-range} | The data range, padded when every value is equal. |
+
+<details><summary>Signatures</summary>
+
+```php
+trace(CmdStanFit|array $draws, string $variable): Figure
+hist(CmdStanFit|array $draws, string $variable, int $bins = 30): Figure
+dens(CmdStanFit|array $draws, string $variable, bool $byChain = false): Figure
+intervals(CmdStanFit|array $draws, array|string|null $variables = null, float $prob = 0.5, float $probOuter = 0.9, string $pointEst = 'median'): Figure
+rankHist(CmdStanFit|array $draws, string $variable, int $bins = 20): Figure
+scatter(CmdStanFit|array $draws, string $xVariable, string $yVariable): Figure
+acf(CmdStanFit|array $draws, string $variable, int $lags = 20): Figure
+paretoK(array $loo): Figure
+bandwidth(array $x): float
+density(array $x, array $at, ?float $bw = null): array
+autocorrelation(array $x, int $lags): array
+ranks(array $x): array
+range(array $values): array
+```
+
+</details>
+
+## Model methods and Stan functions {#model-methods-and-stan-functions}
+
+### `StanFunctions` {#StanFunctions}
+
+Returned by `exposeFunctions()`. Arguments and results use PHP numbers and zero-indexed lists: vectors and arrays are lists, matrices are lists of rows, complex numbers are `[re, im]`, and tuples are lists. Call a function as a method, such as `$f->add(1.5, 2)`. Needs the FFI extension.
+
+| Method | Purpose |
+|---|---|
+| [`StanFunctions::compile()`]{#StanFunctions-compile} | Compile, or reuse, the functions library for a Stan file. Libraries are cached beside the file. |
+| [`->functions()`]{#StanFunctions-functions} | Each function's `return_type`, `arguments`, `rng`, `supported`, and `reason`, with Stan type names. |
+| [`->call()`]{#StanFunctions-call} | Call a function with positional or named arguments. `_rng` functions also accept `seed`. |
+| [`->library()`]{#StanFunctions-library} | The compiled library path. |
+
+<details><summary>Signatures</summary>
+
+```php
+compile(string $stanFile, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): self
+functions(): array
+call(string $function, mixed ...$arguments): mixed
+library(): ?string
+```
+
+</details>
+
+### `ModelMethods` {#ModelMethods}
+
+What a fit's [model methods](api-fits.qmd#model-methods-1) use, without a fit. Densities drop constants, as in CmdStanR. Named variables are nested zero-indexed lists, and unconstrained vectors are flat lists. Needs the FFI extension.
+
+| Method | Purpose |
+|---|---|
+| [`ModelMethods::compile()`]{#ModelMethods-compile} | Build, or reuse, the library for a Stan file and bind it to data. |
+| [`ModelMethods::build()`]{#ModelMethods-build} | Build, or reuse, the library and return its path. |
+| [`new ModelMethods()`]{#ModelMethods-construct} | Bind a built library to data: an array, a `StanData`, a table, or a JSON file. |
+| [`->logProb()`]{#ModelMethods-logProb} | Log density at unconstrained values. |
+| [`->gradLogProb()`]{#ModelMethods-gradLogProb} | `log_prob` and `gradient`. |
+| [`->hessian()`]{#ModelMethods-hessian} | `log_prob`, `grad_log_prob`, and `hessian`, by finite differences of autodiff gradients. |
+| [`->unconstrainVariables()`]{#ModelMethods-unconstrainVariables} | A flat unconstrained list from values keyed by parameter name. |
+| [`->unconstrainDraws()`]{#ModelMethods-unconstrainDraws} | Unconstrained rows from draw rows keyed by names such as `x[1,2]`. |
+| [`->constrainVariables()`]{#ModelMethods-constrainVariables} | Constrained values keyed by variable. |
+| [`->unconstrainedParamNames()`]{#ModelMethods-unconstrainedParamNames} | Unconstrained parameter names, such as `s[1]`. |
+| [`->constrainedParamNames()`]{#ModelMethods-constrainedParamNames} | Constrained names in CmdStan CSV column order. |
+| [`->variableSkeleton()`]{#ModelMethods-variableSkeleton} | Each variable's dimensions: `[]` for scalars, a trailing 2 for complex values. |
+| [`->numUnconstrained()`]{#ModelMethods-numUnconstrained} | The number of unconstrained parameters. |
+| [`->seedRng()`]{#ModelMethods-seedRng} | Reseed the generator that `constrainVariables()` uses for generated quantities. |
+| [`->seed()`]{#ModelMethods-seed} | The current seed. |
+| [`->library()`]{#ModelMethods-library} | The library path. |
+
+<details><summary>Signatures</summary>
+
+```php
+compile(string $stanFile, object|array|string|null $data = null, int $seed = 1, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): self
+build(string $stanFile, array $stancOptions = [], ?string $outputDir = null, ?float $timeout = null): string
+new ModelMethods(string $library, object|array|string|null $data = null, int $seed = 1)
+logProb(array $unconstrainedVariables, bool $jacobian = true): float
+gradLogProb(array $unconstrainedVariables, bool $jacobian = true): array
+hessian(array $unconstrainedVariables, bool $jacobian = true): array
+unconstrainVariables(array $variables): array
+unconstrainDraws(array $draws): array
+constrainVariables(array $unconstrainedVariables, bool $transformedParameters = true, bool $generatedQuantities = true): array
+unconstrainedParamNames(): array
+constrainedParamNames(bool $transformedParameters = true, bool $generatedQuantities = true): array
+variableSkeleton(bool $transformedParameters = true, bool $generatedQuantities = true): array
+numUnconstrained(): int
+seedRng(int $seed): void
+seed(): int
+library(): string
+```
+
+</details>
+
+## Summaries and diagnostics {#summaries-and-diagnostics}
+
+### `Summary` {#Summary}
+
+Static methods on a `draws_list` (`[chain][variable => list]`) or, for single measures, a list of chains. `CmdStanFit::summary()` with `measures` uses these.
+
+| Method | Purpose |
+|---|---|
+| [`Summary::summarise()`]{#Summary-summarise} | One row per variable, with posterior's `summarise_draws()` semantics. |
+| [`Summary::fromDrawsArray()`]{#Summary-fromDrawsArray} | A `draws_list` from a `draws_array`. |
+| [`Summary::measure()`]{#Summary-measure} | One named measure. Quantile measures return named arrays such as `q5` and `ess_q5`. |
+| [`Summary::defaultSummaryMeasures()`]{#Summary-defaultSummaryMeasures} | The names in `default_summary_measures`. |
+| [`Summary::defaultConvergenceMeasures()`]{#Summary-defaultConvergenceMeasures} | The names in `default_convergence_measures`. |
+| [`Summary::defaultMcseMeasures()`]{#Summary-defaultMcseMeasures} | The names in `default_mcse_measures`. |
+| [`Summary::mean()`]{#Summary-mean} | Mean. |
+| [`Summary::median()`]{#Summary-median} | Median. |
+| [`Summary::var()`]{#Summary-var} | Variance. |
+| [`Summary::sd()`]{#Summary-sd} | Standard deviation. |
+| [`Summary::mad()`]{#Summary-mad} | Median absolute deviation, scaled by 1.4826. |
+| [`Summary::quantile2()`]{#Summary-quantile2} | Quantiles keyed `q5`, `q95`, and so on. All `NAN` when draws contain NaN. |
+| [`Summary::rhat()`]{#Summary-rhat} | Rank-normalized split R-hat. |
+| [`Summary::rhatBasic()`]{#Summary-rhatBasic} | Basic R-hat, split by default. |
+| [`Summary::essBulk()`]{#Summary-essBulk} | Bulk ESS. |
+| [`Summary::essTail()`]{#Summary-essTail} | Tail ESS. |
+| [`Summary::essBasic()`]{#Summary-essBasic} | Basic ESS, split by default. |
+| [`Summary::essMean()`]{#Summary-essMean} | ESS of the mean. |
+| [`Summary::essSd()`]{#Summary-essSd} | ESS of the standard deviation. |
+| [`Summary::essMedian()`]{#Summary-essMedian} | ESS of the median. |
+| [`Summary::essQuantile()`]{#Summary-essQuantile} | ESS of quantiles, keyed `ess_q5` and so on. |
+| [`Summary::mcseMean()`]{#Summary-mcseMean} | Monte Carlo standard error of the mean. |
+| [`Summary::mcseSd()`]{#Summary-mcseSd} | MCSE of the standard deviation. |
+| [`Summary::mcseMedian()`]{#Summary-mcseMedian} | MCSE of the median. |
+| [`Summary::mcseQuantile()`]{#Summary-mcseQuantile} | MCSE of quantiles, keyed `mcse_q5` and so on. |
+| [`Summary::chains()`]{#Summary-chains} | Draws as a list of float chains. |
+| [`Summary::splitChains()`]{#Summary-splitChains} | Each chain halved, dropping the middle draw of odd-length chains. |
+| [`Summary::percent()`]{#Summary-percent} | A probability formatted as posterior names quantiles, such as `5` for 0.05. |
+
+<details><summary>Signatures</summary>
+
+```php
+summarise(array $draws, array $measures = [], array $probs = [0.05, 0.95]): array
+fromDrawsArray(array $draws): array
+measure(string $name, array $x, array $probs = [0.05, 0.95]): array|float
+defaultSummaryMeasures(): array
+defaultConvergenceMeasures(): array
+defaultMcseMeasures(): array
+mean(array $x): float
+median(array $x): float
+var(array $x): float
+sd(array $x): float
+mad(array $x): float
+quantile2(array $x, array $probs = [0.05, 0.95]): array
+rhat(array $x): float
+rhatBasic(array $x, bool $split = true): float
+essBulk(array $x): float
+essTail(array $x): float
+essBasic(array $x, bool $split = true): float
+essMean(array $x): float
+essSd(array $x): float
+essMedian(array $x): float
+essQuantile(array $x, array $probs = [0.05, 0.95]): array
+mcseMean(array $x): float
+mcseSd(array $x): float
+mcseMedian(array $x): float
+mcseQuantile(array $x, array $probs = [0.05, 0.95]): array
+chains(array $x): array
+splitChains(array $x): array
+percent(float $p): string
+```
+
+</details>
+
+### `Psis` {#Psis}
+
+Static methods following posterior and loo.
+
+| Method | Purpose |
+|---|---|
+| [`Psis::paretoSmooth()`]{#Psis-paretoSmooth} | posterior's `pareto_smooth()` with `return_k` and `extra_diags`: smoothed values, diagnostics, and warnings. |
+| [`Psis::paretoKhat()`]{#Psis-paretoKhat} | The Pareto k diagnostic without smoothing. |
+| [`Psis::paretoSmoothLogWeights()`]{#Psis-paretoSmoothLogWeights} | Right-tail smoothing of log weights. |
+| [`Psis::psis()`]{#Psis-psis} | loo's `psis()` for a vector or a draws-by-observations matrix of log ratios. |
+| [`Psis::gpdfit()`]{#Psis-gpdfit} | Zhang and Stephens' generalized Pareto fit: `k` and `sigma`, `NAN` when undefined. |
+| [`Psis::qgeneralizedPareto()`]{#Psis-qgeneralizedPareto} | The generalized Pareto quantile function. |
+| [`Psis::psTailLength()`]{#Psis-psTailLength} | The tail length for a number of draws and relative efficiency. |
+| [`Psis::psKhatThreshold()`]{#Psis-psKhatThreshold} | The Pareto k threshold for a number of draws. |
+| [`Psis::psMinSs()`]{#Psis-psMinSs} | The minimum sample size for a Pareto k. |
+| [`Psis::psConvergenceRate()`]{#Psis-psConvergenceRate} | The convergence rate for a Pareto k and number of draws. |
+| [`Psis::prepareReff()`]{#Psis-prepareReff} | loo's preparation of relative efficiencies for PSIS. |
+
+<details><summary>Signatures</summary>
+
+```php
+paretoSmooth(array $x, string $tail = 'both', ?float $rEff = null, ?int $ndrawsTail = null, bool $areLogWeights = false, bool $smoothDraws = true): array
+paretoKhat(array $x, string $tail = 'both', ?float $rEff = null, ?int $ndrawsTail = null, bool $areLogWeights = false): float
+paretoSmoothLogWeights(array $logWeights): array
+psis(array $logRatios, array|float|null $rEff = 1.0): array
+gpdfit(array $x, bool $wip = true, int $minGridPts = 30, bool $sortX = true): array
+qgeneralizedPareto(array|float $p, float $mu = 0.0, float $sigma = 1.0, float $k = 0.0): array|float
+psTailLength(int $ndraws, float $rEff): float
+psKhatThreshold(int $ndraws): float
+psMinSs(float $k): float
+psConvergenceRate(float $k, int $ndraws): float
+prepareReff(array|float|null $rEff, int $len): array
+```
+
+</details>
+
+### `Loo` {#Loo}
+
+Static methods on a `draws_array` or `draws_matrix` of log-likelihood values. `CmdStanMCMC::loo()` and `waic()` use these.
+
+| Method | Purpose |
+|---|---|
+| [`Loo::loo()`]{#Loo-loo} | PSIS-LOO: estimates, pointwise rows, diagnostics, and warnings. `rEff: true` computes relative efficiencies as CmdStanR does. |
+| [`Loo::fromFit()`]{#Loo-fromFit} | PSIS-LOO for a fit's variable, as `CmdStanMCMC::loo()`. |
+| [`Loo::waic()`]{#Loo-waic} | WAIC: estimates, pointwise rows, and warnings. |
+| [`Loo::waicFromFit()`]{#Loo-waicFromFit} | WAIC for a fit's variable. |
+| [`Loo::relativeEff()`]{#Loo-relativeEff} | loo's `relative_eff()` for likelihood values. |
+| [`Loo::relativeEffLogLik()`]{#Loo-relativeEffLogLik} | Relative efficiencies from log-likelihood values, as CmdStanR computes them. |
+| [`Loo::paretoKTable()`]{#Loo-paretoKTable} | Counts, proportions, and minimum n_eff per Pareto k interval. |
+
+<details><summary>Signatures</summary>
+
+```php
+loo(array $logLik, array|float|bool|null $rEff = true): array
+fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $rEff = true): array
+waic(array $logLik): array
+waicFromFit(CmdStanFit $fit, string $variables = 'log_lik'): array
+relativeEff(array $x): array
+relativeEffLogLik(array $logLik): array
+paretoKTable(array $loo): array
+```
+
+</details>
+
+### `MomentMatch` {#MomentMatch}
+
+Static methods. Needs the phit draw kernels. [Compatibility](compatibility.qmd#moment-matching-and-loo) lists the differences from loo.
+
+| Method | Purpose |
+|---|---|
+| [`MomentMatch::loo()`]{#MomentMatch-loo} | Moment matching on unconstrained draws, with log-density and log-likelihood callbacks. Returns the `loo()` result with updated rows and a `moment_match` key. |
+| [`MomentMatch::fromFit()`]{#MomentMatch-fromFit} | PSIS-LOO, then moment matching with the fit's model methods. |
+| [`MomentMatch::transform()`]{#MomentMatch-transform} | One shift, scale, or covariance step. |
+| [`MomentMatch::splitTransform()`]{#MomentMatch-splitTransform} | The split proposal's affine map and its exact inverse. |
+| [`MomentMatch::splitLogRatios()`]{#MomentMatch-splitLogRatios} | Split-proposal log importance ratios. |
+
+<details><summary>Signatures</summary>
+
+```php
+loo(array $loo, array $upars, array $logLik, callable $logProbUpars, callable $logLikIUpars, int $maxIters = 30, ?float $kThreshold = null, bool $split = true, bool $cov = true): array
+fromFit(CmdStanFit $fit, string $variables = 'log_lik', array|float|bool|null $rEff = true, int $maxIters = 30, ?float $kThreshold = null, bool $split = true, bool $cov = true): array
+transform(string $kind, array $upars, array $lwi): array
+splitTransform(array $upars, array $shift, array $scaling, array $maps, ?array $steps = null): array
+splitLogRatios(array $lpZ, array $lpInverse, array $llZ, float $logAbsDet): array
+```
+
+</details>
+
+### `DrawKernels` {#DrawKernels}
+
+Static methods around `Phit\draws_moments()`, `Phit\draws_covariance_map()`, and `Phit\draws_affine()`.
+
+| Method | Purpose |
+|---|---|
+| [`DrawKernels::available()`]{#DrawKernels-available} | Whether the three kernels are available. |
+| [`DrawKernels::missing()`]{#DrawKernels-missing} | The kernel functions that are not available. |
+| [`DrawKernels::require()`]{#DrawKernels-require} | Throw a `RuntimeException` naming the missing kernels. |
+| [`DrawKernels::moments()`]{#DrawKernels-moments} | Weighted mean and covariance. |
+| [`DrawKernels::covarianceMap()`]{#DrawKernels-covarianceMap} | The map `A` with `A · source · Aᵀ = target`, and its log absolute determinant. |
+| [`DrawKernels::affine()`]{#DrawKernels-affine} | `y = A x + b` for every draw. |
+| [`DrawKernels::affineAbout()`]{#DrawKernels-affineAbout} | `y = A (x − from) + to` for every draw. |
+| [`DrawKernels::isNumericalFailure()`]{#DrawKernels-isNumericalFailure} | Whether a kernel exception reports a numerical failure. |
+| [`DrawKernels::apply()`]{#DrawKernels-apply} | Matrix-vector product. |
+| [`DrawKernels::multiply()`]{#DrawKernels-multiply} | Product of square matrices. |
+| [`DrawKernels::diagonal()`]{#DrawKernels-diagonal} | A diagonal matrix. |
+| [`DrawKernels::identity()`]{#DrawKernels-identity} | An identity matrix. |
+
+<details><summary>Signatures</summary>
+
+```php
+available(): bool
+missing(array $functions = self::FUNCTIONS): array
+require(): void
+moments(array $draws, ?array $weights = null, string $normalization = 'population'): array
+covarianceMap(array $source, array $target): array
+affine(array $draws, array $matrix, array $shift): array
+affineAbout(array $draws, array $matrix, array $from, array $to): array
+isNumericalFailure(Throwable $e): bool
+apply(array $matrix, array $x): array
+multiply(array $a, array $b): array
+diagonal(array $diagonal): array
+identity(int $n): array
+```
+
+</details>
+
+## Draws and initial values {#draws-and-initial-values}
+
+### `Rvars` {#Rvars}
+
+Static methods. `draws(format: 'draws_rvars')` uses these.
+
+| Method | Purpose |
+|---|---|
+| [`Rvars::fromFit()`]{#Rvars-fromFit} | `draws_rvars` for a fit's variables. |
+| [`Rvars::fromDrawsDf()`]{#Rvars-fromDrawsDf} | `draws_rvars` from `draws_df` rows. |
+| [`Rvars::fromDrawsArray()`]{#Rvars-fromDrawsArray} | `draws_rvars` from a `draws_array`. |
+| [`Rvars::draw()`]{#Rvars-draw} | The values of one zero-based draw, nested by dimensions. |
+| [`Rvars::parseName()`]{#Rvars-parseName} | Split `x[1,2]` into `['x', [1, 2]]`. |
+
+<details><summary>Signatures</summary>
+
+```php
+fromFit(CmdStanFit $fit, array|string|null $variables = null): array
+fromDrawsDf(array $rows): array
+fromDrawsArray(array $draws): array
+draw(array $rvar, int $draw): array|float
+parseName(string $name): array
+```
+
+</details>
+
+### `Inits` {#Inits}
+
+Static methods. The `init` option uses these when given a fit or draws.
+
+| Method | Purpose |
+|---|---|
+| [`Inits::fromFit()`]{#Inits-fromFit} | One set of initial values per process from a fit's draws. |
+| [`Inits::fromDraws()`]{#Inits-fromDraws} | The same from draw rows or a `draws_array`. Fewer draws than processes are recycled, and more are resampled without replacement. |
+| [`Inits::nest()`]{#Inits-nest} | One draw's flat columns as nested arrays sized by the largest index, keeping only model parameters. |
+| [`Inits::validate()`]{#Inits-validate} | Check a list of per-process initial values. |
+| [`Inits::sampleNoReplace()`]{#Inits-sampleNoReplace} | Weighted sampling without replacement, returning zero-based indices. |
+
+<details><summary>Signatures</summary>
+
+```php
+fromFit(CmdStanFit $fit, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warnPartial = true): array
+fromDraws(array $draws, int $numProcs, ?array $parameters = null, ?int $seed = null, bool $warnPartial = true): array
+nest(array $row, ?array $parameters = null): array
+validate(array $inits, int $numProcs, ?array $parameters = null, bool $warnPartial = true): array
+sampleNoReplace(array $weights, int $size, Random\Randomizer $rng): array
+```
+
+</details>

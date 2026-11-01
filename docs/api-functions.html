@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API: functions – CmdStanPHP</title>
+<title>Functions – CmdStanPHP</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -86,7 +121,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-functions.html">API: functions</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-functions.html">Functions</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -111,12 +146,6 @@ ul.task-list li input[type="checkbox"] {
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Overview</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -126,6 +155,12 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./installation.html" class="sidebar-item-text sidebar-link">
@@ -203,12 +238,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Figures</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Compatibility with CmdStanR</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -217,43 +258,49 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Functions and methods</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-functions.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">API: functions</span></a>
+ <span class="menu-text">Functions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-options.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: options</span></a>
+ <span class="menu-text">Options</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: models</span></a>
+ <span class="menu-text">CmdStanModel</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-fits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: fits</span></a>
+ <span class="menu-text">Fits</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-data-frames.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: data frames and the phpstats family</span></a>
+ <span class="menu-text">Data frames</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api-helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Helper classes</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./api-errors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API: errors</span></a>
+ <span class="menu-text">Errors</span></a>
   </div>
 </li>
       </ul>
@@ -284,29 +331,12 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Compatibility and limitations</span></a>
+ <span class="menu-text">Contributing</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./compatibility.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Compatibility with CmdStanR</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Contributing</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contributing.html" class="sidebar-item-text sidebar-link">
@@ -325,19 +355,59 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#models-and-stan-files" id="toc-models-and-stan-files" class="nav-link active" data-scroll-target="#models-and-stan-files">Models and Stan files</a></li>
-  <li><a href="#cmdstan-installation" id="toc-cmdstan-installation" class="nav-link" data-scroll-target="#cmdstan-installation">CmdStan installation</a></li>
-  <li><a href="#data-and-csv-files" id="toc-data-and-csv-files" class="nav-link" data-scroll-target="#data-and-csv-files">Data and CSV files</a></li>
-  <li><a href="#figures-and-examples" id="toc-figures-and-examples" class="nav-link" data-scroll-target="#figures-and-examples">Figures and examples</a></li>
+  <li><a href="#models-and-stan-files" id="toc-models-and-stan-files" class="nav-link active" data-scroll-target="#models-and-stan-files">Models and Stan files</a>
+  <ul class="collapse">
+  <li><a href="#cmdstan_model" id="toc-cmdstan_model" class="nav-link" data-scroll-target="#cmdstan_model"><code>cmdstan_model()</code></a></li>
+  <li><a href="#compile_stan_file" id="toc-compile_stan_file" class="nav-link" data-scroll-target="#compile_stan_file"><code>compile_stan_file()</code></a></li>
+  <li><a href="#check_syntax_stan_file" id="toc-check_syntax_stan_file" class="nav-link" data-scroll-target="#check_syntax_stan_file"><code>check_syntax_stan_file()</code></a></li>
+  <li><a href="#format_stan_file" id="toc-format_stan_file" class="nav-link" data-scroll-target="#format_stan_file"><code>format_stan_file()</code></a></li>
+  <li><a href="#variables_stan_file" id="toc-variables_stan_file" class="nav-link" data-scroll-target="#variables_stan_file"><code>variables_stan_file()</code></a></li>
+  <li><a href="#print_stan_file" id="toc-print_stan_file" class="nav-link" data-scroll-target="#print_stan_file"><code>print_stan_file()</code></a></li>
+  <li><a href="#write_stan_file" id="toc-write_stan_file" class="nav-link" data-scroll-target="#write_stan_file"><code>write_stan_file()</code></a></li>
+  <li><a href="#stan_build_info" id="toc-stan_build_info" class="nav-link" data-scroll-target="#stan_build_info"><code>stan_build_info()</code></a></li>
+  </ul></li>
+  <li><a href="#cmdstan-installation" id="toc-cmdstan-installation" class="nav-link" data-scroll-target="#cmdstan-installation">CmdStan installation</a>
+  <ul class="collapse">
+  <li><a href="#install_cmdstan" id="toc-install_cmdstan" class="nav-link" data-scroll-target="#install_cmdstan"><code>install_cmdstan()</code></a></li>
+  <li><a href="#set_cmdstan_path" id="toc-set_cmdstan_path" class="nav-link" data-scroll-target="#set_cmdstan_path"><code>set_cmdstan_path()</code></a></li>
+  <li><a href="#cmdstan_path" id="toc-cmdstan_path" class="nav-link" data-scroll-target="#cmdstan_path"><code>cmdstan_path()</code></a></li>
+  <li><a href="#cmdstan_version" id="toc-cmdstan_version" class="nav-link" data-scroll-target="#cmdstan_version"><code>cmdstan_version()</code></a></li>
+  <li><a href="#check_cmdstan_toolchain" id="toc-check_cmdstan_toolchain" class="nav-link" data-scroll-target="#check_cmdstan_toolchain"><code>check_cmdstan_toolchain()</code></a></li>
+  <li><a href="#cmdstan_make_local" id="toc-cmdstan_make_local" class="nav-link" data-scroll-target="#cmdstan_make_local"><code>cmdstan_make_local()</code></a></li>
+  <li><a href="#rebuild_cmdstan" id="toc-rebuild_cmdstan" class="nav-link" data-scroll-target="#rebuild_cmdstan"><code>rebuild_cmdstan()</code></a></li>
+  </ul></li>
+  <li><a href="#data-and-csv-files" id="toc-data-and-csv-files" class="nav-link" data-scroll-target="#data-and-csv-files">Data and CSV files</a>
+  <ul class="collapse">
+  <li><a href="#write_stan_json" id="toc-write_stan_json" class="nav-link" data-scroll-target="#write_stan_json"><code>write_stan_json()</code></a></li>
+  <li><a href="#read_cmdstan_csv" id="toc-read_cmdstan_csv" class="nav-link" data-scroll-target="#read_cmdstan_csv"><code>read_cmdstan_csv()</code></a></li>
+  <li><a href="#as_cmdstan_fit" id="toc-as_cmdstan_fit" class="nav-link" data-scroll-target="#as_cmdstan_fit"><code>as_cmdstan_fit()</code></a></li>
+  <li><a href="#read_cmdstan_csv_list" id="toc-read_cmdstan_csv_list" class="nav-link" data-scroll-target="#read_cmdstan_csv_list"><code>read_cmdstan_csv_list()</code></a></li>
+  <li><a href="#draws_to_csv" id="toc-draws_to_csv" class="nav-link" data-scroll-target="#draws_to_csv"><code>draws_to_csv()</code></a></li>
+  </ul></li>
+  <li><a href="#figures-and-examples" id="toc-figures-and-examples" class="nav-link" data-scroll-target="#figures-and-examples">Figures and examples</a>
+  <ul class="collapse">
+  <li><a href="#mcmc_trace" id="toc-mcmc_trace" class="nav-link" data-scroll-target="#mcmc_trace"><code>mcmc_trace()</code></a></li>
+  <li><a href="#mcmc_hist" id="toc-mcmc_hist" class="nav-link" data-scroll-target="#mcmc_hist"><code>mcmc_hist()</code></a></li>
+  <li><a href="#mcmc_dens" id="toc-mcmc_dens" class="nav-link" data-scroll-target="#mcmc_dens"><code>mcmc_dens()</code></a></li>
+  <li><a href="#mcmc_dens_overlay" id="toc-mcmc_dens_overlay" class="nav-link" data-scroll-target="#mcmc_dens_overlay"><code>mcmc_dens_overlay()</code></a></li>
+  <li><a href="#mcmc_intervals" id="toc-mcmc_intervals" class="nav-link" data-scroll-target="#mcmc_intervals"><code>mcmc_intervals()</code></a></li>
+  <li><a href="#mcmc_rank_hist" id="toc-mcmc_rank_hist" class="nav-link" data-scroll-target="#mcmc_rank_hist"><code>mcmc_rank_hist()</code></a></li>
+  <li><a href="#mcmc_scatter" id="toc-mcmc_scatter" class="nav-link" data-scroll-target="#mcmc_scatter"><code>mcmc_scatter()</code></a></li>
+  <li><a href="#mcmc_acf" id="toc-mcmc_acf" class="nav-link" data-scroll-target="#mcmc_acf"><code>mcmc_acf()</code></a></li>
+  <li><a href="#pareto_k_plot" id="toc-pareto_k_plot" class="nav-link" data-scroll-target="#pareto_k_plot"><code>pareto_k_plot()</code></a></li>
+  <li><a href="#cmdstanr_example" id="toc-cmdstanr_example" class="nav-link" data-scroll-target="#cmdstanr_example"><code>cmdstanr_example()</code></a></li>
+  <li><a href="#print_example_program" id="toc-print_example_program" class="nav-link" data-scroll-target="#print_example_program"><code>print_example_program()</code></a></li>
+  <li><a href="#num_threads" id="toc-num_threads" class="nav-link" data-scroll-target="#num_threads"><code>num_threads()</code></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Reference</a></li><li class="breadcrumb-item"><a href="./api-functions.html">API: functions</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="./api-functions.html">Functions</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API: functions</h1>
+<h1 class="title">Functions</h1>
 </div>
 
 
@@ -354,130 +424,161 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Standalone functions in the <code>CmdStan</code> namespace, which keep CmdStanR’s snake_case names.</p>
+<p>Standalone functions in the <code>CmdStan</code> namespace. They keep CmdStanR’s snake_case names. <a href="./api-options.html#global-options"><code>options()</code> and <code>cmdstan_option()</code></a> are on the options page.</p>
 <section id="models-and-stan-files" class="level2">
 <h2 class="anchored" data-anchor-id="models-and-stan-files">Models and Stan files</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cmdstan_model(stanFile: null, exeFile: null, quiet: true, dir: null, pedantic: false, includePaths: null, userHeader: null, cppOptions: null, stancOptions: null, forceRecompile: null)</code></td>
-<td>A <code>CmdStanModel</code>, compiled or reusing an up-to-date executable</td>
-</tr>
-<tr class="even">
-<td><code>compile_stan_file(stanFile, ...)</code></td>
-<td>The executable path, compiled with <code>cmdstan_model()</code>’s build arguments but without a model object</td>
-</tr>
-<tr class="odd">
-<td><code>check_syntax_stan_file(stanFile, includePaths: null, pedantic: false, stancOptions: [], quiet: false)</code></td>
-<td><code>true</code>, or an exception for invalid Stan</td>
-</tr>
-<tr class="even">
-<td><code>format_stan_file(stanFile, includePaths: null, overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)</code></td>
-<td>The formatted program. <code>overwriteFile</code> rewrites the file and keeps a <code>.bak-YYYYMMDDHHMMSS</code> copy unless <code>backup: false</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>variables_stan_file(stanFile, includePaths: null)</code></td>
-<td>The program’s declarations, without compiling</td>
-</tr>
-<tr class="even">
-<td><code>print_stan_file(stanFile, lineNumbers: null)</code></td>
-<td>Prints the program</td>
-</tr>
-<tr class="odd">
-<td><code>stan_build_info(exeFile)</code></td>
-<td>How an executable was built, from its build record and what it reports about itself</td>
-</tr>
-<tr class="even">
-<td><code>write_stan_file(code, file: null, dir: null, basename: null, forceOverwrite: false, hashSalt: '')</code></td>
-<td>The path of <code>model_&lt;hash&gt;.stan</code>, or of <code>basename</code>. An identical existing file is left untouched.</td>
-</tr>
-</tbody>
-</table>
+<section id="cmdstan_model" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstan_model"><code>cmdstan_model()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cmdstan_model(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$stanFile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$exeFile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$pedantic</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$userHeader</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$cppOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">bool</span> <span class="va">$forceRecompile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> CmdStanModel</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a <code>CmdStanModel</code>. Give <code>stanFile</code>, whose executable is built beside it or in <code>dir</code>, or <code>exeFile</code> alone to use an existing executable without building. The arguments are those of <a href="./api-models.html#constructor"><code>new CmdStanModel()</code></a>, which describes them.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'bernoulli.stan'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="compile_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="compile_stan_file"><code>compile_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>compile_stan_file(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$pedantic</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$userHeader</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$cppOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">bool</span> <span class="va">$forceRecompile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the executable path. Takes <code>cmdstan_model()</code>’s build arguments and reuses an up-to-date executable in the same way.</p>
+</section>
+<section id="check_syntax_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="check_syntax_stan_file"><code>check_syntax_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>check_syntax_stan_file(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$pedantic</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$stancOptions</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">bool</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>true</code>. Throws a <code>RuntimeException</code> with stanc’s message for invalid Stan. <code>pedantic: true</code> adds stanc’s pedantic warnings, and <code>quiet: true</code> suppresses stanc’s output.</p>
+</section>
+<section id="format_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="format_stan_file"><code>format_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>format_stan_file(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$overwriteFile</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">bool</span> <span class="va">$canonicalize</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$backup</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">int</span> <span class="va">$maxLineLength</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$quiet</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the formatted program. <code>canonicalize</code> is <code>true</code> for every canonicalization or a list such as <code>['deprecations', 'braces']</code>. <code>overwriteFile: true</code> rewrites the file and keeps a <code>.bak-YYYYMMDDHHMMSS</code> copy unless <code>backup: false</code>.</p>
+</section>
+<section id="variables_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="variables_stan_file"><code>variables_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>variables_stan_file(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$includePaths</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the <code>data</code>, <code>parameters</code>, <code>transformed_parameters</code>, and <code>generated_quantities</code> declarations from <code>stanc --info</code>, each keyed by variable name with its type and number of dimensions.</p>
+</section>
+<section id="print_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="print_stan_file"><code>print_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>print_stan_file(<span class="dt">string</span> <span class="va">$stanFile</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">bool</span> <span class="va">$lineNumbers</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Prints with line numbers when <code>lineNumbers</code> is <code>true</code>. The default comes from the <code>cmdstanr_print_line_numbers</code> option.</p>
+</section>
+<section id="write_stan_file" class="level3">
+<h3 class="anchored" data-anchor-id="write_stan_file"><code>write_stan_file()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>write_stan_file(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$code</span><span class="ot">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$file</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$basename</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$forceOverwrite</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$hashSalt</span> <span class="op">=</span> <span class="st">''</span><span class="ot">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the path. <code>code</code> is a string or a list of lines. Without <code>file</code>, the file is <code>dir/basename</code>, where <code>dir</code> defaults to the <code>cmdstanr_write_stan_file_dir</code> option or the system temporary directory and <code>basename</code> to <code>model_&lt;hash&gt;.stan</code>. An identical existing file is left untouched, so its executable stays current, unless <code>forceOverwrite: true</code>.</p>
+</section>
+<section id="stan_build_info" class="level3">
+<h3 class="anchored" data-anchor-id="stan_build_info"><code>stan_build_info()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stan_build_info(<span class="dt">string</span> <span class="va">$exeFile</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the executable’s build record and the features it reports about itself (<code>stan_threads</code>, <code>stan_mpi</code>, <code>stan_opencl</code>, <code>stan_no_range_checks</code>, and <code>stan_version</code>). The same as <a href="./api-models.html#stanBuildInfo"><code>CmdStanModel::stanBuildInfo()</code></a>.</p>
+</section>
 </section>
 <section id="cmdstan-installation" class="level2">
 <h2 class="anchored" data-anchor-id="cmdstan-installation">CmdStan installation</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>install_cmdstan(version: null, dir: null, cores: null, timeout: null, overwrite: false, releaseUrl: null, releaseFile: null, cppOptions: [], checkToolchain: true, copyMakeLocal: null)</code></td>
-<td>Downloads or unpacks a release, builds it, and selects it. See <a href="./installation.html#install-cmdstan">Installation</a>.</td>
-</tr>
-<tr class="even">
-<td><code>set_cmdstan_path(path)</code>, <code>cmdstan_path()</code></td>
-<td>Selects or returns the CmdStan installation</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstan_version()</code></td>
-<td>The selected CmdStan’s version</td>
-</tr>
-<tr class="even">
-<td><code>check_cmdstan_toolchain()</code></td>
-<td>Paths and versions of make, CmdStan’s C++ compiler, and stanc. Throws when make or the compiler is missing. A successful check does not prove that a compilation will succeed.</td>
-</tr>
-<tr class="odd">
-<td><code>cmdstan_make_local(dir: null, cppOptions: [], append: true)</code></td>
-<td>Reads or writes CmdStan’s <code>make/local</code></td>
-</tr>
-<tr class="even">
-<td><code>rebuild_cmdstan(cores: null, timeout: null)</code></td>
-<td>Cleans and rebuilds the selected CmdStan</td>
-</tr>
-</tbody>
-</table>
-<p>CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. <code>set_cmdstan_path()</code> refuses an older installation, discovery skips one, and <code>install_cmdstan()</code> rejects older versions. CI tests 2.37 and 2.40. Options added in newer CmdStan releases fail on older ones with CmdStan’s error message.</p>
+<p>CmdStan 2.37 is the oldest supported release, as in CmdStanR 1.0. <code>set_cmdstan_path()</code> refuses an older installation, discovery skips one, and <code>install_cmdstan()</code> rejects older versions. Options added in newer CmdStan releases fail on older ones with CmdStan’s error message.</p>
+<section id="install_cmdstan" class="level3">
+<h3 class="anchored" data-anchor-id="install_cmdstan"><code>install_cmdstan()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>install_cmdstan(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$version</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">int</span> <span class="va">$cores</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$overwrite</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$releaseUrl</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$releaseFile</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$cppOptions</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$checkToolchain</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">bool</span> <span class="va">$copyMakeLocal</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the installation directory, <code>~/.cmdstan/cmdstan-&lt;version&gt;</code> unless <code>dir</code> is given. Without a version, installs the latest release. Versions before 2.37 are rejected. <code>cores</code> sets the parallel make jobs (default: the <code>mc.cores</code> option, else 1), and <code>timeout</code> is in seconds. <code>releaseFile</code> is a local <code>.tar.gz</code> and <code>releaseUrl</code> an HTTPS <code>.tar.gz</code> URL. <code>cppOptions</code> are written to <code>make/local</code> before the build. An existing installation is replaced only with <code>overwrite: true</code>, and it is restored if the new build fails. <a href="./installation.html#install-cmdstan">Installation</a> gives examples.</p>
+</section>
+<section id="set_cmdstan_path" class="level3">
+<h3 class="anchored" data-anchor-id="set_cmdstan_path"><code>set_cmdstan_path()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>set_cmdstan_path(<span class="dt">string</span> <span class="va">$path</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The path must contain CmdStan’s makefile and <code>bin/stanc</code>. Throws for a missing installation or a version before 2.37. The selection lasts for the PHP process.</p>
+</section>
+<section id="cmdstan_path" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstan_path"><code>cmdstan_path()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cmdstan_path()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Without a selection, uses the <code>CMDSTAN</code> environment variable, then the highest supported version under <code>~/.cmdstan/cmdstan-*</code>. Throws a <code>RuntimeException</code> when none is found.</p>
+</section>
+<section id="cmdstan_version" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstan_version"><code>cmdstan_version()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cmdstan_version()<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns a version string such as <code>2.40.0</code>.</p>
+</section>
+<section id="check_cmdstan_toolchain" class="level3">
+<h3 class="anchored" data-anchor-id="check_cmdstan_toolchain"><code>check_cmdstan_toolchain()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>check_cmdstan_toolchain()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the path and version of <code>make</code>, CmdStan’s C++ compiler, and <code>stanc</code> when CmdStan is installed. Throws a <code>RuntimeException</code> when make or the compiler is missing. A successful check does not prove that a compilation will succeed.</p>
+</section>
+<section id="cmdstan_make_local" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstan_make_local"><code>cmdstan_make_local()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cmdstan_make_local(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$dir</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$cppOptions</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$append</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the current <code>make/local</code> lines. Named <code>cppOptions</code> entries are written as <code>NAME=value</code>, with booleans as <code>true</code> and <code>false</code>, and list entries as raw lines. Appends unless <code>append: false</code>. <code>dir</code> defaults to the selected CmdStan.</p>
+</section>
+<section id="rebuild_cmdstan" class="level3">
+<h3 class="anchored" data-anchor-id="rebuild_cmdstan"><code>rebuild_cmdstan()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rebuild_cmdstan(<span class="ot">?</span><span class="dt">int</span> <span class="va">$cores</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">float</span> <span class="va">$timeout</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Runs <code>make clean-all</code> and <code>make build</code>. <code>cores</code> sets the parallel make jobs, and <code>timeout</code> is in seconds.</p>
+</section>
 </section>
 <section id="data-and-csv-files" class="level2">
 <h2 class="anchored" data-anchor-id="data-and-csv-files">Data and CSV files</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>write_stan_json(data, file, alwaysDecimal: false, variables: null)</code></td>
-<td>Writes data, initial values, or a metric as JSON. <code>data</code> may be an array, a <code>StanData</code>, or a table. With <code>variables</code> (stanc’s declarations, such as <code>$model-&gt;variables()['data']</code>), <code>int</code> variables are written as integers and tuples as Stan’s <code>{"1": ..., "2": ...}</code> objects.</td>
-</tr>
-<tr class="even">
-<td><code>read_cmdstan_csv(files)</code></td>
-<td>A fit from one or more CmdStan CSV files (<code>.csv</code>, <code>.csv.gz</code>, or <code>.csv.bz2</code>)</td>
-</tr>
-<tr class="odd">
-<td><code>as_cmdstan_fit(files, variables: null, checkDiagnostics: true, format: null)</code></td>
-<td>The same, reading only <code>variables</code> and with <code>format</code> as the fit’s default draws format</td>
-</tr>
-<tr class="even">
-<td><code>read_cmdstan_csv_list(files, variables: null, samplerDiagnostics: null, format: null)</code></td>
-<td>CmdStanR’s <code>read_cmdstan_csv()</code> list shape</td>
-</tr>
-<tr class="odd">
-<td><code>draws_to_csv(chains, dir)</code></td>
-<td>Writes <code>[chain][iteration][variable]</code> draw rows to one CSV file per chain</td>
-</tr>
-</tbody>
-</table>
+<section id="write_stan_json" class="level3">
+<h3 class="anchored" data-anchor-id="write_stan_json"><code>write_stan_json()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>write_stan_json(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">|</span><span class="dt">array</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$file</span><span class="ot">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$alwaysDecimal</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">array</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">string</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the file path. <code>data</code> is an array, a <code>StanData</code>, or a <a href="./api-data-frames.html#data-in">table</a>. With <code>variables</code> (stanc’s declarations, such as <code>$model-&gt;variables()['data']</code>), <code>int</code> variables are written as integers and tuples as Stan’s <code>{"1": ..., "2": ...}</code> objects. <code>alwaysDecimal: true</code> writes every value of a non-<code>int</code> variable as a floating-point number.</p>
 <p>Data arrays are named PHP arrays at the top level, with lists for Stan arrays, vectors, and matrices:</p>
 <ul>
 <li>Matrices are lists of rows, with no column-major conversion. Booleans become 0 and 1, complex numbers are <code>[re, im]</code> pairs, and a tuple is a list of its elements. Empty top-level data becomes <code>{}</code>.</li>
@@ -485,33 +586,127 @@ ul.task-list li input[type="checkbox"] {
 <li>The fitting methods write data with the model’s declarations. Every declared data variable is required, <code>int</code> variables are written as integers (a non-integer is truncated with a warning), and a single value for a one-dimensional array becomes a one-element array.</li>
 </ul>
 </section>
+<section id="read_cmdstan_csv" class="level3">
+<h3 class="anchored" data-anchor-id="read_cmdstan_csv"><code>read_cmdstan_csv()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>read_cmdstan_csv(<span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$files</span>)<span class="ot">:</span> CmdStanFit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the fit class for the files’ method, such as <code>CmdStanMCMC</code>. Accepts <code>.csv</code>, <code>.csv.gz</code>, and <code>.csv.bz2</code> files.</p>
+</section>
+<section id="as_cmdstan_fit" class="level3">
+<h3 class="anchored" data-anchor-id="as_cmdstan_fit"><code>as_cmdstan_fit()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>as_cmdstan_fit(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$files</span><span class="ot">,</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$checkDiagnostics</span> <span class="op">=</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> CmdStanFit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>With <code>variables</code>, only those variables are read and listed in <code>metadata()['variables']</code> and <code>draws()</code>. <code>checkDiagnostics: false</code> also skips the sampler diagnostics. <code>format</code> sets the fit’s default draws format.</p>
+</section>
+<section id="read_cmdstan_csv_list" class="level3">
+<h3 class="anchored" data-anchor-id="read_cmdstan_csv_list"><code>read_cmdstan_csv_list()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>read_cmdstan_csv_list(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$files</span><span class="ot">,</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$samplerDiagnostics</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$format</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns <code>metadata</code> plus, by method: <code>time</code>, <code>inv_metric</code>, <code>step_size</code>, <code>warmup_draws</code>, <code>post_warmup_draws</code>, <code>warmup_sampler_diagnostics</code>, and <code>post_warmup_sampler_diagnostics</code> (sample); <code>draws</code> (variational, laplace, pathfinder); <code>point_estimates</code> (optimize); <code>generated_quantities</code>; or <code>gradients</code> and <code>lp</code> (diagnose). An empty <code>variables</code> or <code>samplerDiagnostics</code> selects none.</p>
+</section>
+<section id="draws_to_csv" class="level3">
+<h3 class="anchored" data-anchor-id="draws_to_csv"><code>draws_to_csv()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>draws_to_csv(<span class="dt">array</span> <span class="va">$chains</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$dir</span>)<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>chains</code> is <code>[chain][iteration][variable =&gt; value]</code>. Returns the file paths. Column names follow CmdStan’s naming.</p>
+</section>
+</section>
 <section id="figures-and-examples" class="level2">
 <h2 class="anchored" data-anchor-id="figures-and-examples">Figures and examples</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Function</th>
-<th>Result</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>mcmc_trace</code>, <code>mcmc_hist</code>, <code>mcmc_dens</code>, <code>mcmc_dens_overlay</code>, <code>mcmc_intervals</code>, <code>mcmc_rank_hist</code>, <code>mcmc_scatter</code>, <code>mcmc_acf</code>, <code>pareto_k_plot</code></td>
-<td>A <code>Figure</code>, named after its bayesplot or loo counterpart. See <a href="./figures.html">Figures</a>.</td>
-</tr>
-<tr class="even">
-<td><code>cmdstanr_example(example: 'logistic', method: 'sample', ...options)</code></td>
-<td>A fit of the <code>logistic</code>, <code>schools</code>, or <code>schools_ncp</code> example</td>
-</tr>
-<tr class="odd">
-<td><code>print_example_program(example)</code></td>
-<td>Prints an example’s Stan program</td>
-</tr>
-</tbody>
-</table>
-<p><code>num_threads()</code> is deprecated, as in CmdStanR.</p>
+<section id="mcmc_trace" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_trace"><code>mcmc_trace()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mcmc_trace(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each figure function returns a <a href="./api-helpers.html#Figure"><code>Figure</code></a>, named after its bayesplot or loo counterpart. Echo it for ASCII text, or call <code>vegaLite()</code>, <code>html()</code>, <code>svg()</code>, or <code>png()</code>. <code>draws</code> is a fit or a <code>draws_array</code>, and a variable names one column, such as <code>theta</code> or <code>beta[2]</code>. <a href="./figures.html">Figures</a> shows each one.</p>
+</section>
+<section id="mcmc_hist" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_hist"><code>mcmc_hist()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mcmc_hist(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$bins</span> <span class="op">=</span> <span class="dv">30</span><span class="ot">,</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Bins have equal width over the observed range.</p>
+</section>
+<section id="mcmc_dens" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_dens"><code>mcmc_dens()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>mcmc_dens(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Gaussian kernel with R’s <code>bw.nrd0</code> bandwidth, as R’s <code>density()</code>.</p>
+</section>
+<section id="mcmc_dens_overlay" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_dens_overlay"><code>mcmc_dens_overlay()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mcmc_dens_overlay(CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$variable</span>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>One curve per chain, with the same kernel and bandwidth rule as <code>mcmc_dens()</code>.</p>
+</section>
+<section id="mcmc_intervals" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_intervals"><code>mcmc_intervals()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>mcmc_intervals(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span><span class="op">|</span><span class="kw">null</span> <span class="va">$variables</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> <span class="va">$prob</span> <span class="op">=</span> <span class="fl">0.5</span><span class="ot">,</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> <span class="va">$probOuter</span> <span class="op">=</span> <span class="fl">0.9</span><span class="ot">,</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$pointEst</span> <span class="op">=</span> <span class="st">'median'</span><span class="ot">,</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>null</code> selects every variable except <code>lp__</code> and other names ending in <code>__</code>. Base names select all their elements. <code>pointEst</code> is <code>'median'</code>, <code>'mean'</code>, or <code>'none'</code>.</p>
+</section>
+<section id="mcmc_rank_hist" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_rank_hist"><code>mcmc_rank_hist()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>mcmc_rank_hist(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$bins</span> <span class="op">=</span> <span class="dv">20</span><span class="ot">,</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ranks are pooled over chains, and each panel shows the count expected under uniform ranks.</p>
+</section>
+<section id="mcmc_scatter" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_scatter"><code>mcmc_scatter()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>mcmc_scatter(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$xVariable</span><span class="ot">,</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$yVariable</span><span class="ot">,</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For MCMC fits, divergent transitions are flagged.</p>
+</section>
+<section id="mcmc_acf" class="level3">
+<h3 class="anchored" data-anchor-id="mcmc_acf"><code>mcmc_acf()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mcmc_acf(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    CmdStanFit<span class="op">|</span><span class="dt">array</span> <span class="va">$draws</span><span class="ot">,</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$variable</span><span class="ot">,</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$lags</span> <span class="op">=</span> <span class="dv">20</span><span class="ot">,</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Lags 0 to <code>lags</code>, as bayesplot’s <code>mcmc_acf_bar()</code>.</p>
+</section>
+<section id="pareto_k_plot" class="level3">
+<h3 class="anchored" data-anchor-id="pareto_k_plot"><code>pareto_k_plot()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pareto_k_plot(<span class="dt">array</span> <span class="va">$loo</span>)<span class="ot">:</span> Figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Takes a <code>CmdStanMCMC::loo()</code> or <code>Loo::loo()</code> result.</p>
+</section>
+<section id="cmdstanr_example" class="level3">
+<h3 class="anchored" data-anchor-id="cmdstanr_example"><code>cmdstanr_example()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>cmdstanr_example(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$example</span> <span class="op">=</span> <span class="st">'logistic'</span><span class="ot">,</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$method</span> <span class="op">=</span> <span class="st">'sample'</span><span class="ot">,</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> CmdStanFit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>example</code> is <code>logistic</code>, <code>schools</code>, or <code>schools_ncp</code>, and <code>method</code> is any fitting method. The model is compiled in the <code>cmdstanphp_example_dir</code> option’s directory, else <code>&lt;tmp&gt;/cmdstanphp-examples</code>, and fitted with its bundled data. Other options go to the method. <code>quiet</code> (default <code>true</code>) discards console output.</p>
+</section>
+<section id="print_example_program" class="level3">
+<h3 class="anchored" data-anchor-id="print_example_program"><code>print_example_program()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>print_example_program(<span class="dt">string</span> <span class="va">$example</span> <span class="op">=</span> <span class="st">'logistic'</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>example</code> is <code>logistic</code>, <code>schools</code>, or <code>schools_ncp</code>.</p>
+</section>
+<section id="num_threads" class="level3">
+<h3 class="anchored" data-anchor-id="num_threads"><code>num_threads()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>num_threads()<span class="ot">:</span> <span class="ot">?</span><span class="dt">int</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Returns the <code>STAN_NUM_THREADS</code> environment variable as an integer, or <code>null</code> when unset. Deprecated, as in CmdStanR. Use the fit’s <code>metadata()</code>.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

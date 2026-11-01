@@ -1,12 +1,28 @@
 ---
-title: "API: options"
+title: "Options"
 ---
 
 Global options, the options every inference method takes, and each method's own options. Options left out or `null` use the installed CmdStan's default, and unknown options throw.
 
 ## Global options {#global-options}
 
-`options(set: [])` sets options and returns their previous values, and `cmdstan_option(name, default: null)` reads one. A `null` value unsets an option, and unknown names and values of the wrong type throw.
+### `options()` {#options}
+
+```php
+options(array $set = []): array
+```
+
+Sets session options, like R's `options()`, and returns their previous values. A `null` value unsets an option, and unknown names and values of the wrong type throw. With no argument, returns every option that is set.
+
+### `cmdstan_option()` {#cmdstan_option}
+
+```php
+cmdstan_option(string $name, mixed $default = null): mixed
+```
+
+Reads one option, or `default` when it is not set, like R's `getOption()`.
+
+### Option names {#option-names}
 
 | Option | Effect |
 | --- | --- |

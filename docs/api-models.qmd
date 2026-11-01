@@ -1,50 +1,291 @@
 ---
-title: "API: models"
+title: "CmdStanModel"
 ---
 
-`CmdStanModel` compiles a Stan program and runs it.
+`CmdStanModel` compiles a Stan program and runs CmdStan's methods on it. Method names are camelCase versions of CmdStanR's.
 
 ## Creating a model {#model-methods}
 
-`cmdstan_model()` and `new CmdStanModel()` take the same arguments and compile the model, or reuse an up-to-date executable, before they return.
+`cmdstan_model()` and `new CmdStanModel()` return a model.
+
+### `new CmdStanModel()` {#constructor}
+
+```php
+new CmdStanModel(
+    ?string $stanFile = null,
+    ?string $exeFile = null,
+    bool $quiet = true,
+    ?string $dir = null,
+    bool $pedantic = false,
+    ?array $includePaths = null,
+    ?string $userHeader = null,
+    ?array $cppOptions = null,
+    ?array $stancOptions = null,
+    ?bool $forceRecompile = null,
+    ?float $timeout = null,
+)
+```
+
+Compiles the program, or reuses an up-to-date executable, before it returns. `cmdstan_model()` takes the same arguments except `timeout`, the compile limit in seconds.
 
 - Give `stanFile`, whose executable goes beside it or in `dir`, or `exeFile` alone to use an existing executable. A model from `exeFile` alone refuses the build arguments, because there is nothing to build.
 - `cppOptions` are named make variables, such as `['STAN_THREADS' => true]`. Names are uppercased, and `false` turns an option off even when `make/local` turns it on. Unnamed entries and values containing command expansions or shell metacharacters are rejected. Use `cmdstan_make_local()` for other make lines.
 - `stancOptions` take flags and values, such as `['O1', 'canonicalize' => 'deprecations', 'max-line-length' => 78]`. Flags with their own argument are rejected: use `includePaths`, `pedantic`, `userHeader`, or `cppOptions: ['STAN_OPENCL' => true]`.
-- `quiet: false`, or the `cmdstanr_verbose` option, reports whether and why the model compiles. `forceRecompile: true` rebuilds anyway.
+- A rebuild happens when the build record shows that the program, its `#include` files, the user header, `cppOptions`, `stancOptions`, `make/local`, or the selected CmdStan changed. `forceRecompile: true` rebuilds anyway, and its default comes from the `cmdstanr_force_recompile` option.
+- `quiet: false`, or the `cmdstanr_verbose` option, reports whether and why the model compiles.
 
-[Compiling models](compiling.qmd) covers when a model is rebuilt, `StaleExecutableException`, and concurrent builds.
+[Compiling models](compiling.qmd) covers rebuilds, `StaleExecutableException`, and concurrent builds.
 
-## Inspecting a model
+## Inspecting a model {#inspecting-a-model}
 
-| Method | Result |
-| --- | --- |
-| `stanFile()`, `exeFile()`, `hppFile()` | Paths. `hppFile()` writes the generated C++ to a temporary file on first use. |
-| `code()` | The program as it was when the model was created |
-| `variables()` | The `data`, `parameters`, `transformed_parameters`, and `generated_quantities` declarations, from stanc |
-| `modelName()`, `hasStanFile()`, `includePaths()`, `userHeader()`, `stancOptions()` | The model's identity and recorded build settings |
-| `cppOptions()` | Make variables and values, so `['stan_threads' => true]` comes back as `['STAN_THREADS' => 'true']` |
-| `cmdstanVersion()` | The CmdStan version that built the executable |
-| `reportedFeatures()` | What the executable reports: `stan_threads`, `stan_mpi`, `stan_opencl`, `stan_no_range_checks`, and `stan_version` |
-| `buildInfo()` | The build record and the reported features, as `stan_build_info()` returns them |
-| `isCurrent()` | `false` when the executable is out of date |
-| `cmdstanDefaults(method: 'sample')` | CmdStan's default values for `sample`, `optimize`, `variational`, `pathfinder`, or `laplace`, under this package's option names |
-| `print(lineNumbers: null)`, `saveHppFile(dir)` | Prints the program, or copies the generated header |
-| `format(overwriteFile: false, canonicalize: false, backup: true, maxLineLength: null, quiet: false)` | The formatted program. Create the model again to use a rewritten file. |
-| `checkSyntax(pedantic: false, includePaths: null, stancOptions: [], quiet: false)` | `true`, or an exception for invalid Stan |
-| `exposeFunctions(timeout: null, quiet: false)`, `functions()` | The model's user-defined functions as a `StanFunctions` object |
+### `stanFile()`, `exeFile()`, `hppFile()` {#stanFile}
 
-`code()` and `hppFile()` are `null` for a model from `exeFile` alone.
+[]{#exeFile} []{#hppFile}
 
-## Running a model
+```php
+$model->stanFile(): ?string
+$model->exeFile(): string
+$model->hppFile(): ?string
+```
 
-| Method | Result |
-| --- | --- |
-| `sample()`, `sampleMpi()` | `CmdStanMCMC` |
-| `optimize()` | `CmdStanMLE` |
-| `variational()` | `CmdStanVB` |
-| `pathfinder()` | `CmdStanPathfinder` |
-| `laplace()` | `CmdStanLaplace` |
-| `generateQuantities(fittedParams, ...)` | `CmdStanGQ` |
-| `diagnose()` | `CmdStanDiagnose` |
-| `logProb()` | `CmdStanFit` |
+`stanFile()` and `hppFile()` are `null` for a model from `exeFile` alone. `hppFile()` writes the generated C++ to a temporary file on first use.
+
+### `saveHppFile()` {#saveHppFile}
+
+```php
+$model->saveHppFile(string $dir): string
+```
+
+Returns the copied path. The directory must exist. Throws for a model from `exeFile` alone.
+
+### `code()` {#code}
+
+```php
+$model->code(): ?string
+```
+
+`null`, with a warning, for a model from `exeFile` alone.
+
+### `print()` {#print}
+
+```php
+$model->print(?bool $lineNumbers = null): void
+```
+
+With line numbers when `lineNumbers` is `true`, or when the `cmdstanr_print_line_numbers` option is set.
+
+### `variables()` {#variables}
+
+```php
+$model->variables(): array
+```
+
+Returns `data`, `parameters`, `transformed_parameters`, and `generated_quantities`, each keyed by variable name with its type and dimensions, from `stanc --info`.
+
+### `modelName()`, `hasStanFile()` {#modelName}
+
+[]{#hasStanFile}
+
+```php
+$model->modelName(): string
+$model->hasStanFile(): bool
+```
+
+The name is the Stan file's or executable's base name.
+
+### `includePaths()`, `userHeader()`, `stancOptions()`, `cppOptions()` {#includePaths}
+
+[]{#userHeader} []{#stancOptions} []{#cppOptions}
+
+```php
+$model->includePaths(): array
+$model->userHeader(): ?string
+$model->stancOptions(): array
+$model->cppOptions(): array
+```
+
+`cppOptions()` returns make variables and values, so `['stan_threads' => true]` comes back as `['STAN_THREADS' => 'true']`. `stancOptions()` returns the stanc arguments given as `stancOptions`.
+
+### `nativeStancOptions()` {#nativeStancOptions}
+
+```php
+$model->nativeStancOptions(): array
+```
+
+The stanc options used when building exposed functions and model methods.
+
+### `cmdstanVersion()` {#cmdstanVersion}
+
+```php
+$model->cmdstanVersion(): ?string
+```
+
+From the build record, else the Stan version the executable reports. `null` when neither is known.
+
+### `reportedFeatures()` {#reportedFeatures}
+
+```php
+$model->reportedFeatures(): array
+```
+
+`stan_threads`, `stan_mpi`, `stan_opencl`, `stan_no_range_checks`, and `stan_version`, from `<exe> info`.
+
+### `buildInfo()` {#buildInfo}
+
+```php
+$model->buildInfo(): array
+```
+
+The same as `stan_build_info()` for this model's executable.
+
+### `CmdStanModel::stanBuildInfo()` {#stanBuildInfo}
+
+```php
+CmdStanModel::stanBuildInfo(string $exeFile): array
+```
+
+Static form of [`stan_build_info()`](api-functions.qmd#stan_build_info) for any executable.
+
+### `isCurrent()` {#isCurrent}
+
+```php
+$model->isCurrent(): bool
+```
+
+`false` when the program or its build settings changed after the build. Other failures, such as a stanc error, throw.
+
+### `cmdstanDefaults()` {#cmdstanDefaults}
+
+```php
+$model->cmdstanDefaults(string $method = 'sample'): array
+```
+
+`method` is `sample`, `optimize`, `variational`, `pathfinder`, or `laplace`. Returns the defaults from `<exe> <method> help-all`, under this package's option names (such as `iter_sampling` and `adapt_delta`), in help order.
+
+### `checkSyntax()` {#checkSyntax}
+
+```php
+$model->checkSyntax(
+    bool $pedantic = false,
+    ?array $includePaths = null,
+    array $stancOptions = [],
+    bool $quiet = false,
+): bool
+```
+
+Returns `true`, or throws for invalid Stan. Include paths default to the model's.
+
+### `format()` {#format}
+
+```php
+$model->format(
+    bool $overwriteFile = false,
+    array|bool $canonicalize = false,
+    bool $backup = true,
+    ?int $maxLineLength = null,
+    bool $quiet = false,
+): string
+```
+
+Returns the formatted program, with `format_stan_file()`'s options. After `overwriteFile: true`, create the model again to use the rewritten file.
+
+### `exposeFunctions()`, `functions()` {#exposeFunctions}
+
+[]{#functions}
+
+```php
+$model->exposeFunctions(
+    ?float $timeout = null,
+    bool $quiet = false,
+): StanFunctions
+$model->functions(): StanFunctions
+```
+
+`exposeFunctions()` compiles the functions into a library called through PHP FFI and returns a [`StanFunctions`](api-helpers.qmd#StanFunctions). `functions()` returns it afterwards and throws before `exposeFunctions()`. Needs the FFI extension. [Log density and model methods](log-density.qmd) gives examples.
+
+## Running a model {#running-a-model}
+
+Each method takes PHP named arguments or one associative options array. An option left out or `null` uses the installed CmdStan's default. Every `data` option accepts an array, a JSON file, a `StanData`, or a [table](api-data-frames.qmd#data-in).
+
+### `sample()` {#sample}
+
+```php
+$model->sample(mixed ...$options): CmdStanMCMC
+```
+
+Returns a `CmdStanMCMC`. Options are named arguments or one associative array, and unknown options throw. [Options](api-options.qmd#method-specific-options) lists them, and [MCMC sampling](mcmc.qmd) explains them.
+
+```php
+$fit = $model->sample(data: $data, seed: 123, chains: 4);
+```
+
+### `sampleMpi()` {#sampleMpi}
+
+```php
+$model->sampleMpi(
+    string $mpiCmd = 'mpiexec',
+    array $mpiArgs = [],
+    mixed ...$options,
+): CmdStanMCMC
+```
+
+Returns a `CmdStanMCMC`. Takes the sampling options, defaults to one chain, and runs chains one after another. An associative `mpiArgs` such as `['n' => 4]` becomes `-n 4`, and a list is passed as literal arguments. Compile with `['STAN_MPI' => true, 'CXX' => 'mpicxx', 'TBB_CXX_TYPE' => 'gcc']` and install an MPI runtime. The launch command is unit-tested, but no run on a real MPI cluster has been tested.
+
+### `optimize()` {#optimize}
+
+```php
+$model->optimize(mixed ...$options): CmdStanMLE
+```
+
+Returns a `CmdStanMLE`. [Optimization](optimization.qmd) explains the options.
+
+### `laplace()` {#laplace}
+
+```php
+$model->laplace(mixed ...$options): CmdStanLaplace
+```
+
+Returns a `CmdStanLaplace`. `mode` is an optimization fit, a CSV or JSON file, or `null` to run `optimize()` first with `opt_args`. `jacobian` defaults to `true`.
+
+### `variational()` {#variational}
+
+```php
+$model->variational(mixed ...$options): CmdStanVB
+```
+
+Returns a `CmdStanVB`. [Variational inference](variational.qmd) explains the options.
+
+### `pathfinder()` {#pathfinder}
+
+```php
+$model->pathfinder(mixed ...$options): CmdStanPathfinder
+```
+
+Returns a `CmdStanPathfinder`.
+
+### `generateQuantities()` {#generateQuantities}
+
+```php
+$model->generateQuantities(
+    CmdStanFit|array|string $fittedParams,
+    mixed ...$options,
+): CmdStanGQ
+```
+
+Returns a `CmdStanGQ`. `fittedParams` is an MCMC fit, an optimization, Laplace, variational, or Pathfinder fit (its draws are written as one sample-style CSV file, as in CmdStanR 1.0), or a list of CmdStan CSV files. [Generated quantities](generated-quantities.qmd) gives examples.
+
+### `diagnose()` {#diagnose}
+
+```php
+$model->diagnose(mixed ...$options): CmdStanDiagnose
+```
+
+Returns a `CmdStanDiagnose`. `epsilon` and `error` set the finite-difference step and tolerance.
+
+### `logProb()` {#logProb}
+
+```php
+$model->logProb(mixed ...$options): CmdStanFit
+```
+
+Returns a `CmdStanFit` with the log density and gradient at the given parameter values. Give exactly one of `unconstrained_params` and `constrained_params`, and optionally `jacobian`. For in-process evaluation, use the fit's [model methods](api-fits.qmd#model-methods-1).

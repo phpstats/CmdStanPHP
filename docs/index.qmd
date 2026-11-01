@@ -75,3 +75,10 @@ theta     0.257 0.124 0.080 0.485 1.001     1232
 - Figures: bayesplot's diagnostic plots as text, Vega-Lite, HTML, SVG, or PNG
 
 [Compatibility with CmdStanR](compatibility.qmd) lists the differences from CmdStanR and the features it does not implement.
+
+## Documentation
+
+- [Getting started](getting-started.qmd): fit a first model and check the result.
+- Guides: [compiling](compiling.qmd), [MCMC](mcmc.qmd), [optimization and Laplace](optimization.qmd), [ADVI and Pathfinder](variational.qmd), [generated quantities](generated-quantities.qmd), [draws and summaries](draws.qmd), [model methods](log-density.qmd), [LOO and WAIC](loo.qmd), and [figures](figures.qmd).
+- [Functions and methods](api.qmd): every function and every model and fit method, with links to their reference entries.
+- [Examples](examples/sample.qmd): complete worked examples.

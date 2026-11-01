@@ -74,6 +74,10 @@ theta     0.257 0.124 0.080 0.485 1.001     1232
 
 [Getting started](https://cmdstanphp.phpstats.org/docs/getting-started) explains the output and the convergence checks.
 
+## Documentation
+
+The [documentation](https://cmdstanphp.phpstats.org/docs) has guides, worked examples, and [Functions and methods](https://cmdstanphp.phpstats.org/docs/api), an index of every function and every model and fit method.
+
 ## Compatibility
 
 CmdStanPHP does not implement every CmdStanR feature. The [compatibility page](https://cmdstanphp.phpstats.org/docs/compatibility) maps CmdStanR's names to CmdStanPHP's and lists the differences and the missing features. [Verification](https://cmdstanphp.phpstats.org/verification) reports the comparisons with CmdStanR, posterior, loo, and bayesplot.

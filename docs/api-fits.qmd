@@ -1,92 +1,582 @@
 ---
-title: "API: fits"
+title: "Fits"
 ---
 
-Every fitting method returns a fit object. These methods read its draws, summaries, diagnostics, and files.
+Every fitting method returns a fit: `CmdStanMCMC`, `CmdStanMLE`, `CmdStanVB`, `CmdStanLaplace`, `CmdStanPathfinder`, `CmdStanGQ`, or `CmdStanDiagnose`, all extending `CmdStanFit`. Methods are camelCase versions of CmdStanR's.
 
-[Draws, summaries, and saving fits](draws.qmd) explains formats, summaries, and saving.
+A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that `draws()`, `summary()`, and the diagnostics use. Each read of new columns passes over the files again, so request variables together. Until `materialize()`, the fit needs its CSV files.
 
-## Draws and summaries
+## Draws and summaries {#draws-and-summaries}
 
-| Method | Result |
-| --- | --- |
-| `draws(variables: null, format: null, incWarmup: false)` | Draws in `draws_array`, `draws_matrix`, `draws_df`, `draws_list`, or `draws_rvars` format |
-| `samplerDiagnostics(format: null, incWarmup: false)` | Sampler columns ending in `__`, except `lp__` |
-| `summary(variables: null, probs: [0.05, 0.95], measures: [])` | One row per variable |
-| `drawsColumns(variables: null, incWarmup: false)`, `summaryColumns(...)` | The same as column arrays. See [data frames](api-data-frames.qmd#draws-and-summaries-out). |
-| `drawsTable(...)`, `summaryTable(...)` | The same as a `Phibble\DataFrame` |
-| `print(variables: null, maxRows: null)` | Prints summary JSON for at most `cmdstanr_max_rows` variables |
-| `lp()` | `lp__` by iteration and chain |
-| `cmdstanSummary()` | CmdStan's `stansummary` text |
+### `draws()` {#draws}
 
-A fit reads its CSV metadata and checks every row when it is created, then reads only the columns that `draws()`, `summary()`, and the diagnostics use, as packed doubles. Each read of new columns passes over the files again, so request variables together. Until `materialize()`, the fit needs its CSV files.
+```php
+$fit->draws(
+    array|string|null $variables = null,
+    ?string $format = null,
+    bool $incWarmup = false,
+): array
+```
 
-## Diagnostics and run information
+| Format | Shape |
+|---|---|
+| `draws_array` | `[iteration][chain][variable => value]`. Default for MCMC and generated quantities fits. Chains must have equal lengths. |
+| `draws_matrix` | `[draw][variable => value]`, chain after chain. Default for other fits. |
+| `draws_df` | `draws_matrix` rows plus one-based `.chain`, `.iteration`, and `.draw` |
+| `draws_list` | `[chain][variable => list of values]`, in the requested variable order |
+| `draws_rvars` | `[base name => ['dims', 'nchains', 'ndraws', 'draws']]` |
 
-| Method | Result |
-| --- | --- |
-| `diagnosticSummary()` | Per-chain `num_divergent`, `num_max_treedepth`, and `ebfmi` |
-| `checkDiagnostics(checks: ['divergences', 'treedepth', 'ebfmi'])`, `diagnosticWarnings()` | Runs the checks, or returns their messages |
-| `cmdstanDiagnose()` | The text from CmdStan's `diagnose` utility |
-| `metadata()`, `chainMetadata()` | CSV metadata, merged or per chain |
-| `variables()`, `numChains()`, `numDrawsSampling()`, `numDrawsWarmup()`, `numProcs()` | Counts and names from the CSV files |
-| `stepSize()`, `invMetric(matrix: true)` | Adaptation results, one per chain |
-| `time()` | Warmup, sampling, and total time per chain, when available |
-| `init()` | The initial values each process used |
-| `output()`, `returnCodes()`, `command()` | Console output, exit status, and command line of each process. Imported fits have none of these. `command()` leaves out `STAN_NUM_THREADS` and an MPI launcher. |
-| `code()` | The Stan program. Imported fits have none. |
+A base name such as `beta` selects every element, and `null` selects every variable except sampler columns ending in `__`. Unknown names throw. A `null` format uses the `cmdstanr_draws_format` option, else the default above. Warmup draws need `save_warmup: true` and `incWarmup: true`. [Draws, summaries, and saving fits](draws.qmd) gives examples.
 
-## Files and saving
+### `samplerDiagnostics()` {#samplerDiagnostics}
 
-| Method | Result |
-| --- | --- |
-| `outputFiles()`, `latentDynamicsFiles()`, `profileFiles()` | File paths. The latent-dynamics and profile accessors throw when there are no such files. `includeFailed` is accepted for CmdStanR compatibility. |
-| `profiles()` | Parsed profiling data |
-| `dataFile()`, `configFiles()`, `metricFiles()` | Paths. An imported fit uses the data file recorded in the CSV when it still exists. |
-| `cmdstanConfig()`, `metric()` | The decoded configuration and metric JSON |
-| `saveOutputFiles()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveDataFile()`, `saveConfigFiles()`, `saveMetricFiles()` | Saved paths. Each takes `dir: '.', basename: null, timestamp: true, random: true`, and the first two also take `compress`. |
-| `materialize()` | Reads the draws, initial values, and profiles into memory |
-| `saveObject(file)` | Materializes and serializes the fit, with MCMC summary statistics |
+```php
+$fit->samplerDiagnostics(
+    ?string $format = null,
+    bool $incWarmup = false,
+): array
+```
+
+The columns ending in `__` other than `lp__`, in the same formats as `draws()`.
+
+### `summary()` {#summary}
+
+```php
+$fit->summary(
+    array|string|null $variables = null,
+    array $probs = [0.05, 0.95],
+    array $measures = [],
+): array
+```
+
+Without `measures`, returns `mean`, `median`, `sd`, `mad`, the quantiles named after `probs` (`q5` and `q95` by default), `rhat`, `ess_bulk`, `ess_tail`, and `mcse_mean`. CmdStan's `stansummary` computes `rhat`, `ess_bulk`, and `mcse_mean`, and `ess_tail` is computed in PHP. With `measures`, the summary follows posterior's `summarise_draws()` and is computed in PHP: named measures, the groups `default_summary_measures`, `default_convergence_measures`, and `default_mcse_measures`, or callables with string keys. Convergence columns are `NAN` for fits other than MCMC and for chains with fewer than four draws. [Summaries](draws.qmd#summaries) lists the measures.
+
+### `drawsColumns()`, `summaryColumns()` {#drawsColumns}
+
+[]{#summaryColumns}
+
+```php
+$fit->drawsColumns(
+    array|string|null $variables = null,
+    bool $incWarmup = false,
+): array
+$fit->summaryColumns(
+    array|string|null $variables = null,
+    array $probs = [0.05, 0.95],
+    array $measures = [],
+): array
+```
+
+`drawsColumns()` returns one list per variable element, such as `beta[2]`, then one-based `.chain`, `.iteration`, and `.draw` columns, like posterior's `as_draws_df()`. `summaryColumns()` returns `variable` and one column per measure. Neither needs another package.
+
+### `drawsTable()`, `summaryTable()` {#drawsTable}
+
+[]{#summaryTable}
+
+```php
+$fit->drawsTable(
+    array|string|null $variables = null,
+    bool $incWarmup = false,
+): object
+$fit->summaryTable(
+    array|string|null $variables = null,
+    array $probs = [0.05, 0.95],
+    array $measures = [],
+): object
+```
+
+The column arrays above as a `Phibble\DataFrame`. Needs `phpstats/phibble`, which requires PHP 8.3 or later, and throws a `RuntimeException` when it is not installed.
+
+### `print()` {#print}
+
+```php
+$fit->print(
+    array|string|null $variables = null,
+    ?int $maxRows = null,
+): void
+```
+
+Prints at most `maxRows` variables, by default the `cmdstanr_max_rows` option, else 10.
+
+### `lp()` {#lp}
+
+```php
+$fit->lp(): array|float
+```
+
+Returns `[iteration][chain]` values of `lp__`. Optimization and diagnose fits return one float: see [`CmdStanMLE::lp()`](#mle-lp) and [`CmdStanDiagnose::lp()`](#diagnose-lp).
+
+### `cmdstanSummary()` {#cmdstanSummary}
+
+```php
+$fit->cmdstanSummary(): string
+```
+
+Returns `stansummary`'s text for the output files. Compressed files are decompressed to temporary copies first.
+
+## Diagnostics and run information {#diagnostics-and-run-information}
+
+### `diagnosticSummary()` {#diagnosticSummary}
+
+```php
+$fit->diagnosticSummary(): array
+```
+
+Returns `num_divergent`, `num_max_treedepth`, and `ebfmi`, each with one value per chain.
+
+### `checkDiagnostics()`, `diagnosticWarnings()` {#checkDiagnostics}
+
+[]{#diagnosticWarnings}
+
+```php
+$fit->checkDiagnostics(
+    array $checks = ['divergences', 'treedepth', 'ebfmi'],
+): array
+$fit->diagnosticWarnings(): array
+```
+
+`checkDiagnostics()` runs the named checks (`divergences`, `treedepth`, and `ebfmi`) and returns their messages. `diagnosticWarnings()` returns the messages from the checks run when the fit was created. Messages are returned, not raised as PHP warnings.
+
+### `cmdstanDiagnose()` {#cmdstanDiagnose}
+
+```php
+$fit->cmdstanDiagnose(): string
+```
+
+Returns the text of CmdStan's `bin/diagnose` for the output files.
+
+### `metadata()`, `chainMetadata()` {#metadata}
+
+[]{#chainMetadata}
+
+```php
+$fit->metadata(): array
+$fit->chainMetadata(): array
+```
+
+`metadata()` returns the first chain's metadata with `id`, `seed`, `init`, `step_size`, `step_size_adaptation`, and `fitted_params` collected across chains (`seed` is a scalar when shared), `time` as per-chain rows, and missing keys filled from the configuration JSON. `chainMetadata()` returns each chain's metadata, including CmdStan's raw argument keys.
+
+### `variables()` {#variables}
+
+```php
+$fit->variables(): array
+```
+
+Returns the column names, in CSV order.
+
+### `numChains()`, `numDrawsSampling()`, `numDrawsWarmup()`, `numProcs()` {#numChains}
+
+[]{#numDrawsSampling} []{#numDrawsWarmup} []{#numProcs}
+
+```php
+$fit->numChains(): int
+$fit->numDrawsSampling(): int
+$fit->numDrawsWarmup(): int
+$fit->numProcs(): int
+```
+
+`numDrawsWarmup()` is 0 unless warmup was saved. `numProcs()` counts CmdStan processes, one per output file.
+
+### `stepSize()`, `invMetric()`, `metric()` {#stepSize}
+
+[]{#invMetric} []{#metric}
+
+```php
+$fit->stepSize(): array
+$fit->invMetric(bool $matrix = true): array
+$fit->metric(): array
+```
+
+`stepSize()` returns one step size per chain. `invMetric()` returns each chain's inverse metric, from `save_metric` JSON when every chain has it, else from the CSV comments. With `matrix: true`, CmdStanR's default, diagonal metrics are expanded to matrices. `metric()` returns the decoded `save_metric` JSON (`stepsize`, `metric_type`, and `inv_metric`) per chain.
+
+### `cmdstanConfig()` {#cmdstanConfig}
+
+```php
+$fit->cmdstanConfig(): array
+```
+
+Returns the decoded `save_cmdstan_config` JSON, one array per process.
+
+### `time()` {#time}
+
+```php
+$fit->time(): array
+```
+
+Returns rows with `chain`, `warmup`, `sampling`, and `total` in seconds. `total` is the process's elapsed time, `null` for imported fits.
+
+### `init()` {#init}
+
+```php
+$fit->init(): array
+```
+
+Read from the init files named in the metadata.
+
+### `output()`, `returnCodes()`, `command()` {#output}
+
+[]{#returnCodes} []{#command}
+
+```php
+$fit->output(): array
+$fit->returnCodes(): array
+$fit->command(): array
+```
+
+Imported fits have none of these. `command()` returns shell-quoted command lines and leaves out `STAN_NUM_THREADS` and an MPI launcher.
+
+### `code()` {#code}
+
+```php
+$fit->code(): string
+```
+
+Throws a `RuntimeException` for fits imported from CSV files.
+
+### `profiles()` {#profiles}
+
+```php
+$fit->profiles(): array
+```
+
+Returns one list of rows per profile CSV file, with numeric values as floats.
+
+## Files and saving {#files-and-saving}
+
+### `outputFiles()`, `latentDynamicsFiles()`, `profileFiles()` {#outputFiles}
+
+[]{#latentDynamicsFiles} []{#profileFiles}
+
+```php
+$fit->outputFiles(bool $includeFailed = false): array
+$fit->latentDynamicsFiles(bool $includeFailed = false): array
+$fit->profileFiles(bool $includeFailed = false): array
+```
+
+The latent-dynamics and profile accessors throw when there are no such files. `includeFailed` is accepted for CmdStanR compatibility and adds nothing, because a failing process throws.
+
+### `dataFile()`, `configFiles()`, `metricFiles()` {#dataFile}
+
+[]{#configFiles} []{#metricFiles}
+
+```php
+$fit->dataFile(): ?string
+$fit->configFiles(bool $includeFailed = false): array
+$fit->metricFiles(bool $includeFailed = false): array
+```
+
+An imported fit uses the data file recorded in the CSV header when it still exists.
+
+### `saveOutputFiles()`, `saveLatentDynamicsFiles()`, `saveProfileFiles()`, `saveDataFile()`, `saveConfigFiles()`, `saveMetricFiles()` {#saveOutputFiles}
+
+[]{#saveLatentDynamicsFiles} []{#saveProfileFiles} []{#saveDataFile} []{#saveConfigFiles} []{#saveMetricFiles}
+
+```php
+$fit->saveOutputFiles(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+    ?string $compress = null,
+): array
+$fit->saveLatentDynamicsFiles(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+    ?string $compress = null,
+): array
+$fit->saveProfileFiles(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+): array
+$fit->saveDataFile(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+): ?string
+$fit->saveConfigFiles(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+): array
+$fit->saveMetricFiles(
+    string $dir = '.',
+    ?string $basename = null,
+    bool $timestamp = true,
+    bool $random = true,
+): array
+```
+
+Returns the saved paths and points the fit at them. Files are named `<basename>[-<YYYYmmddHHMM>][-<id>][-<hex>]`, where `basename` defaults to the model name, `timestamp` adds the date, and `random` adds the suffix. Files the run created are moved. Imported CSV files and the data file are copied. An existing destination throws. `compress` recompresses output and latent-dynamics files.
+
+### `materialize()` {#materialize}
+
+```php
+$fit->materialize(): static
+```
+
+Returns the fit. Afterwards it no longer needs its files.
+
+### `saveObject()` {#saveObject}
+
+```php
+$fit->saveObject(string $file): string
+```
+
+Materializes the fit, computes MCMC summary statistics, and writes `serialize($fit)`. Returns the file path. Read it with `unserialize(file_get_contents($file))`, and unserialize only files you trust. Running generated quantities from a restored fit still needs its CSV files.
 
 ## Model methods {#model-methods-1}
 
-These need PHP's FFI extension. The first call compiles a shared library for the fit's model and data, and `initModelMethods(data: null, seed: 1, verbose: false, quiet: false, model: null)` does this explicitly. `data` binds other data, for example when a reloaded fit's data file is gone, and `dataFile()` then points to it. Imported CSV fits must pass `model:`, and a model from `exeFile` alone has no program to build them from. See [Log density and model methods](log-density.qmd).
+These need PHP's FFI extension. The first call compiles a shared library for the fit's model and data. A model from `exeFile` alone has no program to build them from. [Log density and model methods](log-density.qmd) gives examples. `ModelMethods` and `StanFunctions` can also be used directly with a Stan file: see [Helper classes](api-helpers.qmd).
 
-| Method | Result |
-| --- | --- |
-| `logProb(unconstrainedVariables, jacobian: true)` | The log density, with constants dropped |
-| `gradLogProb(...)` | `['log_prob' => float, 'gradient' => list]` |
-| `hessian(...)` | `['log_prob' => float, 'grad_log_prob' => list, 'hessian' => rows]` |
-| `unconstrainVariables(variables)` | A flat unconstrained list from parameter values keyed by name, shaped as `constrainVariables()` returns them |
-| `unconstrainDraws(files: null, draws: null, format: null, incWarmup: false)` | The fit's draws, other CSV files, or `draws_df` rows on the unconstrained scale |
-| `constrainVariables(unconstrainedVariables, transformedParameters: true, generatedQuantities: true)` | Variables keyed by name as nested arrays, with tuples as lists and complex values as `[re, im]` |
-| `exposeFunctions(timeout: null)`, `functions()` | The model's user-defined functions |
+### `initModelMethods()` {#initModelMethods}
 
-`CmdStan\ModelMethods` and `CmdStan\StanFunctions` can also be used directly with a Stan file.
+```php
+$fit->initModelMethods(
+    object|array|string|null $data = null,
+    int $seed = 1,
+    bool $verbose = false,
+    bool $quiet = false,
+    ?CmdStanModel $model = null,
+): void
+```
 
-## Methods of specific fit types
+Compiles (or reuses) a shared library for the model and binds it to `data`, by default the fit's data. The first model-method call does this implicitly. Pass `data` when a reloaded fit's data file is gone, and `dataFile()` then points to it. Imported CSV fits must pass `model`.
 
-| Fit | Methods |
-| --- | --- |
-| `CmdStanMCMC` | `loo(variables: 'log_lik', rEff: false, momentMatch: false, maxIters: 30, kThreshold: null, split: true, cov: true)` and `waic(variables: 'log_lik')`. See [LOO and WAIC](loo.qmd). |
-| `CmdStanMLE` | `mle()` and `optimizedParams()` (the estimates without `lp__`), and `lp()`. Its `summary()` returns `variable` and `estimate` rows. |
-| `CmdStanVB` | `variationalMean()`, and `lpApprox()`, the approximation's log density at each draw |
-| `CmdStanLaplace` | `mode()` and `lpApprox()` |
-| `CmdStanPathfinder` | `lpApprox()`, and `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, and `singlePathDiagnostics()` with `save_single_paths: true`. Its variables include `lp_approx__` and `path__`. |
-| `CmdStanGQ` | `fittedParamsFiles()` |
-| `CmdStanDiagnose` | `gradients()`, the gradient check's console output |
+### `logProb()` {#logProb}
 
-## Statistics helpers
+```php
+$fit->logProb(
+    array $unconstrainedVariables,
+    bool $jacobian = true,
+): float
+```
 
-These classes work on plain draws arrays, and their docblocks describe the shapes.
+Constants are dropped. `jacobian: false` leaves out the Jacobian adjustment.
 
-| Class | Methods |
-| --- | --- |
-| `Figure` | `ascii()`, `vegaLite()`, `json()`, `html()`, `svg()`, `png()`. Casting to a string gives the ASCII form. |
-| `Plot` | The figures, plus `bandwidth()`, `density()`, `autocorrelation()`, and `ranks()` |
-| `Psis` | `paretoSmooth()`, `paretoKhat()`, `psis()`, `gpdfit()` |
-| `Loo` | `loo()`, `waic()`, `relativeEff()` |
-| `MomentMatch` | `loo()` on unconstrained draws with log-density and log-likelihood callbacks, and `fromFit()` |
-| `DrawKernels` | Detection of and wrappers for the phit draw kernels |
-| `Summary` | `summarise()` and each posterior measure |
-| `Rvars`, `Inits` | `draws_rvars` helpers, and `fromFit()`, `fromDraws()`, `nest()`, and `validate()` for initial values |
+### `gradLogProb()` {#gradLogProb}
+
+```php
+$fit->gradLogProb(
+    array $unconstrainedVariables,
+    bool $jacobian = true,
+): array
+```
+
+Returns `['log_prob' => float, 'gradient' => list]`.
+
+### `hessian()` {#hessian}
+
+```php
+$fit->hessian(
+    array $unconstrainedVariables,
+    bool $jacobian = true,
+): array
+```
+
+Returns `['log_prob' => float, 'grad_log_prob' => list, 'hessian' => rows]`. The Hessian uses finite differences of autodiff gradients, as in CmdStanR.
+
+### `unconstrainVariables()` {#unconstrainVariables}
+
+```php
+$fit->unconstrainVariables(array $variables): array
+```
+
+`variables` is keyed by parameter name and shaped as `constrainVariables()` returns them. Returns a flat list.
+
+### `unconstrainDraws()` {#unconstrainDraws}
+
+```php
+$fit->unconstrainDraws(
+    ?array $files = null,
+    ?array $draws = null,
+    ?string $format = null,
+    bool $incWarmup = false,
+): array
+```
+
+Unconstrains the fit's draws, the draws in other CmdStan CSV `files`, or `draws_df` or `draws_matrix` rows given as `draws`, in a draws format.
+
+### `constrainVariables()` {#constrainVariables}
+
+```php
+$fit->constrainVariables(
+    array $unconstrainedVariables,
+    bool $transformedParameters = true,
+    bool $generatedQuantities = true,
+): array
+```
+
+Returns variables keyed by name as nested arrays, with tuples as lists and complex values as `[re, im]`. Transformed parameters and generated quantities are included unless turned off.
+
+### `exposeFunctions()`, `functions()` {#exposeFunctions}
+
+[]{#functions}
+
+```php
+$fit->exposeFunctions(?float $timeout = null): StanFunctions
+$fit->functions(): StanFunctions
+```
+
+As [`CmdStanModel::exposeFunctions()`](api-models.qmd#exposeFunctions) for the model that produced the fit.
+
+## Methods of specific fit types {#methods-of-specific-fit-types}
+
+### `loo()` {#loo}
+
+```php
+$fit->loo(
+    string $variables = 'log_lik',
+    array|float|bool|null $rEff = false,
+    bool $momentMatch = false,
+    int $maxIters = 30,
+    ?float $kThreshold = null,
+    bool $split = true,
+    bool $cov = true,
+): array
+```
+
+`CmdStanMCMC` only. Uses the `log_lik` variable by default. `rEff: true` computes relative efficiencies as CmdStanR does. `momentMatch: true` needs the phit extension and model methods, and `maxIters`, `kThreshold`, `split`, and `cov` are `loo_moment_match()`'s options. [LOO and WAIC](loo.qmd) describes the result.
+
+### `waic()` {#waic}
+
+```php
+$fit->waic(string $variables = 'log_lik'): array
+```
+
+`CmdStanMCMC` only. Uses the `log_lik` variable by default. Adds a message to `warnings` when any pointwise `p_waic` exceeds 0.4.
+
+### `mle()`, `optimizedParams()` {#mle}
+
+[]{#optimizedParams}
+
+```php
+$fit->mle(): array
+$fit->optimizedParams(): array
+```
+
+`CmdStanMLE` only. Returns the estimates keyed by variable name. `summary()` on this fit returns `variable` and `estimate` rows and rejects `measures`.
+
+### `lp()` {#mle-lp}
+
+```php
+$fit->lp(): float
+```
+
+`CmdStanMLE` only. The log density at the optimum, `NAN` when missing.
+
+### `variationalMean()` {#variationalMean}
+
+```php
+$fit->variationalMean(): array
+```
+
+`CmdStanVB` only. Returns values keyed by variable name.
+
+### `lpApprox()` {#lpApprox}
+
+```php
+$fit->lpApprox(): array
+```
+
+`CmdStanVB`, `CmdStanLaplace`, and `CmdStanPathfinder`. The approximation's log density at each draw, as one list in draw order.
+
+### `mode()` {#mode}
+
+```php
+$fit->mode(): array
+```
+
+`CmdStanLaplace` only. Returns values keyed by variable name.
+
+### `singlePathFiles()`, `singlePathJsonFiles()`, `singlePathFits()`, `singlePathDiagnostics()` {#singlePathFiles}
+
+[]{#singlePathJsonFiles} []{#singlePathFits} []{#singlePathDiagnostics}
+
+```php
+$fit->singlePathFiles(): array
+$fit->singlePathJsonFiles(): array
+$fit->singlePathFits(): array
+$fit->singlePathDiagnostics(): array
+```
+
+`CmdStanPathfinder` only. Available with `save_single_paths: true`. The files are CmdStan's `<output>_path_<n>.csv` and `.json`, in path order. `singlePathFits()` returns one `CmdStanPathfinder` per path, and `singlePathDiagnostics()` the decoded JSON. The fit's variables include `lp_approx__` and `path__`.
+
+### `fittedParamsFiles()` {#fittedParamsFiles}
+
+```php
+$fit->fittedParamsFiles(): array
+```
+
+`CmdStanGQ` only. The files generated quantities ran on.
+
+### `gradients()` {#gradients}
+
+```php
+$fit->gradients(): string
+```
+
+`CmdStanDiagnose` only. The console output of CmdStan's `diagnose` method.
+
+### `lp()` {#diagnose-lp}
+
+```php
+$fit->lp(): float
+```
+
+`CmdStanDiagnose` only. The log density at the checked point.
+
+## Reading CSV files {#reading-csv-files}
+
+Static methods of `CmdStanFit`.
+
+### `CmdStanFit::fromCsv()` {#fromCsv}
+
+```php
+CmdStanFit::fromCsv(
+    array $files,
+    ?array $variables = null,
+    bool $checkDiagnostics = true,
+    ?string $format = null,
+): self
+```
+
+The static form of [`as_cmdstan_fit()`](api-functions.qmd#as_cmdstan_fit). Returns the fit class for the files' method.
+
+### `CmdStanFit::readCmdStanCsv()` {#readCmdStanCsv}
+
+```php
+CmdStanFit::readCmdStanCsv(
+    array $files,
+    array|string|null $variables = null,
+    array|string|null $samplerDiagnostics = null,
+    ?string $format = null,
+): array
+```
+
+The static form of [`read_cmdstan_csv_list()`](api-functions.qmd#read_cmdstan_csv_list).
+
+### `CmdStanFit::classForMethod()` {#classForMethod}
+
+```php
+CmdStanFit::classForMethod(string $method): string
+```
+
+The fit class name for a CmdStan method name, such as `CmdStanMCMC` for `sample`.
+
+### `CmdStanFit::quantile()` {#quantile}
+
+```php
+CmdStanFit::quantile(array $values, float $p): float
+```
+
+The `p` quantile of `values` with R's type 7 rule. `NAN` for an empty list.
+
+## Statistics helpers {#statistics-helpers}
+
+`Figure`, `Plot`, `Psis`, `Loo`, `MomentMatch`, `DrawKernels`, `Summary`, `Rvars`, `Inits`, `ModelMethods`, and `StanFunctions` are on [Helper classes](api-helpers.qmd).
