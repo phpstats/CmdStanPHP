@@ -1,5 +1,5 @@
 ---
-title: "Compile, sample, and summarize a Stan model"
+title: "Fit a Stan model with MCMC"
 ---
 
 Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler's warnings, and draws of `tau`.

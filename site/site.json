@@ -112,7 +112,7 @@
                 "path": "api.qmd"
             },
             {
-                "title": "Compile, sample, and summarize a Stan model",
+                "title": "Fit a Stan model with MCMC",
                 "path": "examples/sample.qmd"
             },
             {
