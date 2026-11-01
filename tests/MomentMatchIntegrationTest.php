@@ -94,16 +94,25 @@ final class MomentMatchIntegrationTest extends TestCase
         copy($model->stanFile(), $options['output_dir'].'/regression.stan');
         Process::run(['Rscript', __DIR__.'/fixtures/moment_match_cmdstanr.R', $options['output_dir'].'/regression.stan', $this->dir.'/options.json', $this->dir.'/reference.json'], env: ['CMDSTAN' => CmdStan::path()], timeout: 900);
         $ref = json_decode(file_get_contents($this->dir.'/reference.json'), true, flags: JSON_THROW_ON_ERROR);
-        self::assertEqualsWithDelta($ref['lp'], array_column($fit->draws('lp__', 'draws_matrix'), 'lp__'), 1e-12, 'same draws');
+        $case = 'Regression fit, 4 chains × 1,000 draws, vs CmdStanR loo(moment_match = TRUE)';
+        self::near(['moment-matching', $case, 'lp__ draws'], $ref['lp'], array_column($fit->draws('lp__', 'draws_matrix'), 'lp__'), 1e-12, message: 'same draws');
         // loo computes r_eff from exp(log_lik) unshifted; when every value is tiny, posterior's absolute constant check
         // returns NA. ESS is scale invariant, so CmdStanPHP shifts by the maximum and reports a finite value instead.
-        $close = function (mixed $v, float $actual, string $label) { if ($v === 'NA') { self::assertTrue(is_finite($actual), $label); return; } self::assertEqualsWithDelta($v, $actual, 1e-8 * max(1.0, abs($v)), $label); };
-        $compare = function (array $reference, array $actual, array $columns, string $label, array $skip = []) use ($close) {
-            foreach ($columns as $column) { foreach ($reference['pointwise'][$column] as $i => $v) { if (!isset($skip[$i])) { $close($v, $actual['pointwise'][$i][$column], "$label $column [$i]"); } } }
-            foreach ($reference['pareto_k'] as $i => $v) { if (!isset($skip[$i])) { self::assertEqualsWithDelta($v, $actual['diagnostics']['pareto_k'][$i], 1e-8, "$label pareto_k [$i]"); } }
+        // $close compares relatively, |x − r| ≤ 1e-8 × max(1, |r|), and records NA references as excluded.
+        $close = function (array $values, array $actual, string $quantity) use ($case) {
+            $expected = []; $kept = []; $na = 0;
+            foreach ($values as $i => $v) { if ($v === 'NA') { ++$na; self::assertTrue(is_finite($actual[$i]), "$quantity [$i]"); } else { $expected[] = $v; $kept[] = $actual[$i]; } }
+            if ($na > 0) { self::record(['moment-matching', $case, $quantity.' where loo reports NA'], ['rule' => ['kind' => 'excluded'], 'n_compared' => $na, 'status' => 'skipped', 'reason' => 'loo reports NA here; CmdStanPHP must report a finite value, and does.']); }
+            self::near(['moment-matching', $case, $quantity], $expected, $kept, 1e-8, true, $quantity);
+        };
+        $compare = function (array $reference, array $actual, array $columns, string $label, array $skip = []) use ($close, $case) {
+            $keep = fn(array $values) => array_values(array_diff_key($values, $skip));
+            foreach ($columns as $column) { $close($keep($reference['pointwise'][$column]), $keep(array_column($actual['pointwise'], $column)), "$label pointwise $column"); }
+            self::near(['moment-matching', $case, "$label pareto_k"], $keep($reference['pareto_k']), $keep($actual['diagnostics']['pareto_k']), 1e-8, message: "$label pareto_k");
+            if ($skip !== []) { self::record(['moment-matching', $case, "$label observations with scaling or a covariance map"], ['rule' => ['kind' => 'excluded'], 'n_compared' => count($skip), 'status' => 'skipped', 'reason' => 'These use the exact split inverse, where loo 2.10.1 and earlier differ, so they are not compared with loo.']); }
         };
         $compare($ref['unsplit'], $unsplit = $fit->loo(rEff: true, momentMatch: true, split: false), ['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'], 'unsplit');
-        foreach ($ref['unsplit']['n_eff'] as $i => $v) { $close($v, $unsplit['diagnostics']['n_eff'][$i], "unsplit n_eff [$i]"); }
+        $close(array_values($ref['unsplit']['n_eff']), array_values($unsplit['diagnostics']['n_eff']), 'unsplit n_eff');
         // With shifts only, the exact and loo split inverses coincide; mcse and n_eff use the two-half r_eff.
         $split = $fit->loo(rEff: true, momentMatch: true);
         // An observation that also needed scale or covariance steps uses the exact split inverse, where loo 2.10.1 and

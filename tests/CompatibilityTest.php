@@ -31,27 +31,24 @@ final class CompatibilityTest extends TestCase
         $output = $this->dir.'/reference.json';
         Process::run(['Rscript', __DIR__.'/fixtures/reference.R', $method, $model->stanFile(), $model->exeFile(), $config, $output], env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
         $reference = json_decode(file_get_contents($output), true, flags: JSON_THROW_ON_ERROR);
+        $case = $method === 'sample' ? 'sample, 2 chains × '.$iterations.' draws' : $method;
         $draws = $phpFit->draws(format: 'draws_df'); self::assertCount(count($reference['draws']), $draws);
-        foreach ($reference['draws'] as $i => $row) {
-            foreach (['theta', 'lp__'] as $name) {
-                if (isset($row[$name])) { self::assertEqualsWithDelta($row[$name], $draws[$i][$name], 1e-13, $method.' draw '.$i.' '.$name); }
-            }
+        foreach (['theta', 'lp__'] as $name) {
+            $expected = []; $actual = [];
+            foreach ($reference['draws'] as $i => $row) { if (isset($row[$name])) { $expected[] = $row[$name]; $actual[] = $draws[$i][$name]; } }
+            if ($expected !== []) { self::near(['cmdstanr-methods', $case, $name.' draws'], $expected, $actual, 1e-13, message: $method.' '.$name.' draws'); }
         }
         if ($method === 'sample') {
             $diagnostics = $phpFit->diagnosticSummary();
-            foreach (['num_divergent', 'num_max_treedepth', 'ebfmi'] as $name) {
-                foreach ($reference['diagnostics'][$name] as $i => $value) { self::assertEqualsWithDelta($value, $diagnostics[$name][$i], 1e-12, $name); }
-            }
+            foreach (['num_divergent', 'num_max_treedepth', 'ebfmi'] as $name) { self::near(['cmdstanr-methods', $case, $name.' per chain'], $reference['diagnostics'][$name], $diagnostics[$name], 1e-12, message: $name); }
         }
         if (in_array($method, ['variational', 'pathfinder', 'laplace'], true)) {
-            $approx = $phpFit->lpApprox();
-            self::assertCount(count($reference['approx_lp']), $approx);
-            foreach ($reference['approx_lp'] as $i => $value) { self::assertEqualsWithDelta($value, $approx[$i], 1e-13, $method.' approximate lp'); }
+            self::near(['cmdstanr-methods', $case, 'approximate lp'], $reference['approx_lp'], $phpFit->lpApprox(), 1e-13, message: $method.' approximate lp');
         }
         $summary = array_column($phpFit->summary('theta'), null, 'variable')['theta'];
         $refSummary = array_column($reference['summary'], null, 'variable')['theta'];
         foreach ($method === 'optimize' ? ['estimate'] : ($method === 'sample' ? ['mean', 'median', 'sd', 'mad', 'q5', 'q95', 'rhat', 'ess_bulk', 'ess_tail'] : ['mean', 'median', 'sd', 'mad', 'q5', 'q95']) as $name) {
-            if ($refSummary[$name] !== null) { self::assertEqualsWithDelta($refSummary[$name], $summary[$name], in_array($name, ['rhat', 'ess_bulk', 'ess_tail'], true) ? 1e-8 : 1e-12, $method.' summary '.$name); }
+            if ($refSummary[$name] !== null) { self::near(['cmdstanr-methods', $case, 'theta '.$name], $refSummary[$name], $summary[$name], in_array($name, ['rhat', 'ess_bulk', 'ess_tail'], true) ? 1e-8 : 1e-12, message: $method.' summary '.$name); }
         }
     }
     public static function metadataMethods(): array { return [['sample'], ['optimize'], ['variational'], ['pathfinder'], ['laplace']]; }
@@ -64,23 +61,24 @@ final class CompatibilityTest extends TestCase
         $script = 'm <- cmdstanr::read_cmdstan_csv(commandArgs(TRUE)[-1])$metadata; m$time <- NULL; m$stan_variable_sizes <- lapply(m$stan_variable_sizes, as.list); jsonlite::write_json(list(names = names(m), metadata = m[!names(m) %in% c("init", "fitted_params", "profile_file", "file", "data_file", "diagnostic_file", "start_datetime")]), commandArgs(TRUE)[1], digits = NA, auto_unbox = TRUE)';
         Process::run(array_merge(['Rscript', '-e', $script, $this->dir.'/meta.json'], $fit->outputFiles()), env: ['CMDSTAN' => CmdStan::path()], timeout: 120);
         $reference = json_decode(file_get_contents($this->dir.'/meta.json'), true, flags: JSON_THROW_ON_ERROR); $meta = $fit->metadata();
-        self::assertSame([], array_values(array_diff($reference['names'], array_keys($meta), ['time'])), 'CmdStanR metadata keys missing in PHP');
+        $names = array_values(array_diff($reference['names'], ['time']));
+        self::exact(['cmdstanr-metadata', $method, 'metadata keys present'], $names, array_values(array_intersect($names, array_keys($meta))), 'CmdStanR metadata keys missing in PHP');
         foreach ($reference['metadata'] as $key => $value) {
             $actual = $meta[$key];
             if (is_bool($actual)) { $actual = (int)$actual; }
             if ($key === 'id' && count($actual) === 1) { $actual = $actual[0]; }
             if ($key === 'stan_variable_sizes') { $value = array_map(fn($dims) => (array)$dims, $value); }
             if (is_array($actual) && array_is_list($actual) && count($actual) === 1 && !is_array($value)) { $actual = $actual[0]; }
-            self::assertEquals($value, $actual, $method.' metadata '.$key);
+            self::exact(['cmdstanr-metadata', $method, 'metadata values'], $value, $actual, $method.' metadata '.$key, loose: true);
         }
     }
     public function testExampleProgramsAndDataMatchCmdStanR(): void
     {
         foreach (['logistic', 'schools', 'schools_ncp'] as $example) {
             $r = Process::run(['Rscript', '-e', 'cmdstanr::print_example_program("'.$example.'")'])['stdout'];
-            ob_start(); \CmdStan\print_example_program($example); self::assertSame($r, ob_get_clean(), $example);
+            ob_start(); \CmdStan\print_example_program($example); self::exact(['cmdstanr-metadata', 'example '.$example, 'program text'], $r, ob_get_clean(), $example);
             $data = Process::run(['Rscript', '-e', 'cat(readLines(system.file("'.$example.'.data.json", package = "cmdstanr")), sep = "\n")'])['stdout'];
-            self::assertSame(json_decode($data, true), json_decode(file_get_contents(__DIR__.'/../resources/examples/'.$example.'.data.json'), true), $example);
+            self::exact(['cmdstanr-metadata', 'example '.$example, 'data'], json_decode($data, true), json_decode(file_get_contents(__DIR__.'/../resources/examples/'.$example.'.data.json'), true), $example);
         }
     }
     /**
@@ -103,23 +101,23 @@ final class CompatibilityTest extends TestCase
         $reference = json_decode(file_get_contents($this->dir.'/output.json'), true, flags: JSON_THROW_ON_ERROR);
         $matrix = $fit->draws('shoe_latent', 'draws_matrix');
         self::assertSame(array_map(fn($i) => 'shoe_latent['.$i.']', range(1, 12)), array_keys($matrix[0]));
-        $all = $fit->draws($variables, 'draws_matrix'); self::assertSame($reference['columns'], array_keys($all[0])); self::assertCount(count($reference['matrix']), $all);
-        foreach ($reference['matrix'] as $i => $row) { foreach (array_values($all[$i]) as $j => $value) { self::assertEqualsWithDelta($row[$j], $value, 1e-13 * max(1.0, abs($value)), 'draw '.$i); } }
+        $case = 'shoe_latent model, 4 chains × 1,000 draws';
+        $all = $fit->draws($variables, 'draws_matrix'); self::exact(['posterior-summaries', $case, 'variable names'], $reference['columns'], array_keys($all[0])); self::assertCount(count($reference['matrix']), $all);
+        self::near(['posterior-summaries', $case, 'draws passed to R'], $reference['matrix'], array_map('array_values', $all), 1e-13, true, 'draws');
         $quantiles = array_map(fn($p) => 'q'.Summary::percent($p), $probs);
         $posterior = array_column($fit->summary($variables, $probs, ['mean', 'median', 'sd', 'mad', 'quantile2', 'rhat', 'ess_bulk', 'ess_tail']), null, 'variable');
         $default = array_column($fit->summary($variables, $probs), null, 'variable');
         self::assertCount(14, $reference['summary']);
         foreach ($reference['summary'] as $row) {
             foreach (array_merge(['mean', 'median', 'sd', 'mad', 'rhat', 'ess_bulk', 'ess_tail'], $quantiles) as $name) {
-                $tolerance = 1e-8 * max(1.0, abs($row[$name]));
-                self::assertEqualsWithDelta($row[$name], $posterior[$row['variable']][$name], $tolerance, 'measures '.$row['variable'].' '.$name);
-                self::assertEqualsWithDelta($row[$name], $default[$row['variable']][$name], $tolerance, 'default '.$row['variable'].' '.$name);
+                self::near(['posterior-summaries', $case, $name.', with measures'], $row[$name], $posterior[$row['variable']][$name], 1e-8, true, 'measures '.$row['variable'].' '.$name);
+                self::near(['posterior-summaries', $case, $name.', default summary'], $row[$name], $default[$row['variable']][$name], 1e-8, true, 'default '.$row['variable'].' '.$name);
             }
         }
         $diagnostics = $fit->diagnosticSummary();
         foreach (['num_divergent', 'num_max_treedepth', 'ebfmi'] as $name) {
             self::assertCount(4, $reference['diagnostics'][$name]);
-            foreach ($reference['diagnostics'][$name] as $i => $value) { self::assertEqualsWithDelta($value, $diagnostics[$name][$i], 1e-12, $name.' chain '.($i + 1)); }
+            self::near(['posterior-summaries', $case, $name.' per chain, against diagnostic_summary()'], $reference['diagnostics'][$name], $diagnostics[$name], 1e-12, message: $name);
         }
     }
 }

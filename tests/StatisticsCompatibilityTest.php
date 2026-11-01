@@ -52,16 +52,10 @@ final class StatisticsCompatibilityTest extends TestCase
         $columns = fn(array $rows) => array_map(fn($name) => array_column($rows, $name), array_combine(array_keys($rows[0]), array_keys($rows[0])));
         return ['chains' => $chains, 'probs' => [0.025, 0.5, 0.975], 'smooth' => $smooth, 'smooth_small' => $small, 'log_weights' => $logWeights, 'gpd' => $gpd, 'log_lik' => $logLik, 'rvars' => $rvars, 'parameters' => $parameters, 'init_draws' => $columns([$row(1.0), $row(2.0)]), 'init_one' => $columns([$row(1.5)])];
     }
-    private static function close(mixed $expected, mixed $actual, string $message, float $tolerance = 1e-8): void
+    /** Relative comparison: |x − r| ≤ tolerance × max(1, |r|), with R's NA as NAN. $at is [topic, case, quantity]. */
+    private static function close(array $at, mixed $expected, mixed $actual, string $message, float $tolerance = 1e-8): void
     {
-        if ($expected === null) { self::assertTrue(is_nan($actual), $message.': expected NA, got '.var_export($actual, true)); return; }
-        if (is_array($expected)) {
-            self::assertIsArray($actual, $message); self::assertCount(count($expected), $actual, $message);
-            foreach (array_values($expected) as $i => $value) { self::close($value, array_values($actual)[$i], $message.'['.$i.']', $tolerance); }
-            return;
-        }
-        if (is_infinite((float)$actual) && is_string($expected)) { self::assertSame($expected, $actual > 0 ? 'Inf' : '-Inf', $message); return; }
-        self::assertEqualsWithDelta((float)$expected, (float)$actual, $tolerance * max(1.0, abs((float)$expected)), $message);
+        self::near($at, is_array($expected) ? array_values($expected) : $expected, is_array($actual) ? array_values($actual) : $actual, $tolerance, true, $message);
     }
     private function drawsList(): array
     {
@@ -69,67 +63,68 @@ final class StatisticsCompatibilityTest extends TestCase
         foreach (self::$input['chains'] as $name => $chains) { foreach ($chains as $c => $values) { $out[$c][$name] = $values; } }
         return $out;
     }
-    private function compareSummary(array $reference, array $actual, string $label): void
+    private function compareSummary(array $reference, array $actual, string $label, string $case): void
     {
         $actual = array_column($actual, null, 'variable');
         foreach ($reference as $row) {
             foreach ($row as $column => $value) {
                 if ($column === 'variable') { continue; }
                 self::assertArrayHasKey($column, $actual[$row['variable']], $label.' column '.$column);
-                self::close($value, $actual[$row['variable']][$column], $label.' '.$row['variable'].' '.$column);
+                self::close(['posterior-summaries', $case, $column], $value, $actual[$row['variable']][$column], $label.' '.$row['variable'].' '.$column);
             }
         }
     }
     public function testSummaryMeasuresMatchPosterior(): void
     {
-        $this->compareSummary(self::$reference['summary_default'], Summary::summarise($this->drawsList()), 'default');
+        $this->compareSummary(self::$reference['summary_default'], Summary::summarise($this->drawsList()), 'default', 'Fixed draws, default measures');
         $measures = ['default_summary_measures', 'default_convergence_measures', 'default_mcse_measures', 'rhat_basic', 'ess_basic', 'ess_mean', 'ess_sd', 'ess_median', 'ess_quantile'];
-        $all = Summary::summarise($this->drawsList(), $measures); $this->compareSummary(self::$reference['summary_all'], $all, 'all');
-        self::assertSame(array_keys(self::$reference['summary_all'][0]), array_keys($all[0]));
-        $this->compareSummary(self::$reference['summary_probs'], Summary::summarise($this->drawsList(), ['quantile2', 'mcse_quantile', 'ess_quantile'], self::$input['probs']), 'probs');
+        $all = Summary::summarise($this->drawsList(), $measures); $this->compareSummary(self::$reference['summary_all'], $all, 'all', 'Fixed draws, every named measure');
+        self::exact(['posterior-summaries', 'Fixed draws, every named measure', 'column names and order'], array_keys(self::$reference['summary_all'][0]), array_keys($all[0]));
+        $this->compareSummary(self::$reference['summary_probs'], Summary::summarise($this->drawsList(), ['quantile2', 'mcse_quantile', 'ess_quantile'], self::$input['probs']), 'probs', 'Fixed draws, probabilities 0.025, 0.5, and 0.975');
     }
     public function testParetoSmoothingMatchesPosterior(): void
     {
         $in = self::$input; $ref = self::$reference['pareto'];
         $cases = ['both' => Psis::paretoSmooth($in['smooth']), 'right' => Psis::paretoSmooth($in['smooth'], 'right', 1.0), 'left' => Psis::paretoSmooth($in['smooth'], 'left', 0.8), 'small' => Psis::paretoSmooth($in['smooth_small'], 'right'), 'log_weights' => Psis::paretoSmooth($in['log_weights'], areLogWeights: true)];
+        $labels = ['both' => 'pareto_smooth(), both tails', 'right' => 'pareto_smooth(), right tail, r_eff 1', 'left' => 'pareto_smooth(), left tail, r_eff 0.8', 'small' => 'pareto_smooth(), 100 values', 'log_weights' => 'pareto_smooth(), log weights'];
         foreach ($cases as $name => $result) {
-            self::close($ref[$name]['x'], $result['x'], $name.' x');
-            foreach ($ref[$name]['diagnostics'] as $key => $value) { self::close($value, $result['diagnostics'][$key], $name.' '.$key); }
+            self::close(['loo-psis', $labels[$name], 'smoothed values'], $ref[$name]['x'], $result['x'], $name.' x');
+            foreach ($ref[$name]['diagnostics'] as $key => $value) { self::close(['loo-psis', $labels[$name], $key], $value, $result['diagnostics'][$key], $name.' '.$key); }
         }
-        self::close($ref['khat'], Psis::paretoKhat($in['smooth']), 'khat');
-        $fit = Psis::gpdfit($in['gpd']); self::close($ref['gpdfit']['k'], $fit['k'], 'gpd k'); self::close($ref['gpdfit']['sigma'], $fit['sigma'], 'gpd sigma');
+        self::close(['loo-psis', 'pareto_khat()', 'k'], $ref['khat'], Psis::paretoKhat($in['smooth']), 'khat');
+        $fit = Psis::gpdfit($in['gpd']); self::close(['loo-psis', 'gpdfit()', 'k'], $ref['gpdfit']['k'], $fit['k'], 'gpd k'); self::close(['loo-psis', 'gpdfit()', 'sigma'], $ref['gpdfit']['sigma'], $fit['sigma'], 'gpd sigma');
     }
     public function testPsisRelativeEfficiencyLooAndWaicMatchLoo(): void
     {
-        $in = self::$input; $ref = self::$reference;
-        $rEff = Loo::relativeEffLogLik($in['log_lik']); self::close($ref['relative_eff'], $rEff, 'relative_eff');
+        $in = self::$input; $ref = self::$reference; $case = 'log_lik, 4 chains × 250 draws × 12 observations';
+        $rEff = Loo::relativeEffLogLik($in['log_lik']); self::close(['loo-psis', $case, 'relative_eff()'], $ref['relative_eff'], $rEff, 'relative_eff');
         $rows = []; foreach ([0, 1, 2, 3] as $c) { foreach ($in['log_lik'] as $iteration) { $rows[] = array_map(fn($v) => -$v, $iteration[$c]); } }
         $psis = Psis::psis($rows, $rEff);
-        self::close($ref['psis']['log_weights'], $psis['log_weights'], 'psis log weights'); self::close($ref['psis']['pareto_k'], $psis['pareto_k'], 'psis k'); self::close($ref['psis']['n_eff'], $psis['n_eff'], 'psis n_eff');
+        self::close(['loo-psis', $case, 'psis() log weights'], $ref['psis']['log_weights'], $psis['log_weights'], 'psis log weights'); self::close(['loo-psis', $case, 'psis() Pareto k'], $ref['psis']['pareto_k'], $psis['pareto_k'], 'psis k'); self::close(['loo-psis', $case, 'psis() n_eff'], $ref['psis']['n_eff'], $psis['n_eff'], 'psis n_eff');
         $vector = Psis::psis($in['smooth_small']);
-        self::close($ref['psis_vector']['log_weights'], $vector['log_weights'], 'vector log weights'); self::close((array)$ref['psis_vector']['pareto_k'], $vector['pareto_k'], 'vector k'); self::close((array)$ref['psis_vector']['n_eff'], $vector['n_eff'], 'vector n_eff');
+        self::close(['loo-psis', 'psis() on 100 values', 'log weights'], $ref['psis_vector']['log_weights'], $vector['log_weights'], 'vector log weights'); self::close(['loo-psis', 'psis() on 100 values', 'Pareto k'], (array)$ref['psis_vector']['pareto_k'], $vector['pareto_k'], 'vector k'); self::close(['loo-psis', 'psis() on 100 values', 'n_eff'], (array)$ref['psis_vector']['n_eff'], $vector['n_eff'], 'vector n_eff');
         $loo = Loo::loo($in['log_lik']);
-        self::close($ref['loo']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($loo['estimates'])), 'loo estimates');
-        self::close($ref['loo']['pointwise'], array_map('array_values', $loo['pointwise']), 'loo pointwise');
-        self::close($ref['loo']['pareto_k'], $loo['diagnostics']['pareto_k'], 'loo k'); self::close($ref['loo']['n_eff'], $loo['diagnostics']['n_eff'], 'loo n_eff');
+        self::close(['loo-psis', $case, 'loo() estimates and SEs'], $ref['loo']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($loo['estimates'])), 'loo estimates');
+        self::close(['loo-psis', $case, 'loo() pointwise'], $ref['loo']['pointwise'], array_map('array_values', $loo['pointwise']), 'loo pointwise');
+        self::close(['loo-psis', $case, 'loo() Pareto k'], $ref['loo']['pareto_k'], $loo['diagnostics']['pareto_k'], 'loo k'); self::close(['loo-psis', $case, 'loo() n_eff'], $ref['loo']['n_eff'], $loo['diagnostics']['n_eff'], 'loo n_eff');
         self::assertGreaterThan($loo['k_threshold'], max($loo['diagnostics']['pareto_k']));
         $plain = Loo::loo($in['log_lik'], false);
-        self::close($ref['loo_noreff']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($plain['estimates'])), 'loo without r_eff');
-        self::close($ref['loo_noreff']['pointwise'], array_map('array_values', $plain['pointwise']), 'loo pointwise without r_eff'); self::close($ref['loo_noreff']['n_eff'], $plain['diagnostics']['n_eff'], 'n_eff without r_eff');
+        self::close(['loo-psis', $case, 'loo() without r_eff, estimates and SEs'], $ref['loo_noreff']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($plain['estimates'])), 'loo without r_eff');
+        self::close(['loo-psis', $case, 'loo() without r_eff, pointwise'], $ref['loo_noreff']['pointwise'], array_map('array_values', $plain['pointwise']), 'loo pointwise without r_eff'); self::close(['loo-psis', $case, 'loo() without r_eff, n_eff'], $ref['loo_noreff']['n_eff'], $plain['diagnostics']['n_eff'], 'n_eff without r_eff');
         $waic = Loo::waic($in['log_lik']);
-        self::close($ref['waic']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($waic['estimates'])), 'waic estimates');
-        self::close($ref['waic']['pointwise'], array_map('array_values', $waic['pointwise']), 'waic pointwise');
+        self::close(['loo-psis', $case, 'waic() estimates and SEs'], $ref['waic']['estimates'], array_map(fn($row) => [$row['Estimate'], $row['SE']], array_values($waic['estimates'])), 'waic estimates');
+        self::close(['loo-psis', $case, 'waic() pointwise'], $ref['waic']['pointwise'], array_map('array_values', $waic['pointwise']), 'waic pointwise');
     }
     public function testRvarsShapesMatchPosterior(): void
     {
         $columns = self::$input['rvars']; $rows = [];
         foreach ($columns['theta'] as $i => $unused) { $rows[] = array_map(fn($values) => $values[$i], $columns); }
         $rvars = Rvars::fromDrawsDf($rows);
-        self::assertSame(array_column(self::$reference['rvars'], 'name'), array_keys($rvars));
+        self::exact(['rvars-inits', 'draws_rvars', 'variable names'], array_column(self::$reference['rvars'], 'name'), array_keys($rvars));
         foreach (self::$reference['rvars'] as $ref) {
             $rvar = $rvars[$ref['name']];
-            self::assertSame((array)$ref['dim'], $rvar['dims'] === [] ? [1] : $rvar['dims'], $ref['name'].' dims'); self::assertSame($ref['nchains'], $rvar['nchains']);
-            self::close($ref['values'], self::columnMajor($rvar), $ref['name'].' values');
+            self::exact(['rvars-inits', 'draws_rvars', 'dimensions'], (array)$ref['dim'], $rvar['dims'] === [] ? [1] : $rvar['dims'], $ref['name'].' dims'); self::exact(['rvars-inits', 'draws_rvars', 'chain count'], $ref['nchains'], $rvar['nchains']);
+            self::close(['rvars-inits', 'draws_rvars', 'values'], $ref['values'], self::columnMajor($rvar), $ref['name'].' values');
         }
     }
     private static function columnMajor(array $rvar): array
@@ -147,15 +142,16 @@ final class StatisticsCompatibilityTest extends TestCase
     {
         $in = self::$input;
         foreach (['two' => [$in['init_draws'], 2], 'recycled' => [$in['init_one'], 3]] as $name => [$columns, $chains]) {
+            $case = $name === 'two' ? 'Initial values, 2 draws for 2 chains' : 'Initial values, 1 draw recycled for 3 chains';
             $rows = [];
             foreach ($columns['theta'] as $i => $unused) { $rows[] = array_map(fn($values) => $values[$i], $columns); }
             $result = Inits::fromDraws($rows, $chains, $in['parameters'], warnPartial: false);
             self::assertCount($chains, self::$reference['inits'][$name]);
             foreach (self::$reference['inits'][$name] as $i => $json) {
                 $expected = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
-                self::assertSame(array_keys($expected), array_keys($result['inits'][$i]), $name.' names');
-                self::assertSame(self::shape($expected), self::shape($result['inits'][$i]), $name.' shapes');
-                self::close(self::flatten($expected), self::flatten($result['inits'][$i]), $name.' values', 1e-15);
+                self::exact(['rvars-inits', $case, 'parameter names'], array_keys($expected), array_keys($result['inits'][$i]), $name.' names');
+                self::exact(['rvars-inits', $case, 'shapes'], self::shape($expected), self::shape($result['inits'][$i]), $name.' shapes');
+                self::close(['rvars-inits', $case, 'values'], self::flatten($expected), self::flatten($result['inits'][$i]), $name.' values', 1e-15);
             }
         }
     }

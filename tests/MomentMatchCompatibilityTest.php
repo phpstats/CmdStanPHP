@@ -36,26 +36,25 @@ final class MomentMatchCompatibilityTest extends TestCase
         $f = self::$fixtures[$name];
         return MomentMatch::loo(Loo::loo($f['log_lik']), $f['upars'], $f['log_lik'], MomentMatchFixture::logProb($f), MomentMatchFixture::logLikI($f), split: $split);
     }
-    private static function compare(array $reference, array $actual, string $label, float $tolerance = 1e-8): void
+    /** Relative comparison, |x − r| ≤ tolerance × max(1, |r|), of pointwise values, diagnostics, and estimates. */
+    private static function compare(array $reference, array $actual, string $label, string $case, float $tolerance = 1e-8): void
     {
         foreach (['elpd_loo', 'mcse_elpd_loo', 'p_loo', 'looic'] as $column) {
-            foreach ($reference['pointwise'][$column] as $i => $v) { self::assertEqualsWithDelta($v, $actual['pointwise'][$i][$column], $tolerance * max(1.0, abs($v)), "$label $column [$i]"); }
+            self::near(['moment-matching', $case, 'pointwise '.$column], array_values($reference['pointwise'][$column]), array_column($actual['pointwise'], $column), $tolerance, true, "$label $column");
         }
-        foreach (['pareto_k', 'n_eff'] as $key) {
-            foreach ($reference[$key] as $i => $v) { self::assertEqualsWithDelta($v, $actual['diagnostics'][$key][$i], $tolerance * max(1.0, abs($v)), "$label $key [$i]"); }
-        }
-        foreach (['elpd_loo', 'p_loo', 'looic'] as $j => $name) {
-            self::assertEqualsWithDelta($reference['estimates']['Estimate'][$j], $actual['estimates'][$name]['Estimate'], $tolerance * max(1.0, abs($reference['estimates']['Estimate'][$j])), "$label $name");
-            self::assertEqualsWithDelta($reference['estimates']['SE'][$j], $actual['estimates'][$name]['SE'], $tolerance * max(1.0, abs($reference['estimates']['SE'][$j])), "$label SE $name");
-        }
+        foreach (['pareto_k', 'n_eff'] as $key) { self::near(['moment-matching', $case, $key], array_values($reference[$key]), array_values($actual['diagnostics'][$key]), $tolerance, true, "$label $key"); }
+        $names = ['elpd_loo', 'p_loo', 'looic'];
+        $estimates = array_merge(array_map(fn($name) => $actual['estimates'][$name]['Estimate'], $names), array_map(fn($name) => $actual['estimates'][$name]['SE'], $names));
+        self::near(['moment-matching', $case, 'estimates and SEs'], array_merge($reference['estimates']['Estimate'], $reference['estimates']['SE']), $estimates, $tolerance, true, "$label estimates");
     }
+    private const LABELS = ['shift_only' => 'shifts only', 'shift_scale' => 'shifts and scaling', 'cov' => 'covariance map'];
     public function testUnsplitMomentMatchingMatchesLoo(): void
     {
-        foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['unsplit'], self::matched($name, false), $name.' unsplit'); }
+        foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['unsplit'], self::matched($name, false), $name.' unsplit', 'Regression, '.self::LABELS[$name].', unsplit'); }
     }
     public function testSplitMatchesLooWithTheExactInverse(): void
     {
-        foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['exact_split'], self::matched($name, true), $name.' split'); }
+        foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['exact_split'], self::matched($name, true), $name.' split', 'Regression, '.self::LABELS[$name].', split with the exact inverse'); }
     }
     /**
      * loo 2.10.1.9000 builds before stan-dev/loo#405 (merged 2026-10-13, d69d44f) differ from CmdStanPHP's split as
@@ -70,13 +69,15 @@ final class MomentMatchCompatibilityTest extends TestCase
         $same = fn(string $name) => abs(self::$reference[$name]['loo_split']['pointwise']['elpd_loo'][count(self::$fixtures[$name]['x']) - 1] - self::$reference[$name]['exact_split']['pointwise']['elpd_loo'][count(self::$fixtures[$name]['x']) - 1]) <= 1e-6;
         if ($same('shift_scale') || $same('cov')) {
             // Corrected loo: its split is the reference for every design.
-            foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['loo_split'], self::matched($name, true), $name.' corrected loo split'); }
+            foreach (array_keys(self::DESIGNS) as $name) { self::compare(self::$reference[$name]['loo_split'], self::matched($name, true), $name.' corrected loo split', 'Regression, '.self::LABELS[$name].', loo\'s own split'); }
             return;
         }
         // Earlier loo: with scaling or a covariance map, it evaluates the split proposal density at the wrong inverse
         // points (MomentMatchTest::testAffineLogDeterminantEntersTheSplitProposal measures the resulting error).
         foreach (['shift_scale', 'cov'] as $name) {
             $i = count(self::$fixtures[$name]['x']) - 1;
+            $difference = abs(self::$reference[$name]['loo_split']['pointwise']['elpd_loo'][$i] - self::$reference[$name]['exact_split']['pointwise']['elpd_loo'][$i]);
+            self::record(['moment-matching', 'Regression, '.self::LABELS[$name].', loo\'s own split', 'pointwise elpd_loo differs by more than 1e-6, as documented'], ['rule' => ['kind' => 'documented-difference'], 'n_compared' => 1, 'max_abs_error' => $difference, 'status' => $difference > 1e-6 ? 'pass' : 'fail']);
             self::assertNotEqualsWithDelta(self::$reference[$name]['loo_split']['pointwise']['elpd_loo'][$i], self::$reference[$name]['exact_split']['pointwise']['elpd_loo'][$i], 1e-6, $name);
         }
     }

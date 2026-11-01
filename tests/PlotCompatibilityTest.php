@@ -17,13 +17,14 @@ final class PlotCompatibilityTest extends TestCase
         file_put_contents($this->dir.'/in.json', json_encode(['x' => $x, 'ties' => $ties, 'at' => $at], JSON_THROW_ON_ERROR | JSON_PRESERVE_ZERO_FRACTION));
         Process::run(['Rscript', __DIR__.'/fixtures/plot.R', $this->dir.'/in.json', $this->dir.'/out.json'], timeout: 120);
         $r = json_decode(file_get_contents($this->dir.'/out.json'), true, flags: JSON_THROW_ON_ERROR);
-        self::assertEqualsWithDelta($r['bandwidth'], Plot::bandwidth($x), 1e-14);
-        self::assertEqualsWithDelta($r['density'], Plot::density($x, $at), 1e-13);
-        self::assertEqualsWithDelta($r['acf'], Plot::autocorrelation($x, 20), 1e-12);
-        self::assertEqualsWithDelta($r['ranks'], Plot::ranks($ties), 1e-12);
+        $case = '400 AR(1) draws and 400 tied integers';
+        self::near(['figures', $case, 'density bandwidth'], $r['bandwidth'], Plot::bandwidth($x), 1e-14);
+        self::near(['figures', $case, 'density at 41 points'], $r['density'], Plot::density($x, $at), 1e-13);
+        self::near(['figures', $case, 'autocorrelation, lags 0 to 20'], $r['acf'], Plot::autocorrelation($x, 20), 1e-12);
+        self::near(['figures', $case, 'ranks with ties'], $r['ranks'], Plot::ranks($ties), 1e-12);
         foreach ($r['intervals'] as $row) {
             $values = $row['parameter'] === 'a' ? $x : $ties;
-            foreach (['ll' => 0.05, 'l' => 0.25, 'm' => 0.5, 'h' => 0.75, 'hh' => 0.95] as $key => $p) { self::assertEqualsWithDelta($row[$key], CmdStanFit::quantile($values, $p), 1e-12, $row['parameter'].' '.$key); }
+            foreach (['ll' => 0.05, 'l' => 0.25, 'm' => 0.5, 'h' => 0.75, 'hh' => 0.95] as $key => $p) { self::near(['figures', $case, 'interval quantiles'], $row[$key], CmdStanFit::quantile($values, $p), 1e-12, message: $row['parameter'].' '.$key); }
         }
     }
 }
