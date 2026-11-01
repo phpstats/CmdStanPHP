@@ -40,7 +40,7 @@ echo $warnings ? implode("\n", $warnings) : 'No warnings';
 echo "\n";
 ```
 
-```text
+```stan
 data {
   int<lower=1> J;
   vector<lower=0>[J] sigma;
