@@ -7,7 +7,7 @@
     "description": "PHP generates the inputs with a fixed seed. R computes the reference values with stats functions and bayesplot's mcmc_intervals_data().",
     "reference": "R 4.6.1 bw.nrd0(), dnorm(), acf(), and rank(), and bayesplot 1.16.0.9000 mcmc_intervals_data() with posterior 1.7.1",
     "versions": {
-        "PHP": "8.4.25",
+        "PHP": "8.5.10",
         "CmdStan": "2.40.0",
         "R": "4.6.1",
         "posterior": "1.7.1",
@@ -87,9 +87,9 @@
     "reproduce": "php verification/compatibility/run.php",
     "source": "verification/compatibility/results.json",
     "environment": {
-        "date": "2026-11-01",
-        "commit": "0e80bd3",
-        "php": "8.4.25",
+        "date": "2026-11-02",
+        "commit": "4ec6712",
+        "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
 }

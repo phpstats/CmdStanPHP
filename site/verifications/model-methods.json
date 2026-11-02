@@ -7,7 +7,7 @@
     "description": "CmdStanPHP and CmdStanR each compile tests/fixtures/native.stan with model methods and evaluate them at the same points.",
     "reference": "cmdstanr 0.99.0 (commit 0a54123) model methods, compiled with Rcpp 1.1.2 and RcppEigen 0.3.4.0.2",
     "versions": {
-        "PHP": "8.4.25",
+        "PHP": "8.5.10",
         "CmdStan": "2.40.0",
         "R": "4.6.1",
         "cmdstanr": "0.99.0 (commit 0a54123)",
@@ -184,9 +184,9 @@
     "reproduce": "php verification/compatibility/run.php",
     "source": "verification/compatibility/results.json",
     "environment": {
-        "date": "2026-11-01",
-        "commit": "0e80bd3",
-        "php": "8.4.25",
+        "date": "2026-11-02",
+        "commit": "4ec6712",
+        "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
 }

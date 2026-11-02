@@ -7,7 +7,7 @@
     "description": "posterior's as_draws_rvars() and CmdStanR's initial-value handling receive the same draws as CmdStanPHP.",
     "reference": "posterior 1.7.1 as_draws_rvars(), and the initial values cmdstanr 0.99.0 (commit 0a54123) writes from draws",
     "versions": {
-        "PHP": "8.4.25",
+        "PHP": "8.5.10",
         "CmdStan": "2.40.0",
         "R": "4.6.1",
         "cmdstanr": "0.99.0 (commit 0a54123)",
@@ -116,9 +116,9 @@
     "reproduce": "php verification/compatibility/run.php",
     "source": "verification/compatibility/results.json",
     "environment": {
-        "date": "2026-11-01",
-        "commit": "0e80bd3",
-        "php": "8.4.25",
+        "date": "2026-11-02",
+        "commit": "4ec6712",
+        "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
 }
