@@ -102,7 +102,7 @@ final class MomentMatchIntegrationTest extends TestCase
         $close = function (array $values, array $actual, string $quantity) use ($case) {
             $expected = []; $kept = []; $na = 0;
             foreach ($values as $i => $v) { if ($v === 'NA') { ++$na; self::assertTrue(is_finite($actual[$i]), "$quantity [$i]"); } else { $expected[] = $v; $kept[] = $actual[$i]; } }
-            if ($na > 0) { self::record(['moment-matching', $case, $quantity.' where loo reports NA'], ['rule' => ['kind' => 'excluded'], 'n_compared' => $na, 'status' => 'skipped', 'reason' => 'loo reports NA here; CmdStanPHP must report a finite value, and does.']); }
+            if ($na > 0) { self::record(['moment-matching', $case, $quantity], ['rule' => ['kind' => 'excluded'], 'n_compared' => $na, 'status' => 'skipped', 'reason' => 'loo reports NA, so the value is not compared; the test requires a finite value from CmdStanPHP.']); }
             self::near(['moment-matching', $case, $quantity], $expected, $kept, 1e-8, true, $quantity);
         };
         $compare = function (array $reference, array $actual, array $columns, string $label, array $skip = []) use ($close, $case) {

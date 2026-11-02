@@ -97,10 +97,16 @@ function junit(string $file, string $events): array
 /** Aggregates the comparison lines of one topic into cases, and adds a case for every skipped or failed test. */
 function record(string $id, array $topic, array $lines, array $tests, array $environment): array
 {
-    $cases = []; $rules = [];
+    $cases = []; $rules = []; $excluded = [];
     foreach ($lines as $line) {
         if ($line['topic'] !== $id) { continue; }
         $rule = $line['rule']; $ruleId = null;
+        // Values that cannot be compared, such as R's NA, are Limitations rather than cases.
+        if ($rule['kind'] === 'excluded') {
+            $key = $line['case']."\0".$line['quantity'];
+            $excluded[$key] = ['case' => $line['case'], 'quantity' => $line['quantity'], 'n' => ($excluded[$key]['n'] ?? 0) + $line['n_compared'], 'reason' => $line['reason']];
+            continue;
+        }
         if ($rule['kind'] === 'tolerance') {
             $ruleId = isset($rule['rtol']) ? 'rel-'.fmt($rule['rtol']) : 'abs-'.fmt($rule['atol']);
             $rules[$ruleId] ??= ['id' => $ruleId, 'kind' => 'tolerance'] + (isset($rule['rtol']) ? ['rtol' => $rule['rtol'], 'rel_floor' => 1.0] : ['atol' => $rule['atol'], 'rel_floor' => 1.0]);
@@ -155,7 +161,7 @@ function record(string $id, array $topic, array $lines, array $tests, array $env
         'inputs' => $topic['inputs'],
         'comparison' => $rules,
         'cases' => $cases,
-        'exclusions' => $topic['exclusions'] ?? null,
+        'exclusions' => array_merge($topic['exclusions'] ?? [], array_map(fn($e) => sprintf('%s: %s (%d %s). %s', $e['case'], $e['quantity'], $e['n'], $e['n'] === 1 ? 'value' : 'values', $e['reason']), array_values($excluded))) ?: null,
         'known_differences' => $topic['known_differences'] ?? null,
         'reproduce' => $topic['reproduce'] ?? 'php verification/compatibility/run.php',
         'source' => 'verification/compatibility/results.json',
