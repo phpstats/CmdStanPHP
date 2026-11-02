@@ -416,7 +416,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Bernoulli posterior estimates against the analytic mean, R-hat and ESS, seeded parallel chains, modes, and draw counts.</li>
 <li>Generated quantities, fixed parameters, syntax checking and formatting, gradient checking, log density, input errors, metrics, and auxiliary files.</li>
-<li>A hierarchical regression from <code>StanData::fromColumns()</code>, a model on table data, and, with phit, <code>score ~ study_hours + (1 | school)</code> from <code>StanData::fromFormula()</code>, compared with <code>Phit\fit_lmer()</code>.</li>
+<li>A hierarchical regression from <code>StanData::fromColumns()</code>, a model on table data, and, with phit, <code>score ~ study_hours + (1 | school)</code> from <code>StanData::fromFormula()</code>, compared with <code>Phit\fit_mixed_gaussian()</code>.</li>
 <li>FFI model methods and exposed functions, initialization from fits, the example models, and LOO with and without moment matching.</li>
 </ul>
 <p>Tests that need FFI skip without it, and the suite skips without CmdStan.</p>
@@ -453,7 +453,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p>The integration jobs check that FFI, phit’s three draw kernels, its seeded draw generator, <code>Phit\model_matrix()</code>, and <code>Phit\fit_lmer()</code> are present, and they fail on skipped tests.</p>
+<p>The integration jobs check that FFI, phit’s three draw kernels, its seeded draw generator, <code>Phit\model_matrix()</code>, and <code>Phit\fit_mixed_gaussian()</code> are present, and they fail on skipped tests.</p>
 <p>Pinned versions, set in <code>tests.yml</code>:</p>
 <table class="caption-top table">
 <colgroup>
@@ -473,7 +473,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>phit</td>
-<td>Commit <code>bb9133e</code>, built against PHP 8.4 headers</td>
+<td>0.4.4 (commit <code>066e2e1</code>), built against PHP 8.4 headers</td>
 </tr>
 <tr class="odd">
 <td>vl-convert</td>

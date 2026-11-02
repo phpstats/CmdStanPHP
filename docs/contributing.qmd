@@ -39,7 +39,7 @@ The integration suite compiles the bundled models and runs real CmdStan methods:
 
 - Bernoulli posterior estimates against the analytic mean, R-hat and ESS, seeded parallel chains, modes, and draw counts.
 - Generated quantities, fixed parameters, syntax checking and formatting, gradient checking, log density, input errors, metrics, and auxiliary files.
-- A hierarchical regression from `StanData::fromColumns()`, a model on table data, and, with phit, `score ~ study_hours + (1 | school)` from `StanData::fromFormula()`, compared with `Phit\fit_lmer()`.
+- A hierarchical regression from `StanData::fromColumns()`, a model on table data, and, with phit, `score ~ study_hours + (1 | school)` from `StanData::fromFormula()`, compared with `Phit\fit_mixed_gaussian()`.
 - FFI model methods and exposed functions, initialization from fits, the example models, and LOO with and without moment matching.
 
 Tests that need FFI skip without it, and the suite skips without CmdStan.
@@ -62,14 +62,14 @@ It sets `CMDSTANPHP_EVIDENCE`, which makes the compatibility tests write each co
 | Integration | Builds CmdStan 2.37 and 2.40 with this package's installer (two make jobs, cached), builds phit, enables FFI, and runs the native unit tests and the real-model suite on PHP 8.4. Every figure kind is rendered to SVG and one to PNG. |
 | Compatibility | On the CmdStan 2.40 job, installs the R packages and runs the compatibility suite |
 
-The integration jobs check that FFI, phit's three draw kernels, its seeded draw generator, `Phit\model_matrix()`, and `Phit\fit_lmer()` are present, and they fail on skipped tests.
+The integration jobs check that FFI, phit's three draw kernels, its seeded draw generator, `Phit\model_matrix()`, and `Phit\fit_mixed_gaussian()` are present, and they fail on skipped tests.
 
 Pinned versions, set in `tests.yml`:
 
 | Dependency | Version |
 |---|---|
 | CmdStanR | Commit `0a54123` of its v1.0 branch, a release candidate. CI checks that its version is at least 0.99.0. |
-| phit | Commit `bb9133e`, built against PHP 8.4 headers |
+| phit | 0.4.4 (commit `066e2e1`), built against PHP 8.4 headers |
 | vl-convert | 1.9.0 |
 
 Locally, the phit extension must be built for the PHP that loads it, so an extension built for Homebrew's PHP 8.5 does not load into Herd's PHP 8.4.

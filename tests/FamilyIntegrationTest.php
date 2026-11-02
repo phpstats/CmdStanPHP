@@ -66,24 +66,24 @@ model {
   y ~ normal(X * beta + tau * z[school_id], sigma);
 }
 STAN;
-    /** score ~ study_hours + (1 | school) on phit's schools data, compared with Phit\fit_lmer()'s REML estimates. */
-    public function testFormulaHierarchicalFitAgreesWithStatsLmer(): void
+    /** score ~ study_hours + (1 | school) on phit's schools data, compared with Phit\fit_mixed_gaussian()'s REML estimates. */
+    public function testFormulaHierarchicalFitAgreesWithFitMixedGaussian(): void
     {
-        if (!function_exists('Phit\model_matrix') || !function_exists('Phit\fit_lmer')) { self::markTestSkipped('Needs Phit\model_matrix() and Phit\fit_lmer() from the phit extension.'); }
+        if (!function_exists('Phit\model_matrix') || !function_exists('Phit\fit_mixed_gaussian')) { self::markTestSkipped('Needs Phit\model_matrix() and Phit\fit_mixed_gaussian() from the phit extension.'); }
         $handle = fopen(__DIR__.'/fixtures/schools.csv', 'rb'); $header = fgetcsv($handle, escape: ''); $columns = [];
         while (($row = fgetcsv($handle, escape: '')) !== false) { foreach ($header as $i => $name) { $columns[$name][] = $name === 'school' ? $row[$i] : (float)$row[$i]; } }
         fclose($handle);
         $formula = 'score ~ study_hours + (1 | school)';
         $data = StanData::fromFormula($formula, $columns);
         self::assertSame(250, $data->data['N']); self::assertSame(12, $data->data['J']); self::assertSame(['(Intercept)', 'study_hours'], $data->columns);
-        $lmer = \Phit\fit_lmer($formula, $columns);
+        $mixed = \Phit\fit_mixed_gaussian($formula, $columns);
         $fit = $this->model(self::FORMULA_PROGRAM, 'family_formula')->sample(data: $data, chains: 4, parallel_chains: 4, iter_warmup: 1000, iter_sampling: 2000, seed: 2024, adapt_delta: 0.95, show_messages: false, refresh: 0, output_dir: $this->dir, diagnostics: null);
         $summary = array_column($fit->summary(['beta', 'tau', 'sigma']), null, 'variable');
         // A smoke-test convergence bound; tau's R-hat varies by CmdStan release (1.0103 on 2.37 with 4 x 1000 draws).
         foreach ($summary as $row) { self::assertLessThan(1.05, $row['rhat'], $row['variable']); }
-        foreach ([0, 1] as $k) { self::assertEqualsWithDelta($lmer['coefficients'][$k], $summary['beta['.($k + 1).']']['mean'], 0.5 * $lmer['std_errors'][$k], 'beta['.($k + 1).']'); }
-        self::assertEqualsWithDelta($lmer['sigma'], $summary['sigma']['mean'], 0.05 * $lmer['sigma']);
-        $tau = sqrt($lmer['random'][0]['covariance'][0][0]); self::assertEqualsWithDelta($tau, $summary['tau']['mean'], 0.35 * $tau);
+        foreach ([0, 1] as $k) { self::assertEqualsWithDelta($mixed['coefficients'][$k], $summary['beta['.($k + 1).']']['mean'], 0.5 * $mixed['std_errors'][$k], 'beta['.($k + 1).']'); }
+        self::assertEqualsWithDelta($mixed['sigma'], $summary['sigma']['mean'], 0.05 * $mixed['sigma']);
+        $tau = sqrt($mixed['random'][0]['covariance'][0][0]); self::assertEqualsWithDelta($tau, $summary['tau']['mean'], 0.35 * $tau);
     }
     public function testTableDataRunsBernoulli(): void
     {

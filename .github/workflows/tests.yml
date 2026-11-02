@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: phpstats/phit
-          ref: bb9133ea39245977f0b79f77d168c7d4e9bdd107
+          ref: 066e2e16a4b1db644e2700451b91ddd88cd635b1
           path: .context/phit
           persist-credentials: false
       - name: Install matching PHP headers and clang
@@ -67,7 +67,7 @@ jobs:
       - name: Build and verify phit
         run: |
           cargo build --manifest-path .context/phit/Cargo.toml --package phit --release --locked
-          php -d extension="$PHIT_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("Phit\\dist_normal_rng") || !function_exists("Phit\\model_matrix") || !function_exists("Phit\\fit_lmer")) { throw new RuntimeException("FFI, seeded native draws, Phit\\model_matrix, and Phit\\fit_lmer are required by CI"); }'
+          php -d extension="$PHIT_LIBRARY" -r 'require "vendor/autoload.php"; CmdStan\DrawKernels::require(); if (!extension_loaded("ffi") || !function_exists("Phit\\dist_normal_rng") || !function_exists("Phit\\model_matrix") || !function_exists("Phit\\fit_mixed_gaussian")) { throw new RuntimeException("FFI, seeded native draws, Phit\\model_matrix, and Phit\\fit_mixed_gaussian are required by CI"); }'
       - name: Test native kernels, moment matching, and model matrices
         run: php -d extension="$PHIT_LIBRARY" vendor/bin/phpunit --filter '(DrawKernelsTest|MomentMatchTest|StanDataTest::testRealModelMatrix)' --exclude-group integration --exclude-group compatibility --fail-on-skipped
       - uses: actions/cache@v4
