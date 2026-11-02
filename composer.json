@@ -2,7 +2,7 @@
   "name": "phpstats/cmdstanphp",
   "description": "A PHP interface to CmdStan inspired by CmdStanR",
   "type": "library",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "require": {
     "php": ">=8.2 <8.6",
     "ext-json": "*"

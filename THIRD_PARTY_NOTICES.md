@@ -1,6 +1,6 @@
 # Third-party notices
 
-CmdStanPHP is released under the MIT license in [LICENSE](LICENSE). Parts of it follow the source code of the projects below, which keep their own licenses.
+CmdStanPHP is released under the GNU General Public License, version 3 or later, in [LICENSE](LICENSE). Parts of it follow the source code of the projects below, which keep their own licenses.
 
 ## posterior
 
@@ -84,3 +84,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - License: Artistic License 2.0, in [LICENSES/Artistic-2.0.txt](LICENSES/Artistic-2.0.txt)
 - Copyright holder, from its DESCRIPTION file: Henrik Bengtsson [aut, cre, cph]
 - Files: `Special::logSumExp()` in `src/Special.php`.
+
+## loo
+
+- Version: 2.10.1.9000
+- URL: <https://mc-stan.org/loo/>, <https://github.com/stan-dev/loo>
+- License: GNU GPL, version 3 or later, the text in [LICENSE](LICENSE)
+- Authors, from its DESCRIPTION file: Aki Vehtari, Jonah Gabry, Måns Magnusson, Yuling Yao, Paul-Christian Bürkner, Topi Paananen, and Andrew Gelman
+- Files: `src/Loo.php`, `src/MomentMatch.php`, and the `psis()`, `psisColumns()`, and `prepareReff()` functions in `src/Psis.php`.
+
+## bayesplot
+
+- Version: 1.16.0.9000
+- URL: <https://mc-stan.org/bayesplot/>, <https://github.com/stan-dev/bayesplot>
+- License: GNU GPL, version 3 or later, the text in [LICENSE](LICENSE)
+- Authors, from its DESCRIPTION file: Jonah Gabry and Tristan Mahr
+- Files: the figure computations in `src/Plot.php`, which reproduce bayesplot's values, such as `mcmc_intervals_data()`.
+
+## R
+
+- Version: 4.6.1
+- URL: <https://www.r-project.org>
+- License: GNU GPL, version 2 or later, used here under version 3, the text in [LICENSE](LICENSE)
+- Copyright, from its COPYRIGHTS file: "The bulk of this code is copyright by members of or all of the R Core Team."
+- Files: `lbeta()` and the Stirling series in `src/Special.php`, which follow R's `lbeta.c`, and `bandwidth()`, `density()`, and `autocorrelation()` in `src/Plot.php`, which reproduce `bw.nrd0()`, `density()`, and `acf()`.
