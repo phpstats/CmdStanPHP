@@ -3,7 +3,7 @@ declare(strict_types=1);
 namespace CmdStan\Tests;
 use CmdStan\{Inits, Loo, Process, Psis, Rvars, Summary};
 use PHPUnit\Framework\Attributes\Group;
-/** Compares the posterior/loo/cmdstanr ports with the installed R packages on deterministic inputs. */
+/** Compares the posterior, loo, and cmdstanr implementations with the installed R packages on deterministic inputs. */
 #[Group('compatibility')]
 final class StatisticsCompatibilityTest extends TestCase
 {

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * Initial values from fits and draws, ported from CmdStanR's process_init methods.
+ * Initial values from fits and draws, following the R source of CmdStanR's process_init methods (BSD 3-Clause).
  *
  * $parameters is the stanc --info parameter map (CmdStanModel::variables()['parameters']):
  * ['theta' => ['type' => 'real', 'dimensions' => 0], ...]. When null, every non-reserved variable (no '__' suffix)

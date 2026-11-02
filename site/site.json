@@ -3,7 +3,7 @@
     "title": "CmdStanPHP",
     "tagline": "Stan modeling and inference from PHP.",
     "summary": [
-        "Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP. CmdStanPHP runs Stan programs through CmdStan, Stan's command-line interface, and is a port of CmdStanR 1.0 that keeps its function and option names.",
+        "Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP. CmdStanPHP runs Stan programs through CmdStan, Stan's command-line interface, and its API is modeled on CmdStanR 1.0, with CmdStanR's function and option names.",
         "It fits models with MCMC, optimization, the Laplace approximation, ADVI, and Pathfinder, and runs standalone generated quantities. Fits return draws in posterior's formats, summaries with R-hat and effective sample sizes, sampler diagnostics, and PSIS-LOO and WAIC. Through PHP's FFI extension it also evaluates log densities and gradients in process and calls a model's Stan functions, and it draws bayesplot's diagnostic plots as text, Vega-Lite, HTML, SVG, or PNG."
     ],
     "install": [

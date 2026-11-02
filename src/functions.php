@@ -35,7 +35,7 @@ function cmdstan_version(): string { return CmdStan::version(); }
 function check_cmdstan_toolchain(): array { return CmdStan::checkToolchain(); }
 /**
  * Session options, like R's options(). Supported: cmdstanr_output_dir, cmdstanr_write_stan_file_dir, cmdstanr_force_recompile,
- * cmdstanr_draws_format, cmdstanr_warn_inits, cmdstanr_verbose, cmdstanr_no_ver_check (accepted; this port never checks for
+ * cmdstanr_draws_format, cmdstanr_warn_inits, cmdstanr_verbose, cmdstanr_no_ver_check (accepted; CmdStanPHP never checks for
  * updates), cmdstanr_max_rows, mc.cores, cmdstanr_print_line_numbers, cmdstanr_compress ('none', 'gzip' or 'bzip2'; the fitting methods' default compress),
  * cmdstanr_progress_bar (sample()'s default show_progress_bar), cmdstanr_save_metric (sample()'s default save_metric),
  * cmdstanr_save_config (the default save_cmdstan_config), cmdstanr_spinner (accepted; no spinner is shown), and the

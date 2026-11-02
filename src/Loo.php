@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * PSIS-LOO and WAIC ported from loo (loo.array, waic.array) as called by CmdStanR's CmdStanMCMC$loo(r_eff = TRUE).
+ * PSIS-LOO and WAIC following the R source of loo (GPL-3; loo.array, waic.array) as called by CmdStanR's CmdStanMCMC$loo(r_eff = TRUE).
  *
  * Log-likelihood input is a draws_array [iteration][chain][observation] (inner arrays may be keyed by names such as
  * 'log_lik[1]', as CmdStanFit::draws() returns) or a draws_matrix [draw][observation], treated as a single chain.

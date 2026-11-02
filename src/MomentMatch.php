@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * Importance-weighted moment matching for PSIS-LOO, ported from loo::loo_moment_match.default (Paananen et al., 2021) as
+ * Importance-weighted moment matching for PSIS-LOO, following the R source of loo::loo_moment_match.default (GPL-3; Paananen et al., 2021) as
  * CmdStanMCMC$loo(moment_match = TRUE) calls it. Mean, covariance, covariance-map and affine computations use the
  * phit posterior-draw kernels (see DrawKernels); this class owns model evaluation, PSIS, iteration and diagnostics.
  *

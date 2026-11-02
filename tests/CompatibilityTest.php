@@ -82,7 +82,7 @@ final class CompatibilityTest extends TestCase
         }
     }
     /**
-     * An indexed parameter, a fixed quantile set, and both summary paths (stansummary by default, the posterior port with
+     * An indexed parameter, a fixed quantile set, and both summary paths (stansummary by default, the posterior implementation with
      * measures) against posterior::summarise_draws() on the same doubles, and diagnosticSummary() against CmdStanR's
      * diagnostic_summary() on the same CSV files. See posterior_fit.R for why R gets the doubles rather than the CSVs.
      */

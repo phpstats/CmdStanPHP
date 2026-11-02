@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * posterior::summarise_draws port with posterior's convergence diagnostics (rank-normalized split R-hat, bulk/tail ESS, MCSE).
+ * posterior::summarise_draws, following its R source (BSD 3-Clause), with posterior's convergence diagnostics (rank-normalized split R-hat, bulk/tail ESS, MCSE).
  *
  * Every measure function accepts either a list of chains (list<list<float>>, equal lengths for convergence measures)
  * or a flat list of draws, which is treated as a single chain (R's vector behaviour).

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * Pareto smoothing ported from posterior (pareto_smooth, pareto_khat, gpdfit) and loo (psis).
+ * Pareto smoothing following the R source of posterior (BSD 3-Clause; pareto_smooth, pareto_khat, gpdfit) and loo (GPL-3; psis).
  * Warnings that R emits are returned in a 'warnings' list instead of raising PHP warnings.
  */
 final class Psis

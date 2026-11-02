@@ -358,7 +358,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>CmdStanPHP ports CmdStanR’s model, executable, and CSV workflow to PHP. It does not implement every CmdStanR feature. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), with the <a href="https://mc-stan.org/cmdstanr/reference/">CmdStanR API</a> and the <a href="https://mc-stan.org/docs/cmdstan-guide/command_line_options.html">CmdStan command-line options</a>.</p>
+<p>CmdStanPHP provides CmdStanR’s model, executable, and CSV workflow in PHP. It does not implement every CmdStanR feature. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), with the <a href="https://mc-stan.org/cmdstanr/reference/">CmdStanR API</a> and the <a href="https://mc-stan.org/docs/cmdstan-guide/command_line_options.html">CmdStan command-line options</a>.</p>
 <section id="supported-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="supported-workflows">Supported</h2>
 <table class="caption-top table">
@@ -1149,7 +1149,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>Draws are PHP arrays with documented shapes. Indices are zero-based, and draw metadata is one-based. R’s tibble, posterior, bayesplot, and ggplot2 classes are not emulated. <a href="./draws.html">Draws, summaries, and saving fits</a> describes the formats.</li>
 <li>Summary quantiles use linear interpolation (R’s default type 7), and scaled MAD uses 1.4826.</li>
-<li>The default MCMC summary takes R-hat and bulk ESS from the installed CmdStan’s <code>stansummary</code> and computes tail ESS in PHP. With <code>measures</code>, <code>summary()</code> uses a PHP port of posterior’s <code>summarise_draws()</code> and needs no CmdStan. Results are checked against the installed R packages and are not guaranteed to be identical to every posterior version.</li>
+<li>The default MCMC summary takes R-hat and bulk ESS from the installed CmdStan’s <code>stansummary</code> and computes tail ESS in PHP. With <code>measures</code>, <code>summary()</code> uses a PHP implementation of posterior’s <code>summarise_draws()</code> and needs no CmdStan. Results are checked against the installed R packages and are not guaranteed to be identical to every posterior version.</li>
 <li>ADVI’s mean row is stored separately. ADVI and Laplace <code>log_p__</code> columns become <code>lp__</code>, and their approximate densities <code>lp_approx__</code>, as in CmdStanR. Convergence statistics are <code>NAN</code> for fits other than MCMC.</li>
 <li><code>metadata()</code> returns one merged array with CmdStanR’s keys, such as <code>iter_sampling</code>, <code>max_treedepth</code>, and <code>stan_variable_sizes</code>, alongside CmdStan’s raw argument names. <code>chainMetadata()</code> returns the per-chain arrays. <code>invMetric()</code> returns matrices by default and reads metric JSON when every chain has one.</li>
 </ul>

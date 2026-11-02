@@ -4,7 +4,7 @@ title: "CmdStanPHP"
 
 Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP.
 
-CmdStanPHP runs [Stan](https://mc-stan.org) programs through [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. It is a port of [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and keeps CmdStanR's function and option names. It needs CmdStan and a C++ toolchain, as described in [Installation](installation.qmd), and does not need R.
+CmdStanPHP runs [Stan](https://mc-stan.org) programs through [CmdStan](https://mc-stan.org/docs/cmdstan-guide/), Stan's command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. Its API is modeled on [CmdStanR](https://mc-stan.org/cmdstanr/) 1.0 and uses CmdStanR's function and option names. It needs CmdStan and a C++ toolchain, as described in [Installation](installation.qmd), and does not need R.
 
 ## Example
 

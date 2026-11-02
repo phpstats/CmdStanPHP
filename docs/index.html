@@ -384,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Compile Stan models, run Bayesian inference, and inspect posterior draws from PHP.</p>
-<p>CmdStanPHP runs <a href="https://mc-stan.org">Stan</a> programs through <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a>, Stan’s command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. It is a port of <a href="https://mc-stan.org/cmdstanr/">CmdStanR</a> 1.0 and keeps CmdStanR’s function and option names. It needs CmdStan and a C++ toolchain, as described in <a href="./installation.html">Installation</a>, and does not need R.</p>
+<p>CmdStanPHP runs <a href="https://mc-stan.org">Stan</a> programs through <a href="https://mc-stan.org/docs/cmdstan-guide/">CmdStan</a>, Stan’s command-line interface. It compiles each program to an executable, runs it in separate processes, and reads the output into PHP arrays. Its API is modeled on <a href="https://mc-stan.org/cmdstanr/">CmdStanR</a> 1.0 and uses CmdStanR’s function and option names. It needs CmdStan and a C++ toolchain, as described in <a href="./installation.html">Installation</a>, and does not need R.</p>
 <section id="example" class="level2">
 <h2 class="anchored" data-anchor-id="example">Example</h2>
 <p>This Stan program estimates the probability <code>theta</code> of a success from <code>N</code> yes-or-no outcomes <code>y</code>. Save it as <code>bernoulli.stan</code>:</p>

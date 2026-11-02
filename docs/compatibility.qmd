@@ -2,7 +2,7 @@
 title: "Compatibility with CmdStanR"
 ---
 
-CmdStanPHP ports CmdStanR's model, executable, and CSV workflow to PHP. It does not implement every CmdStanR feature. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), with the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/) and the [CmdStan command-line options](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html).
+CmdStanPHP provides CmdStanR's model, executable, and CSV workflow in PHP. It does not implement every CmdStanR feature. The reference is CmdStanR 1.0 (its release candidate, from the v1.0 branch), with the [CmdStanR API](https://mc-stan.org/cmdstanr/reference/) and the [CmdStan command-line options](https://mc-stan.org/docs/cmdstan-guide/command_line_options.html).
 
 ## Supported {#supported-workflows}
 
@@ -180,7 +180,7 @@ Every renamed method:
 
 - Draws are PHP arrays with documented shapes. Indices are zero-based, and draw metadata is one-based. R's tibble, posterior, bayesplot, and ggplot2 classes are not emulated. [Draws, summaries, and saving fits](draws.qmd) describes the formats.
 - Summary quantiles use linear interpolation (R's default type 7), and scaled MAD uses 1.4826.
-- The default MCMC summary takes R-hat and bulk ESS from the installed CmdStan's `stansummary` and computes tail ESS in PHP. With `measures`, `summary()` uses a PHP port of posterior's `summarise_draws()` and needs no CmdStan. Results are checked against the installed R packages and are not guaranteed to be identical to every posterior version.
+- The default MCMC summary takes R-hat and bulk ESS from the installed CmdStan's `stansummary` and computes tail ESS in PHP. With `measures`, `summary()` uses a PHP implementation of posterior's `summarise_draws()` and needs no CmdStan. Results are checked against the installed R packages and are not guaranteed to be identical to every posterior version.
 - ADVI's mean row is stored separately. ADVI and Laplace `log_p__` columns become `lp__`, and their approximate densities `lp_approx__`, as in CmdStanR. Convergence statistics are `NAN` for fits other than MCMC.
 - `metadata()` returns one merged array with CmdStanR's keys, such as `iter_sampling`, `max_treedepth`, and `stan_variable_sizes`, alongside CmdStan's raw argument names. `chainMetadata()` returns the per-chain arrays. `invMetric()` returns matrices by default and reads metric JSON when every chain has one.
 

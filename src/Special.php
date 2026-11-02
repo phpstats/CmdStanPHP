@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace CmdStan;
-/** @internal Numerical primitives ported from R (stats, matrixStats) for the posterior/loo ports. */
+/** @internal Numerical primitives following R (stats, GPL-2 or later) and matrixStats (Artistic-2.0), for the posterior and loo classes. */
 final class Special
 {
     private const LN_SQRT_2PI = 0.918938533204672741780329736406;

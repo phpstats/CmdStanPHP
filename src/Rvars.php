@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace CmdStan;
 /**
- * posterior::as_draws_rvars port.
+ * draws_rvars following the R source of posterior::as_draws_rvars (BSD 3-Clause).
  *
  * Returns variable base name => ['dims' => list<int>, 'nchains' => int, 'ndraws' => int, 'draws' => nested], in order of
  * first appearance. 'draws' is a zero-based nested array shaped by dims whose leaves are lists of the ndraws draws in
