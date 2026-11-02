@@ -21,7 +21,7 @@ To run an executable without its Stan program, pass `exeFile` alone, as in `cmds
 
 `cppOptions` are make variables for this model's build, such as `['STAN_THREADS' => true]` for within-chain threading. `false` turns an option off even when CmdStan's `make/local` turns it on. `stancOptions` are stanc flags, such as `['O1']`. `includePaths` lists directories searched by `#include`, and `userHeader` names a C++ header with external function definitions. [`new CmdStanModel()`](api-models.qmd#constructor) lists the accepted values.
 
-## When a model is rebuilt
+## Rebuilds {#when-a-model-is-rebuilt}
 
 Compiling writes a hidden build record beside the executable, such as `.bernoulli.cmdstanphp.json` beside `bernoulli`. The record holds hashes of the Stan program and its `#include` files, the user header, and CmdStan's `make/local`. It also holds the `cppOptions`, the `stancOptions`, and the CmdStan installation that built the executable. The next `cmdstan_model()` call rebuilds when one of these changed, and `quiet: false` names the change. A missing or unreadable record also causes a rebuild. `forceRecompile: true` rebuilds in any case.
 

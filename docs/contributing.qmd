@@ -31,7 +31,7 @@ composer test:compatibility   # additionally needs R + cmdstanr 1.0, posterior, 
 
 Tests that need the phit extension load it into PHP, for example `php -d extension=/path/to/libphit.dylib vendor/bin/phpunit`. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it.
 
-## What the suites cover
+## Test coverage {#what-the-suites-cover}
 
 The unit suite covers JSON shapes and invalid data, CSV comments, warmup, and special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. Process behavior is tested with real PHP subprocesses. Data frames are tested with stand-in tables and a stand-in `Phibble\DataFrame`. Without phit, `StanData::fromFormula()` is tested with a stand-in `Phit\model_matrix()`, and with phit, against the real function. The moment-matching tests need phit and skip without it.
 
@@ -56,7 +56,7 @@ It sets `CMDSTANPHP_EVIDENCE`, which makes the compatibility tests write each co
 
 `.github/workflows/tests.yml` runs on Linux:
 
-| Job | What it does |
+| Job | Steps |
 |---|---|
 | Unit | The unit suite on PHP 8.2, 8.3, 8.4, and 8.5, without phit, testing the path without optional extensions |
 | Integration | Builds CmdStan 2.37 and 2.40 with this package's installer (two make jobs, cached), builds phit, enables FFI, and runs the native unit tests and the real-model suite on PHP 8.4. Every figure kind is rendered to SVG and one to PNG. |

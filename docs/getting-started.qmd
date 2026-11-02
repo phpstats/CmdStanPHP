@@ -113,7 +113,7 @@ echo implode(', ', array_slice($theta, 0, 3)), "\n";
 
 `draws_matrix` is one row per draw, chain after chain. [Draws, summaries, and saving fits](draws.qmd) describes the other formats.
 
-## Where the files are
+## Files {#where-the-files-are}
 
 The executable and two hidden files, `.bernoulli.cmdstanphp.json` and `.bernoulli.cmdstanphp.lock`, stay beside `bernoulli.stan`. The next run reuses the executable. Editing the Stan file makes the next `cmdstan_model()` call compile again. [Compiling models](compiling.qmd) explains when a model is rebuilt.
 

@@ -357,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#set-up" id="toc-set-up" class="nav-link active" data-scroll-target="#set-up">Set up</a></li>
   <li><a href="#run-the-tests" id="toc-run-the-tests" class="nav-link" data-scroll-target="#run-the-tests">Run the tests</a></li>
-  <li><a href="#what-the-suites-cover" id="toc-what-the-suites-cover" class="nav-link" data-scroll-target="#what-the-suites-cover">What the suites cover</a></li>
+  <li><a href="#what-the-suites-cover" id="toc-what-the-suites-cover" class="nav-link" data-scroll-target="#what-the-suites-cover">Test coverage</a></li>
   <li><a href="#continuous-integration" id="toc-continuous-integration" class="nav-link" data-scroll-target="#continuous-integration">Continuous integration</a></li>
   <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
   </ul>
@@ -410,7 +410,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Tests that need the phit extension load it into PHP, for example <code>php -d extension=/path/to/libphit.dylib vendor/bin/phpunit</code>. The extension must be built for the same PHP version and thread-safety mode as the PHP that loads it.</p>
 </section>
 <section id="what-the-suites-cover" class="level2">
-<h2 class="anchored" data-anchor-id="what-the-suites-cover">What the suites cover</h2>
+<h2 class="anchored" data-anchor-id="what-the-suites-cover">Test coverage</h2>
 <p>The unit suite covers JSON shapes and invalid data, CSV comments, warmup, and special numbers, draw layouts, summaries, diagnostics, serialization, option validation, process argument isolation, pipe draining, timeouts, cancellation, and bounded execution. Process behavior is tested with real PHP subprocesses. Data frames are tested with stand-in tables and a stand-in <code>Phibble\DataFrame</code>. Without phit, <code>StanData::fromFormula()</code> is tested with a stand-in <code>Phit\model_matrix()</code>, and with phit, against the real function. The moment-matching tests need phit and skip without it.</p>
 <p>The integration suite compiles the bundled models and runs real CmdStan methods:</p>
 <ul>
@@ -435,7 +435,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <thead>
 <tr class="header">
 <th>Job</th>
-<th>What it does</th>
+<th>Steps</th>
 </tr>
 </thead>
 <tbody>

@@ -383,7 +383,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Variational methods fit an approximating distribution to the posterior and draw from it. They are usually faster than MCMC, and their draws can be inaccurate, especially in the tails and for correlated or multimodal posteriors. Their draws are useful for a quick look, and as initial values for <code>sample()</code>.</p>
+<p>Variational methods fit an approximating distribution to the posterior and draw from it. They are usually faster than MCMC, and their draws can be inaccurate, especially in the tails and for correlated or multimodal posteriors. Their draws suit preliminary estimates and initial values for <code>sample()</code>.</p>
 <section id="advi" class="level2">
 <h2 class="anchored" data-anchor-id="advi">ADVI</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$model</span> <span class="op">=</span> CmdStan\cmdstan_model(<span class="st">'examples/bernoulli.stan'</span>)<span class="ot">;</span></span>

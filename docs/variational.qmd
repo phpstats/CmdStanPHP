@@ -2,7 +2,7 @@
 title: "ADVI and Pathfinder"
 ---
 
-Variational methods fit an approximating distribution to the posterior and draw from it. They are usually faster than MCMC, and their draws can be inaccurate, especially in the tails and for correlated or multimodal posteriors. Their draws are useful for a quick look, and as initial values for `sample()`.
+Variational methods fit an approximating distribution to the posterior and draw from it. They are usually faster than MCMC, and their draws can be inaccurate, especially in the tails and for correlated or multimodal posteriors. Their draws suit preliminary estimates and initial values for `sample()`.
 
 ## ADVI
 

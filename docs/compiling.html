@@ -357,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#create-a-model" id="toc-create-a-model" class="nav-link active" data-scroll-target="#create-a-model">Create a model</a></li>
   <li><a href="#build-options" id="toc-build-options" class="nav-link" data-scroll-target="#build-options">Build options</a></li>
-  <li><a href="#when-a-model-is-rebuilt" id="toc-when-a-model-is-rebuilt" class="nav-link" data-scroll-target="#when-a-model-is-rebuilt">When a model is rebuilt</a></li>
+  <li><a href="#when-a-model-is-rebuilt" id="toc-when-a-model-is-rebuilt" class="nav-link" data-scroll-target="#when-a-model-is-rebuilt">Rebuilds</a></li>
   <li><a href="#stale-executables" id="toc-stale-executables" class="nav-link" data-scroll-target="#stale-executables">Stale executables</a></li>
   <li><a href="#several-processes" id="toc-several-processes" class="nav-link" data-scroll-target="#several-processes">Several processes</a></li>
   <li><a href="#version-control" id="toc-version-control" class="nav-link" data-scroll-target="#version-control">Version control</a></li>
@@ -401,7 +401,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>cppOptions</code> are make variables for this model’s build, such as <code>['STAN_THREADS' =&gt; true]</code> for within-chain threading. <code>false</code> turns an option off even when CmdStan’s <code>make/local</code> turns it on. <code>stancOptions</code> are stanc flags, such as <code>['O1']</code>. <code>includePaths</code> lists directories searched by <code>#include</code>, and <code>userHeader</code> names a C++ header with external function definitions. <a href="./api-models.html#constructor"><code>new CmdStanModel()</code></a> lists the accepted values.</p>
 </section>
 <section id="when-a-model-is-rebuilt" class="level2">
-<h2 class="anchored" data-anchor-id="when-a-model-is-rebuilt">When a model is rebuilt</h2>
+<h2 class="anchored" data-anchor-id="when-a-model-is-rebuilt">Rebuilds</h2>
 <p>Compiling writes a hidden build record beside the executable, such as <code>.bernoulli.cmdstanphp.json</code> beside <code>bernoulli</code>. The record holds hashes of the Stan program and its <code>#include</code> files, the user header, and CmdStan’s <code>make/local</code>. It also holds the <code>cppOptions</code>, the <code>stancOptions</code>, and the CmdStan installation that built the executable. The next <code>cmdstan_model()</code> call rebuilds when one of these changed, and <code>quiet: false</code> names the change. A missing or unreadable record also causes a rebuild. <code>forceRecompile: true</code> rebuilds in any case.</p>
 <p>A failed build throws and leaves the previous executable and its record in place.</p>
 <p>Some changes cannot be detected: a new C++ compiler, a makefile included from <code>make/local</code>, or a header included from the user header. Compiling prints a note about the last two. Use <code>forceRecompile: true</code> after such a change. Switching shared CmdStan settings may also need <code>rebuild_cmdstan()</code>.</p>

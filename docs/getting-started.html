@@ -359,7 +359,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#compile-and-sample" id="toc-compile-and-sample" class="nav-link" data-scroll-target="#compile-and-sample">Compile and sample</a></li>
   <li><a href="#read-the-results" id="toc-read-the-results" class="nav-link" data-scroll-target="#read-the-results">Read the results</a></li>
   <li><a href="#get-the-draws" id="toc-get-the-draws" class="nav-link" data-scroll-target="#get-the-draws">Get the draws</a></li>
-  <li><a href="#where-the-files-are" id="toc-where-the-files-are" class="nav-link" data-scroll-target="#where-the-files-are">Where the files are</a></li>
+  <li><a href="#where-the-files-are" id="toc-where-the-files-are" class="nav-link" data-scroll-target="#where-the-files-are">Files</a></li>
   </ul>
 </nav>
     </div>
@@ -480,7 +480,7 @@ No warnings</code></pre>
 <p><code>draws_matrix</code> is one row per draw, chain after chain. <a href="./draws.html">Draws, summaries, and saving fits</a> describes the other formats.</p>
 </section>
 <section id="where-the-files-are" class="level2">
-<h2 class="anchored" data-anchor-id="where-the-files-are">Where the files are</h2>
+<h2 class="anchored" data-anchor-id="where-the-files-are">Files</h2>
 <p>The executable and two hidden files, <code>.bernoulli.cmdstanphp.json</code> and <code>.bernoulli.cmdstanphp.lock</code>, stay beside <code>bernoulli.stan</code>. The next run reuses the executable. Editing the Stan file makes the next <code>cmdstan_model()</code> call compile again. <a href="./compiling.html">Compiling models</a> explains when a model is rebuilt.</p>
 <p>The CSV files go into a new directory under the system temporary directory. <code>$fit-&gt;outputFiles()</code> lists them. They are not deleted when the fit is, so pass <code>output_dir</code> to keep them somewhere known, and remove them when they are no longer needed.</p>
 
