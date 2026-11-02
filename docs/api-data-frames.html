@@ -372,7 +372,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#Tables-fromRows" id="toc-Tables-fromRows" class="nav-link" data-scroll-target="#Tables-fromRows"><code>Tables::fromRows()</code></a></li>
   <li><a href="#Tables-dataFrame" id="toc-Tables-dataFrame" class="nav-link" data-scroll-target="#Tables-dataFrame"><code>Tables::dataFrame()</code></a></li>
   </ul></li>
-  <li><a href="#part-of-the-phpstats-family" id="toc-part-of-the-phpstats-family" class="nav-link" data-scroll-target="#part-of-the-phpstats-family">Part of the phpstats family</a></li>
+  <li><a href="#part-of-the-phpstats-family" id="toc-part-of-the-phpstats-family" class="nav-link" data-scroll-target="#part-of-the-phpstats-family">Part of the PHPstats family</a></li>
   </ul>
 </nav>
     </div>
@@ -398,7 +398,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>CmdStanPHP works with the <a href="#part-of-the-phpstats-family">phpstats family</a> without depending on it. phibble is detected by method and class names. The <code>phit</code> extension is detected by function name.</p>
+<p>CmdStanPHP works with the <a href="#part-of-the-phpstats-family">PHPstats family</a> without depending on it. phibble is detected by method and class names. The <code>phit</code> extension is detected by function name.</p>
 <section id="data-in" class="level2">
 <h2 class="anchored" data-anchor-id="data-in">Data in</h2>
 <p>Every <code>data</code> argument (<code>sample()</code>, <code>sampleMpi()</code>, <code>optimize()</code>, <code>variational()</code>, <code>pathfinder()</code>, <code>laplace()</code>, <code>generateQuantities()</code>, <code>diagnose()</code>, and <code>logProb()</code>) and <code>write_stan_json()</code> accept a plain array, a JSON file, a <code>CmdStan\StanData</code>, or a table. A table is any object with <code>toModelData()</code> or <code>toColumns()</code>, such as a <a href="https://github.com/phpstats/phibble">phibble</a> <code>Phibble\DataFrame</code>. <code>toModelData()</code> is used when both exist. <code>StanData::fromTable($table, addN: true)</code> performs the same conversion and keeps the factor labels.</p>
@@ -625,8 +625,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </section>
 <section id="part-of-the-phpstats-family" class="level2">
-<h2 class="anchored" data-anchor-id="part-of-the-phpstats-family">Part of the phpstats family</h2>
-<p>CmdStanPHP is part of the phpstats family of PHP statistics packages:</p>
+<h2 class="anchored" data-anchor-id="part-of-the-phpstats-family">Part of the PHPstats family</h2>
+<p>CmdStanPHP is part of the PHPstats family of PHP statistics packages:</p>
 <ul>
 <li><a href="https://github.com/phpstats/phit">phit</a>: the <code>phit</code> native extension (<code>Phit\</code> functions), which provides the moment-matching draw kernels and, when available, <code>Phit\model_matrix()</code>.</li>
 <li><a href="https://github.com/phpstats/phibble">phibble</a>: data frames (<code>Phibble\DataFrame</code>).</li>

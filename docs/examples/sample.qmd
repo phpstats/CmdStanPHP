@@ -4,7 +4,7 @@ title: "Fit a Stan model with MCMC"
 
 Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler's warnings, and draws of `tau`.
 
-Compiling a model needs CmdStan and a C++ toolchain, as described in [Installation](../installation.qmd). The data are the estimated effects `y` of a coaching program on SAT-V scores in eight high schools and their standard errors `sigma` (Rubin 1981), read from [schools.csv](https://github.com/phpstats/datasets#schools) in the phpstats datasets repository.
+Compiling a model needs CmdStan and a C++ toolchain, as described in [Installation](../installation.qmd). The data are the estimated effects `y` of a coaching program on SAT-V scores in eight high schools and their standard errors `sigma` (Rubin 1981), read from [schools.csv](https://github.com/phpstats/datasets#schools) in the PHPstats datasets repository.
 
 ```php
 use function CmdStan\cmdstan_model;

@@ -376,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler’s warnings, and draws of <code>tau</code>.</p>
-<p>Compiling a model needs CmdStan and a C++ toolchain, as described in <a href="../installation.html">Installation</a>. The data are the estimated effects <code>y</code> of a coaching program on SAT-V scores in eight high schools and their standard errors <code>sigma</code> (Rubin 1981), read from <a href="https://github.com/phpstats/datasets#schools">schools.csv</a> in the phpstats datasets repository.</p>
+<p>Compiling a model needs CmdStan and a C++ toolchain, as described in <a href="../installation.html">Installation</a>. The data are the estimated effects <code>y</code> of a coaching program on SAT-V scores in eight high schools and their standard errors <code>sigma</code> (Rubin 1981), read from <a href="https://github.com/phpstats/datasets#schools">schools.csv</a> in the PHPstats datasets repository.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\cmdstan_model<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> CmdStan\write_stan_file<span class="ot">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>

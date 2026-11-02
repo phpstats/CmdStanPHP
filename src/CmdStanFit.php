@@ -250,11 +250,11 @@ class CmdStanFit
         }
         return $columns + $meta;
     }
-    /** drawsTable(): drawsColumns() as a Phibble\DataFrame. Needs phpstats/phibble, which is optional; throws when it is not installed. */
+    /** drawsTable(): drawsColumns() as a Phibble\DataFrame. Needs `phpstats/phibble`, which is optional; throws when it is not installed. */
     public function drawsTable(array|string|null $variables = null, bool $incWarmup = false): object { return Tables::dataFrame($this->drawsColumns($variables, $incWarmup), 'drawsTable()'); }
     /** summary() turned into columns: 'variable' and one column per measure, one value per variable. */
     public function summaryColumns(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): array { return Tables::fromRows($this->summary($variables, $probs, $measures)); }
-    /** summaryTable(): summaryColumns() as a Phibble\DataFrame. Needs phpstats/phibble; throws when it is not installed. */
+    /** summaryTable(): summaryColumns() as a Phibble\DataFrame. Needs `phpstats/phibble`; throws when it is not installed. */
     public function summaryTable(array|string|null $variables = null, array $probs = [0.05, 0.95], array $measures = []): object { return Tables::dataFrame($this->summaryColumns($variables, $probs, $measures), 'summaryTable()'); }
     public static function quantile(array $values, float $p): float
     {

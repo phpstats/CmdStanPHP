@@ -4,7 +4,7 @@ These scripts run the non-centered eight schools model (Rubin 1981), a hierarchi
 
 ## Files
 
-- `schools.stan` and `data.json` are the model and the data. The data are the eight schools effects and standard errors from Rubin (1981), also published as [schools.csv](https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv) (columns school, y, and sigma) in phpstats/datasets.
+- `schools.stan` and `data.json` are the model and the data. The data are the eight schools effects and standard errors from Rubin (1981), also published as [schools.csv](https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv) (columns school, y, and sigma) in `phpstats/datasets`.
 - `cmdstanphp.php`, `cmdstanr.R`, and `cmdstanpy_run.py` each copy the model into `output/<interface>/`, compile it there, sample, and save the summary and the CSV file paths to `output/<interface>/summary.json`.
 - `compare.py` reads the CSV files and summaries, checks that the CmdStan arguments recorded in each CSV header match, computes the largest absolute differences in draws and in summaries, and writes the JSON file.
 - `example.php` is the short script the site shows beside the results. It produces the same draws.
@@ -33,7 +33,7 @@ Each interface runs 4 chains with ids 1 to 4, 1,000 warmup and 1,000 sampling it
 
 The draws are identical: the largest absolute difference between any two interfaces is 0 across all 25 CSV columns and 4,000 draws. CmdStanPHP's and cmdstanr's summaries differ by less than 1e-10. CmdStanPy's `summary()` runs CmdStan's `stansummary` and rounds its output to 6 significant figures by default, so its values differ from the others by up to that rounding (4e-5 for a 95% quantile near 16). With `summary(sig_figs=12)` the largest difference from CmdStanPHP is 5e-9, in bulk ESS.
 
-`interfaces.json` also lists one case per variable and summary measure, in the format of the other phpstats verification files. Each case compares CmdStanPHP with cmdstanr and with CmdStanPy at 12 significant figures, and it passes within 1e-9 + 1e-9 times the absolute value of cmdstanr's result. A final case, `draws`, passes only when the draws are identical.
+`interfaces.json` also lists one case per variable and summary measure, in the format of the other PHPstats verification files. Each case compares CmdStanPHP with cmdstanr and with CmdStanPy at 12 significant figures, and it passes within 1e-9 + 1e-9 times the absolute value of cmdstanr's result. A final case, `draws`, passes only when the draws are identical.
 
 ## Workload benchmark
 

@@ -2,7 +2,7 @@
 title: "Data frames"
 ---
 
-CmdStanPHP works with the [phpstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `phit` extension is detected by function name.
+CmdStanPHP works with the [PHPstats family](#part-of-the-phpstats-family) without depending on it. phibble is detected by method and class names. The `phit` extension is detected by function name.
 
 ## Data in
 
@@ -173,9 +173,9 @@ Tables::dataFrame(
 
 A `Phibble\DataFrame` from columns, built with `DataFrame::fromColumns()`. Throws a `RuntimeException` with installation advice when phibble is not installed. `method` names the caller in that message.
 
-## Part of the phpstats family
+## Part of the PHPstats family {#part-of-the-phpstats-family}
 
-CmdStanPHP is part of the phpstats family of PHP statistics packages:
+CmdStanPHP is part of the PHPstats family of PHP statistics packages:
 
 - [phit](https://github.com/phpstats/phit): the `phit` native extension (`Phit\` functions), which provides the moment-matching draw kernels and, when available, `Phit\model_matrix()`.
 - [phibble](https://github.com/phpstats/phibble): data frames (`Phibble\DataFrame`).

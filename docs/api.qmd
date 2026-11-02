@@ -235,7 +235,7 @@ Option names and defaults: [shared options](api-options.qmd#shared-options){#sha
 | [`Tables::fromRows()`](api-data-frames.qmd#Tables-fromRows) | Convert associative rows to columns. |
 | [`Tables::dataFrame()`](api-data-frames.qmd#Tables-dataFrame) | A Phibble\DataFrame from columns. |
 
-CmdStanPHP works with the [phpstats family](api-data-frames.qmd#part-of-the-phpstats-family){#part-of-the-phpstats-family} without depending on it.
+CmdStanPHP works with the [PHPstats family](api-data-frames.qmd#part-of-the-phpstats-family){#part-of-the-phpstats-family} without depending on it.
 
 ## Helper classes {#statistics-helpers}
 
