@@ -24,7 +24,7 @@ model {
 }
 ```
 
-Compile it, sample four chains, and summarize `theta`:
+Compile it, sample four chains, and summarize `theta`. The data are CmdStan's own Bernoulli example data, `examples/bernoulli/bernoulli.data.json` in CmdStan:
 
 ```php
 use function CmdStan\cmdstan_model;
