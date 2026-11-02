@@ -96,4 +96,4 @@ See [Contributing](https://cmdstanphp.phpstats.org/docs/contributing).
 
 ## License
 
-MIT. The example models in `resources/examples/` come from CmdStanR under its BSD 3-Clause license (see the `NOTICE` there). CmdStan and CmdStanR are separate Stan projects, and CmdStanPHP is not an official Stan interface.
+MIT. The example models in `resources/examples/` come from CmdStanR under its BSD 3-Clause license (see the `NOTICE` there). [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) lists the projects whose source code parts of CmdStanPHP follow, with their licenses. CmdStan and CmdStanR are separate Stan projects, and CmdStanPHP is not an official Stan interface.
