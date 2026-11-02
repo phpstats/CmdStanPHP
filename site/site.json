@@ -159,7 +159,7 @@
         {
             "path": "examples/sample",
             "title": "Fit a Stan model with MCMC",
-            "description": "Estimates coaching effects in eight schools with a hierarchical model and checks that the chains converged."
+            "description": "Estimates the effect of SAT coaching in eight schools from Rubin's published data with a hierarchical model, and checks that the chains converged."
         }
     ],
     "verifications": [

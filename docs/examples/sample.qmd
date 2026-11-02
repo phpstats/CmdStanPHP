@@ -4,7 +4,7 @@ title: "Fit a Stan model with MCMC"
 
 Fit the eight schools hierarchical model with four MCMC chains, then print a posterior summary, the sampler's warnings, and draws of `tau`.
 
-Compiling a model needs CmdStan and a C++ toolchain, as described in [Installation](../installation.qmd). The data are the estimated coaching effects `y` and their standard errors `sigma` for eight schools (Rubin 1981), also available as [schools.csv](https://raw.githubusercontent.com/phpstats/datasets/main/csv/schools.csv).
+Compiling a model needs CmdStan and a C++ toolchain, as described in [Installation](../installation.qmd). The data are the estimated effects `y` of a coaching program on SAT-V scores in eight high schools and their standard errors `sigma` (Rubin 1981), read from [schools.csv](https://github.com/phpstats/datasets#schools) in the phpstats datasets repository.
 
 ```php
 use function CmdStan\cmdstan_model;
@@ -39,10 +39,17 @@ $file = write_stan_file(
 );
 $model = cmdstan_model($file);
 
+$url = 'https://raw.githubusercontent.com/'
+    . 'phpstats/datasets/main/csv/schools.csv';
+$lines = file($url, FILE_IGNORE_NEW_LINES);
+$rows = array_map(
+    fn($line) => str_getcsv($line, escape: ''),
+    array_slice($lines, 1),
+);
 $data = [
-    'J' => 8,
-    'y' => [28, 8, -3, 7, -1, 1, 18, 12],
-    'sigma' => [15, 10, 16, 11, 9, 11, 10, 18],
+    'J' => count($rows),
+    'y' => array_map(fn($r) => (float)$r[1], $rows),
+    'sigma' => array_map(fn($r) => (float)$r[2], $rows),
 ];
 
 $fit = $model->sample(
@@ -101,9 +108,10 @@ No warnings
 
 - `write_stan_file()` rewrites `schools.stan` only when the program changes, so the model compiles on the first run and later runs reuse the executable.
 - Four chains of 1,000 sampling iterations, after 1,000 warmup iterations, give 4,000 draws per variable.
+- `theta[1]` to `theta[8]` are the effects in schools A to H, and `mu` and `tau` are the mean and standard deviation of the effects across schools, all in SAT-V points.
 - Partial pooling pulls each school's `theta` toward `mu`. The pull is stronger when `tau` is small or a school's `sigma` is large.
 - The non-centered form, `theta = mu + tau * theta_raw`, usually produces far fewer divergent transitions than sampling `theta` directly. It does not rule them out.
 - Before using the estimates, check that `rhat` is below 1.01, `ess_bulk` is at least 100 per chain, and there are no warnings. Passing these checks does not prove convergence.
 - A fixed seed reproduces the draws only with the same CmdStan version, compiler, and machine.
 
-[Compiling models](../compiling.qmd) · [MCMC sampling](../mcmc.qmd) · [Draws, summaries, and saving fits](../draws.qmd) · [API reference](../api.qmd) · [Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)
+[Compiling models](../compiling.qmd) · [MCMC sampling](../mcmc.qmd) · [Draws, summaries, and saving fits](../draws.qmd) · [Functions and methods](../api.qmd) · [Interactive version](https://cmdstanphp.phpstats.org/vignettes/bayesian-schools)

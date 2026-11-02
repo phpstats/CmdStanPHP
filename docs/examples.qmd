@@ -2,7 +2,7 @@
 title: "Examples"
 ---
 
-The package ships three example models from CmdStanR, with their data: `logistic`, a logistic regression, and `schools` and `schools_ncp`, the eight schools hierarchical model in its centered and non-centered forms. The repository's `examples/` directory has the small programs used in these docs.
+The package ships three example models from CmdStanR, with their data: `logistic`, a logistic regression, and `schools` and `schools_ncp`, the eight schools hierarchical model in its centered and non-centered forms. The data are CmdStanR's own published example data, and the eight schools values are Rubin's (1981) estimates, the same as in [schools.csv](https://github.com/phpstats/datasets#schools). The repository's `examples/` directory has the small programs used in these docs.
 
 ## Bundled models
 
@@ -94,6 +94,6 @@ The [MCMC guide](mcmc.qmd#check-convergence) explains these warnings. Outputs ar
 
 The `examples/` directory of the [repository](https://github.com/phpstats/CmdStanPHP/tree/main/examples) holds:
 
-- `bernoulli.stan` and `bernoulli.php`, the model from [Getting started](getting-started.qmd) and a script that samples it. Run `php examples/bernoulli.php` from a clone of the repository after `composer install`.
+- `bernoulli.stan` and `bernoulli.php`, the model from [Getting started](getting-started.qmd) and a script that samples it with CmdStan's own published example data, `examples/bernoulli/bernoulli.data.json`. Run `php examples/bernoulli.php` from a clone of the repository after `composer install`.
 - `generated.stan`, the Bernoulli model with a posterior prediction, used in [Generated quantities](generated-quantities.qmd).
 - `normal.stan`, a one-parameter normal model, used in [Log density and model methods](log-density.qmd).

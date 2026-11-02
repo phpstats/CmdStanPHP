@@ -382,7 +382,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The package ships three example models from CmdStanR, with their data: <code>logistic</code>, a logistic regression, and <code>schools</code> and <code>schools_ncp</code>, the eight schools hierarchical model in its centered and non-centered forms. The repository’s <code>examples/</code> directory has the small programs used in these docs.</p>
+<p>The package ships three example models from CmdStanR, with their data: <code>logistic</code>, a logistic regression, and <code>schools</code> and <code>schools_ncp</code>, the eight schools hierarchical model in its centered and non-centered forms. The data are CmdStanR’s own published example data, and the eight schools values are Rubin’s (1981) estimates, the same as in <a href="https://github.com/phpstats/datasets#schools">schools.csv</a>. The repository’s <code>examples/</code> directory has the small programs used in these docs.</p>
 <section id="bundled-models" class="level2">
 <h2 class="anchored" data-anchor-id="bundled-models">Bundled models</h2>
 <p><code>cmdstanr_example()</code> compiles an example, fits it with its bundled data, and returns the fit. The first argument names the example, and the second the method: <code>sample</code> (the default), <code>optimize</code>, <code>laplace</code>, <code>variational</code>, <code>pathfinder</code>, or <code>diagnose</code>. Other arguments are passed to the method. The executable is built in the directory set by the <code>cmdstanphp_example_dir</code> option, or in <code>cmdstanphp-examples</code> under the system temporary directory. <code>print_example_program()</code> prints the Stan program.</p>
@@ -456,7 +456,7 @@ Chain 4: 8 divergent transitions.</code></pre>
 <h2 class="anchored" data-anchor-id="programs-in-the-repository">Programs in the repository</h2>
 <p>The <code>examples/</code> directory of the <a href="https://github.com/phpstats/CmdStanPHP/tree/main/examples">repository</a> holds:</p>
 <ul>
-<li><code>bernoulli.stan</code> and <code>bernoulli.php</code>, the model from <a href="./getting-started.html">Getting started</a> and a script that samples it. Run <code>php examples/bernoulli.php</code> from a clone of the repository after <code>composer install</code>.</li>
+<li><code>bernoulli.stan</code> and <code>bernoulli.php</code>, the model from <a href="./getting-started.html">Getting started</a> and a script that samples it with CmdStan’s own published example data, <code>examples/bernoulli/bernoulli.data.json</code>. Run <code>php examples/bernoulli.php</code> from a clone of the repository after <code>composer install</code>.</li>
 <li><code>generated.stan</code>, the Bernoulli model with a posterior prediction, used in <a href="./generated-quantities.html">Generated quantities</a>.</li>
 <li><code>normal.stan</code>, a one-parameter normal model, used in <a href="./log-density.html">Log density and model methods</a>.</li>
 </ul>
